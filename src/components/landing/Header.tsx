@@ -6,6 +6,8 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
+    { label: "Cabinets", href: "#cabinets" },
+    { label: "More Products", href: "#other-products" },
     { label: "How It Works", href: "#how-it-works" },
     { label: "Benefits", href: "#benefits" },
     { label: "For Contractors", href: "#contractors" },

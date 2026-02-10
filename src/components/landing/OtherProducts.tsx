@@ -57,7 +57,7 @@ const products = [
 
 const OtherProducts = () => {
   return (
-    <section className="py-14 bg-secondary/30">
+    <section id="other-products" className="py-14 bg-secondary/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <Badge variant="outline" className="mb-4 text-sm px-4 py-1">

@@ -59,7 +59,7 @@ const products = [
 
 const ProductShowcase = () => {
   return (
-    <section className="py-20 bg-secondary/50">
+    <section id="cabinets" className="py-20 bg-secondary/50">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-14">
