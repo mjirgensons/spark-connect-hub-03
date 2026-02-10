@@ -1,5 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 
 import productIsland from "@/assets/product-island-new.jpg";
 import productVanity from "@/assets/product-vanity-new.jpg";
@@ -71,40 +78,46 @@ const OtherProducts = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          {products.map((product) => (
-            <Card key={product.name} className="group overflow-hidden">
-              <div className="relative aspect-square overflow-hidden">
-                <img
-                  src={product.image}
-                  alt={`${product.name} luxury cabinetry`}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-                <Badge className="absolute top-2 left-2 text-[10px] px-2 py-0.5">{product.tag}</Badge>
-                <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-xs sm:text-sm font-extrabold px-2.5 py-1 rounded-full shadow-lg">
-                  {product.discount}% OFF
-                </div>
-              </div>
-              <CardContent className="p-3">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
-                  {product.brand}
-                </p>
-                <h3 className="text-sm font-serif font-semibold text-foreground mb-2">
-                  {product.name}
-                </h3>
-                <div className="flex items-end gap-2">
-                  <span className="text-lg font-bold text-foreground">
-                    ${product.ourPrice.toLocaleString()}
-                  </span>
-                  <span className="text-xs text-muted-foreground line-through">
-                    ${product.retailPrice.toLocaleString()}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Carousel opts={{ align: "start", loop: true }} className="w-full">
+          <CarouselContent className="-ml-4">
+            {products.map((product) => (
+              <CarouselItem key={product.name} className="pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/5">
+                <Card className="group overflow-hidden">
+                  <div className="relative aspect-square overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={`${product.name} luxury cabinetry`}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <Badge className="absolute top-2 left-2 text-[10px] px-2 py-0.5">{product.tag}</Badge>
+                    <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-xs sm:text-sm font-extrabold px-2.5 py-1 rounded-full shadow-lg">
+                      {product.discount}% OFF
+                    </div>
+                  </div>
+                  <CardContent className="p-3">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
+                      {product.brand}
+                    </p>
+                    <h3 className="text-sm font-serif font-semibold text-foreground mb-2">
+                      {product.name}
+                    </h3>
+                    <div className="flex items-end gap-2">
+                      <span className="text-lg font-bold text-foreground">
+                        ${product.ourPrice.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-muted-foreground line-through">
+                        ${product.retailPrice.toLocaleString()}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="-left-4 md:-left-6" />
+          <CarouselNext className="-right-4 md:-right-6" />
+        </Carousel>
       </div>
     </section>
   );
