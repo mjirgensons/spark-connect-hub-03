@@ -6,14 +6,21 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const WEBHOOK_URL = "https://sundeco.app.n8n.cloud/webhook/a8e842e5-ca06-4259-97b4-3d9bc0a03be3";
-
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const WEBHOOK_URL = Deno.env.get("N8N_WEBHOOK_URL");
+    if (!WEBHOOK_URL) {
+      console.error("N8N_WEBHOOK_URL secret is not configured");
+      return new Response(JSON.stringify({ error: "Service configuration error" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     const body = await req.json();
 
     const webhookResponse = await fetch(WEBHOOK_URL, {
@@ -30,7 +37,7 @@ serve(async (req: Request) => {
     });
   } catch (error: any) {
     console.error("Webhook error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "Unable to process request. Please try again." }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
