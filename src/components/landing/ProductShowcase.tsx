@@ -3,16 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 
-import cabinetWhite from "@/assets/cabinet-white-shaker.jpg";
-import cabinetWalnut from "@/assets/cabinet-dark-walnut.jpg";
-import cabinetGrey from "@/assets/cabinet-grey-modern.jpg";
-import cabinetNavy from "@/assets/cabinet-navy-blue.jpg";
-import cabinetCream from "@/assets/cabinet-cream.jpg";
+import cabinet1 from "@/assets/cabinet-1.jpg";
+import cabinet2 from "@/assets/cabinet-2.jpg";
+import cabinet3 from "@/assets/cabinet-3.jpg";
+import cabinet4 from "@/assets/cabinet-4.jpg";
+import cabinet5 from "@/assets/cabinet-5.jpg";
 
 const products = [
   {
-    image: cabinetWhite,
-    name: "Milano White Shaker",
+    image: cabinet1,
+    name: "Milano Light Oak",
     brand: "Italian Collection",
     retailPrice: 18500,
     ourPrice: 5900,
@@ -20,16 +20,7 @@ const products = [
     tag: "Best Seller",
   },
   {
-    image: cabinetWalnut,
-    name: "Vienna Dark Walnut",
-    brand: "Austrian Heritage",
-    retailPrice: 24000,
-    ourPrice: 7200,
-    discount: 70,
-    tag: "Premium",
-  },
-  {
-    image: cabinetGrey,
+    image: cabinet2,
     name: "Berlin Grey Modern",
     brand: "German Precision",
     retailPrice: 21000,
@@ -38,8 +29,17 @@ const products = [
     tag: "New Arrival",
   },
   {
-    image: cabinetNavy,
-    name: "Oxford Navy Classic",
+    image: cabinet3,
+    name: "Vienna Gloss White",
+    brand: "Austrian Heritage",
+    retailPrice: 24000,
+    ourPrice: 7200,
+    discount: 70,
+    tag: "Premium",
+  },
+  {
+    image: cabinet4,
+    name: "Oxford Grey & Walnut",
     brand: "British Elegance",
     retailPrice: 28000,
     ourPrice: 8400,
@@ -47,8 +47,8 @@ const products = [
     tag: "Limited",
   },
   {
-    image: cabinetCream,
-    name: "Provence Cream",
+    image: cabinet5,
+    name: "Provence Cream & Wood",
     brand: "French Countryside",
     retailPrice: 22000,
     ourPrice: 6600,

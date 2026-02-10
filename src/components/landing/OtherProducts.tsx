@@ -1,19 +1,19 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
-import productTvUnit from "@/assets/product-tv-unit.jpg";
-import productVanity from "@/assets/product-vanity.jpg";
-import productIsland from "@/assets/product-island.jpg";
-import productCloset from "@/assets/product-closet.jpg";
-import productMedicine from "@/assets/product-medicine-cabinet.jpg";
+import productIsland from "@/assets/product-island-new.jpg";
+import productVanity from "@/assets/product-vanity-new.jpg";
+import productMurphy from "@/assets/product-murphy-desk.jpg";
+import productWallBed from "@/assets/product-wall-bed.jpg";
+import cabinet6 from "@/assets/cabinet-6.jpg";
 
 const products = [
   {
-    image: productTvUnit,
-    name: "Milano TV Console",
+    image: cabinet6,
+    name: "Milano Kitchen Set",
     brand: "Italian Collection",
-    retailPrice: 12000,
-    ourPrice: 3600,
+    retailPrice: 16000,
+    ourPrice: 4800,
     discount: 70,
     tag: "New",
   },
@@ -30,26 +30,26 @@ const products = [
     image: productIsland,
     name: "Berlin Kitchen Island",
     brand: "German Precision",
-    retailPrice: 16000,
-    ourPrice: 4800,
+    retailPrice: 12000,
+    ourPrice: 3600,
     discount: 70,
     tag: "Premium",
   },
   {
-    image: productCloset,
-    name: "Oxford Walk-In Closet",
+    image: productMurphy,
+    name: "Oxford Murphy Desk",
     brand: "British Elegance",
-    retailPrice: 20000,
-    ourPrice: 6000,
+    retailPrice: 14000,
+    ourPrice: 4200,
     discount: 70,
     tag: "Best Seller",
   },
   {
-    image: productMedicine,
-    name: "Provence Medicine Cabinet",
+    image: productWallBed,
+    name: "Provence Wall Bed",
     brand: "French Countryside",
-    retailPrice: 4500,
-    ourPrice: 1350,
+    retailPrice: 20000,
+    ourPrice: 6000,
     discount: 70,
     tag: "Limited",
   },
