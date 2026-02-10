@@ -1,51 +1,57 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
+import productTvUnit from "@/assets/product-tv-unit.jpg";
+import productVanity from "@/assets/product-vanity.jpg";
+import productIsland from "@/assets/product-island.jpg";
+import productCloset from "@/assets/product-closet.jpg";
+import productMedicine from "@/assets/product-medicine-cabinet.jpg";
+
 const products = [
   {
+    image: productTvUnit,
     name: "Milano TV Console",
     brand: "Italian Collection",
     retailPrice: 12000,
     ourPrice: 3600,
     discount: 70,
     tag: "New",
-    emoji: "📺",
   },
   {
+    image: productVanity,
     name: "Vienna Vanity Cabinet",
     brand: "Austrian Heritage",
     retailPrice: 9500,
     ourPrice: 2850,
     discount: 70,
     tag: "Popular",
-    emoji: "🪞",
   },
   {
+    image: productIsland,
     name: "Berlin Kitchen Island",
     brand: "German Precision",
     retailPrice: 16000,
     ourPrice: 4800,
     discount: 70,
     tag: "Premium",
-    emoji: "🏝️",
   },
   {
+    image: productCloset,
     name: "Oxford Walk-In Closet",
     brand: "British Elegance",
     retailPrice: 20000,
     ourPrice: 6000,
     discount: 70,
     tag: "Best Seller",
-    emoji: "👔",
   },
   {
+    image: productMedicine,
     name: "Provence Medicine Cabinet",
     brand: "French Countryside",
     retailPrice: 4500,
     ourPrice: 1350,
     discount: 70,
     tag: "Limited",
-    emoji: "💊",
   },
 ];
 
@@ -68,8 +74,13 @@ const OtherProducts = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {products.map((product) => (
             <Card key={product.name} className="group overflow-hidden">
-              <div className="relative aspect-square overflow-hidden bg-muted flex items-center justify-center">
-                <span className="text-5xl">{product.emoji}</span>
+              <div className="relative aspect-square overflow-hidden">
+                <img
+                  src={product.image}
+                  alt={`${product.name} luxury cabinetry`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
                 <Badge className="absolute top-2 left-2 text-[10px] px-2 py-0.5">{product.tag}</Badge>
                 <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                   {product.discount}% OFF
