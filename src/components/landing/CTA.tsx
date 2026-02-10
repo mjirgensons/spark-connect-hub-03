@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +33,8 @@ const styleDescriptions: Record<string, string> = {
 };
 
 const CTA = () => {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -65,9 +69,25 @@ const CTA = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("submit-cabinet-match", {
+        body: formData,
+      });
+      if (error) throw error;
+      setSubmitted(true);
+    } catch (err: any) {
+      console.error("Submit error:", err);
+      toast({
+        title: "Submission failed",
+        description: "Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const showSecondaryWall = formData.layout === "l-shape" || formData.layout === "u-shape";
@@ -442,9 +462,9 @@ const CTA = () => {
 
                 {/* Submit */}
                 <div className="pt-4 border-t border-background/10">
-                  <Button type="submit" variant="gold" size="xl" className="w-full">
+                  <Button type="submit" variant="gold" size="xl" className="w-full" disabled={isSubmitting}>
                     <Send className="w-5 h-5" />
-                    Get My Cabinet Matches
+                    {isSubmitting ? "Submitting..." : "Get My Cabinet Matches"}
                   </Button>
                   <p className="text-xs text-background/40 text-center mt-4">
                     No commitment required. Matched results delivered to your WhatsApp in minutes.
