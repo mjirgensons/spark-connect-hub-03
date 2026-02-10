@@ -27,7 +27,7 @@ const Hero = () => {
           {/* Headline */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-primary-foreground mb-6 leading-tight">
             Premium European Cabinets at{" "}
-            <span className="text-primary">50-80% Off</span> Retail
+            <span className="bg-primary px-3 py-1 rounded-md text-primary-foreground">50-80% Off</span> Retail
           </h1>
 
           {/* Subheadline */}
