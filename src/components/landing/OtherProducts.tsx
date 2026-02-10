@@ -82,7 +82,7 @@ const OtherProducts = () => {
                   loading="lazy"
                 />
                 <Badge className="absolute top-2 left-2 text-[10px] px-2 py-0.5">{product.tag}</Badge>
-                <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-xs sm:text-sm font-extrabold px-2.5 py-1 rounded-full shadow-lg">
                   {product.discount}% OFF
                 </div>
               </div>
