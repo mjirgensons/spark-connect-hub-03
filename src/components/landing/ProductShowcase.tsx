@@ -86,7 +86,7 @@ const ProductShowcase = () => {
                   loading="lazy"
                 />
                 <Badge className="absolute top-3 left-3">{product.tag}</Badge>
-                <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded-full">
+                <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-sm md:text-base font-extrabold px-3 py-1.5 rounded-full shadow-lg">
                   {product.discount}% OFF
                 </div>
               </div>
