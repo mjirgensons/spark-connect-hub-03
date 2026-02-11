@@ -109,7 +109,7 @@ const CTA = () => {
               Our cabinet matching engine is processing your requirements.
             </p>
             <p className="text-background/60">
-              Expect tailored recommendations on WhatsApp at <span className="text-[hsl(var(--gold))] font-semibold">{formData.phone || "your number"}</span> within 24 hours.
+              Expect tailored recommendations on WhatsApp to <span className="text-[hsl(var(--gold))] font-semibold">your number</span> within 24 hours.
             </p>
           </div>
         </div>
