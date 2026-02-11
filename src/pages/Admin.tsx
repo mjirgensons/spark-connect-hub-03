@@ -333,7 +333,30 @@ const Admin = () => {
                   <Label>Featured</Label>
                 </div>
               </div>
-              <div><Label>Compatible Layouts (comma-separated)</Label><Input value={(form.compatible_kitchen_layouts || []).join(", ")} onChange={(e) => updateField("compatible_kitchen_layouts", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} placeholder="L-Shape, U-Shape, Galley" /></div>
+              <div>
+                <Label>Compatible Kitchen Layouts</Label>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {["L-Shape", "U-Shape", "Galley", "Straight", "Island", "Peninsula", "G-Shape"].map((layout) => {
+                    const selected = (form.compatible_kitchen_layouts || []).includes(layout);
+                    return (
+                      <Badge
+                        key={layout}
+                        variant={selected ? "default" : "outline"}
+                        className="cursor-pointer select-none"
+                        onClick={() => {
+                          const current = form.compatible_kitchen_layouts || [];
+                          updateField(
+                            "compatible_kitchen_layouts",
+                            selected ? current.filter((l) => l !== layout) : [...current, layout]
+                          );
+                        }}
+                      >
+                        {layout}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </div>
               <MultiImageUpload label="Additional Images" value={form.additional_image_urls || []} onChange={(urls) => updateField("additional_image_urls", urls)} />
               <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? "Saving..." : editingProduct ? "Update Product" : "Create Product"}</Button>
             </div>
