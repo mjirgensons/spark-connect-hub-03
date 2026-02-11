@@ -126,6 +126,13 @@ const Admin = () => {
 
     const payload = {
       ...form,
+      width_mm: Number(form.width_mm) || 0,
+      height_mm: Number(form.height_mm) || 0,
+      depth_mm: Number(form.depth_mm) || 0,
+      price_retail_usd: Number(form.price_retail_usd) || 0,
+      price_discounted_usd: Number(form.price_discounted_usd) || 0,
+      discount_percentage: Number(form.discount_percentage) || 0,
+      stock_level: Number(form.stock_level) || 0,
       main_image_url: form.main_image_url || null,
       installation_instructions_url: form.installation_instructions_url || null,
       short_description: form.short_description || null,
