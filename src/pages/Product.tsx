@@ -187,9 +187,11 @@ const Product = () => {
                 <Separator />
                 <div>
                   <h2 className="text-lg font-serif font-semibold text-foreground mb-2">Description</h2>
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                    {product.long_description}
-                  </p>
+                  <div className="max-h-48 overflow-y-auto border p-3">
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {product.long_description}
+                    </p>
+                  </div>
                 </div>
               </>
             )}
