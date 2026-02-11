@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, LogOut } from "lucide-react";
 import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
+import { FileUpload } from "@/components/admin/FileUpload";
 
 interface Category {
   id: string;
@@ -267,7 +268,7 @@ const Admin = () => {
               <div><Label>Short Description</Label><Input value={form.short_description || ""} onChange={(e) => updateField("short_description", e.target.value)} /></div>
               <div><Label>Long Description</Label><Textarea value={form.long_description || ""} onChange={(e) => updateField("long_description", e.target.value)} /></div>
               <ImageUpload label="Main Image" value={form.main_image_url || null} onChange={(url) => updateField("main_image_url", url || "")} />
-              <div><Label>Installation Instructions URL</Label><Input value={form.installation_instructions_url || ""} onChange={(e) => updateField("installation_instructions_url", e.target.value)} /></div>
+              <FileUpload label="Installation Instructions (PDF)" value={form.installation_instructions_url || null} onChange={(url) => updateField("installation_instructions_url", url || "")} />
               <div className="grid grid-cols-3 gap-4">
                 <div><Label>Stock Level</Label><Input type="number" value={form.stock_level} onChange={(e) => updateField("stock_level", Number(e.target.value))} /></div>
                 <div>
