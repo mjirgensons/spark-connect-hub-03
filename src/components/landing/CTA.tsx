@@ -69,12 +69,55 @@ const CTA = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const validateForm = (): string | null => {
+    if (!formData.name.trim()) return "Please enter your name.";
+    if (!formData.email.trim()) return "Please enter your email.";
+    if (!formData.phone.trim()) return "Please enter your phone number.";
+    if (!formData.projectType) return "Please select a project type.";
+    if (!formData.layout) return "Please select a kitchen layout.";
+    if (!formData.primaryWall.trim()) return "Please enter the primary wall length.";
+    if (showSecondaryWall && !formData.secondaryWall.trim()) return "Please enter the secondary wall length for your layout.";
+    if (!formData.ceilingHeight.trim()) return "Please enter the ceiling height.";
+    if (!formData.style) return "Please select a style.";
+    if (!formData.budget) return "Please select a budget range.";
+    if (!formData.bundle) return "Please select a bundle preference.";
+    if (!formData.timeline) return "Please select a timeline.";
+    if (formData.layout === "other-layout" && !formData.layoutOther.trim()) return "Please describe your layout.";
+    if (formData.style === "other-style" && !formData.styleOther.trim()) return "Please describe your style.";
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validationError = validateForm();
+    if (validationError) {
+      toast({ title: "Missing information", description: validationError, variant: "destructive" });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        projectType: formData.projectType,
+        layout: formData.layout,
+        primaryWall: formData.primaryWall.trim(),
+        secondaryWall: showSecondaryWall ? formData.secondaryWall.trim() : "",
+        ceilingHeight: formData.ceilingHeight.trim(),
+        obstacles: formData.obstacles.trim(),
+        style: formData.style,
+        budget: formData.budget,
+        bundle: formData.bundle,
+        timeline: formData.timeline,
+        layoutOther: formData.layout === "other-layout" ? formData.layoutOther.trim() : "",
+        styleOther: formData.style === "other-style" ? formData.styleOther.trim() : "",
+      };
+
       const { data, error } = await supabase.functions.invoke("submit-cabinet-match", {
-        body: formData,
+        body: payload,
       });
       if (error) throw error;
       setSubmitted(true);
