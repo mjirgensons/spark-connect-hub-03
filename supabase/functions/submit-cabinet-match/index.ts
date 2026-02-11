@@ -23,6 +23,11 @@ serve(async (req: Request) => {
 
     const body = await req.json();
 
+    // Append 'mm' unit to measurement fields so n8n's convertToMm can parse them
+    if (body.primaryWall) body.primaryWall = `${body.primaryWall} mm`;
+    if (body.secondaryWall) body.secondaryWall = `${body.secondaryWall} mm`;
+    if (body.ceilingHeight) body.ceilingHeight = `${body.ceilingHeight} mm`;
+
     const webhookResponse = await fetch(WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
