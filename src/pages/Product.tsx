@@ -1,0 +1,223 @@
+import { useParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { ArrowLeft, Package, Ruler, Palette, Layers, Info } from "lucide-react";
+import Header from "@/components/landing/Header";
+import Footer from "@/components/landing/Footer";
+
+const Product = () => {
+  const { id } = useParams<{ id: string }>();
+
+  const { data: product, isLoading, error } = useQuery({
+    queryKey: ["product", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*, categories(name)")
+        .eq("id", id!)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-20 text-center">
+          <p className="text-muted-foreground">Loading product...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-20 text-center">
+          <h1 className="text-2xl font-serif font-bold text-foreground mb-4">Product Not Found</h1>
+          <Link to="/">
+            <Button variant="outline"><ArrowLeft className="w-4 h-4 mr-2" />Back to Home</Button>
+          </Link>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  const savings = product.price_retail_usd - product.price_discounted_usd;
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+
+      <main className="container mx-auto px-4 py-10">
+        {/* Back link */}
+        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          Back to all products
+        </Link>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {/* Images */}
+          <div className="space-y-4">
+            <div className="relative aspect-square overflow-hidden border bg-secondary/30">
+              <img
+                src={product.main_image_url || "/placeholder.svg"}
+                alt={product.product_name}
+                className="w-full h-full object-cover"
+              />
+              {product.discount_percentage > 0 && (
+                <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-sm font-extrabold px-3 py-1.5 rounded-full shadow-lg">
+                  {product.discount_percentage}% OFF
+                </div>
+              )}
+            </div>
+            {product.additional_image_urls && product.additional_image_urls.length > 0 && (
+              <div className="grid grid-cols-4 gap-2">
+                {product.additional_image_urls.map((url: string, i: number) => (
+                  <div key={i} className="aspect-square overflow-hidden border bg-secondary/30">
+                    <img src={url} alt={`${product.product_name} view ${i + 2}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Details */}
+          <div className="space-y-6">
+            <div>
+              {product.categories?.name && (
+                <Badge variant="outline" className="mb-2">{product.categories.name}</Badge>
+              )}
+              <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
+                {product.product_name}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">Code: {product.product_code}</p>
+            </div>
+
+            {/* Pricing */}
+            <div className="border p-5 space-y-2">
+              <div className="flex items-end gap-3">
+                <span className="text-3xl font-bold text-foreground">
+                  ${Number(product.price_discounted_usd).toLocaleString()}
+                </span>
+                <span className="text-lg text-muted-foreground line-through mb-0.5">
+                  ${Number(product.price_retail_usd).toLocaleString()}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                You save <span className="font-semibold text-foreground">${savings.toLocaleString()}</span>
+              </p>
+              <Badge variant={product.availability_status === "In Stock" ? "default" : "secondary"}>
+                {product.availability_status}
+              </Badge>
+            </div>
+
+            {/* Short description */}
+            {product.short_description && (
+              <p className="text-muted-foreground leading-relaxed">{product.short_description}</p>
+            )}
+
+            <Separator />
+
+            {/* Specs */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-serif font-semibold text-foreground">Specifications</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <Ruler className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Dimensions (W×H×D)</p>
+                    <p className="text-sm font-medium text-foreground">
+                      {product.width_mm} × {product.height_mm} × {product.depth_mm} mm
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Color</p>
+                    <p className="text-sm font-medium text-foreground">{product.color}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Material</p>
+                    <p className="text-sm font-medium text-foreground">{product.material}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Info className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Style</p>
+                    <p className="text-sm font-medium text-foreground">{product.style}</p>
+                  </div>
+                </div>
+              </div>
+              {product.compatible_kitchen_layouts && product.compatible_kitchen_layouts.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Compatible Layouts</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {product.compatible_kitchen_layouts.map((layout: string) => (
+                      <Badge key={layout} variant="secondary" className="text-xs">{layout}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {product.stock_level > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  <Package className="w-3 h-3 inline mr-1" />
+                  {product.stock_level} units in stock
+                </p>
+              )}
+            </div>
+
+            {/* Long description */}
+            {product.long_description && (
+              <>
+                <Separator />
+                <div>
+                  <h2 className="text-lg font-serif font-semibold text-foreground mb-2">Description</h2>
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {product.long_description}
+                  </p>
+                </div>
+              </>
+            )}
+
+            {/* Installation link */}
+            {product.installation_instructions_url && (
+              <a
+                href={product.installation_instructions_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" className="w-full">
+                  Download Installation Instructions
+                </Button>
+              </a>
+            )}
+
+            {/* CTA */}
+            <Button size="lg" className="w-full">
+              Request a Quote
+            </Button>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Product;
