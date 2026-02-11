@@ -14,7 +14,119 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          additional_image_urls: string[] | null
+          availability_status: string
+          category_id: string | null
+          color: string
+          compatible_kitchen_layouts: string[] | null
+          created_at: string
+          depth_mm: number
+          discount_percentage: number
+          height_mm: number
+          id: string
+          installation_instructions_url: string | null
+          is_featured: boolean
+          long_description: string | null
+          main_image_url: string | null
+          material: string
+          price_discounted_usd: number
+          price_retail_usd: number
+          product_code: string
+          product_name: string
+          short_description: string | null
+          stock_level: number
+          style: string
+          updated_at: string
+          width_mm: number
+        }
+        Insert: {
+          additional_image_urls?: string[] | null
+          availability_status?: string
+          category_id?: string | null
+          color: string
+          compatible_kitchen_layouts?: string[] | null
+          created_at?: string
+          depth_mm: number
+          discount_percentage?: number
+          height_mm: number
+          id?: string
+          installation_instructions_url?: string | null
+          is_featured?: boolean
+          long_description?: string | null
+          main_image_url?: string | null
+          material: string
+          price_discounted_usd: number
+          price_retail_usd: number
+          product_code: string
+          product_name: string
+          short_description?: string | null
+          stock_level?: number
+          style: string
+          updated_at?: string
+          width_mm: number
+        }
+        Update: {
+          additional_image_urls?: string[] | null
+          availability_status?: string
+          category_id?: string | null
+          color?: string
+          compatible_kitchen_layouts?: string[] | null
+          created_at?: string
+          depth_mm?: number
+          discount_percentage?: number
+          height_mm?: number
+          id?: string
+          installation_instructions_url?: string | null
+          is_featured?: boolean
+          long_description?: string | null
+          main_image_url?: string | null
+          material?: string
+          price_discounted_usd?: number
+          price_retail_usd?: number
+          product_code?: string
+          product_name?: string
+          short_description?: string | null
+          stock_level?: number
+          style?: string
+          updated_at?: string
+          width_mm?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
