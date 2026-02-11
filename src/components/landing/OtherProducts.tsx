@@ -25,23 +25,33 @@ const fallbackProducts = [
   { id: "", image: productWallBed, name: "Provence Wall Bed", brand: "French Countryside", retailPrice: 20000, ourPrice: 6000, discount: 70, tag: "Limited" },
 ];
 
+const KITCHENS_SLUG = "kitchens";
+
 const OtherProducts = () => {
+  const { data: kitchenCategory } = useQuery({
+    queryKey: ["category-kitchens"],
+    queryFn: async () => {
+      const { data } = await supabase.from("categories").select("id").eq("slug", KITCHENS_SLUG).single();
+      return data;
+    },
+  });
+
   const { data: dbProducts = [] } = useQuery({
-    queryKey: ["other-products"],
+    queryKey: ["non-kitchen-products", kitchenCategory?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .eq("is_featured", false)
+        .neq("category_id", kitchenCategory!.id)
         .order("created_at", { ascending: false })
         .limit(10);
       if (error) throw error;
       return data;
     },
+    enabled: !!kitchenCategory?.id,
   });
 
   const hasDbProducts = dbProducts.length > 0;
-  const products = hasDbProducts ? dbProducts : fallbackProducts;
 
   return (
     <section id="other-products" className="py-14 bg-secondary/30">
