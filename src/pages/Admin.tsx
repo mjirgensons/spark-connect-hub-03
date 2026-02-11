@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, LogOut } from "lucide-react";
+import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
 
 interface Category {
   id: string;
@@ -265,10 +266,8 @@ const Admin = () => {
               </div>
               <div><Label>Short Description</Label><Input value={form.short_description || ""} onChange={(e) => updateField("short_description", e.target.value)} /></div>
               <div><Label>Long Description</Label><Textarea value={form.long_description || ""} onChange={(e) => updateField("long_description", e.target.value)} /></div>
-              <div className="grid grid-cols-2 gap-4">
-                <div><Label>Main Image URL</Label><Input value={form.main_image_url || ""} onChange={(e) => updateField("main_image_url", e.target.value)} /></div>
-                <div><Label>Installation Instructions URL</Label><Input value={form.installation_instructions_url || ""} onChange={(e) => updateField("installation_instructions_url", e.target.value)} /></div>
-              </div>
+              <ImageUpload label="Main Image" value={form.main_image_url || null} onChange={(url) => updateField("main_image_url", url || "")} />
+              <div><Label>Installation Instructions URL</Label><Input value={form.installation_instructions_url || ""} onChange={(e) => updateField("installation_instructions_url", e.target.value)} /></div>
               <div className="grid grid-cols-3 gap-4">
                 <div><Label>Stock Level</Label><Input type="number" value={form.stock_level} onChange={(e) => updateField("stock_level", Number(e.target.value))} /></div>
                 <div>
@@ -288,7 +287,7 @@ const Admin = () => {
                 </div>
               </div>
               <div><Label>Compatible Layouts (comma-separated)</Label><Input value={(form.compatible_kitchen_layouts || []).join(", ")} onChange={(e) => updateField("compatible_kitchen_layouts", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} placeholder="L-Shape, U-Shape, Galley" /></div>
-              <div><Label>Additional Image URLs (comma-separated)</Label><Input value={(form.additional_image_urls || []).join(", ")} onChange={(e) => updateField("additional_image_urls", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></div>
+              <MultiImageUpload label="Additional Images" value={form.additional_image_urls || []} onChange={(urls) => updateField("additional_image_urls", urls)} />
               <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? "Saving..." : editingProduct ? "Update Product" : "Create Product"}</Button>
             </div>
           </DialogContent>
