@@ -159,7 +159,15 @@ const Admin = () => {
   };
 
   const updateField = (field: string, value: any) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => {
+      const next = { ...prev, [field]: value };
+      if (field === "price_retail_usd" || field === "discount_percentage") {
+        const retail = field === "price_retail_usd" ? Number(value) : Number(prev.price_retail_usd);
+        const discount = field === "discount_percentage" ? Number(value) : Number(prev.discount_percentage);
+        next.price_discounted_usd = Math.round(retail * (1 - discount / 100) * 100) / 100;
+      }
+      return next;
+    });
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Loading...</p></div>;
@@ -262,7 +270,7 @@ const Admin = () => {
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div><Label>Retail Price (USD)</Label><Input type="number" step="0.01" value={form.price_retail_usd} onChange={(e) => updateField("price_retail_usd", Number(e.target.value))} /></div>
-                <div><Label>Discounted Price (USD)</Label><Input type="number" step="0.01" value={form.price_discounted_usd} onChange={(e) => updateField("price_discounted_usd", Number(e.target.value))} /></div>
+                <div><Label>Discounted Price (USD)</Label><Input type="number" step="0.01" value={form.price_discounted_usd} readOnly className="bg-muted" /></div>
                 <div><Label>Discount %</Label><Input type="number" step="0.01" value={form.discount_percentage} onChange={(e) => updateField("discount_percentage", Number(e.target.value))} /></div>
               </div>
               <div><Label>Short Description</Label><Input value={form.short_description || ""} onChange={(e) => updateField("short_description", e.target.value)} /></div>
