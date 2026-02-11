@@ -83,6 +83,8 @@ const Admin = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<Omit<Product, "id">>(emptyProduct);
   const [saving, setSaving] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate("/admin/login");
@@ -305,7 +307,7 @@ const Admin = () => {
                 <div><Label>Material *</Label><Input value={form.material} onChange={(e) => updateField("material", e.target.value)} placeholder="e.g. Maple, MDF" /></div>
               </div>
               <div>
-                <Label>Category</Label>
+                <Label>Category *</Label>
                 <Select value={form.category_id || ""} onValueChange={(v) => updateField("category_id", v || null)}>
                   <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
                   <SelectContent>
@@ -314,6 +316,36 @@ const Admin = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    placeholder="New category name..."
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={!newCategoryName.trim() || creatingCategory}
+                    onClick={async () => {
+                      setCreatingCategory(true);
+                      const slug = newCategoryName.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+                      const { data, error } = await supabase.from("categories").insert({ name: newCategoryName.trim(), slug }).select().single();
+                      if (error) {
+                        toast({ title: "Error", description: error.message, variant: "destructive" });
+                      } else if (data) {
+                        await fetchCategories();
+                        updateField("category_id", data.id);
+                        setNewCategoryName("");
+                        toast({ title: "Category created" });
+                      }
+                      setCreatingCategory(false);
+                    }}
+                  >
+                    <Plus className="w-3 h-3 mr-1" /> Add
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div><Label>Width (mm)</Label><Input type="number" value={form.width_mm} onChange={(e) => updateField("width_mm", Number(e.target.value))} /></div>

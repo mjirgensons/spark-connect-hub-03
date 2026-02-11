@@ -20,19 +20,30 @@ const fallbackProducts = [
   { id: "", image: cabinet5, name: "Provence Cream & Wood", brand: "French Countryside", retailPrice: 22000, ourPrice: 6600, discount: 70, tag: "Popular" },
 ];
 
+const KITCHENS_SLUG = "kitchens";
+
 const ProductShowcase = () => {
+  const { data: kitchenCategory } = useQuery({
+    queryKey: ["category-kitchens"],
+    queryFn: async () => {
+      const { data } = await supabase.from("categories").select("id").eq("slug", KITCHENS_SLUG).single();
+      return data;
+    },
+  });
+
   const { data: dbProducts = [] } = useQuery({
-    queryKey: ["featured-products"],
+    queryKey: ["kitchen-products", kitchenCategory?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .eq("is_featured", true)
+        .eq("category_id", kitchenCategory!.id)
         .order("created_at", { ascending: false })
         .limit(6);
       if (error) throw error;
       return data;
     },
+    enabled: !!kitchenCategory?.id,
   });
 
   const hasDbProducts = dbProducts.length > 0;
@@ -57,7 +68,6 @@ const ProductShowcase = () => {
                   <Card className="group overflow-hidden h-full">
                     <div className="relative aspect-square overflow-hidden">
                       <img src={product.main_image_url || "/placeholder.svg"} alt={`${product.product_name} kitchen cabinets`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
-                      <Badge className="absolute top-3 left-3">Featured</Badge>
                       {product.discount_percentage > 0 && (
                         <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-sm md:text-base font-extrabold px-3 py-1.5 rounded-full shadow-lg">
                           {product.discount_percentage}% OFF
