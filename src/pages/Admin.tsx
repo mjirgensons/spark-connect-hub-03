@@ -55,17 +55,17 @@ const emptyProduct: Omit<Product, "id"> = {
   style: "",
   color: "",
   material: "",
-  width_mm: 0,
-  height_mm: 0,
-  depth_mm: 0,
-  price_retail_usd: 0,
-  price_discounted_usd: 0,
-  discount_percentage: 0,
+  width_mm: "" as unknown as number,
+  height_mm: "" as unknown as number,
+  depth_mm: "" as unknown as number,
+  price_retail_usd: "" as unknown as number,
+  price_discounted_usd: "" as unknown as number,
+  discount_percentage: "" as unknown as number,
   short_description: "",
   long_description: "",
   main_image_url: "",
   additional_image_urls: [],
-  stock_level: 0,
+  stock_level: "" as unknown as number,
   availability_status: "In Stock",
   is_featured: false,
   compatible_kitchen_layouts: [],
@@ -161,10 +161,20 @@ const Admin = () => {
   const updateField = (field: string, value: any) => {
     setForm((prev) => {
       const next = { ...prev, [field]: value };
-      if (field === "price_retail_usd" || field === "discount_percentage") {
-        const retail = field === "price_retail_usd" ? Number(value) : Number(prev.price_retail_usd);
-        const discount = field === "discount_percentage" ? Number(value) : Number(prev.discount_percentage);
+      const retail = Number(field === "price_retail_usd" ? value : prev.price_retail_usd) || 0;
+      const discounted = Number(field === "price_discounted_usd" ? value : prev.price_discounted_usd) || 0;
+      const discount = Number(field === "discount_percentage" ? value : prev.discount_percentage) || 0;
+
+      if (field === "price_retail_usd" && discount) {
         next.price_discounted_usd = Math.round(retail * (1 - discount / 100) * 100) / 100;
+      } else if (field === "discount_percentage" && retail) {
+        next.price_discounted_usd = Math.round(retail * (1 - Number(value) / 100) * 100) / 100;
+      } else if (field === "price_discounted_usd" && discount) {
+        next.price_retail_usd = Math.round(discounted / (1 - discount / 100) * 100) / 100;
+      } else if (field === "price_discounted_usd" && retail) {
+        next.discount_percentage = retail > 0 ? Math.round((1 - Number(value) / retail) * 10000) / 100 : 0;
+      } else if (field === "price_retail_usd" && discounted) {
+        next.discount_percentage = Number(value) > 0 ? Math.round((1 - discounted / Number(value)) * 10000) / 100 : 0;
       }
       return next;
     });
@@ -212,8 +222,8 @@ const Admin = () => {
                     <TableCell className="font-medium">{p.product_name}</TableCell>
                     <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
                     <TableCell>{p.style}</TableCell>
-                    <TableCell className="text-right">${Number(p.price_retail_usd).toLocaleString()}</TableCell>
-                    <TableCell className="text-right">${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">CA${Number(p.price_retail_usd).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">CA${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
                     <TableCell className="text-center">
                       <Badge variant={p.availability_status === "In Stock" ? "default" : "destructive"}>
                         {p.stock_level} — {p.availability_status}
@@ -269,9 +279,9 @@ const Admin = () => {
                 <div><Label>Depth (mm)</Label><Input type="number" value={form.depth_mm} onChange={(e) => updateField("depth_mm", Number(e.target.value))} /></div>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <div><Label>Retail Price (USD)</Label><Input type="number" step="0.01" value={form.price_retail_usd} onChange={(e) => updateField("price_retail_usd", Number(e.target.value))} /></div>
-                <div><Label>Discounted Price (USD)</Label><Input type="number" step="0.01" value={form.price_discounted_usd} readOnly className="bg-muted" /></div>
-                <div><Label>Discount %</Label><Input type="number" step="0.01" value={form.discount_percentage} onChange={(e) => updateField("discount_percentage", Number(e.target.value))} /></div>
+                <div><Label>Retail Price (CAD)</Label><Input type="number" step="0.01" value={form.price_retail_usd} onChange={(e) => updateField("price_retail_usd", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+                <div><Label>Discounted Price (CAD)</Label><Input type="number" step="0.01" value={form.price_discounted_usd} onChange={(e) => updateField("price_discounted_usd", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+                <div><Label>Discount %</Label><Input type="number" step="0.01" value={form.discount_percentage} onChange={(e) => updateField("discount_percentage", e.target.value === "" ? "" : Number(e.target.value))} /></div>
               </div>
               <div><Label>Short Description</Label><Input value={form.short_description || ""} onChange={(e) => updateField("short_description", e.target.value)} /></div>
               <div><Label>Long Description</Label><Textarea value={form.long_description || ""} onChange={(e) => updateField("long_description", e.target.value)} /></div>
