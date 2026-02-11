@@ -155,12 +155,34 @@ const Admin = () => {
     fetchProducts();
   };
 
+  const deleteStorageFile = async (url: string, bucket: string) => {
+    try {
+      const bucketPath = `${bucket}/`;
+      const idx = url.indexOf(bucketPath);
+      if (idx === -1) return;
+      const filePath = url.substring(idx + bucketPath.length);
+      await supabase.storage.from(bucket).remove([filePath]);
+    } catch (e) {
+      console.error("Failed to delete file:", e);
+    }
+  };
+
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this product?")) return;
+    if (!confirm("Delete this product and all associated files?")) return;
+    const product = products.find((p) => p.id === id);
+    if (product) {
+      if (product.main_image_url) await deleteStorageFile(product.main_image_url, "product-images");
+      if (product.additional_image_urls?.length) {
+        for (const url of product.additional_image_urls) {
+          await deleteStorageFile(url, "product-images");
+        }
+      }
+      if (product.installation_instructions_url) await deleteStorageFile(product.installation_instructions_url, "product-documents");
+    }
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else {
-      toast({ title: "Product deleted" });
+      toast({ title: "Product and files deleted" });
       fetchProducts();
     }
   };
@@ -172,16 +194,15 @@ const Admin = () => {
       const discounted = Number(field === "price_discounted_usd" ? value : prev.price_discounted_usd) || 0;
       const discount = Number(field === "discount_percentage" ? value : prev.discount_percentage) || 0;
 
-      if (field === "price_retail_usd" && discount) {
-        next.price_discounted_usd = Math.round(retail * (1 - discount / 100) * 100) / 100;
-      } else if (field === "discount_percentage" && retail) {
-        next.price_discounted_usd = Math.round(retail * (1 - Number(value) / 100) * 100) / 100;
-      } else if (field === "price_discounted_usd" && discount) {
-        next.price_retail_usd = Math.round(discounted / (1 - discount / 100) * 100) / 100;
-      } else if (field === "price_discounted_usd" && retail) {
-        next.discount_percentage = retail > 0 ? Math.round((1 - Number(value) / retail) * 10000) / 100 : 0;
-      } else if (field === "price_retail_usd" && discounted) {
-        next.discount_percentage = Number(value) > 0 ? Math.round((1 - discounted / Number(value)) * 10000) / 100 : 0;
+      if (field === "price_retail_usd") {
+        if (discount) next.price_discounted_usd = Math.round(retail * (1 - discount / 100) * 100) / 100;
+        else if (discounted && retail > 0) next.discount_percentage = Math.round((1 - discounted / retail) * 10000) / 100;
+      } else if (field === "discount_percentage") {
+        if (retail) next.price_discounted_usd = Math.round(retail * (1 - Number(value) / 100) * 100) / 100;
+        else if (discounted && Number(value) < 100) next.price_retail_usd = Math.round(discounted / (1 - Number(value) / 100) * 100) / 100;
+      } else if (field === "price_discounted_usd") {
+        if (discount && Number(value) > 0 && discount < 100) next.price_retail_usd = Math.round(Number(value) / (1 - discount / 100) * 100) / 100;
+        else if (retail > 0) next.discount_percentage = Math.round((1 - Number(value) / retail) * 10000) / 100;
       }
       return next;
     });
