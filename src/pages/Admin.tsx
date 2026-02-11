@@ -286,7 +286,21 @@ const Admin = () => {
                 <div><Label>Product Code *</Label><Input value={form.product_code} onChange={(e) => updateField("product_code", e.target.value)} /></div>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <div><Label>Style *</Label><Input value={form.style} onChange={(e) => updateField("style", e.target.value)} placeholder="e.g. Modern, Shaker" /></div>
+                <div>
+                  <Label>Style *</Label>
+                  <Select value={form.style} onValueChange={(v) => updateField("style", v)}>
+                    <SelectTrigger><SelectValue placeholder="Select style" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Modern">Modern</SelectItem>
+                      <SelectItem value="Shaker">Shaker</SelectItem>
+                      <SelectItem value="Flat Panel">Flat Panel</SelectItem>
+                      <SelectItem value="Slab">Slab</SelectItem>
+                      <SelectItem value="Transitional">Transitional</SelectItem>
+                      <SelectItem value="Contemporary">Contemporary</SelectItem>
+                      <SelectItem value="Minimalist">Minimalist</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div><Label>Color *</Label><Input value={form.color} onChange={(e) => updateField("color", e.target.value)} /></div>
                 <div><Label>Material *</Label><Input value={form.material} onChange={(e) => updateField("material", e.target.value)} placeholder="e.g. Maple, MDF" /></div>
               </div>
