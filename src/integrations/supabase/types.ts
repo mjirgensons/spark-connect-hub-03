@@ -54,6 +54,7 @@ export type Database = {
           is_featured: boolean
           long_description: string | null
           main_image_url: string | null
+          manufacturer: string | null
           material: string
           price_discounted_usd: number
           price_retail_usd: number
@@ -81,6 +82,7 @@ export type Database = {
           is_featured?: boolean
           long_description?: string | null
           main_image_url?: string | null
+          manufacturer?: string | null
           material: string
           price_discounted_usd: number
           price_retail_usd: number
@@ -108,6 +110,7 @@ export type Database = {
           is_featured?: boolean
           long_description?: string | null
           main_image_url?: string | null
+          manufacturer?: string | null
           material?: string
           price_discounted_usd?: number
           price_retail_usd?: number
