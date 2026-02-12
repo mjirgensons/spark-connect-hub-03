@@ -276,31 +276,20 @@ const Admin = () => {
         else if (retail > 0) next.discount_percentage = Math.round((1 - Number(value) / retail) * 10000) / 100;
       }
 
-      // Countertop pricing auto-calc (same bidirectional logic)
-      if (field === "countertop_price_retail" || field === "countertop_discount_percentage" || field === "countertop_price_discounted") {
-        const ctRetail = Number(next.countertop_price_retail) || 0;
-        const ctDiscounted = Number(next.countertop_price_discounted) || 0;
-        const ctDiscount = Number(next.countertop_discount_percentage) || 0;
+      // Countertop pricing auto-calc (mirrors main product logic exactly)
+      const ctRetail = Number(field === "countertop_price_retail" ? value : prev.countertop_price_retail) || 0;
+      const ctDiscounted = Number(field === "countertop_price_discounted" ? value : prev.countertop_price_discounted) || 0;
+      const ctDiscount = Number(field === "countertop_discount_percentage" ? value : prev.countertop_discount_percentage) || 0;
 
-        if (field === "countertop_price_retail") {
-          if (ctDiscount > 0) {
-            next.countertop_price_discounted = Math.round(ctRetail * (1 - ctDiscount / 100) * 100) / 100;
-          } else if (ctDiscounted > 0 && ctRetail > 0) {
-            next.countertop_discount_percentage = Math.round((1 - ctDiscounted / ctRetail) * 10000) / 100;
-          }
-        } else if (field === "countertop_discount_percentage") {
-          if (ctRetail > 0) {
-            next.countertop_price_discounted = Math.round(ctRetail * (1 - ctDiscount / 100) * 100) / 100;
-          } else if (ctDiscounted > 0 && ctDiscount > 0 && ctDiscount < 100) {
-            next.countertop_price_retail = Math.round(ctDiscounted / (1 - ctDiscount / 100) * 100) / 100;
-          }
-        } else if (field === "countertop_price_discounted") {
-          if (ctDiscount > 0 && ctDiscounted > 0 && ctDiscount < 100) {
-            next.countertop_price_retail = Math.round(ctDiscounted / (1 - ctDiscount / 100) * 100) / 100;
-          } else if (ctRetail > 0) {
-            next.countertop_discount_percentage = Math.round((1 - ctDiscounted / ctRetail) * 10000) / 100;
-          }
-        }
+      if (field === "countertop_price_retail") {
+        if (ctDiscount) next.countertop_price_discounted = Math.round(ctRetail * (1 - ctDiscount / 100) * 100) / 100;
+        else if (ctDiscounted && ctRetail > 0) next.countertop_discount_percentage = Math.round((1 - ctDiscounted / ctRetail) * 10000) / 100;
+      } else if (field === "countertop_discount_percentage") {
+        if (ctRetail) next.countertop_price_discounted = Math.round(ctRetail * (1 - Number(value) / 100) * 100) / 100;
+        else if (ctDiscounted && Number(value) < 100) next.countertop_price_retail = Math.round(ctDiscounted / (1 - Number(value) / 100) * 100) / 100;
+      } else if (field === "countertop_price_discounted") {
+        if (ctDiscount && Number(value) > 0 && ctDiscount < 100) next.countertop_price_retail = Math.round(Number(value) / (1 - ctDiscount / 100) * 100) / 100;
+        else if (ctRetail > 0) next.countertop_discount_percentage = Math.round((1 - Number(value) / ctRetail) * 10000) / 100;
       }
 
       return next;
@@ -578,13 +567,11 @@ const Admin = () => {
                       </div>
                     )}
                   </div>
-                  {form.countertop_option === "optional" && (
-                    <div className="grid grid-cols-3 gap-4">
-                      <div><Label>CT Retail Price (CAD)</Label><Input type="number" step="0.01" value={form.countertop_price_retail} onChange={(e) => updateField("countertop_price_retail", e.target.value === "" ? "" : Number(e.target.value))} /></div>
-                      <div><Label>CT Discounted Price (CAD)</Label><Input type="number" step="0.01" value={form.countertop_price_discounted} onChange={(e) => updateField("countertop_price_discounted", e.target.value === "" ? "" : Number(e.target.value))} /></div>
-                      <div><Label>CT Discount %</Label><Input type="number" step="0.01" value={form.countertop_discount_percentage} onChange={(e) => updateField("countertop_discount_percentage", e.target.value === "" ? "" : Number(e.target.value))} /></div>
-                    </div>
-                  )}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div><Label>CT Retail Price (CAD)</Label><Input type="number" step="0.01" value={form.countertop_price_retail} onChange={(e) => updateField("countertop_price_retail", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+                    <div><Label>CT Discounted Price (CAD)</Label><Input type="number" step="0.01" value={form.countertop_price_discounted} onChange={(e) => updateField("countertop_price_discounted", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+                    <div><Label>CT Discount %</Label><Input type="number" step="0.01" value={form.countertop_discount_percentage} onChange={(e) => updateField("countertop_discount_percentage", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+                  </div>
                 </>
               )}
               <MultiImageUpload label="Additional Images" value={form.additional_image_urls || []} onChange={(urls) => updateField("additional_image_urls", urls)} />
