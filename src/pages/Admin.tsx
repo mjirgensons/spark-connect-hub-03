@@ -320,11 +320,12 @@ const Admin = () => {
         <Card>
           <CardContent className="p-0">
             <Table>
-              <TableHeader>
+                <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Code</TableHead>
                   <TableHead>Style</TableHead>
+                  <TableHead className="text-center">Images</TableHead>
                   <TableHead className="text-right">Retail</TableHead>
                   <TableHead className="text-right">Discounted</TableHead>
                   <TableHead className="text-center">Stock</TableHead>
@@ -335,29 +336,29 @@ const Admin = () => {
               <TableBody>
                 {products.map((p) => (
                   <TableRow key={p.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {p.product_name}
-                        {(() => {
-                          const summary = getImageOptSummary(p);
-                          if (summary.label === "all-optimized") return (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-primary" title={`All ${summary.totalCount} image(s) optimized`}>
-                              <Sparkles className="w-3 h-3" /> Optimized
-                            </span>
-                          );
-                          if (summary.label === "partial") return (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-yellow-600" title={`${summary.optimizedCount}/${summary.totalCount} optimized`}>
-                              <AlertTriangle className="w-3 h-3" /> {summary.optimizedCount}/{summary.totalCount}
-                            </span>
-                          );
-                          if (summary.label === "none") return (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-destructive" title="No images optimized">
-                              <ImageOff className="w-3 h-3" /> Not optimized
-                            </span>
-                          );
-                          return null;
-                        })()}
-                      </div>
+                    <TableCell className="font-medium">{p.product_name}</TableCell>
+                    <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
+                    <TableCell>{p.style}</TableCell>
+                    <TableCell className="text-center">
+                      {(() => {
+                        const summary = getImageOptSummary(p);
+                        if (summary.label === "no-images") return <span className="text-xs text-muted-foreground">—</span>;
+                        if (summary.label === "all-optimized") return (
+                          <Badge variant="default" className="text-[10px] gap-1">
+                            <Sparkles className="w-3 h-3" /> {summary.optimizedCount}/{summary.totalCount}
+                          </Badge>
+                        );
+                        if (summary.label === "partial") return (
+                          <Badge variant="secondary" className="text-[10px] gap-1">
+                            <AlertTriangle className="w-3 h-3" /> {summary.optimizedCount}/{summary.totalCount}
+                          </Badge>
+                        );
+                        return (
+                          <Badge variant="destructive" className="text-[10px] gap-1">
+                            <ImageOff className="w-3 h-3" /> 0/{summary.totalCount}
+                          </Badge>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
                     <TableCell>{p.style}</TableCell>
