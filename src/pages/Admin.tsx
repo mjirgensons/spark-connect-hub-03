@@ -277,19 +277,30 @@ const Admin = () => {
       }
 
       // Countertop pricing auto-calc (same bidirectional logic)
-      const ctRetail = Number(field === "countertop_price_retail" ? value : prev.countertop_price_retail) || 0;
-      const ctDiscounted = Number(field === "countertop_price_discounted" ? value : prev.countertop_price_discounted) || 0;
-      const ctDiscount = Number(field === "countertop_discount_percentage" ? value : prev.countertop_discount_percentage) || 0;
+      if (field === "countertop_price_retail" || field === "countertop_discount_percentage" || field === "countertop_price_discounted") {
+        const ctRetail = Number(next.countertop_price_retail) || 0;
+        const ctDiscounted = Number(next.countertop_price_discounted) || 0;
+        const ctDiscount = Number(next.countertop_discount_percentage) || 0;
 
-      if (field === "countertop_price_retail") {
-        if (ctDiscount) next.countertop_price_discounted = Math.round(ctRetail * (1 - ctDiscount / 100) * 100) / 100;
-        else if (ctDiscounted && ctRetail > 0) next.countertop_discount_percentage = Math.round((1 - ctDiscounted / ctRetail) * 10000) / 100;
-      } else if (field === "countertop_discount_percentage") {
-        if (ctRetail) next.countertop_price_discounted = Math.round(ctRetail * (1 - Number(value) / 100) * 100) / 100;
-        else if (ctDiscounted && Number(value) < 100) next.countertop_price_retail = Math.round(ctDiscounted / (1 - Number(value) / 100) * 100) / 100;
-      } else if (field === "countertop_price_discounted") {
-        if (ctDiscount && Number(value) > 0 && ctDiscount < 100) next.countertop_price_retail = Math.round(Number(value) / (1 - ctDiscount / 100) * 100) / 100;
-        else if (ctRetail > 0) next.countertop_discount_percentage = Math.round((1 - Number(value) / ctRetail) * 10000) / 100;
+        if (field === "countertop_price_retail") {
+          if (ctDiscount > 0) {
+            next.countertop_price_discounted = Math.round(ctRetail * (1 - ctDiscount / 100) * 100) / 100;
+          } else if (ctDiscounted > 0 && ctRetail > 0) {
+            next.countertop_discount_percentage = Math.round((1 - ctDiscounted / ctRetail) * 10000) / 100;
+          }
+        } else if (field === "countertop_discount_percentage") {
+          if (ctRetail > 0) {
+            next.countertop_price_discounted = Math.round(ctRetail * (1 - ctDiscount / 100) * 100) / 100;
+          } else if (ctDiscounted > 0 && ctDiscount > 0 && ctDiscount < 100) {
+            next.countertop_price_retail = Math.round(ctDiscounted / (1 - ctDiscount / 100) * 100) / 100;
+          }
+        } else if (field === "countertop_price_discounted") {
+          if (ctDiscount > 0 && ctDiscounted > 0 && ctDiscount < 100) {
+            next.countertop_price_retail = Math.round(ctDiscounted / (1 - ctDiscount / 100) * 100) / 100;
+          } else if (ctRetail > 0) {
+            next.countertop_discount_percentage = Math.round((1 - ctDiscounted / ctRetail) * 10000) / 100;
+          }
+        }
       }
 
       return next;
