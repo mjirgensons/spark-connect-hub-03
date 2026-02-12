@@ -116,16 +116,29 @@ const Admin = () => {
   const [skuMode, setSkuMode] = useState<"auto" | "manual">("auto");
 
   const generateSKU = (f: Omit<Product, "id">) => {
-    const abbrev = (s: string | null | undefined, len = 3) =>
-      (s || "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, len);
+    // Clean: uppercase, remove ambiguous chars (O→0 already excluded, I→1 excluded)
+    const clean = (s: string | null | undefined, len: number) => {
+      const raw = (s || "")
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .toUpperCase()
+        .replace(/[OI]/g, (c) => (c === "O" ? "0" : "1"))
+        .slice(0, len);
+      return raw;
+    };
+
     const cat = categories.find((c) => c.id === f.category_id);
-    const catCode = abbrev(cat?.name, 3) || "GEN";
-    const styleCode = abbrev(f.style, 3) || "STY";
-    const colorCode = abbrev(f.color, 3) || "CLR";
-    const matCode = abbrev(f.material, 2) || "MT";
-    const w = f.width_mm ? String(f.width_mm) : "0";
-    const h = f.height_mm ? String(f.height_mm) : "0";
-    return `LA-${catCode}-${styleCode}-${colorCode}-${matCode}-${w}x${h}`;
+    // Top-level: 2-char category code
+    const catCode = clean(cat?.slug || cat?.name, 2) || "GN";
+    // Middle: 2-char style + 2-char color
+    const styleCode = clean(f.style, 2) || "ST";
+    const colorCode = clean(f.color, 2) || "CL";
+    // Compact dimension: width in cm (drop mm precision)
+    const wCm = f.width_mm ? String(Math.round(Number(f.width_mm) / 10)) : "0";
+    // Sequential suffix: use last 2 digits of timestamp for uniqueness
+    const seq = String(Date.now()).slice(-2);
+
+    // Result: e.g. KC-SH-WH-90-07  (10 chars without hyphens, ~14 with)
+    return `${catCode}-${styleCode}-${colorCode}-${wCm}-${seq}`;
   };
 
   useEffect(() => {
@@ -373,7 +386,7 @@ const Admin = () => {
       }
 
       // Auto-regenerate SKU when relevant fields change and mode is auto
-      if (skuMode === "auto" && ["category_id", "style", "color", "material", "width_mm", "height_mm"].includes(field)) {
+      if (skuMode === "auto" && ["category_id", "style", "color", "width_mm"].includes(field)) {
         next.product_code = generateSKU(next);
       }
 
@@ -737,7 +750,7 @@ const Admin = () => {
                 />
                 {skuMode === "auto" && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    SKU is auto-generated from category, style, color, material & dimensions.
+                    SKU is auto-generated: Category–Style–Color–Width–Seq (8-12 chars). Avoids ambiguous characters (O/I).
                   </p>
                 )}
               </div>
