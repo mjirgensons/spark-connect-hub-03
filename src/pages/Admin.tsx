@@ -467,7 +467,7 @@ const Admin = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Code</TableHead>
+                      <TableHead>SKU</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead className="text-center">Images</TableHead>
                       <TableHead className="text-right">Retail</TableHead>
@@ -562,7 +562,7 @@ const Admin = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Code</TableHead>
+                      <TableHead>SKU</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead className="text-center">Days Left</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
