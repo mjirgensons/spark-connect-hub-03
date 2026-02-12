@@ -235,9 +235,30 @@ const Admin = () => {
     }
   };
 
+  const clearCountertopFields = (obj: any) => {
+    obj.countertop_material = null;
+    obj.countertop_thickness = null;
+    obj.countertop_finish = null;
+    obj.countertop_stock = "" as unknown as number;
+    obj.countertop_included = false;
+    obj.countertop_price_retail = "" as unknown as number;
+    obj.countertop_price_discounted = "" as unknown as number;
+    obj.countertop_discount_percentage = "" as unknown as number;
+  };
+
+  const deleteCountertopStorageFiles = async (product: Product) => {
+    // Delete additional images associated with countertop if needed
+    // (additional images are shared, so we don't delete them here)
+  };
+
   const updateField = (field: string, value: any) => {
     setForm((prev) => {
       const next = { ...prev, [field]: value };
+
+      // When countertop is set to "no", clear all countertop data
+      if (field === "countertop_option" && value === "no") {
+        clearCountertopFields(next);
+      }
 
       // Main product pricing auto-calc
       const retail = Number(field === "price_retail_usd" ? value : prev.price_retail_usd) || 0;
