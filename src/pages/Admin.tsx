@@ -46,6 +46,7 @@ interface Product {
   is_featured: boolean;
   compatible_kitchen_layouts: string[] | null;
   installation_instructions_url: string | null;
+  tag: string | null;
 }
 
 const emptyProduct: Omit<Product, "id"> = {
@@ -70,6 +71,7 @@ const emptyProduct: Omit<Product, "id"> = {
   is_featured: false,
   compatible_kitchen_layouts: [],
   installation_instructions_url: "",
+  tag: null,
 };
 
 const Admin = () => {
@@ -140,6 +142,7 @@ const Admin = () => {
       short_description: form.short_description || null,
       long_description: form.long_description || null,
       category_id: form.category_id || null,
+      tag: form.tag || null,
     };
 
     if (editingProduct) {
@@ -346,6 +349,19 @@ const Admin = () => {
                     <Plus className="w-3 h-3 mr-1" /> Add
                   </Button>
                 </div>
+              </div>
+              <div>
+                <Label>Product Tag</Label>
+                <Select value={form.tag || ""} onValueChange={(v) => updateField("tag", v || null)}>
+                  <SelectTrigger><SelectValue placeholder="Select tag (optional)" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="New">New</SelectItem>
+                    <SelectItem value="Popular">Popular</SelectItem>
+                    <SelectItem value="Premium">Premium</SelectItem>
+                    <SelectItem value="Best Seller">Best Seller</SelectItem>
+                    <SelectItem value="Limited">Limited</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div><Label>Width (mm)</Label><Input type="number" value={form.width_mm} onChange={(e) => updateField("width_mm", Number(e.target.value))} /></div>

@@ -62,6 +62,7 @@ export type Database = {
           short_description: string | null
           stock_level: number
           style: string
+          tag: string | null
           updated_at: string
           width_mm: number
         }
@@ -88,6 +89,7 @@ export type Database = {
           short_description?: string | null
           stock_level?: number
           style: string
+          tag?: string | null
           updated_at?: string
           width_mm: number
         }
@@ -114,6 +116,7 @@ export type Database = {
           short_description?: string | null
           stock_level?: number
           style?: string
+          tag?: string | null
           updated_at?: string
           width_mm?: number
         }
