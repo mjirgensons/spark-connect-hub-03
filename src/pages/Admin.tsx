@@ -238,6 +238,8 @@ const Admin = () => {
   const updateField = (field: string, value: any) => {
     setForm((prev) => {
       const next = { ...prev, [field]: value };
+
+      // Main product pricing auto-calc
       const retail = Number(field === "price_retail_usd" ? value : prev.price_retail_usd) || 0;
       const discounted = Number(field === "price_discounted_usd" ? value : prev.price_discounted_usd) || 0;
       const discount = Number(field === "discount_percentage" ? value : prev.discount_percentage) || 0;
@@ -252,6 +254,23 @@ const Admin = () => {
         if (discount && Number(value) > 0 && discount < 100) next.price_retail_usd = Math.round(Number(value) / (1 - discount / 100) * 100) / 100;
         else if (retail > 0) next.discount_percentage = Math.round((1 - Number(value) / retail) * 10000) / 100;
       }
+
+      // Countertop pricing auto-calc (same bidirectional logic)
+      const ctRetail = Number(field === "countertop_price_retail" ? value : prev.countertop_price_retail) || 0;
+      const ctDiscounted = Number(field === "countertop_price_discounted" ? value : prev.countertop_price_discounted) || 0;
+      const ctDiscount = Number(field === "countertop_discount_percentage" ? value : prev.countertop_discount_percentage) || 0;
+
+      if (field === "countertop_price_retail") {
+        if (ctDiscount) next.countertop_price_discounted = Math.round(ctRetail * (1 - ctDiscount / 100) * 100) / 100;
+        else if (ctDiscounted && ctRetail > 0) next.countertop_discount_percentage = Math.round((1 - ctDiscounted / ctRetail) * 10000) / 100;
+      } else if (field === "countertop_discount_percentage") {
+        if (ctRetail) next.countertop_price_discounted = Math.round(ctRetail * (1 - Number(value) / 100) * 100) / 100;
+        else if (ctDiscounted && Number(value) < 100) next.countertop_price_retail = Math.round(ctDiscounted / (1 - Number(value) / 100) * 100) / 100;
+      } else if (field === "countertop_price_discounted") {
+        if (ctDiscount && Number(value) > 0 && ctDiscount < 100) next.countertop_price_retail = Math.round(Number(value) / (1 - ctDiscount / 100) * 100) / 100;
+        else if (ctRetail > 0) next.countertop_discount_percentage = Math.round((1 - Number(value) / ctRetail) * 10000) / 100;
+      }
+
       return next;
     });
   };
