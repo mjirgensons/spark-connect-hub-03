@@ -48,7 +48,7 @@ const Hero = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-lg bg-primary/20 backdrop-blur-sm flex items-center justify-center">
                 <Percent className="w-6 h-6 text-primary" />
