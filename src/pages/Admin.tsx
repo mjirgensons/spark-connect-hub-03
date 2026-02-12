@@ -307,14 +307,17 @@ const Admin = () => {
   };
 
   const handleToggleActivation = async (product: Product) => {
-    const newStatus = product.availability_status === "Deactivated" ? "In Stock" : "Deactivated";
+    const isDeactivating = product.availability_status !== "Deactivated";
+    const updatePayload: any = isDeactivating
+      ? { availability_status: "Deactivated", stock_level: 0 }
+      : { availability_status: "In Stock" };
     const { error } = await supabase
       .from("products")
-      .update({ availability_status: newStatus } as any)
+      .update(updatePayload)
       .eq("id", product.id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else {
-      toast({ title: newStatus === "Deactivated" ? "Product deactivated" : "Product activated" });
+      toast({ title: isDeactivating ? "Product deactivated — stock set to 0" : "Product activated — update stock in edit form" });
       fetchProducts();
     }
   };
