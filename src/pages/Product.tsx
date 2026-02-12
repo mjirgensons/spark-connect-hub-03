@@ -228,11 +228,6 @@ const Product = () => {
                   </div>
                 </div>
               )}
-              {product.countertop_option === "no" && (
-                <div>
-                  <p className="text-xs text-muted-foreground italic">Countertop not available for this product</p>
-                </div>
-              )}
 
               {product.stock_level > 0 && (
                 <p className="text-xs text-muted-foreground">
