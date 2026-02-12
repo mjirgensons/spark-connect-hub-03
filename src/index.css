@@ -166,3 +166,8 @@
     background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--primary)) 100%);
   }
 }
+
+/* ElevenLabs widget - hide default branding, keep only button */
+elevenlabs-convai {
+  /* Cannot style shadow DOM from here, handled by ChatWidget.tsx */
+}
