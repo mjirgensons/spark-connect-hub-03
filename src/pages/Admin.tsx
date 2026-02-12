@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, LogOut } from "lucide-react";
+import { Plus, Pencil, Trash2, LogOut, Sparkles } from "lucide-react";
 import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
 import { FileUpload } from "@/components/admin/FileUpload";
 
@@ -335,7 +335,16 @@ const Admin = () => {
               <TableBody>
                 {products.map((p) => (
                   <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.product_name}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {p.product_name}
+                        {p.main_image_url?.includes(".webp") && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-primary" title="Images auto-optimized">
+                            <Sparkles className="w-3 h-3" /> Optimized
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
                     <TableCell>{p.style}</TableCell>
                     <TableCell className="text-right">CA${Number(p.price_retail_usd).toLocaleString()}</TableCell>
