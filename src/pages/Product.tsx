@@ -256,7 +256,7 @@ const Product = () => {
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-2">
-              <Button size="lg" className="flex-1">
+              <Button size="lg" className="flex-1 shadow-[0_4px_12px_hsl(var(--primary)/0.3)]">
                 Request a Quote
               </Button>
               {product.installation_instructions_url && (
