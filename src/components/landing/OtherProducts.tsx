@@ -75,11 +75,16 @@ const OtherProducts = () => {
                     <Link to={`/product/${product.id}`}>
                       <Card className="group overflow-hidden">
                         <div className="relative aspect-square overflow-hidden">
-                          <img src={product.main_image_url || "/placeholder.svg"} alt={`${product.product_name} luxury cabinetry`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
-                          {product.tag && (
+                          <img src={product.main_image_url || "/placeholder.svg"} alt={`${product.product_name} luxury cabinetry`} className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${product.availability_status === "Deactivated" ? "opacity-60" : ""}`} loading="lazy" />
+                          {product.availability_status === "Deactivated" && (
+                            <div className="absolute top-2 left-2 right-2 bg-foreground/80 text-background text-[10px] font-bold px-2 py-1 rounded-md text-center">
+                              Temporarily Unavailable
+                            </div>
+                          )}
+                          {product.tag && product.availability_status !== "Deactivated" && (
                             <Badge className="absolute top-2 left-2 text-[10px] px-2 py-0.5">{product.tag}</Badge>
                           )}
-                          {product.discount_percentage > 0 && (
+                          {product.discount_percentage > 0 && product.availability_status !== "Deactivated" && (
                             <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-sm font-extrabold px-2.5 py-1 rounded-full">
                               {product.discount_percentage}% OFF
                             </div>

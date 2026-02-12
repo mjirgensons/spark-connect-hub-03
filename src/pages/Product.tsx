@@ -55,6 +55,7 @@ const Product = () => {
   }
 
   const savings = product.price_retail_usd - product.price_discounted_usd;
+  const isDeactivated = product.availability_status === "Deactivated";
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,12 +70,21 @@ const Product = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Images */}
-          <ProductGallery
-            mainImage={product.main_image_url || "/placeholder.svg"}
-            additionalImages={product.additional_image_urls || []}
-            productName={product.product_name}
-            discountPercentage={product.discount_percentage}
-          />
+          <div className="relative">
+            <ProductGallery
+              mainImage={product.main_image_url || "/placeholder.svg"}
+              additionalImages={product.additional_image_urls || []}
+              productName={product.product_name}
+              discountPercentage={isDeactivated ? 0 : product.discount_percentage}
+            />
+            {isDeactivated && (
+              <div className="absolute top-4 left-4 right-4 z-10">
+                <div className="bg-foreground/80 text-background text-lg font-bold px-4 py-3 rounded-md text-center">
+                  Temporarily Unavailable
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Details */}
           <div className="space-y-6">
@@ -250,17 +260,17 @@ const Product = () => {
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-2">
-              <Button size="lg" className="flex-1 shadow-[0_4px_12px_hsla(var(--primary),0.3)]">
-                Request a Quote
+              <Button size="lg" className="flex-1 shadow-[0_4px_12px_hsla(var(--primary),0.3)]" disabled={isDeactivated}>
+                {isDeactivated ? "Currently Unavailable" : "Request a Quote"}
               </Button>
               {product.installation_instructions_url && (
                 <a
-                  href={product.installation_instructions_url}
+                  href={isDeactivated ? undefined : product.installation_instructions_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1"
+                  className={`flex-1 ${isDeactivated ? "pointer-events-none" : ""}`}
                 >
-                  <Button variant="outline" size="sm" className="w-full h-full text-xs shadow-[0_4px_12px_hsla(var(--muted-foreground),0.3)]">
+                  <Button variant="outline" size="sm" className="w-full h-full text-xs shadow-[0_4px_12px_hsla(var(--muted-foreground),0.3)]" disabled={isDeactivated}>
                     Download Installation Instructions
                   </Button>
                 </a>
