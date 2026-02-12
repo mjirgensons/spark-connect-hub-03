@@ -256,7 +256,7 @@ const Product = () => {
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-2">
-              <Button size="lg" className="flex-1 shadow-[0_4px_12px_hsl(var(--primary)/0.3)]">
+              <Button size="lg" className="flex-1 shadow-[0_4px_12px_hsla(var(--primary),0.3)]">
                 Request a Quote
               </Button>
               {product.installation_instructions_url && (
@@ -266,7 +266,7 @@ const Product = () => {
                   rel="noopener noreferrer"
                   className="flex-1"
                 >
-                  <Button variant="outline" size="sm" className="w-full h-full text-xs shadow-[0_4px_12px_hsl(var(--muted-foreground)/0.3)]">
+                  <Button variant="outline" size="sm" className="w-full h-full text-xs shadow-[0_4px_12px_hsla(var(--muted-foreground),0.3)]">
                     Download Installation Instructions
                   </Button>
                 </a>
