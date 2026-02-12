@@ -324,7 +324,7 @@ const Admin = () => {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Code</TableHead>
-                  <TableHead>Style</TableHead>
+                  <TableHead>Category</TableHead>
                   <TableHead className="text-center">Images</TableHead>
                   <TableHead className="text-right">Retail</TableHead>
                   <TableHead className="text-right">Discounted</TableHead>
@@ -338,7 +338,7 @@ const Admin = () => {
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.product_name}</TableCell>
                     <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
-                    <TableCell>{p.style}</TableCell>
+                    <TableCell>{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
                     <TableCell className="text-center">
                       {(() => {
                         const summary = getImageOptSummary(p);
