@@ -1,0 +1,2 @@
+ALTER TABLE public.products DROP CONSTRAINT products_availability_status_check;
+ALTER TABLE public.products ADD CONSTRAINT products_availability_status_check CHECK (availability_status = ANY (ARRAY['In Stock', 'Low Stock', 'Out of Stock', 'Deactivated']));
