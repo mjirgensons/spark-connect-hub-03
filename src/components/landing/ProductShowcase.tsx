@@ -38,6 +38,7 @@ const ProductShowcase = () => {
         .from("products")
         .select("*")
         .eq("category_id", kitchenCategory!.id)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(6);
       if (error) throw error;

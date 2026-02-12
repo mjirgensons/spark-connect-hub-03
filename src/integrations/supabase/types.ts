@@ -55,6 +55,7 @@ export type Database = {
           countertop_stock: number | null
           countertop_thickness: string | null
           created_at: string
+          deleted_at: string | null
           depth_mm: number
           discount_percentage: number
           height_mm: number
@@ -92,6 +93,7 @@ export type Database = {
           countertop_stock?: number | null
           countertop_thickness?: string | null
           created_at?: string
+          deleted_at?: string | null
           depth_mm: number
           discount_percentage?: number
           height_mm: number
@@ -129,6 +131,7 @@ export type Database = {
           countertop_stock?: number | null
           countertop_thickness?: string | null
           created_at?: string
+          deleted_at?: string | null
           depth_mm?: number
           discount_percentage?: number
           height_mm?: number
