@@ -69,12 +69,12 @@ const ProductShowcase = () => {
                     <div className="relative aspect-square overflow-hidden">
                       <img src={product.main_image_url || "/placeholder.svg"} alt={`${product.product_name} kitchen cabinets`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
                       {product.discount_percentage > 0 && (
-                        <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-sm md:text-base font-extrabold px-3 py-1.5 rounded-full shadow-lg">
+                        <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-sm md:text-base font-extrabold px-3 py-1.5 rounded-full">
                           {product.discount_percentage}% OFF
                         </div>
                       )}
                       {product.countertop_included && product.countertop_option !== "no" && (
-                        <div className="absolute bottom-3 left-3 right-3 bg-primary text-primary-foreground text-xs md:text-sm font-bold px-3 py-1.5 rounded-full shadow-lg text-center">
+                        <div className="absolute bottom-3 left-3 right-3 bg-primary text-primary-foreground text-xs md:text-sm font-bold px-3 py-1.5 rounded-full text-center">
                           {product.countertop_material ? `${product.countertop_material} ` : ""}Countertop Included!
                         </div>
                       )}
@@ -95,7 +95,7 @@ const ProductShowcase = () => {
                   <div className="relative aspect-square overflow-hidden">
                     <img src={product.image} alt={`${product.name} kitchen cabinets`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
                     <Badge className="absolute top-3 left-3">{product.tag}</Badge>
-                    <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-sm md:text-base font-extrabold px-3 py-1.5 rounded-full shadow-lg">
+                    <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-sm md:text-base font-extrabold px-3 py-1.5 rounded-full">
                       {product.discount}% OFF
                     </div>
                   </div>
