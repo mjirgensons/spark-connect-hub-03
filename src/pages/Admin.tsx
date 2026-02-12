@@ -114,6 +114,21 @@ const Admin = () => {
   const [manufacturers, setManufacturers] = useState<string[]>(["LA"]);
   const [newManufacturer, setNewManufacturer] = useState("");
   const [skuMode, setSkuMode] = useState<"auto" | "manual">("auto");
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
+  // Check if current user is in admin_emails whitelist
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) { setIsAdmin(false); return; }
+      const { data } = await supabase
+        .from("admin_emails")
+        .select("id")
+        .eq("email", user.email || "")
+        .maybeSingle();
+      setIsAdmin(!!data);
+    };
+    if (user) checkAdmin();
+  }, [user]);
 
   const generateSKU = (f: Omit<Product, "id">) => {
     // Clean: uppercase, remove ambiguous chars (O→0 already excluded, I→1 excluded)
@@ -433,8 +448,17 @@ const Admin = () => {
     return Math.max(0, remaining);
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Loading...</p></div>;
+  if (loading || isAdmin === null) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Loading...</p></div>;
   if (!user) return null;
+  if (!isAdmin) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <h1 className="text-2xl font-bold text-destructive">Access Denied</h1>
+        <p className="text-muted-foreground">Your account ({user.email}) is not authorized to access the admin panel.</p>
+        <Button variant="outline" onClick={signOut}><LogOut className="w-4 h-4 mr-1" /> Sign Out</Button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background">
