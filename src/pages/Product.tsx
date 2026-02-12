@@ -266,7 +266,7 @@ const Product = () => {
                   rel="noopener noreferrer"
                   className="flex-1"
                 >
-                  <Button variant="outline" size="sm" className="w-full h-full text-xs">
+                  <Button variant="outline" size="sm" className="w-full h-full text-xs shadow-[0_4px_12px_hsl(var(--muted-foreground)/0.3)]">
                     Download Installation Instructions
                   </Button>
                 </a>
