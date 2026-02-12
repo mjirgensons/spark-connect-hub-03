@@ -45,6 +45,15 @@ export type Database = {
           category_id: string | null
           color: string
           compatible_kitchen_layouts: string[] | null
+          countertop_discount_percentage: number | null
+          countertop_finish: string | null
+          countertop_included: boolean | null
+          countertop_material: string | null
+          countertop_option: string | null
+          countertop_price_discounted: number | null
+          countertop_price_retail: number | null
+          countertop_stock: number | null
+          countertop_thickness: string | null
           created_at: string
           depth_mm: number
           discount_percentage: number
@@ -73,6 +82,15 @@ export type Database = {
           category_id?: string | null
           color: string
           compatible_kitchen_layouts?: string[] | null
+          countertop_discount_percentage?: number | null
+          countertop_finish?: string | null
+          countertop_included?: boolean | null
+          countertop_material?: string | null
+          countertop_option?: string | null
+          countertop_price_discounted?: number | null
+          countertop_price_retail?: number | null
+          countertop_stock?: number | null
+          countertop_thickness?: string | null
           created_at?: string
           depth_mm: number
           discount_percentage?: number
@@ -101,6 +119,15 @@ export type Database = {
           category_id?: string | null
           color?: string
           compatible_kitchen_layouts?: string[] | null
+          countertop_discount_percentage?: number | null
+          countertop_finish?: string | null
+          countertop_included?: boolean | null
+          countertop_material?: string | null
+          countertop_option?: string | null
+          countertop_price_discounted?: number | null
+          countertop_price_retail?: number | null
+          countertop_stock?: number | null
+          countertop_thickness?: string | null
           created_at?: string
           depth_mm?: number
           discount_percentage?: number

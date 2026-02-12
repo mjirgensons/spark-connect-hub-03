@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -48,6 +49,15 @@ interface Product {
   installation_instructions_url: string | null;
   tag: string | null;
   manufacturer: string | null;
+  countertop_option: string;
+  countertop_material: string | null;
+  countertop_thickness: string | null;
+  countertop_finish: string | null;
+  countertop_stock: number;
+  countertop_included: boolean;
+  countertop_price_retail: number;
+  countertop_price_discounted: number;
+  countertop_discount_percentage: number;
 }
 
 const emptyProduct: Omit<Product, "id"> = {
@@ -74,6 +84,15 @@ const emptyProduct: Omit<Product, "id"> = {
   installation_instructions_url: "",
   tag: null,
   manufacturer: null,
+  countertop_option: "no",
+  countertop_material: null,
+  countertop_thickness: null,
+  countertop_finish: null,
+  countertop_stock: 0,
+  countertop_included: false,
+  countertop_price_retail: "" as unknown as number,
+  countertop_price_discounted: "" as unknown as number,
+  countertop_discount_percentage: "" as unknown as number,
 };
 
 const Admin = () => {
@@ -158,6 +177,15 @@ const Admin = () => {
       category_id: form.category_id || null,
       tag: form.tag || null,
       manufacturer: form.manufacturer || null,
+      countertop_option: form.countertop_option || "no",
+      countertop_material: form.countertop_material || null,
+      countertop_thickness: form.countertop_thickness || null,
+      countertop_finish: form.countertop_finish || null,
+      countertop_stock: Number(form.countertop_stock) || 0,
+      countertop_included: form.countertop_included || false,
+      countertop_price_retail: Number(form.countertop_price_retail) || 0,
+      countertop_price_discounted: Number(form.countertop_price_discounted) || 0,
+      countertop_discount_percentage: Number(form.countertop_discount_percentage) || 0,
     };
 
     if (editingProduct) {
@@ -470,6 +498,44 @@ const Admin = () => {
                   })}
                 </div>
               </div>
+              <Separator className="my-2" />
+              <h3 className="font-semibold text-foreground">Countertop Options</h3>
+              <div>
+                <Label>Countertop Availability</Label>
+                <Select value={form.countertop_option} onValueChange={(v) => updateField("countertop_option", v)}>
+                  <SelectTrigger><SelectValue placeholder="Select option" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no">No</SelectItem>
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="optional">Optional (Add-on)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {(form.countertop_option === "yes" || form.countertop_option === "optional") && (
+                <>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div><Label>Material</Label><Input value={form.countertop_material || ""} onChange={(e) => updateField("countertop_material", e.target.value)} placeholder="e.g. Quartz, Granite" /></div>
+                    <div><Label>Thickness</Label><Input value={form.countertop_thickness || ""} onChange={(e) => updateField("countertop_thickness", e.target.value)} placeholder="e.g. 20mm, 30mm" /></div>
+                    <div><Label>Finish</Label><Input value={form.countertop_finish || ""} onChange={(e) => updateField("countertop_finish", e.target.value)} placeholder="e.g. Polished, Matte" /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div><Label>Countertop Stock</Label><Input type="number" value={form.countertop_stock} onChange={(e) => updateField("countertop_stock", Number(e.target.value))} /></div>
+                    {form.countertop_option === "yes" && (
+                      <div className="flex items-center gap-2 pt-6">
+                        <Switch id="ct-included" checked={form.countertop_included} onCheckedChange={(v) => updateField("countertop_included", v)} />
+                        <Label htmlFor="ct-included">Included with product</Label>
+                      </div>
+                    )}
+                  </div>
+                  {form.countertop_option === "optional" && (
+                    <div className="grid grid-cols-3 gap-4">
+                      <div><Label>CT Retail Price (CAD)</Label><Input type="number" step="0.01" value={form.countertop_price_retail} onChange={(e) => updateField("countertop_price_retail", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+                      <div><Label>CT Discounted Price (CAD)</Label><Input type="number" step="0.01" value={form.countertop_price_discounted} onChange={(e) => updateField("countertop_price_discounted", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+                      <div><Label>CT Discount %</Label><Input type="number" step="0.01" value={form.countertop_discount_percentage} onChange={(e) => updateField("countertop_discount_percentage", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+                    </div>
+                  )}
+                </>
+              )}
               <MultiImageUpload label="Additional Images" value={form.additional_image_urls || []} onChange={(urls) => updateField("additional_image_urls", urls)} />
               <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? "Saving..." : editingProduct ? "Update Product" : "Create Product"}</Button>
             </div>
