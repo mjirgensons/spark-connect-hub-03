@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Package, Ruler, Palette, Layers, Info } from "lucide-react";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
+import ProductGallery from "@/components/ProductGallery";
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
@@ -67,29 +68,12 @@ const Product = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Images */}
-          <div className="space-y-4">
-            <div className="relative aspect-square overflow-hidden border bg-secondary/30">
-              <img
-                src={product.main_image_url || "/placeholder.svg"}
-                alt={product.product_name}
-                className="w-full h-full object-cover"
-              />
-              {product.discount_percentage > 0 && (
-                <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-sm font-extrabold px-3 py-1.5 rounded-full shadow-lg">
-                  {product.discount_percentage}% OFF
-                </div>
-              )}
-            </div>
-            {product.additional_image_urls && product.additional_image_urls.length > 0 && (
-              <div className="grid grid-cols-4 gap-2">
-                {product.additional_image_urls.map((url: string, i: number) => (
-                  <div key={i} className="aspect-square overflow-hidden border bg-secondary/30">
-                    <img src={url} alt={`${product.product_name} view ${i + 2}`} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <ProductGallery
+            mainImage={product.main_image_url || "/placeholder.svg"}
+            additionalImages={product.additional_image_urls || []}
+            productName={product.product_name}
+            discountPercentage={product.discount_percentage}
+          />
 
           {/* Details */}
           <div className="space-y-6">
