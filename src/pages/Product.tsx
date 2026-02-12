@@ -173,6 +173,67 @@ const Product = () => {
                   </div>
                 </div>
               )}
+
+              {/* Countertop Info */}
+              {product.countertop_option && product.countertop_option !== "no" && (
+                <Separator />
+              )}
+              {product.countertop_option === "yes" && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-foreground">Countertop</h3>
+                  <Badge variant={product.countertop_included ? "default" : "secondary"}>
+                    {product.countertop_included ? "Included with product" : "Available separately"}
+                  </Badge>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    {product.countertop_material && (
+                      <div><p className="text-xs text-muted-foreground">Material</p><p className="font-medium text-foreground">{product.countertop_material}</p></div>
+                    )}
+                    {product.countertop_thickness && (
+                      <div><p className="text-xs text-muted-foreground">Thickness</p><p className="font-medium text-foreground">{product.countertop_thickness}</p></div>
+                    )}
+                    {product.countertop_finish && (
+                      <div><p className="text-xs text-muted-foreground">Finish</p><p className="font-medium text-foreground">{product.countertop_finish}</p></div>
+                    )}
+                  </div>
+                </div>
+              )}
+              {product.countertop_option === "optional" && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-foreground">Countertop (Optional Add-on)</h3>
+                  <div className="border p-3 space-y-2">
+                    <div className="flex items-end gap-3">
+                      <span className="text-xl font-bold text-foreground">
+                        CA${Number(product.countertop_price_discounted).toLocaleString()}
+                      </span>
+                      {Number(product.countertop_price_retail) > Number(product.countertop_price_discounted) && (
+                        <span className="text-sm text-muted-foreground line-through">
+                          CA${Number(product.countertop_price_retail).toLocaleString()}
+                        </span>
+                      )}
+                      {Number(product.countertop_discount_percentage) > 0 && (
+                        <Badge variant="destructive" className="text-xs">{product.countertop_discount_percentage}% OFF</Badge>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      {product.countertop_material && (
+                        <div><p className="text-xs text-muted-foreground">Material</p><p className="font-medium text-foreground">{product.countertop_material}</p></div>
+                      )}
+                      {product.countertop_thickness && (
+                        <div><p className="text-xs text-muted-foreground">Thickness</p><p className="font-medium text-foreground">{product.countertop_thickness}</p></div>
+                      )}
+                      {product.countertop_finish && (
+                        <div><p className="text-xs text-muted-foreground">Finish</p><p className="font-medium text-foreground">{product.countertop_finish}</p></div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {product.countertop_option === "no" && (
+                <div>
+                  <p className="text-xs text-muted-foreground italic">Countertop not available for this product</p>
+                </div>
+              )}
+
               {product.stock_level > 0 && (
                 <p className="text-xs text-muted-foreground">
                   <Package className="w-3 h-3 inline mr-1" />
