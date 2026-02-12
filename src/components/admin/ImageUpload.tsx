@@ -79,8 +79,17 @@ export const ImageUpload = ({ value, onChange, label, onOptStatusChange }: Image
     setUploading(false);
   };
 
-  const handleResubmit = () => {
+  const handleResubmit = async () => {
     if (optStatus?.originalFile) {
+      // Delete old file from storage before re-uploading
+      if (value) {
+        const bucketPath = "product-images/";
+        const idx = value.indexOf(bucketPath);
+        if (idx !== -1) {
+          const filePath = value.substring(idx + bucketPath.length);
+          await supabase.storage.from("product-images").remove([filePath]);
+        }
+      }
       uploadFile(optStatus.originalFile);
     } else {
       fileInputRef.current?.click();
