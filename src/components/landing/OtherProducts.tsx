@@ -84,7 +84,7 @@ const OtherProducts = () => {
                             </div>
                           )}
                           {product.countertop_included && product.countertop_option !== "no" && (
-                            <div className="absolute bottom-2 left-2 right-2 bg-primary text-primary-foreground text-[9px] sm:text-xs font-bold px-2 py-1 rounded-full text-center">
+                            <div className="absolute bottom-2 left-2 right-2 bg-destructive text-destructive-foreground text-[9px] sm:text-xs font-bold px-2 py-1 rounded-full text-center">
                               {product.countertop_material ? `${product.countertop_material} ` : ""}Countertop Included!
                             </div>
                           )}
