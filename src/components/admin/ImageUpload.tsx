@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Upload, X, Loader2, Sparkles } from "lucide-react";
+import { optimizeImage } from "@/lib/optimizeImage";
 
 interface ImageUploadProps {
   value: string | null;
@@ -18,24 +19,36 @@ export const ImageUpload = ({ value, onChange, label }: ImageUploadProps) => {
 
   const uploadFile = async (file: File) => {
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const fileName = `${crypto.randomUUID()}.${ext}`;
+    try {
+      const optimized = await optimizeImage(file);
+      const ext = optimized.name.split(".").pop();
+      const fileName = `${crypto.randomUUID()}.${ext}`;
 
-    const { error } = await supabase.storage
-      .from("product-images")
-      .upload(fileName, file, { upsert: true });
+      const { error } = await supabase.storage
+        .from("product-images")
+        .upload(fileName, optimized, { upsert: true });
 
-    if (error) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
-      setUploading(false);
-      return;
+      if (error) {
+        toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+        setUploading(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+
+      onChange(urlData.publicUrl);
+      toast({ title: "Image optimized & uploaded", description: `Converted to WebP (${Math.round(optimized.size / 1024)}KB)` });
+    } catch (e) {
+      toast({ title: "Optimization failed", description: "Uploading original instead", variant: "destructive" });
+      // Fallback: upload original
+      const ext = file.name.split(".").pop();
+      const fileName = `${crypto.randomUUID()}.${ext}`;
+      await supabase.storage.from("product-images").upload(fileName, file, { upsert: true });
+      const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(fileName);
+      onChange(urlData.publicUrl);
     }
-
-    const { data: urlData } = supabase.storage
-      .from("product-images")
-      .getPublicUrl(fileName);
-
-    onChange(urlData.publicUrl);
     setUploading(false);
   };
 
@@ -43,6 +56,8 @@ export const ImageUpload = ({ value, onChange, label }: ImageUploadProps) => {
     const file = e.target.files?.[0];
     if (file) uploadFile(file);
   };
+
+  const isOptimized = value?.includes(".webp");
 
   return (
     <div className="space-y-2">
@@ -71,7 +86,14 @@ export const ImageUpload = ({ value, onChange, label }: ImageUploadProps) => {
       </div>
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
       {value && (
-        <img src={value} alt="Preview" className="h-20 w-20 rounded-md object-cover border border-border" />
+        <div className="flex items-center gap-2">
+          <img src={value} alt="Preview" className="h-20 w-20 rounded-md object-cover border border-border" />
+          {isOptimized && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+              <Sparkles className="w-3 h-3" /> Optimized
+            </span>
+          )}
+        </div>
       )}
     </div>
   );
@@ -93,27 +115,33 @@ export const MultiImageUpload = ({ value, onChange, label }: MultiImageUploadPro
     const urls = [...(value || [])];
 
     for (const file of Array.from(files)) {
-      const ext = file.name.split(".").pop();
-      const fileName = `${crypto.randomUUID()}.${ext}`;
+      try {
+        const optimized = await optimizeImage(file);
+        const ext = optimized.name.split(".").pop();
+        const fileName = `${crypto.randomUUID()}.${ext}`;
 
-      const { error } = await supabase.storage
-        .from("product-images")
-        .upload(fileName, file, { upsert: true });
+        const { error } = await supabase.storage
+          .from("product-images")
+          .upload(fileName, optimized, { upsert: true });
 
-      if (error) {
-        toast({ title: "Upload failed", description: error.message, variant: "destructive" });
-        continue;
+        if (error) {
+          toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+          continue;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from("product-images")
+          .getPublicUrl(fileName);
+
+        urls.push(urlData.publicUrl);
+      } catch {
+        toast({ title: "Optimization failed for a file", variant: "destructive" });
       }
-
-      const { data: urlData } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(fileName);
-
-      urls.push(urlData.publicUrl);
     }
 
     onChange(urls);
     setUploading(false);
+    toast({ title: "Images optimized & uploaded" });
   };
 
   const removeImage = (index: number) => {
@@ -134,7 +162,7 @@ export const MultiImageUpload = ({ value, onChange, label }: MultiImageUploadPro
           className="w-full"
         >
           {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
-          {uploading ? "Uploading..." : "Upload Images"}
+          {uploading ? "Optimizing & Uploading..." : "Upload Images (auto-optimized)"}
         </Button>
       </div>
       <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => e.target.files && uploadFiles(e.target.files)} />
@@ -143,6 +171,11 @@ export const MultiImageUpload = ({ value, onChange, label }: MultiImageUploadPro
           {(value || []).map((url, i) => (
             <div key={i} className="relative group">
               <img src={url} alt={`Image ${i + 1}`} className="h-16 w-16 rounded-md object-cover border border-border" />
+              {url.includes(".webp") && (
+                <span className="absolute -top-1 -left-1 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[8px]">
+                  ✓
+                </span>
+              )}
               <button
                 type="button"
                 onClick={() => removeImage(i)}
