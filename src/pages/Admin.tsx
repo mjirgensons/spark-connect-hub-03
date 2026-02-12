@@ -113,6 +113,20 @@ const Admin = () => {
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [manufacturers, setManufacturers] = useState<string[]>(["LA"]);
   const [newManufacturer, setNewManufacturer] = useState("");
+  const [skuMode, setSkuMode] = useState<"auto" | "manual">("auto");
+
+  const generateSKU = (f: Omit<Product, "id">) => {
+    const abbrev = (s: string | null | undefined, len = 3) =>
+      (s || "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, len);
+    const cat = categories.find((c) => c.id === f.category_id);
+    const catCode = abbrev(cat?.name, 3) || "GEN";
+    const styleCode = abbrev(f.style, 3) || "STY";
+    const colorCode = abbrev(f.color, 3) || "CLR";
+    const matCode = abbrev(f.material, 2) || "MT";
+    const w = f.width_mm ? String(f.width_mm) : "0";
+    const h = f.height_mm ? String(f.height_mm) : "0";
+    return `LA-${catCode}-${styleCode}-${colorCode}-${matCode}-${w}x${h}`;
+  };
 
   useEffect(() => {
     if (!loading && !user) navigate("/admin/login");
@@ -175,12 +189,14 @@ const Admin = () => {
   const openCreate = () => {
     setEditingProduct(null);
     setForm(emptyProduct);
+    setSkuMode("auto");
     setDialogOpen(true);
   };
 
   const openEdit = (product: Product) => {
     setEditingProduct(product);
     setForm({ ...product });
+    setSkuMode(product.manufacturer === "LA" || !product.manufacturer ? "auto" : "manual");
     setDialogOpen(true);
   };
 
@@ -345,6 +361,20 @@ const Admin = () => {
       // When countertop is set to "no", clear all countertop data
       if (field === "countertop_option" && value === "no") {
         clearCountertopFields(next);
+      }
+
+      // Auto-switch SKU mode based on manufacturer
+      if (field === "manufacturer") {
+        const newMode = value === "LA" ? "auto" : "manual";
+        setSkuMode(newMode);
+        if (newMode === "auto") {
+          next.product_code = generateSKU(next);
+        }
+      }
+
+      // Auto-regenerate SKU when relevant fields change and mode is auto
+      if (skuMode === "auto" && ["category_id", "style", "color", "material", "width_mm", "height_mm"].includes(field)) {
+        next.product_code = generateSKU(next);
       }
 
       // Main product pricing auto-calc
@@ -565,9 +595,8 @@ const Admin = () => {
               <DialogTitle>{editingProduct ? "Edit Product" : "Add Product"}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div><Label>Product Name *</Label><Input value={form.product_name} onChange={(e) => updateField("product_name", e.target.value)} /></div>
-                <div><Label>Product Code *</Label><Input value={form.product_code} onChange={(e) => updateField("product_code", e.target.value)} /></div>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
@@ -677,6 +706,40 @@ const Admin = () => {
                     <Plus className="w-3 h-3 mr-1" /> Add
                   </Button>
                 </div>
+              </div>
+              <Separator className="my-1" />
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <Label>SKU / Product Code *</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="sku-mode-switch" className="text-xs text-muted-foreground">
+                      {skuMode === "auto" ? "Auto-generated" : "Manual entry"}
+                    </Label>
+                    <Switch
+                      id="sku-mode-switch"
+                      checked={skuMode === "manual"}
+                      onCheckedChange={(checked) => {
+                        const newMode = checked ? "manual" : "auto";
+                        setSkuMode(newMode);
+                        if (newMode === "auto") {
+                          updateField("product_code", generateSKU(form));
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+                <Input
+                  value={form.product_code}
+                  onChange={(e) => updateField("product_code", e.target.value)}
+                  disabled={skuMode === "auto"}
+                  placeholder={skuMode === "auto" ? "Auto-generated from product details" : "Enter manufacturer SKU code"}
+                  className={skuMode === "auto" ? "font-mono text-sm bg-muted" : "font-mono text-sm"}
+                />
+                {skuMode === "auto" && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    SKU is auto-generated from category, style, color, material & dimensions.
+                  </p>
+                )}
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div><Label>Width (mm)</Label><Input type="number" value={form.width_mm} onChange={(e) => updateField("width_mm", Number(e.target.value))} /></div>
