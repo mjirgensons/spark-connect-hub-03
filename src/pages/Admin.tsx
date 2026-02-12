@@ -88,7 +88,7 @@ const emptyProduct: Omit<Product, "id"> = {
   countertop_material: null,
   countertop_thickness: null,
   countertop_finish: null,
-  countertop_stock: 0,
+  countertop_stock: "" as unknown as number,
   countertop_included: false,
   countertop_price_retail: "" as unknown as number,
   countertop_price_discounted: "" as unknown as number,
