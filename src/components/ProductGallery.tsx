@@ -35,7 +35,7 @@ const ProductGallery = ({ mainImage, additionalImages, productName, discountPerc
             className="w-full h-full object-cover transition-all duration-300"
           />
           {discountPercentage > 0 && (
-            <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-sm font-extrabold px-3 py-1.5 rounded-full shadow-lg">
+            <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-sm font-extrabold px-3 py-1.5 rounded-full">
               {discountPercentage}% OFF
             </div>
           )}
