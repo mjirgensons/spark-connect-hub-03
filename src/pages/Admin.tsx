@@ -47,6 +47,7 @@ interface Product {
   compatible_kitchen_layouts: string[] | null;
   installation_instructions_url: string | null;
   tag: string | null;
+  manufacturer: string | null;
 }
 
 const emptyProduct: Omit<Product, "id"> = {
@@ -72,6 +73,7 @@ const emptyProduct: Omit<Product, "id"> = {
   compatible_kitchen_layouts: [],
   installation_instructions_url: "",
   tag: null,
+  manufacturer: null,
 };
 
 const Admin = () => {
@@ -87,6 +89,8 @@ const Admin = () => {
   const [saving, setSaving] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creatingCategory, setCreatingCategory] = useState(false);
+  const [manufacturers, setManufacturers] = useState<string[]>(["LA"]);
+  const [newManufacturer, setNewManufacturer] = useState("");
 
   useEffect(() => {
     if (!loading && !user) navigate("/admin/login");
@@ -96,6 +100,7 @@ const Admin = () => {
     if (user) {
       fetchProducts();
       fetchCategories();
+      fetchManufacturers();
     }
   }, [user]);
 
@@ -107,6 +112,15 @@ const Admin = () => {
   const fetchCategories = async () => {
     const { data } = await supabase.from("categories").select("*").order("name");
     if (data) setCategories(data as unknown as Category[]);
+  };
+
+  const fetchManufacturers = async () => {
+    const { data } = await supabase.from("products").select("manufacturer");
+    if (data) {
+      const unique = Array.from(new Set(data.map((d: any) => d.manufacturer).filter(Boolean))) as string[];
+      if (!unique.includes("LA")) unique.unshift("LA");
+      setManufacturers(unique);
+    }
   };
 
   const openCreate = () => {
@@ -143,6 +157,7 @@ const Admin = () => {
       long_description: form.long_description || null,
       category_id: form.category_id || null,
       tag: form.tag || null,
+      manufacturer: form.manufacturer || null,
     };
 
     if (editingProduct) {
@@ -363,6 +378,42 @@ const Admin = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label>Manufacturer (internal only)</Label>
+                <Select value={form.manufacturer || ""} onValueChange={(v) => updateField("manufacturer", v || null)}>
+                  <SelectTrigger><SelectValue placeholder="Select manufacturer" /></SelectTrigger>
+                  <SelectContent>
+                    {manufacturers.map((m) => (
+                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    placeholder="New manufacturer..."
+                    value={newManufacturer}
+                    onChange={(e) => setNewManufacturer(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={!newManufacturer.trim()}
+                    onClick={() => {
+                      const name = newManufacturer.trim();
+                      if (!manufacturers.includes(name)) {
+                        setManufacturers((prev) => [...prev, name]);
+                      }
+                      updateField("manufacturer", name);
+                      setNewManufacturer("");
+                      toast({ title: "Manufacturer added" });
+                    }}
+                  >
+                    <Plus className="w-3 h-3 mr-1" /> Add
+                  </Button>
+                </div>
+              </div>
               <div className="grid grid-cols-3 gap-4">
                 <div><Label>Width (mm)</Label><Input type="number" value={form.width_mm} onChange={(e) => updateField("width_mm", Number(e.target.value))} /></div>
                 <div><Label>Height (mm)</Label><Input type="number" value={form.height_mm} onChange={(e) => updateField("height_mm", Number(e.target.value))} /></div>
@@ -390,9 +441,9 @@ const Admin = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex items-end gap-2 pb-2">
-                  <Switch checked={form.is_featured} onCheckedChange={(v) => updateField("is_featured", v)} />
-                  <Label>Featured</Label>
+                <div className="flex items-center gap-2 pt-6">
+                  <Switch id="featured-switch" checked={form.is_featured} onCheckedChange={(v) => updateField("is_featured", v)} />
+                  <Label htmlFor="featured-switch">Featured</Label>
                 </div>
               </div>
               <div>
