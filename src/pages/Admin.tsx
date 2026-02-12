@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, LogOut, Sparkles, AlertTriangle, ImageOff, RotateCcw, Trash } from "lucide-react";
+import { Plus, Pencil, Trash2, LogOut, Sparkles, AlertTriangle, ImageOff, RotateCcw, Trash, Power, PowerOff } from "lucide-react";
 import { ImageUpload, MultiImageUpload, getImageOptSummary } from "@/components/admin/ImageUpload";
 import { FileUpload } from "@/components/admin/FileUpload";
 
@@ -306,6 +306,19 @@ const Admin = () => {
     fetchProducts();
   };
 
+  const handleToggleActivation = async (product: Product) => {
+    const newStatus = product.availability_status === "Deactivated" ? "In Stock" : "Deactivated";
+    const { error } = await supabase
+      .from("products")
+      .update({ availability_status: newStatus } as any)
+      .eq("id", product.id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: newStatus === "Deactivated" ? "Product deactivated" : "Product activated" });
+      fetchProducts();
+    }
+  };
+
   const clearCountertopFields = (obj: any) => {
     obj.countertop_material = null;
     obj.countertop_thickness = null;
@@ -414,6 +427,7 @@ const Admin = () => {
                       <TableHead className="text-right">Retail</TableHead>
                       <TableHead className="text-right">Discounted</TableHead>
                       <TableHead className="text-center">Stock</TableHead>
+                      <TableHead className="text-center">Status</TableHead>
                       <TableHead className="text-center">Featured</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -452,9 +466,24 @@ const Admin = () => {
                             {p.stock_level} — {p.availability_status}
                           </Badge>
                         </TableCell>
+                        <TableCell className="text-center">
+                          {p.availability_status === "Deactivated" ? (
+                            <Badge variant="destructive" className="text-[10px]"><PowerOff className="w-3 h-3 mr-1" />Deactivated</Badge>
+                          ) : (
+                            <Badge variant="default" className="text-[10px]"><Power className="w-3 h-3 mr-1" />Active</Badge>
+                          )}
+                        </TableCell>
                         <TableCell className="text-center">{p.is_featured ? "⭐" : "—"}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title={p.availability_status === "Deactivated" ? "Activate" : "Deactivate"}
+                              onClick={() => handleToggleActivation(p)}
+                            >
+                              {p.availability_status === "Deactivated" ? <Power className="w-4 h-4 text-primary" /> : <PowerOff className="w-4 h-4 text-muted-foreground" />}
+                            </Button>
                             <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="w-4 h-4" /></Button>
                             <Button variant="ghost" size="icon" onClick={() => handleSoftDelete(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                           </div>
@@ -462,7 +491,7 @@ const Admin = () => {
                       </TableRow>
                     ))}
                     {products.length === 0 && (
-                      <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No products yet. Click "Add Product" to get started.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">No products yet. Click "Add Product" to get started.</TableCell></TableRow>
                     )}
                   </TableBody>
                 </Table>
