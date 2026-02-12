@@ -360,8 +360,6 @@ const Admin = () => {
                         );
                       })()}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
-                    <TableCell>{p.style}</TableCell>
                     <TableCell className="text-right">CA${Number(p.price_retail_usd).toLocaleString()}</TableCell>
                     <TableCell className="text-right">CA${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
                     <TableCell className="text-center">

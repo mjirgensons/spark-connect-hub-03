@@ -302,11 +302,30 @@ export const MultiImageUpload = ({ value, onChange, label, onOptStatusesChange }
 
   const resubmitImage = async (index: number) => {
     const st = optStatuses[index];
-    if (!st?.originalFile) return;
-    setUploading(true);
-    const originalSizeKB = Math.round(st.originalFile.size / 1024);
+    let file = st?.originalFile;
+
+    // If no original file in memory (e.g. loaded from DB), fetch it from URL
+    if (!file) {
+      const url = (value || [])[index];
+      if (!url) return;
+      setUploading(true);
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const ext = url.split(".").pop()?.split("?")[0] || "jpg";
+        file = new File([blob], `resubmit.${ext}`, { type: blob.type });
+      } catch (e: any) {
+        toast({ title: "Failed to fetch image for re-optimization", description: e?.message, variant: "destructive" });
+        setUploading(false);
+        return;
+      }
+    } else {
+      setUploading(true);
+    }
+
+    const originalSizeKB = Math.round(file.size / 1024);
     try {
-      const optimized = await optimizeImage(st.originalFile);
+      const optimized = await optimizeImage(file);
       const ext = optimized.name.split(".").pop();
       const fileName = `${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("product-images").upload(fileName, optimized, { upsert: true });
@@ -315,11 +334,12 @@ export const MultiImageUpload = ({ value, onChange, label, onOptStatusesChange }
       const finalSizeKB = Math.round(optimized.size / 1024);
 
       // Delete old file if exists
-      if (st.url) {
+      const oldUrl = (value || [])[index];
+      if (oldUrl) {
         const bucketPath = "product-images/";
-        const idx = st.url.indexOf(bucketPath);
+        const idx = oldUrl.indexOf(bucketPath);
         if (idx !== -1) {
-          const filePath = st.url.substring(idx + bucketPath.length);
+          const filePath = oldUrl.substring(idx + bucketPath.length);
           await supabase.storage.from("product-images").remove([filePath]);
         }
       }
