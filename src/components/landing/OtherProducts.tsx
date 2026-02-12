@@ -43,6 +43,7 @@ const OtherProducts = () => {
         .from("products")
         .select("*")
         .neq("category_id", kitchenCategory!.id)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(10);
       if (error) throw error;

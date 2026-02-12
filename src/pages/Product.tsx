@@ -19,6 +19,7 @@ const Product = () => {
         .from("products")
         .select("*, categories(name)")
         .eq("id", id!)
+        .is("deleted_at", null)
         .single();
       if (error) throw error;
       return data;

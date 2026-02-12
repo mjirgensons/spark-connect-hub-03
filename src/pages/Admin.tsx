@@ -13,8 +13,9 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, LogOut, Sparkles, AlertTriangle, ImageOff } from "lucide-react";
+import { Plus, Pencil, Trash2, LogOut, Sparkles, AlertTriangle, ImageOff, RotateCcw, Trash } from "lucide-react";
 import { ImageUpload, MultiImageUpload, getImageOptSummary } from "@/components/admin/ImageUpload";
 import { FileUpload } from "@/components/admin/FileUpload";
 
@@ -58,6 +59,7 @@ interface Product {
   countertop_price_retail: number;
   countertop_price_discounted: number;
   countertop_discount_percentage: number;
+  deleted_at?: string | null;
 }
 
 const emptyProduct: Omit<Product, "id"> = {
@@ -101,6 +103,7 @@ const Admin = () => {
   const { toast } = useToast();
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [deletedProducts, setDeletedProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -120,12 +123,39 @@ const Admin = () => {
       fetchProducts();
       fetchCategories();
       fetchManufacturers();
+      autoCleanupBin();
     }
   }, [user]);
 
   const fetchProducts = async () => {
-    const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false });
-    if (data) setProducts(data as unknown as Product[]);
+    const { data: active } = await supabase
+      .from("products")
+      .select("*")
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false });
+    if (active) setProducts(active as unknown as Product[]);
+
+    const { data: deleted } = await supabase
+      .from("products")
+      .select("*")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false });
+    if (deleted) setDeletedProducts(deleted as unknown as Product[]);
+  };
+
+  const autoCleanupBin = async () => {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: expired } = await supabase
+      .from("products")
+      .select("*")
+      .not("deleted_at", "is", null)
+      .lt("deleted_at", sevenDaysAgo);
+    if (expired && expired.length > 0) {
+      for (const p of expired as unknown as Product[]) {
+        await permanentlyDeleteProduct(p);
+      }
+      fetchProducts();
+    }
   };
 
   const fetchCategories = async () => {
@@ -188,6 +218,9 @@ const Admin = () => {
       countertop_discount_percentage: Number(form.countertop_discount_percentage) || 0,
     };
 
+    // Remove deleted_at from payload to avoid sending it during create/update
+    delete (payload as any).deleted_at;
+
     if (editingProduct) {
       const { error } = await supabase.from("products").update(payload as any).eq("id", editingProduct.id);
       if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -215,24 +248,62 @@ const Admin = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this product and all associated files?")) return;
-    const product = products.find((p) => p.id === id);
-    if (product) {
-      if (product.main_image_url) await deleteStorageFile(product.main_image_url, "product-images");
-      if (product.additional_image_urls?.length) {
-        for (const url of product.additional_image_urls) {
-          await deleteStorageFile(url, "product-images");
-        }
-      }
-      if (product.installation_instructions_url) await deleteStorageFile(product.installation_instructions_url, "product-documents");
-    }
-    const { error } = await supabase.from("products").delete().eq("id", id);
+  // Soft delete — moves to recycle bin
+  const handleSoftDelete = async (id: string) => {
+    if (!confirm("Move this product to the recycle bin?")) return;
+    const { error } = await supabase
+      .from("products")
+      .update({ deleted_at: new Date().toISOString() } as any)
+      .eq("id", id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else {
-      toast({ title: "Product and files deleted" });
+      toast({ title: "Product moved to recycle bin" });
       fetchProducts();
     }
+  };
+
+  // Restore from recycle bin
+  const handleRestore = async (id: string) => {
+    const { error } = await supabase
+      .from("products")
+      .update({ deleted_at: null } as any)
+      .eq("id", id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: "Product restored" });
+      fetchProducts();
+    }
+  };
+
+  // Permanently delete a single product and all its storage files
+  const permanentlyDeleteProduct = async (product: Product) => {
+    if (product.main_image_url) await deleteStorageFile(product.main_image_url, "product-images");
+    if (product.additional_image_urls?.length) {
+      for (const url of product.additional_image_urls) {
+        await deleteStorageFile(url, "product-images");
+      }
+    }
+    if (product.installation_instructions_url) await deleteStorageFile(product.installation_instructions_url, "product-documents");
+    await supabase.from("products").delete().eq("id", product.id);
+  };
+
+  const handlePermanentDelete = async (id: string) => {
+    if (!confirm("Permanently delete this product and all its files? This cannot be undone.")) return;
+    const product = deletedProducts.find((p) => p.id === id);
+    if (product) {
+      await permanentlyDeleteProduct(product);
+      toast({ title: "Product permanently deleted" });
+      fetchProducts();
+    }
+  };
+
+  const handleEmptyBin = async () => {
+    if (!confirm(`Permanently delete all ${deletedProducts.length} items in the recycle bin? This cannot be undone.`)) return;
+    for (const p of deletedProducts) {
+      await permanentlyDeleteProduct(p);
+    }
+    toast({ title: "Recycle bin emptied" });
+    fetchProducts();
   };
 
   const clearCountertopFields = (obj: any) => {
@@ -296,6 +367,13 @@ const Admin = () => {
     });
   };
 
+  const getDaysRemaining = (deletedAt: string) => {
+    const deleteDate = new Date(deletedAt).getTime();
+    const expiryDate = deleteDate + 7 * 24 * 60 * 60 * 1000;
+    const remaining = Math.ceil((expiryDate - Date.now()) / (24 * 60 * 60 * 1000));
+    return Math.max(0, remaining);
+  };
+
   if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Loading...</p></div>;
   if (!user) return null;
 
@@ -312,77 +390,141 @@ const Admin = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-foreground">Products ({products.length})</h2>
-          <Button onClick={openCreate}><Plus className="w-4 h-4 mr-1" /> Add Product</Button>
-        </div>
+        <Tabs defaultValue="products">
+          <div className="flex items-center justify-between mb-6">
+            <TabsList>
+              <TabsTrigger value="products">Products ({products.length})</TabsTrigger>
+              <TabsTrigger value="recycle-bin">
+                Recycle Bin ({deletedProducts.length})
+              </TabsTrigger>
+            </TabsList>
+            <Button onClick={openCreate}><Plus className="w-4 h-4 mr-1" /> Add Product</Button>
+          </div>
 
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-                <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-center">Images</TableHead>
-                  <TableHead className="text-right">Retail</TableHead>
-                  <TableHead className="text-right">Discounted</TableHead>
-                  <TableHead className="text-center">Stock</TableHead>
-                  <TableHead className="text-center">Featured</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {products.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.product_name}</TableCell>
-                    <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
-                    <TableCell>{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
-                    <TableCell className="text-center">
-                      {(() => {
-                        const summary = getImageOptSummary(p);
-                        if (summary.label === "no-images") return <span className="text-xs text-muted-foreground">—</span>;
-                        if (summary.label === "all-optimized") return (
-                          <Badge variant="default" className="text-[10px] gap-1">
-                            <Sparkles className="w-3 h-3" /> {summary.optimizedCount}/{summary.totalCount}
+          <TabsContent value="products">
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead className="text-center">Images</TableHead>
+                      <TableHead className="text-right">Retail</TableHead>
+                      <TableHead className="text-right">Discounted</TableHead>
+                      <TableHead className="text-center">Stock</TableHead>
+                      <TableHead className="text-center">Featured</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {products.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-medium">{p.product_name}</TableCell>
+                        <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
+                        <TableCell>{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
+                        <TableCell className="text-center">
+                          {(() => {
+                            const summary = getImageOptSummary(p);
+                            if (summary.label === "no-images") return <span className="text-xs text-muted-foreground">—</span>;
+                            if (summary.label === "all-optimized") return (
+                              <Badge variant="default" className="text-[10px] gap-1">
+                                <Sparkles className="w-3 h-3" /> {summary.optimizedCount}/{summary.totalCount}
+                              </Badge>
+                            );
+                            if (summary.label === "partial") return (
+                              <Badge variant="secondary" className="text-[10px] gap-1">
+                                <AlertTriangle className="w-3 h-3" /> {summary.optimizedCount}/{summary.totalCount}
+                              </Badge>
+                            );
+                            return (
+                              <Badge variant="destructive" className="text-[10px] gap-1">
+                                <ImageOff className="w-3 h-3" /> 0/{summary.totalCount}
+                              </Badge>
+                            );
+                          })()}
+                        </TableCell>
+                        <TableCell className="text-right">CA${Number(p.price_retail_usd).toLocaleString()}</TableCell>
+                        <TableCell className="text-right">CA${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant={p.availability_status === "In Stock" ? "default" : "destructive"}>
+                            {p.stock_level} — {p.availability_status}
                           </Badge>
-                        );
-                        if (summary.label === "partial") return (
-                          <Badge variant="secondary" className="text-[10px] gap-1">
-                            <AlertTriangle className="w-3 h-3" /> {summary.optimizedCount}/{summary.totalCount}
+                        </TableCell>
+                        <TableCell className="text-center">{p.is_featured ? "⭐" : "—"}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleSoftDelete(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {products.length === 0 && (
+                      <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No products yet. Click "Add Product" to get started.</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="recycle-bin">
+            <Card>
+              {deletedProducts.length > 0 && (
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm text-muted-foreground">
+                    Items are permanently deleted after 7 days
+                  </CardTitle>
+                  <Button variant="destructive" size="sm" onClick={handleEmptyBin}>
+                    <Trash className="w-4 h-4 mr-1" /> Empty Recycle Bin
+                  </Button>
+                </CardHeader>
+              )}
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead className="text-center">Days Left</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {deletedProducts.map((p) => (
+                      <TableRow key={p.id} className="opacity-70">
+                        <TableCell className="font-medium">{p.product_name}</TableCell>
+                        <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
+                        <TableCell>{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant={getDaysRemaining(p.deleted_at!) <= 2 ? "destructive" : "secondary"}>
+                            {getDaysRemaining(p.deleted_at!)}d
                           </Badge>
-                        );
-                        return (
-                          <Badge variant="destructive" className="text-[10px] gap-1">
-                            <ImageOff className="w-3 h-3" /> 0/{summary.totalCount}
-                          </Badge>
-                        );
-                      })()}
-                    </TableCell>
-                    <TableCell className="text-right">CA${Number(p.price_retail_usd).toLocaleString()}</TableCell>
-                    <TableCell className="text-right">CA${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={p.availability_status === "In Stock" ? "default" : "destructive"}>
-                        {p.stock_level} — {p.availability_status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">{p.is_featured ? "⭐" : "—"}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="w-4 h-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {products.length === 0 && (
-                  <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No products yet. Click "Add Product" to get started.</TableCell></TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button variant="outline" size="sm" onClick={() => handleRestore(p.id)}>
+                              <RotateCcw className="w-4 h-4 mr-1" /> Restore
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handlePermanentDelete(p.id)}>
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {deletedProducts.length === 0 && (
+                      <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Recycle bin is empty.</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* Product Form Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
