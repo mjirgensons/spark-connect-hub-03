@@ -95,7 +95,7 @@ const Product = () => {
               <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
                 {product.product_name}
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">Code: {product.product_code}</p>
+              <p className="text-sm text-muted-foreground mt-1">SKU: {product.product_code}</p>
             </div>
 
             {/* Pricing */}
