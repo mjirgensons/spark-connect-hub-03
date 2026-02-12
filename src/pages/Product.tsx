@@ -146,6 +146,15 @@ const Product = () => {
                     <p className="text-sm font-medium text-foreground">{product.style}</p>
                   </div>
                 </div>
+                {product.stock_level > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Package className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Units in Stock</p>
+                      <p className="text-sm font-medium text-foreground">{product.stock_level}</p>
+                    </div>
+                  </div>
+                )}
               </div>
               {product.compatible_kitchen_layouts && product.compatible_kitchen_layouts.length > 0 && (
                 <div>
@@ -169,6 +178,9 @@ const Product = () => {
                     {product.countertop_included ? "Included with product" : "Available separately"}
                   </Badge>
                   <div className="grid grid-cols-2 gap-3 text-sm">
+                    {product.countertop_stock != null && product.countertop_stock > 0 && (
+                      <div><p className="text-xs text-muted-foreground">Units in Stock</p><p className="font-medium text-foreground">{product.countertop_stock}</p></div>
+                    )}
                     {product.countertop_material && (
                       <div><p className="text-xs text-muted-foreground">Material</p><p className="font-medium text-foreground">{product.countertop_material}</p></div>
                     )}
@@ -199,6 +211,9 @@ const Product = () => {
                       )}
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-sm">
+                      {product.countertop_stock != null && product.countertop_stock > 0 && (
+                        <div><p className="text-xs text-muted-foreground">Units in Stock</p><p className="font-medium text-foreground">{product.countertop_stock}</p></div>
+                      )}
                       {product.countertop_material && (
                         <div><p className="text-xs text-muted-foreground">Material</p><p className="font-medium text-foreground">{product.countertop_material}</p></div>
                       )}
@@ -213,12 +228,6 @@ const Product = () => {
                 </div>
               )}
 
-              {product.stock_level > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  <Package className="w-3 h-3 inline mr-1" />
-                  {product.stock_level} units in stock
-                </p>
-              )}
             </div>
 
             {/* Long description */}
