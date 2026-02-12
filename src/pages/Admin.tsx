@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, LogOut, Sparkles, AlertTriangle, ImageOff, RotateCcw, Trash, Power, PowerOff } from "lucide-react";
+import { Plus, Pencil, Trash2, LogOut, Sparkles, AlertTriangle, ImageOff, RotateCcw, Trash, Power, PowerOff, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { ImageUpload, MultiImageUpload, getImageOptSummary } from "@/components/admin/ImageUpload";
 import { FileUpload } from "@/components/admin/FileUpload";
 
@@ -115,6 +115,41 @@ const Admin = () => {
   const [newManufacturer, setNewManufacturer] = useState("");
   const [skuMode, setSkuMode] = useState<"auto" | "manual">("auto");
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
+  type SortKey = "product_name" | "product_code" | "category" | "price_retail_usd" | "price_discounted_usd" | "stock_level" | "availability_status" | "is_featured";
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-40" />;
+    return sortDir === "asc" ? <ArrowUp className="w-3 h-3 ml-1" /> : <ArrowDown className="w-3 h-3 ml-1" />;
+  };
+
+  const sortedProducts = [...products].sort((a, b) => {
+    if (!sortKey) return 0;
+    const dir = sortDir === "asc" ? 1 : -1;
+    if (sortKey === "category") {
+      const catA = categories.find(c => c.id === a.category_id)?.name || "";
+      const catB = categories.find(c => c.id === b.category_id)?.name || "";
+      return catA.localeCompare(catB) * dir;
+    }
+    if (sortKey === "is_featured") {
+      return ((a.is_featured ? 1 : 0) - (b.is_featured ? 1 : 0)) * dir;
+    }
+    const valA = a[sortKey];
+    const valB = b[sortKey];
+    if (typeof valA === "number" && typeof valB === "number") return (valA - valB) * dir;
+    return String(valA || "").localeCompare(String(valB || "")) * dir;
+  });
 
   // Check if current user is in admin_emails whitelist
   useEffect(() => {
@@ -490,20 +525,36 @@ const Admin = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>SKU</TableHead>
-                      <TableHead>Category</TableHead>
+                      <TableHead className="cursor-pointer select-none" onClick={() => handleSort("product_name")}>
+                        <span className="inline-flex items-center">Name<SortIcon col="product_name" /></span>
+                      </TableHead>
+                      <TableHead className="cursor-pointer select-none" onClick={() => handleSort("product_code")}>
+                        <span className="inline-flex items-center">SKU<SortIcon col="product_code" /></span>
+                      </TableHead>
+                      <TableHead className="cursor-pointer select-none" onClick={() => handleSort("category")}>
+                        <span className="inline-flex items-center">Category<SortIcon col="category" /></span>
+                      </TableHead>
                       <TableHead className="text-center">Images</TableHead>
-                      <TableHead className="text-right">Retail</TableHead>
-                      <TableHead className="text-right">Discounted</TableHead>
-                      <TableHead className="text-center">Stock</TableHead>
-                      <TableHead className="text-center">Status</TableHead>
-                      <TableHead className="text-center">Featured</TableHead>
+                      <TableHead className="text-right cursor-pointer select-none" onClick={() => handleSort("price_retail_usd")}>
+                        <span className="inline-flex items-center justify-end">Retail<SortIcon col="price_retail_usd" /></span>
+                      </TableHead>
+                      <TableHead className="text-right cursor-pointer select-none" onClick={() => handleSort("price_discounted_usd")}>
+                        <span className="inline-flex items-center justify-end">Discounted<SortIcon col="price_discounted_usd" /></span>
+                      </TableHead>
+                      <TableHead className="text-center cursor-pointer select-none" onClick={() => handleSort("stock_level")}>
+                        <span className="inline-flex items-center">Stock<SortIcon col="stock_level" /></span>
+                      </TableHead>
+                      <TableHead className="text-center cursor-pointer select-none" onClick={() => handleSort("availability_status")}>
+                        <span className="inline-flex items-center">Status<SortIcon col="availability_status" /></span>
+                      </TableHead>
+                      <TableHead className="text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
+                        <span className="inline-flex items-center">Featured<SortIcon col="is_featured" /></span>
+                      </TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {products.map((p) => (
+                    {sortedProducts.map((p) => (
                       <TableRow key={p.id}>
                         <TableCell className="font-medium">{p.product_name}</TableCell>
                         <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
