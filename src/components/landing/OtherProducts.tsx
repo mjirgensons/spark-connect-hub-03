@@ -83,6 +83,11 @@ const OtherProducts = () => {
                               {product.discount_percentage}% OFF
                             </div>
                           )}
+                          {product.countertop_included && (
+                            <div className="absolute bottom-2 left-2 right-2 bg-primary text-primary-foreground text-[9px] sm:text-xs font-bold px-2 py-1 rounded-full shadow-lg text-center">
+                              {product.countertop_material ? `${product.countertop_material} ` : ""}Countertop Included!
+                            </div>
+                          )}
                         </div>
                         <CardContent className="p-3">
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">{product.style}</p>
