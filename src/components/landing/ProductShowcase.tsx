@@ -73,7 +73,7 @@ const ProductShowcase = () => {
                           {product.discount_percentage}% OFF
                         </div>
                       )}
-                      {product.countertop_included && (
+                      {product.countertop_included && product.countertop_option !== "no" && (
                         <div className="absolute bottom-3 left-3 right-3 bg-primary text-primary-foreground text-xs md:text-sm font-bold px-3 py-1.5 rounded-full shadow-lg text-center">
                           {product.countertop_material ? `${product.countertop_material} ` : ""}Countertop Included!
                         </div>
