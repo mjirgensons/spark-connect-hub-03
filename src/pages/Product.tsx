@@ -252,23 +252,26 @@ const Product = () => {
               </>
             )}
 
-            {/* Installation link */}
-            {product.installation_instructions_url && (
-              <a
-                href={product.installation_instructions_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button variant="outline" className="w-full">
-                  Download Installation Instructions
-                </Button>
-              </a>
-            )}
+            <Separator />
 
-            {/* CTA */}
-            <Button size="lg" className="w-full">
-              Request a Quote
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-2">
+              <Button size="lg" className="flex-1">
+                Request a Quote
+              </Button>
+              {product.installation_instructions_url && (
+                <a
+                  href={product.installation_instructions_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1"
+                >
+                  <Button variant="outline" size="sm" className="w-full h-full text-xs">
+                    Download Installation Instructions
+                  </Button>
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </main>
