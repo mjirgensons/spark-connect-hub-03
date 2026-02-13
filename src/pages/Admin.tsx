@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, LogOut, Sparkles, AlertTriangle, ImageOff, RotateCcw, Trash, Power, PowerOff, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { ImageUpload, MultiImageUpload, getImageOptSummary } from "@/components/admin/ImageUpload";
 import { FileUpload } from "@/components/admin/FileUpload";
+import FooterPagesAdmin from "@/components/admin/FooterPagesAdmin";
 
 interface Category {
   id: string;
@@ -515,6 +516,7 @@ const Admin = () => {
               <TabsTrigger value="recycle-bin">
                 Recycle Bin ({deletedProducts.length})
               </TabsTrigger>
+              <TabsTrigger value="footer-pages">Footer Pages</TabsTrigger>
             </TabsList>
             <Button onClick={openCreate}><Plus className="w-4 h-4 mr-1" /> Add Product</Button>
           </div>
@@ -673,6 +675,10 @@ const Admin = () => {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="footer-pages">
+            <FooterPagesAdmin />
           </TabsContent>
         </Tabs>
 
