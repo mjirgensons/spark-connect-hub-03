@@ -26,8 +26,8 @@ const Hero = () => {
 
           {/* Headline */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-primary-foreground mb-6 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
-            Premium European Cabinets at{" "}
-            <span className="text-primary-foreground font-extrabold">50-80% Off</span> Retail
+            Luxury European Cabinets for GTA:{" "}
+            <span className="text-primary-foreground font-extrabold">50-80% Off</span>, Perfect Fit, Fast Install
           </h1>
 
           {/* Subheadline */}
