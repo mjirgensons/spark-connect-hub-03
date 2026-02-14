@@ -528,89 +528,86 @@ const Admin = () => {
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="cursor-pointer select-none" onClick={() => handleSort("product_name")}>
+                    <TableRow className="text-xs">
+                      <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("product_name")}>
                         <span className="inline-flex items-center">Name<SortIcon col="product_name" /></span>
                       </TableHead>
-                      <TableHead className="cursor-pointer select-none" onClick={() => handleSort("product_code")}>
+                      <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("product_code")}>
                         <span className="inline-flex items-center">SKU<SortIcon col="product_code" /></span>
                       </TableHead>
-                      <TableHead className="cursor-pointer select-none" onClick={() => handleSort("category")}>
-                        <span className="inline-flex items-center">Category<SortIcon col="category" /></span>
+                      <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("category")}>
+                        <span className="inline-flex items-center">Cat.<SortIcon col="category" /></span>
                       </TableHead>
-                      <TableHead className="text-center">Images</TableHead>
-                      <TableHead className="text-right cursor-pointer select-none" onClick={() => handleSort("price_retail_usd")}>
+                      <TableHead className="py-2 px-1 text-center">Img</TableHead>
+                      <TableHead className="py-2 px-2 text-right cursor-pointer select-none" onClick={() => handleSort("price_retail_usd")}>
                         <span className="inline-flex items-center justify-end">Retail<SortIcon col="price_retail_usd" /></span>
                       </TableHead>
-                      <TableHead className="text-right cursor-pointer select-none" onClick={() => handleSort("price_discounted_usd")}>
-                        <span className="inline-flex items-center justify-end">Discounted<SortIcon col="price_discounted_usd" /></span>
+                      <TableHead className="py-2 px-2 text-right cursor-pointer select-none" onClick={() => handleSort("price_discounted_usd")}>
+                        <span className="inline-flex items-center justify-end">Sale<SortIcon col="price_discounted_usd" /></span>
                       </TableHead>
-                      <TableHead className="text-center cursor-pointer select-none" onClick={() => handleSort("stock_level")}>
+                      <TableHead className="py-2 px-2 text-center cursor-pointer select-none" onClick={() => handleSort("stock_level")}>
                         <span className="inline-flex items-center">Stock<SortIcon col="stock_level" /></span>
                       </TableHead>
-                      <TableHead className="text-center cursor-pointer select-none" onClick={() => handleSort("availability_status")}>
+                      <TableHead className="py-2 px-2 text-center cursor-pointer select-none" onClick={() => handleSort("availability_status")}>
                         <span className="inline-flex items-center">Status<SortIcon col="availability_status" /></span>
                       </TableHead>
-                      <TableHead className="text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
-                        <span className="inline-flex items-center">Featured<SortIcon col="is_featured" /></span>
+                      <TableHead className="py-2 px-1 text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
+                        <span className="inline-flex items-center">⭐<SortIcon col="is_featured" /></span>
                       </TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="py-2 px-2 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {sortedProducts.map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell className="font-medium">{p.product_name}</TableCell>
-                        <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
-                        <TableCell>{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
-                        <TableCell className="text-center">
+                      <TableRow key={p.id} className="text-xs">
+                        <TableCell className="py-1.5 px-2 font-medium max-w-[140px] truncate">{p.product_name}</TableCell>
+                        <TableCell className="py-1.5 px-2 text-muted-foreground max-w-[100px] truncate">{p.product_code}</TableCell>
+                        <TableCell className="py-1.5 px-2 max-w-[80px] truncate">{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
+                        <TableCell className="py-1.5 px-1 text-center">
                           {(() => {
                             const summary = getImageOptSummary(p);
-                            if (summary.label === "no-images") return <span className="text-xs text-muted-foreground">—</span>;
+                            if (summary.label === "no-images") return <span className="text-muted-foreground">—</span>;
                             if (summary.label === "all-optimized") return (
-                              <Badge variant="default" className="text-[10px] gap-1">
-                                <Sparkles className="w-3 h-3" /> {summary.optimizedCount}/{summary.totalCount}
+                              <Badge variant="default" className="text-[9px] px-1 py-0 gap-0.5">
+                                <Sparkles className="w-2.5 h-2.5" /> {summary.optimizedCount}/{summary.totalCount}
                               </Badge>
                             );
                             if (summary.label === "partial") return (
-                              <Badge variant="secondary" className="text-[10px] gap-1">
-                                <AlertTriangle className="w-3 h-3" /> {summary.optimizedCount}/{summary.totalCount}
+                              <Badge variant="secondary" className="text-[9px] px-1 py-0 gap-0.5">
+                                <AlertTriangle className="w-2.5 h-2.5" /> {summary.optimizedCount}/{summary.totalCount}
                               </Badge>
                             );
                             return (
-                              <Badge variant="destructive" className="text-[10px] gap-1">
-                                <ImageOff className="w-3 h-3" /> 0/{summary.totalCount}
+                              <Badge variant="destructive" className="text-[9px] px-1 py-0 gap-0.5">
+                                <ImageOff className="w-2.5 h-2.5" /> 0/{summary.totalCount}
                               </Badge>
                             );
                           })()}
                         </TableCell>
-                        <TableCell className="text-right">CA${Number(p.price_retail_usd).toLocaleString()}</TableCell>
-                        <TableCell className="text-right">CA${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant={p.availability_status === "In Stock" ? "default" : "destructive"}>
-                            {p.stock_level} — {p.availability_status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell className="py-1.5 px-2 text-right">${Number(p.price_retail_usd).toLocaleString()}</TableCell>
+                        <TableCell className="py-1.5 px-2 text-right">${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
+                        <TableCell className="py-1.5 px-2 text-center">{p.stock_level}</TableCell>
+                        <TableCell className="py-1.5 px-2 text-center">
                           {p.availability_status === "Deactivated" ? (
-                            <Badge variant="destructive" className="text-[10px]"><PowerOff className="w-3 h-3 mr-1" />Deactivated</Badge>
+                            <Badge variant="destructive" className="text-[9px] px-1 py-0"><PowerOff className="w-2.5 h-2.5 mr-0.5" />Off</Badge>
                           ) : (
-                            <Badge variant="default" className="text-[10px]"><Power className="w-3 h-3 mr-1" />Active</Badge>
+                            <Badge variant="default" className="text-[9px] px-1 py-0"><Power className="w-2.5 h-2.5 mr-0.5" />On</Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-center">{p.is_featured ? "⭐" : "—"}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
+                        <TableCell className="py-1.5 px-1 text-center">{p.is_featured ? "⭐" : "—"}</TableCell>
+                        <TableCell className="py-1.5 px-2 text-right">
+                          <div className="flex justify-end gap-0">
                             <Button
                               variant="ghost"
                               size="icon"
+                              className="h-7 w-7"
                               title={p.availability_status === "Deactivated" ? "Activate" : "Deactivate"}
                               onClick={() => handleToggleActivation(p)}
                             >
-                              {p.availability_status === "Deactivated" ? <Power className="w-4 h-4 text-primary" /> : <PowerOff className="w-4 h-4 text-muted-foreground" />}
+                              {p.availability_status === "Deactivated" ? <Power className="w-3.5 h-3.5 text-primary" /> : <PowerOff className="w-3.5 h-3.5 text-muted-foreground" />}
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="w-4 h-4" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleSoftDelete(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(p)}><Pencil className="w-3.5 h-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleSoftDelete(p.id)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
                           </div>
                         </TableCell>
                       </TableRow>
