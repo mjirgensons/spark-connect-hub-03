@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { trackFormView, trackFormSubmit } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -120,6 +121,7 @@ const CTA = () => {
         body: payload,
       });
       if (error) throw error;
+      trackFormSubmit("cabinet-match", { projectType: formData.projectType, layout: formData.layout, budget: formData.budget });
       setSubmitted(true);
     } catch (err: any) {
       console.error("Submit error:", err);
@@ -134,6 +136,10 @@ const CTA = () => {
   };
 
   const showSecondaryWall = formData.layout === "l-shape" || formData.layout === "u-shape";
+
+  useEffect(() => {
+    trackFormView("cabinet-match");
+  }, []);
 
   if (submitted) {
     return (
