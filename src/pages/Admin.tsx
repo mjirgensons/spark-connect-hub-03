@@ -636,32 +636,32 @@ const Admin = () => {
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>SKU</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead className="text-center">Days Left</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                    <TableRow className="text-xs">
+                      <TableHead className="py-2 px-2">Name</TableHead>
+                      <TableHead className="py-2 px-2">SKU</TableHead>
+                      <TableHead className="py-2 px-2">Cat.</TableHead>
+                      <TableHead className="py-2 px-2 text-center">Days Left</TableHead>
+                      <TableHead className="py-2 px-2 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {deletedProducts.map((p) => (
-                      <TableRow key={p.id} className="opacity-70">
-                        <TableCell className="font-medium">{p.product_name}</TableCell>
-                        <TableCell className="text-muted-foreground">{p.product_code}</TableCell>
-                        <TableCell>{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant={getDaysRemaining(p.deleted_at!) <= 2 ? "destructive" : "secondary"}>
+                      <TableRow key={p.id} className="opacity-70 text-xs">
+                        <TableCell className="py-1.5 px-2 font-medium max-w-[140px] truncate">{p.product_name}</TableCell>
+                        <TableCell className="py-1.5 px-2 text-muted-foreground max-w-[100px] truncate">{p.product_code}</TableCell>
+                        <TableCell className="py-1.5 px-2 max-w-[80px] truncate">{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
+                        <TableCell className="py-1.5 px-2 text-center">
+                          <Badge variant={getDaysRemaining(p.deleted_at!) <= 2 ? "destructive" : "secondary"} className="text-[9px] px-1 py-0">
                             {getDaysRemaining(p.deleted_at!)}d
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button variant="outline" size="sm" onClick={() => handleRestore(p.id)}>
-                              <RotateCcw className="w-4 h-4 mr-1" /> Restore
+                        <TableCell className="py-1.5 px-2 text-right">
+                          <div className="flex justify-end gap-0">
+                            <Button variant="outline" size="sm" className="h-7 text-xs px-2" onClick={() => handleRestore(p.id)}>
+                              <RotateCcw className="w-3 h-3 mr-1" /> Restore
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handlePermanentDelete(p.id)}>
-                              <Trash2 className="w-4 h-4 text-destructive" />
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handlePermanentDelete(p.id)}>
+                              <Trash2 className="w-3.5 h-3.5 text-destructive" />
                             </Button>
                           </div>
                         </TableCell>
