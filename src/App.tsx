@@ -15,9 +15,9 @@ import Admin from "./pages/Admin";
 import FooterPage from "./pages/FooterPage";
 import UnderConstruction from "./pages/UnderConstruction";
 
-const isPreview = window.location.hostname.includes("preview") || 
-  window.location.hostname === "localhost" || 
-  window.location.hostname === "127.0.0.1";
+const PRODUCTION_DOMAINS = ["fitmatch.ca", "www.fitmatch.ca", "spark-connect-hub-03.lovable.app"];
+const isProduction = PRODUCTION_DOMAINS.includes(window.location.hostname);
+const isPreview = !isProduction;
 
 const queryClient = new QueryClient();
 
