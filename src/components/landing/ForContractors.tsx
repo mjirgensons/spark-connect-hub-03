@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2, DollarSign, Clock3, FileText } from "lucide-react";
+import { trackCTAClick } from "@/lib/analytics";
 
 const contractorBenefits = [
   {
@@ -57,7 +58,7 @@ const ForContractors = () => {
               ))}
             </div>
 
-            <Button variant="gold" size="xl">
+            <Button variant="gold" size="xl" onClick={() => trackCTAClick("Join Our Trade Network")}>
               Join Our Trade Network
               <ArrowRight className="w-5 h-5" />
             </Button>

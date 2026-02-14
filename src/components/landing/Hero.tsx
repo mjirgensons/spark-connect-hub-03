@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Percent, Clock, Ruler } from "lucide-react";
+import { trackCTAClick } from "@/lib/analytics";
 import heroImage from "@/assets/hero-kitchen.jpg";
 
 const Hero = () => {
@@ -38,11 +39,11 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <Button variant="hero" size="xl" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
+            <Button variant="hero" size="xl" onClick={() => { trackCTAClick("Find Your Perfect Fit"); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}>
               Find Your Perfect Fit
               <ArrowRight className="w-5 h-5" />
             </Button>
-            <Button variant="heroOutline" size="xl">
+            <Button variant="heroOutline" size="xl" onClick={() => { trackCTAClick("I'm a Contractor"); document.getElementById('contractors')?.scrollIntoView({ behavior: 'smooth' }); }}>
               I'm a Contractor
             </Button>
           </div>

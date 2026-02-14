@@ -19,6 +19,7 @@ import { Plus, Pencil, Trash2, LogOut, Sparkles, AlertTriangle, ImageOff, Rotate
 import { ImageUpload, MultiImageUpload, getImageOptSummary } from "@/components/admin/ImageUpload";
 import { FileUpload } from "@/components/admin/FileUpload";
 import FooterPagesAdmin from "@/components/admin/FooterPagesAdmin";
+import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 
 interface Category {
   id: string;
@@ -517,6 +518,7 @@ const Admin = () => {
                 Recycle Bin ({deletedProducts.length})
               </TabsTrigger>
               <TabsTrigger value="footer-pages">Footer Pages</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
             <Button onClick={openCreate}><Plus className="w-4 h-4 mr-1" /> Add Product</Button>
           </div>
@@ -679,6 +681,10 @@ const Admin = () => {
 
           <TabsContent value="footer-pages">
             <FooterPagesAdmin />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AnalyticsDashboard />
           </TabsContent>
         </Tabs>
 

@@ -32,6 +32,129 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_category: string | null
+          event_label: string | null
+          event_type: string
+          event_value: number | null
+          id: string
+          metadata: Json | null
+          page_path: string | null
+          referrer: string | null
+          screen_height: number | null
+          screen_width: number | null
+          session_id: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_category?: string | null
+          event_label?: string | null
+          event_type: string
+          event_value?: number | null
+          id?: string
+          metadata?: Json | null
+          page_path?: string | null
+          referrer?: string | null
+          screen_height?: number | null
+          screen_width?: number | null
+          session_id: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_category?: string | null
+          event_label?: string | null
+          event_type?: string
+          event_value?: number | null
+          id?: string
+          metadata?: Json | null
+          page_path?: string | null
+          referrer?: string | null
+          screen_height?: number | null
+          screen_width?: number | null
+          session_id?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: []
+      }
+      analytics_sessions: {
+        Row: {
+          duration_seconds: number | null
+          event_count: number | null
+          first_page: string | null
+          id: string
+          is_bounce: boolean | null
+          last_activity_at: string
+          last_page: string | null
+          page_count: number | null
+          referrer: string | null
+          screen_height: number | null
+          screen_width: number | null
+          session_id: string
+          started_at: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          duration_seconds?: number | null
+          event_count?: number | null
+          first_page?: string | null
+          id?: string
+          is_bounce?: boolean | null
+          last_activity_at?: string
+          last_page?: string | null
+          page_count?: number | null
+          referrer?: string | null
+          screen_height?: number | null
+          screen_width?: number | null
+          session_id: string
+          started_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          duration_seconds?: number | null
+          event_count?: number | null
+          first_page?: string | null
+          id?: string
+          is_bounce?: boolean | null
+          last_activity_at?: string
+          last_page?: string | null
+          page_count?: number | null
+          referrer?: string | null
+          screen_height?: number | null
+          screen_width?: number | null
+          session_id?: string
+          started_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
