@@ -15,6 +15,10 @@ import Admin from "./pages/Admin";
 import FooterPage from "./pages/FooterPage";
 import UnderConstruction from "./pages/UnderConstruction";
 
+const isPreview = window.location.hostname.includes("preview") || 
+  window.location.hostname === "localhost" || 
+  window.location.hostname === "127.0.0.1";
+
 const queryClient = new QueryClient();
 
 const AnalyticsTracker = () => {
@@ -32,7 +36,7 @@ const App = () => (
         <HideChatOnAdmin />
         <AnalyticsTracker />
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={isPreview ? <Index /> : <UnderConstruction />} />
           <Route path="/product/:id" element={<Product />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<Admin />} />
