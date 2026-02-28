@@ -138,19 +138,23 @@ const AdminIntegrationsTab = () => {
 
   const fetchLastFired = useCallback(async () => {
     const fired: Record<string, string> = {};
+    const statuses: Record<string, string> = {};
     for (const we of WEBHOOK_EVENTS) {
-      // Match both exact event and .test variant
+      // Get the most recent log for this event (regardless of status)
       const { data } = await supabase
         .from("webhook_logs")
-        .select("created_at")
+        .select("created_at, status")
         .or(`event_type.eq.${we.event},event_type.eq.${we.event}.test`)
-        .eq("status", "delivered")
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (data) fired[we.event] = data.created_at;
+      if (data) {
+        fired[we.event] = data.created_at;
+        statuses[we.event] = data.status as string;
+      }
     }
     setLastFired(fired);
+    setLastStatus(statuses);
   }, []);
 
   useEffect(() => {
