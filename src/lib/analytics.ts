@@ -116,6 +116,7 @@ let sessionInitialized = false;
 
 export const initSession = async () => {
   if (sessionInitialized) return;
+  if (!hasAnalyticsConsent()) return;
   sessionInitialized = true;
 
   const common = getCommonData();
