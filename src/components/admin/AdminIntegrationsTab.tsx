@@ -693,20 +693,19 @@ const AdminIntegrationsTab = () => {
       </div>
 
       {/* Configuration Sheet */}
-      <Sheet open={!!configSheet} onOpenChange={open => { if (!open) setConfigSheet(null); }}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="text-foreground">{configSheet?.display_name} Configuration</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6 space-y-6">
+      <Dialog open={!!configSheet} onOpenChange={open => { if (!open) setConfigSheet(null); }}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">{configSheet?.display_name} Configuration</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-6">
             {renderConfigContent()}
-            <Separator />
             <Button onClick={handleSaveConfig} disabled={saving} className="w-full">
-              {saving ? "Saving..." : "Save Configuration"}
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Save Configuration
             </Button>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* Payload Viewer Dialog */}
       <Dialog open={!!payloadDialog} onOpenChange={open => { if (!open) setPayloadDialog(null); }}>
