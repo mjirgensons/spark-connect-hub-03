@@ -452,8 +452,10 @@ const AdminIntegrationsTab = () => {
                   />
                 </TableCell>
                 <TableCell className="py-1.5 px-2 text-center">
-                  {lastFired[we.event] ? (
+                  {lastStatus[we.event] === "delivered" ? (
                     <CheckCircle className="w-3.5 h-3.5 text-green-600 mx-auto" />
+                  ) : lastStatus[we.event] === "failed" ? (
+                    <XCircle className="w-3.5 h-3.5 text-destructive mx-auto" />
                   ) : (
                     <Circle className="w-3.5 h-3.5 text-muted-foreground mx-auto" />
                   )}
@@ -463,7 +465,7 @@ const AdminIntegrationsTab = () => {
                 </TableCell>
                 <TableCell className="py-1.5 px-2 text-center">
                   <Button
-                    variant="outline"
+                    variant={lastStatus[we.event] === "failed" ? "destructive" : lastStatus[we.event] === "delivered" ? "default" : "outline"}
                     size="sm"
                     className="h-6 text-[10px] px-2"
                     disabled={testing === we.event}
