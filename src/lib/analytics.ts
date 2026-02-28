@@ -1,5 +1,17 @@
 import { supabase } from "@/integrations/supabase/client";
 
+// Check if analytics cookies are consented
+const hasAnalyticsConsent = (): boolean => {
+  try {
+    const raw = localStorage.getItem("fm_cookie_consent");
+    if (!raw) return false;
+    const prefs = JSON.parse(raw);
+    return prefs?.analytics === true;
+  } catch {
+    return false;
+  }
+};
+
 // Generate a unique session ID
 const generateSessionId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
