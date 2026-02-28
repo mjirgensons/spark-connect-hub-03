@@ -18,6 +18,7 @@ import {
   Shield,
   HelpCircle,
   MessageSquare,
+  BookOpen,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
