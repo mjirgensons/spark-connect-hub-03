@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { SlidersHorizontal, X } from "lucide-react";
 
 const MM_TO_INCH = 0.0393701;
-const fmt = (mm: number) => `${mm}mm (${(mm * MM_TO_INCH).toFixed(1)}″)`;
+const fmt = (mm: number) => `${mm}mm / ${(mm * MM_TO_INCH).toFixed(1)}″`;
 const fmtPrice = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
 type SortOption = "price-asc" | "price-desc" | "newest" | "discount";
@@ -372,7 +372,7 @@ const ProductCatalog = () => {
                           </div>
 
                           <p className="font-mono text-xs text-muted-foreground">
-                            {product.width_mm}×{product.height_mm}×{product.depth_mm} mm
+                            {product.width_mm}×{product.height_mm}×{product.depth_mm} mm / {(product.width_mm * MM_TO_INCH).toFixed(1)}″×{(product.height_mm * MM_TO_INCH).toFixed(1)}″×{(product.depth_mm * MM_TO_INCH).toFixed(1)}″
                           </p>
 
                           <div className="flex items-baseline gap-2">
