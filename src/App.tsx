@@ -11,6 +11,8 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import "./App.css";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
+import { CompareProvider } from "./contexts/CompareContext";
+import CompareBar from "./components/CompareBar";
 import Index from "./pages/Index";
 import Product from "./pages/Product";
 import Cart from "./pages/Cart";
