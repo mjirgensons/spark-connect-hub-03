@@ -700,7 +700,10 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="cookie-manager">
-            <CookieCategoriesAdmin />
+            <div className="space-y-8">
+              <CookieCategoriesAdmin />
+              <CookieRegistryAdmin />
+            </div>
           </TabsContent>
         </Tabs>
 
