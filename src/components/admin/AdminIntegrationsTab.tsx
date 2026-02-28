@@ -226,30 +226,28 @@ const AdminIntegrationsTab = () => {
   const handleTestWebhook = async (event: string, path: string) => {
     setTesting(event);
     const n8n = integrations.find(i => i.service_name === "n8n");
-    const baseUrl = (n8n?.config as any)?.base_url || n8n?.webhook_url || "";
+    const baseUrl = (n8n?.config as any)?.webhook_base_url || (n8n?.config as any)?.base_url || n8n?.webhook_url || "";
     const fullUrl = baseUrl.replace(/\/+$/, "") + path;
     const samplePayload = { event, test: true, timestamp: new Date().toISOString(), sample_data: { order_id: "test-123" } };
 
     try {
-      const res = await fetch(fullUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(samplePayload),
+      const { data, error } = await supabase.functions.invoke("test-integration", {
+        body: { service_name: "n8n", webhook_test_url: fullUrl, webhook_test_payload: samplePayload },
       });
-      const body = await res.text();
-      const status = res.ok ? "delivered" : "failed";
-      toast({ title: res.ok ? "Webhook delivered" : "Webhook failed", description: `Status: ${res.status}` });
+
+      const ok = data?.status === "healthy";
+      toast({ title: ok ? "Webhook delivered" : "Webhook failed", description: data?.message || error?.message });
 
       await supabase.from("webhook_logs").insert([{
         event_type: `${event}.test`,
         direction: "outbound",
         webhook_url: fullUrl,
         request_payload: samplePayload,
-        response_status: res.status,
-        response_body: body.slice(0, 2000),
-        duration_ms: 0,
-        status,
-        error_message: res.ok ? null : `HTTP ${res.status}`,
+        response_status: ok ? 200 : 0,
+        response_body: data?.message || null,
+        duration_ms: data?.latency_ms || 0,
+        status: ok ? "delivered" : "failed",
+        error_message: ok ? null : (data?.message || error?.message),
       }] as any);
       fetchWebhookLogs();
     } catch (e: any) {
