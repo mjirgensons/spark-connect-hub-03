@@ -120,15 +120,15 @@ const Footer = () => {
                 <h4 className="font-sans font-bold text-sm tracking-wider uppercase mb-4">
                   {col.title}
                 </h4>
-                <ul className="space-y-2.5">
+                <ul className="space-y-1">
                   {col.links.map((link) => (
                     <li key={link.label}>
                       {link.to === "#" ? (
-                        <a href="#" className="text-sm text-gray-400 hover:text-background transition-colors">
+                        <a href="#" className="text-sm text-gray-400 hover:text-background transition-colors inline-block min-h-[44px] py-2">
                           {link.label}
                         </a>
                       ) : (
-                        <Link to={link.to} className="text-sm text-gray-400 hover:text-background transition-colors">
+                        <Link to={link.to} className="text-sm text-gray-400 hover:text-background transition-colors inline-block min-h-[44px] py-2">
                           {link.label}
                         </Link>
                       )}

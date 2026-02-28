@@ -113,7 +113,7 @@ const SearchBar = () => {
     <>
       {/* Icon trigger — same style as shopping cart */}
       <button
-        className="relative p-2 text-muted-foreground hover:text-foreground transition-colors"
+        className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
         onClick={() => setDialogOpen(true)}
         aria-label="Search"
       >
@@ -122,7 +122,7 @@ const SearchBar = () => {
 
       {/* Search dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="border-2 border-foreground shadow-[6px_6px_0px_0px_hsl(var(--foreground))] max-w-lg p-0 gap-0">
+        <DialogContent className="border-2 border-foreground shadow-[4px_4px_0px_0px_hsl(var(--foreground))] sm:shadow-[6px_6px_0px_0px_hsl(var(--foreground))] w-[calc(100vw-2rem)] max-w-lg p-0 gap-0">
           {/* Mode toggle */}
           <div className="flex border-b-2 border-border">
             <button
@@ -195,11 +195,11 @@ const SearchBar = () => {
               )}
             </div>
           ) : (
-            <div className="p-6 space-y-5">
+            <div className="p-4 sm:p-6 space-y-5">
               <p className="text-sm text-muted-foreground">
                 Enter your opening dimensions to find cabinets that fit.
               </p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {[
                   { label: "Width", value: dimW, set: setDimW },
                   { label: "Depth", value: dimD, set: setDimD },
@@ -224,8 +224,8 @@ const SearchBar = () => {
                   </div>
                 ))}
               </div>
-              <div className="flex items-end gap-3">
-                <div className="w-36">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+                <div className="sm:w-36">
                   <label className="text-xs font-bold uppercase tracking-wider mb-1.5 block text-muted-foreground">
                     Tolerance
                   </label>

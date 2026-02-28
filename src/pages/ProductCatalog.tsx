@@ -302,7 +302,7 @@ const ProductCatalog = () => {
                 <span className="font-bold text-foreground">{filtered.length}</span> products found
               </p>
               <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-                <SelectTrigger className="w-48 border-2 border-foreground">
+                <SelectTrigger className="w-full sm:w-48 border-2 border-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

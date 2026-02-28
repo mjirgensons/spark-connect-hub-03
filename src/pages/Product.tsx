@@ -157,7 +157,7 @@ const Product = () => {
             {/* Specs */}
             <div className="space-y-4">
               <h2 className="text-lg font-serif font-semibold text-foreground">Specifications</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">
                   <Ruler className="w-4 h-4 text-muted-foreground" />
                   <div>
@@ -219,7 +219,7 @@ const Product = () => {
                   <Badge variant={product.countertop_included ? "default" : "secondary"}>
                     {product.countertop_included ? "Included with product" : "Available separately"}
                   </Badge>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                     {product.countertop_stock != null && product.countertop_stock > 0 && (
                       <div><p className="text-xs text-muted-foreground">Units in Stock</p><p className="font-medium text-foreground">{product.countertop_stock}</p></div>
                     )}
@@ -252,7 +252,7 @@ const Product = () => {
                         <Badge variant="destructive" className="text-xs">{product.countertop_discount_percentage}% OFF</Badge>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                       {product.countertop_stock != null && product.countertop_stock > 0 && (
                         <div><p className="text-xs text-muted-foreground">Units in Stock</p><p className="font-medium text-foreground">{product.countertop_stock}</p></div>
                       )}
@@ -290,10 +290,10 @@ const Product = () => {
             <Separator />
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-2 flex-wrap">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
                 size="lg"
-                className="flex-1 shadow-[4px_4px_0px_0px_hsl(var(--foreground))]"
+                className="w-full sm:flex-1 min-h-[48px] shadow-[2px_2px_0px_0px_hsl(var(--foreground))] sm:shadow-[4px_4px_0px_0px_hsl(var(--foreground))]"
                 disabled={isDeactivated || qtyInCart >= product.stock_level}
                 onClick={handleAddToCart}
               >
@@ -305,9 +305,9 @@ const Product = () => {
                   href={isDeactivated ? undefined : product.installation_instructions_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`flex-1 ${isDeactivated ? "pointer-events-none" : ""}`}
+                  className={`w-full sm:flex-1 ${isDeactivated ? "pointer-events-none" : ""}`}
                 >
-                  <Button variant="outline" size="sm" className="w-full h-full text-xs shadow-[0_4px_12px_hsla(var(--muted-foreground),0.3)]" disabled={isDeactivated}>
+                  <Button variant="outline" size="sm" className="w-full h-full min-h-[44px] text-xs shadow-[0_4px_12px_hsla(var(--muted-foreground),0.3)]" disabled={isDeactivated}>
                     Download Installation Instructions
                   </Button>
                 </a>

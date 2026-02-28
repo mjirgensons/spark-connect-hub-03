@@ -29,11 +29,12 @@ const CheckoutStepper = ({ currentStep }: CheckoutStepperProps) => {
                 {isCompleted ? <Check className="w-4 h-4" /> : stepNum}
               </div>
               <span
-                className={`text-xs mt-1 font-medium whitespace-nowrap ${
+                className={`text-[10px] sm:text-xs mt-1 font-medium whitespace-nowrap ${
                   isCurrent ? "text-foreground" : "text-muted-foreground"
                 }`}
               >
-                {label}
+                <span className="hidden sm:inline">{label}</span>
+                <span className="sm:hidden">{stepNum}</span>
               </span>
             </div>
             {i < steps.length - 1 && (

@@ -66,11 +66,11 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+          <Link to="/" className="flex items-center gap-2 min-w-0">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
               <span className="text-primary-foreground font-serif font-bold text-xl">F</span>
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden sm:block min-w-0">
               <span className="font-serif text-xl font-semibold text-foreground">Fit-Match</span>
               <span className="block text-xs text-muted-foreground -mt-1">Luxury Cabinet Exchange</span>
             </div>
@@ -82,7 +82,7 @@ const Header = () => {
 
           <div className="flex items-center gap-1">
             <SearchBar />
-            <Link to="/cart" className="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/cart" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
               <ShoppingCart className="w-5 h-5" />
               {itemCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{itemCount}</span>
@@ -104,9 +104,13 @@ const Header = () => {
 
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
-            <nav className="flex flex-col gap-4">
-              {navLinks.map(renderNavItem)}
-              <Link to="/cart" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setIsMenuOpen(false)}>
+            <nav className="flex flex-col gap-1">
+              {navLinks.map((item) => (
+                <div key={item.label} className="min-h-[44px] flex items-center">
+                  {renderNavItem(item)}
+                </div>
+              ))}
+              <Link to="/cart" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground min-h-[44px]" onClick={() => setIsMenuOpen(false)}>
                 <ShoppingCart className="w-4 h-4" />
                 Cart {itemCount > 0 && `(${itemCount})`}
               </Link>

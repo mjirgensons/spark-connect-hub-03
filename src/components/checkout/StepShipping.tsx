@@ -90,9 +90,9 @@ const StepShipping = () => {
                   : "border-border hover:border-foreground/50"
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <div
-                  className={`w-4 h-4 border-2 border-foreground flex items-center justify-center ${
+                  className={`w-5 h-5 shrink-0 border-2 border-foreground flex items-center justify-center ${
                     selected === opt.id ? "bg-foreground" : ""
                   }`}
                 >
