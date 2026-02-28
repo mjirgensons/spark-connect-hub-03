@@ -32,6 +32,7 @@ const linkColumns = [
       { label: "About Us", to: "/page/about-us" },
       { label: "Our Story", to: "/page/our-story" },
       { label: "How It Works", to: "/how-it-works" },
+      { label: "Blog", to: "/blog" },
       { label: "Careers", to: "/page/careers" },
       { label: "Contact", to: "/about" },
     ],

@@ -15,6 +15,7 @@ const navLinks: NavItem[] = [
   { label: "Cabinets", type: "anchor", href: "#cabinets" },
   { label: "More Products", type: "anchor", href: "#other-products" },
   { label: "How It Works", type: "route", to: "/how-it-works" },
+  { label: "Blog", type: "route", to: "/blog" },
   { label: "Benefits", type: "anchor", href: "#benefits" },
   { label: "For Contractors", type: "route", to: "/for-contractors" },
   { label: "For Sellers", type: "route", to: "/for-sellers" },
