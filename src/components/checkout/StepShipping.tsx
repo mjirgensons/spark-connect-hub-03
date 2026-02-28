@@ -83,6 +83,7 @@ const StepShipping = () => {
           {shippingOptions.map((opt) => (
             <label
               key={opt.id}
+              onClick={() => setSelected(opt.id)}
               className={`flex items-center justify-between border-2 p-4 cursor-pointer transition-colors ${
                 selected === opt.id
                   ? "border-foreground bg-muted/50"
