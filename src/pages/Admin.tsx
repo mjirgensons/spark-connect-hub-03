@@ -20,6 +20,8 @@ import { ImageUpload, MultiImageUpload, getImageOptSummary } from "@/components/
 import { FileUpload } from "@/components/admin/FileUpload";
 import FooterPagesAdmin from "@/components/admin/FooterPagesAdmin";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
+import SiteSettingsAdmin from "@/components/admin/SiteSettingsAdmin";
+import LegalPagesAdmin from "@/components/admin/LegalPagesAdmin";
 
 interface Category {
   id: string;
@@ -519,6 +521,8 @@ const Admin = () => {
               </TabsTrigger>
               <TabsTrigger value="footer-pages">Footer Pages</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="site-settings">Site Settings</TabsTrigger>
+              <TabsTrigger value="legal-pages">Legal Pages</TabsTrigger>
             </TabsList>
             <Button onClick={openCreate}><Plus className="w-4 h-4 mr-1" /> Add Product</Button>
           </div>
@@ -682,6 +686,14 @@ const Admin = () => {
 
           <TabsContent value="analytics">
             <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="site-settings">
+            <SiteSettingsAdmin />
+          </TabsContent>
+
+          <TabsContent value="legal-pages">
+            <LegalPagesAdmin />
           </TabsContent>
         </Tabs>
 
