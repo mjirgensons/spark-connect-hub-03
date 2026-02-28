@@ -326,6 +326,10 @@ const Product = () => {
             <TrustBadgeBar />
           </div>
         </div>
+        {/* Reviews */}
+        <div className="mt-16">
+          <ProductReviews productId={product.id} />
+        </div>
       </main>
 
       <Footer />
