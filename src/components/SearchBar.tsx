@@ -122,7 +122,7 @@ const SearchBar = () => {
 
       {/* Search dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="border-2 border-foreground shadow-[6px_6px_0px_0px_hsl(var(--foreground))] max-w-lg p-0 gap-0">
+        <DialogContent className="border-2 border-foreground shadow-[4px_4px_0px_0px_hsl(var(--foreground))] sm:shadow-[6px_6px_0px_0px_hsl(var(--foreground))] w-[calc(100vw-2rem)] max-w-lg p-0 gap-0">
           {/* Mode toggle */}
           <div className="flex border-b-2 border-border">
             <button
