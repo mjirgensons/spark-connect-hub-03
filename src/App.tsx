@@ -8,8 +8,10 @@ import { HideChatOnAdmin } from "./components/HideChatOnAdmin";
 import CookieConsent from "./components/CookieConsent";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import "./App.css";
+import { CartProvider } from "./contexts/CartContext";
 import Index from "./pages/Index";
 import Product from "./pages/Product";
+import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
@@ -70,6 +72,7 @@ const AnalyticsTracker = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <CartProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
@@ -80,6 +83,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={isPreview ? <Index /> : <UnderConstruction />} />
           <Route path="/product/:id" element={<Product />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/page/:slug" element={<FooterPage />} />
@@ -149,6 +153,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Package, Ruler, Palette, Layers, Info } from "lucide-react";
+import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart } from "lucide-react";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import ProductGallery from "@/components/ProductGallery";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,6 +58,25 @@ const Product = () => {
 
   const savings = product.price_retail_usd - product.price_discounted_usd;
   const isDeactivated = product.availability_status === "Deactivated";
+  const { dispatch, getItemQuantity } = useCart();
+  const qtyInCart = getItemQuantity(product.id);
+
+  const handleAddToCart = () => {
+    dispatch({
+      type: "ADD_ITEM",
+      payload: {
+        productId: product.id,
+        name: product.product_name,
+        image: product.main_image_url || "/placeholder.svg",
+        price: product.price_discounted_usd,
+        dimensions: `${product.width_mm} × ${product.height_mm} × ${product.depth_mm} mm`,
+        maxStock: product.stock_level,
+      },
+    });
+    toast.success("Added to cart", {
+      action: { label: "View Cart", onClick: () => window.location.href = "/cart" },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -260,9 +281,15 @@ const Product = () => {
             <Separator />
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-2">
-              <Button size="lg" className="flex-1 shadow-[0_4px_12px_hsla(var(--primary),0.3)]" disabled={isDeactivated}>
-                {isDeactivated ? "Currently Unavailable" : "Request a Quote"}
+            <div className="flex gap-3 pt-2 flex-wrap">
+              <Button
+                size="lg"
+                className="flex-1 shadow-[4px_4px_0px_0px_hsl(var(--foreground))]"
+                disabled={isDeactivated || qtyInCart >= product.stock_level}
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                {isDeactivated ? "Currently Unavailable" : qtyInCart > 0 ? `In Cart (${qtyInCart})` : "Add to Cart"}
               </Button>
               {product.installation_instructions_url && (
                 <a

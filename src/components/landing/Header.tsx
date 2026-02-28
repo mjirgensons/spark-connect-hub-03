@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ShoppingCart } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
 
 type NavItem =
   | { label: string; type: "anchor"; href: string }
@@ -23,6 +24,7 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
+  const { itemCount } = useCart();
 
   const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (!isHome) {
@@ -78,6 +80,12 @@ const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
+            <Link to="/cart" className="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
+              <ShoppingCart className="w-5 h-5" />
+              {itemCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{itemCount}</span>
+              )}
+            </Link>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/login">Sign In</Link>
             </Button>
@@ -95,6 +103,10 @@ const Header = () => {
           <div className="md:hidden py-4 border-t border-border">
             <nav className="flex flex-col gap-4">
               {navLinks.map(renderNavItem)}
+              <Link to="/cart" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setIsMenuOpen(false)}>
+                <ShoppingCart className="w-4 h-4" />
+                Cart {itemCount > 0 && `(${itemCount})`}
+              </Link>
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
