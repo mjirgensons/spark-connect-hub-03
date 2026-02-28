@@ -106,6 +106,7 @@ const App = () => (
 
           {/* Contractor routes */}
           <Route path="/contractor" element={<RoleGuard allowedRoles={['contractor']}><DashboardLayout role="contractor" /></RoleGuard>}>
+            <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<ContractorDashboard />} />
             <Route path="jobs" element={<ContractorJobs />} />
             <Route path="jobs/:jobId" element={<ContractorJobDetail />} />
