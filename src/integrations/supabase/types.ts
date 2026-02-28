@@ -600,8 +600,10 @@ export type Database = {
           countertop_thickness: string | null
           created_at: string
           deleted_at: string | null
+          depth_inches: number | null
           depth_mm: number
           discount_percentage: number
+          height_inches: number | null
           height_mm: number
           id: string
           installation_instructions_url: string | null
@@ -620,6 +622,7 @@ export type Database = {
           style: string
           tag: string | null
           updated_at: string
+          width_inches: number | null
           width_mm: number
         }
         Insert: {
@@ -639,8 +642,10 @@ export type Database = {
           countertop_thickness?: string | null
           created_at?: string
           deleted_at?: string | null
+          depth_inches?: number | null
           depth_mm: number
           discount_percentage?: number
+          height_inches?: number | null
           height_mm: number
           id?: string
           installation_instructions_url?: string | null
@@ -659,6 +664,7 @@ export type Database = {
           style: string
           tag?: string | null
           updated_at?: string
+          width_inches?: number | null
           width_mm: number
         }
         Update: {
@@ -678,8 +684,10 @@ export type Database = {
           countertop_thickness?: string | null
           created_at?: string
           deleted_at?: string | null
+          depth_inches?: number | null
           depth_mm?: number
           discount_percentage?: number
+          height_inches?: number | null
           height_mm?: number
           id?: string
           installation_instructions_url?: string | null
@@ -698,6 +706,7 @@ export type Database = {
           style?: string
           tag?: string | null
           updated_at?: string
+          width_inches?: number | null
           width_mm?: number
         }
         Relationships: [
