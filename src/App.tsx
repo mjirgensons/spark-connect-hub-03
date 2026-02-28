@@ -10,6 +10,7 @@ import CookieConsent from "./components/CookieConsent";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import "./App.css";
 import { CartProvider } from "./contexts/CartContext";
+import { WishlistProvider } from "./contexts/WishlistContext";
 import Index from "./pages/Index";
 import Product from "./pages/Product";
 import Cart from "./pages/Cart";
