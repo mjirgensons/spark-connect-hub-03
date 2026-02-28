@@ -241,6 +241,7 @@ export type Database = {
           price_retail_usd: number
           product_code: string
           product_name: string
+          seller_id: string | null
           short_description: string | null
           stock_level: number
           style: string
@@ -279,6 +280,7 @@ export type Database = {
           price_retail_usd: number
           product_code: string
           product_name: string
+          seller_id?: string | null
           short_description?: string | null
           stock_level?: number
           style: string
@@ -317,6 +319,7 @@ export type Database = {
           price_retail_usd?: number
           product_code?: string
           product_name?: string
+          seller_id?: string | null
           short_description?: string | null
           stock_level?: number
           style?: string
@@ -330,6 +333,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
