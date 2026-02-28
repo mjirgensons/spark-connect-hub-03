@@ -517,6 +517,24 @@ const CTA = () => {
                   </Select>
                 </div>
 
+                {/* CASL Consent */}
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="casl-consent"
+                      checked={caslConsent}
+                      onCheckedChange={(v) => setCaslConsent(v === true)}
+                      className="mt-0.5 border-background/40 data-[state=checked]:bg-[hsl(var(--gold))] data-[state=checked]:border-[hsl(var(--gold))]"
+                    />
+                    <label htmlFor="casl-consent" className="text-sm text-background/70 leading-relaxed cursor-pointer">
+                      I consent to receive emails from FitMatch about my cabinet match request and related offers. I can unsubscribe at any time.
+                    </label>
+                  </div>
+                  <p className="text-xs text-background/40 pl-7">
+                    FitMatch, 137 Chrislea Rd, Woodbridge, ON L4L 8N6 | info@fitmatch.ca
+                  </p>
+                </div>
+
                 {/* Submit */}
                 <div className="pt-4 border-t border-background/10">
                   <Button type="submit" variant="gold" size="xl" className="w-full" disabled={isSubmitting}>
