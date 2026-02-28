@@ -3,6 +3,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Package, Eye, ShoppingCart, FileText, PlusCircle } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const stats = [
   { label: "Products Listed", value: "0", icon: Package },
