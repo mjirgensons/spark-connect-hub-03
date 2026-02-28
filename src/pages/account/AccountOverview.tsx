@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Package, DollarSign, Clock, ShoppingBag, MessageSquare } from "lucide-react";
+import { Package, DollarSign, Clock, ShoppingBag, MessageSquare } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { OrderCardSkeleton } from "@/components/ui/order-card-skeleton";
 import { format } from "date-fns";
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive"> = {
@@ -47,8 +49,27 @@ const AccountOverview = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-5 h-5 animate-spin" />
+      <div className="space-y-8">
+        <Skeleton className="h-8 w-56" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="border-2 border-border shadow-[3px_3px_0px_0px_hsl(var(--foreground))]">
+              <CardContent className="p-4 flex items-center gap-4">
+                <Skeleton className="w-9 h-9 shrink-0" />
+                <div className="space-y-1 flex-1">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-6 w-16" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-32" />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <OrderCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }

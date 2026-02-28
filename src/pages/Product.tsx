@@ -8,6 +8,7 @@ import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart } from "
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import ProductGallery from "@/components/ProductGallery";
+import { ProductDetailSkeleton } from "@/components/ui/product-detail-skeleton";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 
@@ -33,9 +34,7 @@ const Product = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
-          <p className="text-muted-foreground">Loading product...</p>
-        </div>
+        <ProductDetailSkeleton />
         <Footer />
       </div>
     );

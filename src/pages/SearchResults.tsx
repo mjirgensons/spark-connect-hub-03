@@ -8,7 +8,8 @@ import DimensionMatcher from "@/components/DimensionMatcher";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, SearchX } from "lucide-react";
+import { SearchX } from "lucide-react";
+import { ProductCardSkeleton } from "@/components/ui/product-card-skeleton";
 
 const MM_TO_INCH = 0.0393701;
 const fmtPrice = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -98,8 +99,10 @@ const SearchResults = () => {
         <h1 className="font-serif text-2xl md:text-3xl font-bold mb-6">{headingText}</h1>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
           </div>
         ) : results.length === 0 ? (
           <div
