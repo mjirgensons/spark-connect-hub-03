@@ -14,6 +14,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { useCart } from "@/contexts/CartContext";
 import TrustBadgeBar from "@/components/TrustBadgeBar";
 import ProductReviews from "@/components/ProductReviews";
+import WishlistButton from "@/components/WishlistButton";
 import { toast } from "sonner";
 
 const Product = () => {
