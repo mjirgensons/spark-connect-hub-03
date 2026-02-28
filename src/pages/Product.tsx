@@ -8,6 +8,7 @@ import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart } from "
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import ProductGallery from "@/components/ProductGallery";
+import { ProductDetailSkeleton } from "@/components/ui/product-detail-skeleton";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 
