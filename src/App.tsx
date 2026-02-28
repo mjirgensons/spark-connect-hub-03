@@ -26,6 +26,7 @@ import ForSellersPage from "./pages/ForSellersPage";
 import AboutPage from "./pages/AboutPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import SearchResults from "./pages/SearchResults";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import ClientMatches from "./pages/client/ClientMatches";
 import ClientNewMatch from "./pages/client/ClientNewMatch";
