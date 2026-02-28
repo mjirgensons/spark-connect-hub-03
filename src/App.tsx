@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { HideChatOnAdmin } from "./components/HideChatOnAdmin";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -94,6 +94,7 @@ const App = () => (
 
           {/* Client routes */}
           <Route path="/client" element={<RoleGuard allowedRoles={['client']}><DashboardLayout role="client" /></RoleGuard>}>
+            <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<ClientDashboard />} />
             <Route path="matches" element={<ClientMatches />} />
             <Route path="match/new" element={<ClientNewMatch />} />
@@ -105,6 +106,7 @@ const App = () => (
 
           {/* Contractor routes */}
           <Route path="/contractor" element={<RoleGuard allowedRoles={['contractor']}><DashboardLayout role="contractor" /></RoleGuard>}>
+            <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<ContractorDashboard />} />
             <Route path="jobs" element={<ContractorJobs />} />
             <Route path="jobs/:jobId" element={<ContractorJobDetail />} />
@@ -116,6 +118,7 @@ const App = () => (
 
           {/* Seller routes */}
           <Route path="/seller" element={<RoleGuard allowedRoles={['seller']}><DashboardLayout role="seller" /></RoleGuard>}>
+            <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<SellerDashboard />} />
             <Route path="products" element={<SellerProducts />} />
             <Route path="products/new" element={<SellerNewProduct />} />
@@ -131,6 +134,7 @@ const App = () => (
 
           {/* Builder routes */}
           <Route path="/builder" element={<RoleGuard allowedRoles={['builder']}><DashboardLayout role="builder" /></RoleGuard>}>
+            <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<BuilderDashboard />} />
             <Route path="projects" element={<BuilderProjects />} />
             <Route path="projects/new" element={<BuilderNewProject />} />
