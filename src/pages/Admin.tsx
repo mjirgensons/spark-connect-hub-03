@@ -22,6 +22,7 @@ import FooterPagesAdmin from "@/components/admin/FooterPagesAdmin";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import SiteSettingsAdmin from "@/components/admin/SiteSettingsAdmin";
 import LegalPagesAdmin from "@/components/admin/LegalPagesAdmin";
+import CookieCategoriesAdmin from "@/components/admin/CookieCategoriesAdmin";
 
 interface Category {
   id: string;
