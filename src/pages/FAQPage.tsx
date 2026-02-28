@@ -1,5 +1,6 @@
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";

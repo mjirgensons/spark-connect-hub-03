@@ -19,6 +19,7 @@ const fmtPrice = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionD
 const SearchResults = () => {
   const [params] = useSearchParams();
   const q = params.get("q") || "";
+  usePageMeta(q ? `Search: ${q}` : "Search Results", "Search for premium European cabinets by name, style, color, or dimensions on FitMatch.");
   const dimW = params.get("w") ? Number(params.get("w")) : null;
   const dimD = params.get("d") ? Number(params.get("d")) : null;
   const dimH = params.get("h") ? Number(params.get("h")) : null;

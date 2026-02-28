@@ -78,7 +78,9 @@ const deliverables = [
   },
 ];
 
-const HowItWorksPage = () => (
+const HowItWorksPage = () => {
+  usePageMeta("How It Works", "Learn how FitMatch matches surplus European cabinets to your space dimensions, bundles contractors and countertops, and saves you 50-80%.");
+  return (
   <div className="min-h-screen flex flex-col bg-background">
     <Header />
 

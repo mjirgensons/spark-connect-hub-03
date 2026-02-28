@@ -54,7 +54,9 @@ const howSteps = [
   { number: "3", title: "Receive Orders & RFQs", text: "Accept orders for in-stock items or respond to custom quote requests from clients and builders." },
 ];
 
-const ForSellersPage = () => (
+const ForSellersPage = () => {
+  usePageMeta("For Sellers", "List your surplus European cabinets on FitMatch. Reach GTA buyers through automatic dimension matching. Free to list, commission-based.");
+  return (
   <div className="min-h-screen flex flex-col bg-background">
     <Header />
 

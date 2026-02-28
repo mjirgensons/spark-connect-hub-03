@@ -59,7 +59,9 @@ const trades = [
   { icon: Paintbrush, label: "Painter" },
 ];
 
-const ForContractorsPage = () => (
+const ForContractorsPage = () => {
+  usePageMeta("For Contractors", "Join FitMatch as a verified GTA contractor. Get matched to cabinet installation projects with MEP drawings, specs, and qualified leads.");
+  return (
   <div className="min-h-screen flex flex-col bg-background">
     <Header />
 

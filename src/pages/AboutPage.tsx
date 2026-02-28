@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/use-toast";
 import { MapPin, Mail, Send } from "lucide-react";
 
 const AboutPage = () => {
+  usePageMeta("About & Contact", "Contact FitMatch — GTA's marketplace for luxury European cabinetry. Located in Woodbridge, ON. Email, phone, and online form available.");
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sending, setSending] = useState(false);
 
