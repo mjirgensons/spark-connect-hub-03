@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -78,13 +79,14 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ role }: DashboardLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { session, signOut } = useAuth();
+  const { signOut } = useAuth();
+  const { profile } = useProfile();
   const navigate = useNavigate();
   const items = navConfig[role];
 
   const handleLogout = async () => {
     await signOut();
-    navigate("/login");
+    navigate("/");
   };
 
   return (
@@ -148,7 +150,7 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
             <Menu size={20} />
           </button>
           <span className="font-sans text-sm">
-            {session?.user?.email ?? "User"}
+            {profile?.full_name ?? profile?.email ?? "User"}
           </span>
           <Button variant="outline" size="sm" onClick={handleLogout}>
             <LogOut size={14} className="mr-1" />
