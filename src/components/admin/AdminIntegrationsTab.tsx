@@ -16,7 +16,7 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import {
   Mail, CreditCard, Workflow, Bot, Mic, Megaphone, Settings,
-  CheckCircle, XCircle, AlertCircle, Circle, ArrowRight, ArrowLeft,
+  CheckCircle, XCircle, Circle, ArrowRight, ArrowLeft,
   Copy, RefreshCw, Eye, RotateCcw, Loader2, Activity,
 } from "lucide-react";
 import { format } from "date-fns";
