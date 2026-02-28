@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { CheckoutProvider, useCheckout } from "@/contexts/CheckoutContext";
 import Header from "@/components/landing/Header";
@@ -8,17 +8,26 @@ import CheckoutStepper from "@/components/checkout/CheckoutStepper";
 import StepInformation from "@/components/checkout/StepInformation";
 import StepShipping from "@/components/checkout/StepShipping";
 import StepReview from "@/components/checkout/StepReview";
+import { toast } from "sonner";
 
 const CheckoutContent = () => {
   const { items } = useCart();
   const { step } = useCheckout();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     if (items.length === 0) {
       navigate("/cart", { replace: true });
     }
   }, [items.length, navigate]);
+
+  useEffect(() => {
+    if (searchParams.get("cancelled") === "true") {
+      toast.info("Payment was cancelled. Your order has been saved.");
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   if (items.length === 0) return null;
 

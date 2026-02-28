@@ -8,7 +8,7 @@ import { dispatchWebhook } from "@/lib/webhookDispatcher";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Edit2, Loader2 } from "lucide-react";
+import { Edit2, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 const shippingLabels: Record<string, string> = {
@@ -111,12 +111,23 @@ const StepReview = () => {
         },
       });
 
-      // 5. TODO: Stripe checkout session creation (Prompt I4)
-      // For now, show success and redirect
-      toast.success(`Order ${order.order_number} created!`);
+      // 5. Call Stripe checkout session Edge Function
+      const { data: sessionData, error: sessionErr } = await supabase.functions.invoke(
+        "create-checkout-session",
+        { body: { order_id: order.id } }
+      );
+
+      if (sessionErr || !sessionData?.url) {
+        const msg = sessionData?.error || "Could not create payment session.";
+        toast.error(msg);
+        // Order is created but payment failed to initiate — don't clear cart
+        return;
+      }
+
+      // 6. Clear cart and redirect to Stripe
       cartDispatch({ type: "CLEAR_CART" });
       reset();
-      navigate("/");
+      window.location.href = sessionData.url;
     } catch (err: unknown) {
       console.error("Order creation failed:", err);
       toast.error("Something went wrong. Please try again.");
@@ -230,6 +241,14 @@ const StepReview = () => {
           )}
         </Button>
       </div>
+
+      {/* Trust badge */}
+      {placing && (
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Lock className="w-4 h-4" />
+          <span>Secured by Stripe</span>
+        </div>
+      )}
     </div>
   );
 };
