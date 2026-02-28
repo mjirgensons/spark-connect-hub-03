@@ -86,6 +86,7 @@ const App = () => (
           <Route path="/" element={isPreview ? <Index /> : <UnderConstruction />} />
           <Route path="/product/:id" element={<Product />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/page/:slug" element={<FooterPage />} />
