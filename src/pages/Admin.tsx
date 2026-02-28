@@ -11,9 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, LogOut, Sparkles, AlertTriangle, ImageOff, RotateCcw, Trash, Power, PowerOff, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { ImageUpload, MultiImageUpload, getImageOptSummary } from "@/components/admin/ImageUpload";
@@ -26,6 +25,10 @@ import CookieCategoriesAdmin from "@/components/admin/CookieCategoriesAdmin";
 import CookieRegistryAdmin from "@/components/admin/CookieRegistryAdmin";
 import ConsentLogsAdmin from "@/components/admin/ConsentLogsAdmin";
 import BannerSettingsAdmin from "@/components/admin/BannerSettingsAdmin";
+import AdminSidebar, { type AdminSection } from "@/components/admin/AdminSidebar";
+import AdminDashboardTab from "@/components/admin/AdminDashboardTab";
+import AdminOrdersTab from "@/components/admin/AdminOrdersTab";
+import AdminCustomersTab from "@/components/admin/AdminCustomersTab";
 
 interface Category {
   id: string;
@@ -110,6 +113,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
   const [products, setProducts] = useState<Product[]>([]);
   const [deletedProducts, setDeletedProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -159,7 +163,6 @@ const Admin = () => {
     return String(valA || "").localeCompare(String(valB || "")) * dir;
   });
 
-  // Check if current user is in admin_emails whitelist
   useEffect(() => {
     const checkAdmin = async () => {
       if (!user) { setIsAdmin(false); return; }
@@ -174,7 +177,6 @@ const Admin = () => {
   }, [user]);
 
   const generateSKU = (f: Omit<Product, "id">) => {
-    // Clean: uppercase, remove ambiguous chars (O→0 already excluded, I→1 excluded)
     const clean = (s: string | null | undefined, len: number) => {
       const raw = (s || "")
         .replace(/[^a-zA-Z0-9]/g, "")
@@ -183,19 +185,12 @@ const Admin = () => {
         .slice(0, len);
       return raw;
     };
-
     const cat = categories.find((c) => c.id === f.category_id);
-    // Top-level: 2-char category code
     const catCode = clean(cat?.slug || cat?.name, 2) || "GN";
-    // Middle: 2-char style + 2-char color
     const styleCode = clean(f.style, 2) || "ST";
     const colorCode = clean(f.color, 2) || "CL";
-    // Compact dimension: width in cm (drop mm precision)
     const wCm = f.width_mm ? String(Math.round(Number(f.width_mm) / 10)) : "0";
-    // Sequential suffix: use last 2 digits of timestamp for uniqueness
     const seq = String(Date.now()).slice(-2);
-
-    // Result: e.g. KC-SH-WH-90-07  (10 chars without hyphens, ~14 with)
     return `${catCode}-${styleCode}-${colorCode}-${wCm}-${seq}`;
   };
 
@@ -219,7 +214,6 @@ const Admin = () => {
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
     if (active) setProducts(active as unknown as Product[]);
-
     const { data: deleted } = await supabase
       .from("products")
       .select("*")
@@ -277,7 +271,6 @@ const Admin = () => {
       return;
     }
     setSaving(true);
-
     const payload = {
       ...form,
       width_mm: Number(form.width_mm) || 0,
@@ -304,10 +297,7 @@ const Admin = () => {
       countertop_price_discounted: Number(form.countertop_price_discounted) || 0,
       countertop_discount_percentage: Number(form.countertop_discount_percentage) || 0,
     };
-
-    // Remove deleted_at from payload to avoid sending it during create/update
     delete (payload as any).deleted_at;
-
     if (editingProduct) {
       const { error } = await supabase.from("products").update(payload as any).eq("id", editingProduct.id);
       if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -317,7 +307,6 @@ const Admin = () => {
       if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
       else toast({ title: "Product created" });
     }
-
     setSaving(false);
     setDialogOpen(false);
     fetchProducts();
@@ -335,7 +324,6 @@ const Admin = () => {
     }
   };
 
-  // Soft delete — moves to recycle bin
   const handleSoftDelete = async (id: string) => {
     if (!confirm("Move this product to the recycle bin?")) return;
     const { error } = await supabase
@@ -349,7 +337,6 @@ const Admin = () => {
     }
   };
 
-  // Restore from recycle bin
   const handleRestore = async (id: string) => {
     const { error } = await supabase
       .from("products")
@@ -362,7 +349,6 @@ const Admin = () => {
     }
   };
 
-  // Permanently delete a single product and all its storage files
   const permanentlyDeleteProduct = async (product: Product) => {
     if (product.main_image_url) await deleteStorageFile(product.main_image_url, "product-images");
     if (product.additional_image_urls?.length) {
@@ -420,21 +406,12 @@ const Admin = () => {
     obj.countertop_discount_percentage = "" as unknown as number;
   };
 
-  const deleteCountertopStorageFiles = async (product: Product) => {
-    // Delete additional images associated with countertop if needed
-    // (additional images are shared, so we don't delete them here)
-  };
-
   const updateField = (field: string, value: any) => {
     setForm((prev) => {
       const next = { ...prev, [field]: value };
-
-      // When countertop is set to "no", clear all countertop data
       if (field === "countertop_option" && value === "no") {
         clearCountertopFields(next);
       }
-
-      // Auto-switch SKU mode based on manufacturer
       if (field === "manufacturer") {
         const newMode = value === "LA" ? "auto" : "manual";
         setSkuMode(newMode);
@@ -442,17 +419,12 @@ const Admin = () => {
           next.product_code = generateSKU(next);
         }
       }
-
-      // Auto-regenerate SKU when relevant fields change and mode is auto
       if (skuMode === "auto" && ["category_id", "style", "color", "width_mm"].includes(field)) {
         next.product_code = generateSKU(next);
       }
-
-      // Main product pricing auto-calc
       const retail = Number(field === "price_retail_usd" ? value : prev.price_retail_usd) || 0;
       const discounted = Number(field === "price_discounted_usd" ? value : prev.price_discounted_usd) || 0;
       const discount = Number(field === "discount_percentage" ? value : prev.discount_percentage) || 0;
-
       if (field === "price_retail_usd") {
         if (discount) next.price_discounted_usd = Math.round(retail * (1 - discount / 100) * 100) / 100;
         else if (discounted && retail > 0) next.discount_percentage = Math.round((1 - discounted / retail) * 10000) / 100;
@@ -463,12 +435,9 @@ const Admin = () => {
         if (discount && Number(value) > 0 && discount < 100) next.price_retail_usd = Math.round(Number(value) / (1 - discount / 100) * 100) / 100;
         else if (retail > 0) next.discount_percentage = Math.round((1 - Number(value) / retail) * 10000) / 100;
       }
-
-      // Countertop pricing auto-calc (mirrors main product logic exactly)
       const ctRetail = Number(field === "countertop_price_retail" ? value : prev.countertop_price_retail) || 0;
       const ctDiscounted = Number(field === "countertop_price_discounted" ? value : prev.countertop_price_discounted) || 0;
       const ctDiscount = Number(field === "countertop_discount_percentage" ? value : prev.countertop_discount_percentage) || 0;
-
       if (field === "countertop_price_retail") {
         if (ctDiscount) next.countertop_price_discounted = Math.round(ctRetail * (1 - ctDiscount / 100) * 100) / 100;
         else if (ctDiscounted && ctRetail > 0) next.countertop_discount_percentage = Math.round((1 - ctDiscounted / ctRetail) * 10000) / 100;
@@ -479,7 +448,6 @@ const Admin = () => {
         if (ctDiscount && Number(value) > 0 && ctDiscount < 100) next.countertop_price_retail = Math.round(Number(value) / (1 - ctDiscount / 100) * 100) / 100;
         else if (ctRetail > 0) next.countertop_discount_percentage = Math.round((1 - Number(value) / ctRetail) * 10000) / 100;
       }
-
       return next;
     });
   };
@@ -503,465 +471,507 @@ const Admin = () => {
     </div>
   );
 
+  // Products section content (active + recycle bin)
+  const renderProducts = () => (
+    <>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex gap-2">
+          <Button
+            variant={activeSection === "products" ? "default" : "outline"}
+            size="sm"
+            className="border-2"
+          >
+            Active ({products.length})
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-2"
+            onClick={() => setActiveSection("products" as any)}
+          >
+            Recycle Bin ({deletedProducts.length})
+          </Button>
+        </div>
+        <Button onClick={openCreate}><Plus className="w-4 h-4 mr-1" /> Add Product</Button>
+      </div>
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="text-xs">
+                <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("product_name")}>
+                  <span className="inline-flex items-center">Name<SortIcon col="product_name" /></span>
+                </TableHead>
+                <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("product_code")}>
+                  <span className="inline-flex items-center">SKU<SortIcon col="product_code" /></span>
+                </TableHead>
+                <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("category")}>
+                  <span className="inline-flex items-center">Cat.<SortIcon col="category" /></span>
+                </TableHead>
+                <TableHead className="py-2 px-1 text-center">Img</TableHead>
+                <TableHead className="py-2 px-2 text-right cursor-pointer select-none" onClick={() => handleSort("price_retail_usd")}>
+                  <span className="inline-flex items-center justify-end">Retail<SortIcon col="price_retail_usd" /></span>
+                </TableHead>
+                <TableHead className="py-2 px-2 text-right cursor-pointer select-none" onClick={() => handleSort("price_discounted_usd")}>
+                  <span className="inline-flex items-center justify-end">Sale<SortIcon col="price_discounted_usd" /></span>
+                </TableHead>
+                <TableHead className="py-2 px-2 text-center cursor-pointer select-none" onClick={() => handleSort("stock_level")}>
+                  <span className="inline-flex items-center">Stock<SortIcon col="stock_level" /></span>
+                </TableHead>
+                <TableHead className="py-2 px-2 text-center cursor-pointer select-none" onClick={() => handleSort("availability_status")}>
+                  <span className="inline-flex items-center">Status<SortIcon col="availability_status" /></span>
+                </TableHead>
+                <TableHead className="py-2 px-1 text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
+                  <span className="inline-flex items-center">⭐<SortIcon col="is_featured" /></span>
+                </TableHead>
+                <TableHead className="py-2 px-2 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedProducts.map((p) => (
+                <TableRow key={p.id} className="text-xs">
+                  <TableCell className="py-1.5 px-2 font-medium max-w-[140px] truncate">{p.product_name}</TableCell>
+                  <TableCell className="py-1.5 px-2 text-muted-foreground max-w-[100px] truncate">{p.product_code}</TableCell>
+                  <TableCell className="py-1.5 px-2 max-w-[80px] truncate">{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
+                  <TableCell className="py-1.5 px-1 text-center">
+                    {(() => {
+                      const summary = getImageOptSummary(p);
+                      if (summary.label === "no-images") return <span className="text-muted-foreground">—</span>;
+                      if (summary.label === "all-optimized") return (
+                        <Badge variant="default" className="text-[9px] px-1 py-0 gap-0.5">
+                          <Sparkles className="w-2.5 h-2.5" /> {summary.optimizedCount}/{summary.totalCount}
+                        </Badge>
+                      );
+                      if (summary.label === "partial") return (
+                        <Badge variant="secondary" className="text-[9px] px-1 py-0 gap-0.5">
+                          <AlertTriangle className="w-2.5 h-2.5" /> {summary.optimizedCount}/{summary.totalCount}
+                        </Badge>
+                      );
+                      return (
+                        <Badge variant="destructive" className="text-[9px] px-1 py-0 gap-0.5">
+                          <ImageOff className="w-2.5 h-2.5" /> 0/{summary.totalCount}
+                        </Badge>
+                      );
+                    })()}
+                  </TableCell>
+                  <TableCell className="py-1.5 px-2 text-right">${Number(p.price_retail_usd).toLocaleString()}</TableCell>
+                  <TableCell className="py-1.5 px-2 text-right">${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
+                  <TableCell className="py-1.5 px-2 text-center">{p.stock_level}</TableCell>
+                  <TableCell className="py-1.5 px-2 text-center">
+                    {p.availability_status === "Deactivated" ? (
+                      <Badge variant="destructive" className="text-[9px] px-1 py-0"><PowerOff className="w-2.5 h-2.5 mr-0.5" />Off</Badge>
+                    ) : (
+                      <Badge variant="default" className="text-[9px] px-1 py-0"><Power className="w-2.5 h-2.5 mr-0.5" />On</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="py-1.5 px-1 text-center">{p.is_featured ? "⭐" : "—"}</TableCell>
+                  <TableCell className="py-1.5 px-2 text-right">
+                    <div className="flex justify-end gap-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        title={p.availability_status === "Deactivated" ? "Activate" : "Deactivate"}
+                        onClick={() => handleToggleActivation(p)}
+                      >
+                        {p.availability_status === "Deactivated" ? <Power className="w-3.5 h-3.5 text-primary" /> : <PowerOff className="w-3.5 h-3.5 text-muted-foreground" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(p)}><Pencil className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleSoftDelete(p.id)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {products.length === 0 && (
+                <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">No products yet. Click "Add Product" to get started.</TableCell></TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Recycle Bin */}
+      {deletedProducts.length > 0 && (
+        <Card className="mt-6">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm text-muted-foreground">
+              Recycle Bin — Items permanently deleted after 7 days
+            </CardTitle>
+            <Button variant="destructive" size="sm" onClick={handleEmptyBin}>
+              <Trash className="w-4 h-4 mr-1" /> Empty Bin
+            </Button>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="text-xs">
+                  <TableHead className="py-2 px-2">Name</TableHead>
+                  <TableHead className="py-2 px-2">SKU</TableHead>
+                  <TableHead className="py-2 px-2">Cat.</TableHead>
+                  <TableHead className="py-2 px-2 text-center">Days Left</TableHead>
+                  <TableHead className="py-2 px-2 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {deletedProducts.map((p) => (
+                  <TableRow key={p.id} className="opacity-70 text-xs">
+                    <TableCell className="py-1.5 px-2 font-medium max-w-[140px] truncate">{p.product_name}</TableCell>
+                    <TableCell className="py-1.5 px-2 text-muted-foreground max-w-[100px] truncate">{p.product_code}</TableCell>
+                    <TableCell className="py-1.5 px-2 max-w-[80px] truncate">{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
+                    <TableCell className="py-1.5 px-2 text-center">
+                      <Badge variant={getDaysRemaining(p.deleted_at!) <= 2 ? "destructive" : "secondary"} className="text-[9px] px-1 py-0">
+                        {getDaysRemaining(p.deleted_at!)}d
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-1.5 px-2 text-right">
+                      <div className="flex justify-end gap-0">
+                        <Button variant="outline" size="sm" className="h-7 text-xs px-2" onClick={() => handleRestore(p.id)}>
+                          <RotateCcw className="w-3 h-3 mr-1" /> Restore
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handlePermanentDelete(p.id)}>
+                          <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+    </>
+  );
+
+  const renderSection = () => {
+    switch (activeSection) {
+      case "dashboard":
+        return <AdminDashboardTab onNavigateToOrders={() => setActiveSection("orders")} />;
+      case "orders":
+        return <AdminOrdersTab />;
+      case "quotes":
+        return (
+          <Card className="border-2 border-border">
+            <CardContent className="p-8 text-center text-muted-foreground">
+              <p className="text-sm">Quotes management — coming soon.</p>
+            </CardContent>
+          </Card>
+        );
+      case "products":
+        return renderProducts();
+      case "customers":
+        return <AdminCustomersTab />;
+      case "integrations":
+        return (
+          <Card className="border-2 border-border">
+            <CardContent className="p-8 text-center text-muted-foreground">
+              <p className="text-sm">Integrations management — coming soon.</p>
+            </CardContent>
+          </Card>
+        );
+      case "content":
+        return (
+          <div className="space-y-8">
+            <FooterPagesAdmin />
+            <LegalPagesAdmin />
+            <AnalyticsDashboard />
+          </div>
+        );
+      case "cookie-manager":
+        return (
+          <div className="space-y-8">
+            <BannerSettingsAdmin />
+            <CookieCategoriesAdmin />
+            <CookieRegistryAdmin />
+            <ConsentLogsAdmin />
+          </div>
+        );
+      case "settings":
+        return <SiteSettingsAdmin />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-serif font-bold text-foreground">Product Catalog Admin</h1>
+      <header className="border-b-2 border-border bg-card">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-serif font-bold text-foreground">FitMatch Admin</h1>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">{user.email}</span>
-            <Button variant="outline" size="sm" onClick={signOut}><LogOut className="w-4 h-4 mr-1" /> Sign Out</Button>
+            <span className="text-xs text-muted-foreground hidden sm:inline">{user.email}</span>
+            <Button variant="outline" size="sm" className="border-2" onClick={signOut}>
+              <LogOut className="w-4 h-4 mr-1" /> Sign Out
+            </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="products">
-          <div className="flex items-center justify-between mb-6">
-            <TabsList>
-              <TabsTrigger value="products">Products ({products.length})</TabsTrigger>
-              <TabsTrigger value="recycle-bin">
-                Recycle Bin ({deletedProducts.length})
-              </TabsTrigger>
-              <TabsTrigger value="footer-pages">Footer Pages</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="site-settings">Site Settings</TabsTrigger>
-              <TabsTrigger value="legal-pages">Legal Pages</TabsTrigger>
-              <TabsTrigger value="cookie-manager">Cookie Manager</TabsTrigger>
-            </TabsList>
-            <Button onClick={openCreate}><Plus className="w-4 h-4 mr-1" /> Add Product</Button>
-          </div>
+      <div className="flex">
+        <AdminSidebar
+          active={activeSection}
+          onNavigate={setActiveSection}
+          productCount={products.length}
+        />
 
-          <TabsContent value="products">
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="text-xs">
-                      <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("product_name")}>
-                        <span className="inline-flex items-center">Name<SortIcon col="product_name" /></span>
-                      </TableHead>
-                      <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("product_code")}>
-                        <span className="inline-flex items-center">SKU<SortIcon col="product_code" /></span>
-                      </TableHead>
-                      <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("category")}>
-                        <span className="inline-flex items-center">Cat.<SortIcon col="category" /></span>
-                      </TableHead>
-                      <TableHead className="py-2 px-1 text-center">Img</TableHead>
-                      <TableHead className="py-2 px-2 text-right cursor-pointer select-none" onClick={() => handleSort("price_retail_usd")}>
-                        <span className="inline-flex items-center justify-end">Retail<SortIcon col="price_retail_usd" /></span>
-                      </TableHead>
-                      <TableHead className="py-2 px-2 text-right cursor-pointer select-none" onClick={() => handleSort("price_discounted_usd")}>
-                        <span className="inline-flex items-center justify-end">Sale<SortIcon col="price_discounted_usd" /></span>
-                      </TableHead>
-                      <TableHead className="py-2 px-2 text-center cursor-pointer select-none" onClick={() => handleSort("stock_level")}>
-                        <span className="inline-flex items-center">Stock<SortIcon col="stock_level" /></span>
-                      </TableHead>
-                      <TableHead className="py-2 px-2 text-center cursor-pointer select-none" onClick={() => handleSort("availability_status")}>
-                        <span className="inline-flex items-center">Status<SortIcon col="availability_status" /></span>
-                      </TableHead>
-                      <TableHead className="py-2 px-1 text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
-                        <span className="inline-flex items-center">⭐<SortIcon col="is_featured" /></span>
-                      </TableHead>
-                      <TableHead className="py-2 px-2 text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortedProducts.map((p) => (
-                      <TableRow key={p.id} className="text-xs">
-                        <TableCell className="py-1.5 px-2 font-medium max-w-[140px] truncate">{p.product_name}</TableCell>
-                        <TableCell className="py-1.5 px-2 text-muted-foreground max-w-[100px] truncate">{p.product_code}</TableCell>
-                        <TableCell className="py-1.5 px-2 max-w-[80px] truncate">{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
-                        <TableCell className="py-1.5 px-1 text-center">
-                          {(() => {
-                            const summary = getImageOptSummary(p);
-                            if (summary.label === "no-images") return <span className="text-muted-foreground">—</span>;
-                            if (summary.label === "all-optimized") return (
-                              <Badge variant="default" className="text-[9px] px-1 py-0 gap-0.5">
-                                <Sparkles className="w-2.5 h-2.5" /> {summary.optimizedCount}/{summary.totalCount}
-                              </Badge>
-                            );
-                            if (summary.label === "partial") return (
-                              <Badge variant="secondary" className="text-[9px] px-1 py-0 gap-0.5">
-                                <AlertTriangle className="w-2.5 h-2.5" /> {summary.optimizedCount}/{summary.totalCount}
-                              </Badge>
-                            );
-                            return (
-                              <Badge variant="destructive" className="text-[9px] px-1 py-0 gap-0.5">
-                                <ImageOff className="w-2.5 h-2.5" /> 0/{summary.totalCount}
-                              </Badge>
-                            );
-                          })()}
-                        </TableCell>
-                        <TableCell className="py-1.5 px-2 text-right">${Number(p.price_retail_usd).toLocaleString()}</TableCell>
-                        <TableCell className="py-1.5 px-2 text-right">${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
-                        <TableCell className="py-1.5 px-2 text-center">{p.stock_level}</TableCell>
-                        <TableCell className="py-1.5 px-2 text-center">
-                          {p.availability_status === "Deactivated" ? (
-                            <Badge variant="destructive" className="text-[9px] px-1 py-0"><PowerOff className="w-2.5 h-2.5 mr-0.5" />Off</Badge>
-                          ) : (
-                            <Badge variant="default" className="text-[9px] px-1 py-0"><Power className="w-2.5 h-2.5 mr-0.5" />On</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="py-1.5 px-1 text-center">{p.is_featured ? "⭐" : "—"}</TableCell>
-                        <TableCell className="py-1.5 px-2 text-right">
-                          <div className="flex justify-end gap-0">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              title={p.availability_status === "Deactivated" ? "Activate" : "Deactivate"}
-                              onClick={() => handleToggleActivation(p)}
-                            >
-                              {p.availability_status === "Deactivated" ? <Power className="w-3.5 h-3.5 text-primary" /> : <PowerOff className="w-3.5 h-3.5 text-muted-foreground" />}
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(p)}><Pencil className="w-3.5 h-3.5" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleSoftDelete(p.id)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {products.length === 0 && (
-                      <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">No products yet. Click "Add Product" to get started.</TableCell></TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+        <main className="flex-1 p-6 min-w-0 overflow-x-auto">
+          <h2 className="text-xl font-serif font-bold text-foreground mb-4 capitalize">
+            {activeSection === "cookie-manager" ? "Cookie Manager" : activeSection}
+          </h2>
+          {renderSection()}
+        </main>
+      </div>
 
-          <TabsContent value="recycle-bin">
-            <Card>
-              {deletedProducts.length > 0 && (
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm text-muted-foreground">
-                    Items are permanently deleted after 7 days
-                  </CardTitle>
-                  <Button variant="destructive" size="sm" onClick={handleEmptyBin}>
-                    <Trash className="w-4 h-4 mr-1" /> Empty Recycle Bin
-                  </Button>
-                </CardHeader>
-              )}
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="text-xs">
-                      <TableHead className="py-2 px-2">Name</TableHead>
-                      <TableHead className="py-2 px-2">SKU</TableHead>
-                      <TableHead className="py-2 px-2">Cat.</TableHead>
-                      <TableHead className="py-2 px-2 text-center">Days Left</TableHead>
-                      <TableHead className="py-2 px-2 text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {deletedProducts.map((p) => (
-                      <TableRow key={p.id} className="opacity-70 text-xs">
-                        <TableCell className="py-1.5 px-2 font-medium max-w-[140px] truncate">{p.product_name}</TableCell>
-                        <TableCell className="py-1.5 px-2 text-muted-foreground max-w-[100px] truncate">{p.product_code}</TableCell>
-                        <TableCell className="py-1.5 px-2 max-w-[80px] truncate">{categories.find(c => c.id === p.category_id)?.name || "—"}</TableCell>
-                        <TableCell className="py-1.5 px-2 text-center">
-                          <Badge variant={getDaysRemaining(p.deleted_at!) <= 2 ? "destructive" : "secondary"} className="text-[9px] px-1 py-0">
-                            {getDaysRemaining(p.deleted_at!)}d
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="py-1.5 px-2 text-right">
-                          <div className="flex justify-end gap-0">
-                            <Button variant="outline" size="sm" className="h-7 text-xs px-2" onClick={() => handleRestore(p.id)}>
-                              <RotateCcw className="w-3 h-3 mr-1" /> Restore
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handlePermanentDelete(p.id)}>
-                              <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {deletedProducts.length === 0 && (
-                      <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Recycle bin is empty.</TableCell></TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="footer-pages">
-            <FooterPagesAdmin />
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <AnalyticsDashboard />
-          </TabsContent>
-
-          <TabsContent value="site-settings">
-            <SiteSettingsAdmin />
-          </TabsContent>
-
-          <TabsContent value="legal-pages">
-            <LegalPagesAdmin />
-          </TabsContent>
-
-          <TabsContent value="cookie-manager">
-            <div className="space-y-8">
-              <BannerSettingsAdmin />
-              <CookieCategoriesAdmin />
-              <CookieRegistryAdmin />
-              <ConsentLogsAdmin />
+      {/* Product Form Dialog — preserved exactly */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingProduct ? "Edit Product" : "Add Product"}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div><Label>Product Name *</Label><Input value={form.product_name} onChange={(e) => updateField("product_name", e.target.value)} /></div>
             </div>
-          </TabsContent>
-        </Tabs>
-
-        {/* Product Form Dialog */}
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingProduct ? "Edit Product" : "Add Product"}</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-1 gap-4">
-                <div><Label>Product Name *</Label><Input value={form.product_name} onChange={(e) => updateField("product_name", e.target.value)} /></div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label>Style *</Label>
-                  <Select value={form.style} onValueChange={(v) => updateField("style", v)}>
-                    <SelectTrigger><SelectValue placeholder="Select style" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Modern">Modern</SelectItem>
-                      <SelectItem value="Shaker">Shaker</SelectItem>
-                      <SelectItem value="Flat Panel">Flat Panel</SelectItem>
-                      <SelectItem value="Slab">Slab</SelectItem>
-                      <SelectItem value="Transitional">Transitional</SelectItem>
-                      <SelectItem value="Contemporary">Contemporary</SelectItem>
-                      <SelectItem value="Minimalist">Minimalist</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div><Label>Color *</Label><Input value={form.color} onChange={(e) => updateField("color", e.target.value)} /></div>
-                <div><Label>Material *</Label><Input value={form.material} onChange={(e) => updateField("material", e.target.value)} placeholder="e.g. Maple, MDF" /></div>
-              </div>
+            <div className="grid grid-cols-3 gap-4">
               <div>
-                <Label>Category *</Label>
-                <Select value={form.category_id || ""} onValueChange={(v) => updateField("category_id", v || null)}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                <Label>Style *</Label>
+                <Select value={form.style} onValueChange={(v) => updateField("style", v)}>
+                  <SelectTrigger><SelectValue placeholder="Select style" /></SelectTrigger>
                   <SelectContent>
-                    {categories.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="flex gap-2 mt-2">
-                  <Input
-                    placeholder="New category name..."
-                    value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={!newCategoryName.trim() || creatingCategory}
-                    onClick={async () => {
-                      setCreatingCategory(true);
-                      const slug = newCategoryName.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-                      const { data, error } = await supabase.from("categories").insert({ name: newCategoryName.trim(), slug }).select().single();
-                      if (error) {
-                        toast({ title: "Error", description: error.message, variant: "destructive" });
-                      } else if (data) {
-                        await fetchCategories();
-                        updateField("category_id", data.id);
-                        setNewCategoryName("");
-                        toast({ title: "Category created" });
-                      }
-                      setCreatingCategory(false);
-                    }}
-                  >
-                    <Plus className="w-3 h-3 mr-1" /> Add
-                  </Button>
-                </div>
-              </div>
-              <div>
-                <Label>Product Tag</Label>
-                <Select value={form.tag || ""} onValueChange={(v) => updateField("tag", v || null)}>
-                  <SelectTrigger><SelectValue placeholder="Select tag (optional)" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="New">New</SelectItem>
-                    <SelectItem value="Popular">Popular</SelectItem>
-                    <SelectItem value="Premium">Premium</SelectItem>
-                    <SelectItem value="Best Seller">Best Seller</SelectItem>
-                    <SelectItem value="Limited">Limited</SelectItem>
+                    <SelectItem value="Modern">Modern</SelectItem>
+                    <SelectItem value="Shaker">Shaker</SelectItem>
+                    <SelectItem value="Flat Panel">Flat Panel</SelectItem>
+                    <SelectItem value="Slab">Slab</SelectItem>
+                    <SelectItem value="Transitional">Transitional</SelectItem>
+                    <SelectItem value="Contemporary">Contemporary</SelectItem>
+                    <SelectItem value="Minimalist">Minimalist</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>Manufacturer (internal only)</Label>
-                <Select value={form.manufacturer || ""} onValueChange={(v) => updateField("manufacturer", v || null)}>
-                  <SelectTrigger><SelectValue placeholder="Select manufacturer" /></SelectTrigger>
-                  <SelectContent>
-                    {manufacturers.map((m) => (
-                      <SelectItem key={m} value={m}>{m}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="flex gap-2 mt-2">
-                  <Input
-                    placeholder="New manufacturer..."
-                    value={newManufacturer}
-                    onChange={(e) => setNewManufacturer(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={!newManufacturer.trim()}
-                    onClick={() => {
-                      const name = newManufacturer.trim();
-                      if (!manufacturers.includes(name)) {
-                        setManufacturers((prev) => [...prev, name]);
-                      }
-                      updateField("manufacturer", name);
-                      setNewManufacturer("");
-                      toast({ title: "Manufacturer added" });
-                    }}
-                  >
-                    <Plus className="w-3 h-3 mr-1" /> Add
-                  </Button>
-                </div>
-              </div>
-              <Separator className="my-1" />
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <Label>SKU / Product Code *</Label>
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="sku-mode-switch" className="text-xs text-muted-foreground">
-                      {skuMode === "auto" ? "Auto-generated" : "Manual entry"}
-                    </Label>
-                    <Switch
-                      id="sku-mode-switch"
-                      checked={skuMode === "manual"}
-                      onCheckedChange={(checked) => {
-                        const newMode = checked ? "manual" : "auto";
-                        setSkuMode(newMode);
-                        if (newMode === "auto") {
-                          updateField("product_code", generateSKU(form));
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
+              <div><Label>Color *</Label><Input value={form.color} onChange={(e) => updateField("color", e.target.value)} /></div>
+              <div><Label>Material *</Label><Input value={form.material} onChange={(e) => updateField("material", e.target.value)} placeholder="e.g. Maple, MDF" /></div>
+            </div>
+            <div>
+              <Label>Category *</Label>
+              <Select value={form.category_id || ""} onValueChange={(v) => updateField("category_id", v || null)}>
+                <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex gap-2 mt-2">
                 <Input
-                  value={form.product_code}
-                  onChange={(e) => updateField("product_code", e.target.value)}
-                  disabled={skuMode === "auto"}
-                  placeholder={skuMode === "auto" ? "Auto-generated from product details" : "Enter manufacturer SKU code"}
-                  className={skuMode === "auto" ? "font-mono text-sm bg-muted" : "font-mono text-sm"}
+                  placeholder="New category name..."
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="flex-1"
                 />
-                {skuMode === "auto" && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    SKU is auto-generated: Category–Style–Color–Width–Seq (8-12 chars). Avoids ambiguous characters (O/I).
-                  </p>
-                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={!newCategoryName.trim() || creatingCategory}
+                  onClick={async () => {
+                    setCreatingCategory(true);
+                    const slug = newCategoryName.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+                    const { data, error } = await supabase.from("categories").insert({ name: newCategoryName.trim(), slug }).select().single();
+                    if (error) {
+                      toast({ title: "Error", description: error.message, variant: "destructive" });
+                    } else if (data) {
+                      await fetchCategories();
+                      updateField("category_id", data.id);
+                      setNewCategoryName("");
+                      toast({ title: "Category created" });
+                    }
+                    setCreatingCategory(false);
+                  }}
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Add
+                </Button>
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div><Label>Width (mm)</Label><Input type="number" value={form.width_mm} onChange={(e) => updateField("width_mm", Number(e.target.value))} /></div>
-                <div><Label>Height (mm)</Label><Input type="number" value={form.height_mm} onChange={(e) => updateField("height_mm", Number(e.target.value))} /></div>
-                <div><Label>Depth (mm)</Label><Input type="number" value={form.depth_mm} onChange={(e) => updateField("depth_mm", Number(e.target.value))} /></div>
+            </div>
+            <div>
+              <Label>Product Tag</Label>
+              <Select value={form.tag || ""} onValueChange={(v) => updateField("tag", v || null)}>
+                <SelectTrigger><SelectValue placeholder="Select tag (optional)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="New">New</SelectItem>
+                  <SelectItem value="Popular">Popular</SelectItem>
+                  <SelectItem value="Premium">Premium</SelectItem>
+                  <SelectItem value="Best Seller">Best Seller</SelectItem>
+                  <SelectItem value="Limited">Limited</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Manufacturer (internal only)</Label>
+              <Select value={form.manufacturer || ""} onValueChange={(v) => updateField("manufacturer", v || null)}>
+                <SelectTrigger><SelectValue placeholder="Select manufacturer" /></SelectTrigger>
+                <SelectContent>
+                  {manufacturers.map((m) => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  placeholder="New manufacturer..."
+                  value={newManufacturer}
+                  onChange={(e) => setNewManufacturer(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={!newManufacturer.trim()}
+                  onClick={() => {
+                    const name = newManufacturer.trim();
+                    if (!manufacturers.includes(name)) {
+                      setManufacturers((prev) => [...prev, name]);
+                    }
+                    updateField("manufacturer", name);
+                    setNewManufacturer("");
+                    toast({ title: "Manufacturer added" });
+                  }}
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Add
+                </Button>
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div><Label>Retail Price (CAD)</Label><Input type="number" step="0.01" value={form.price_retail_usd} onChange={(e) => updateField("price_retail_usd", e.target.value === "" ? "" : Number(e.target.value))} /></div>
-                <div><Label>Discounted Price (CAD)</Label><Input type="number" step="0.01" value={form.price_discounted_usd} onChange={(e) => updateField("price_discounted_usd", e.target.value === "" ? "" : Number(e.target.value))} /></div>
-                <div><Label>Discount %</Label><Input type="number" step="0.01" value={form.discount_percentage} onChange={(e) => updateField("discount_percentage", e.target.value === "" ? "" : Number(e.target.value))} /></div>
-              </div>
-              <div><Label>Short Description</Label><Input value={form.short_description || ""} onChange={(e) => updateField("short_description", e.target.value)} /></div>
-              <div><Label>Long Description</Label><Textarea value={form.long_description || ""} onChange={(e) => updateField("long_description", e.target.value)} /></div>
-              <ImageUpload label="Main Image" value={form.main_image_url || null} onChange={(url) => updateField("main_image_url", url || "")} />
-              <FileUpload label="Installation Instructions (PDF)" value={form.installation_instructions_url || null} onChange={(url) => updateField("installation_instructions_url", url || "")} />
-              <div className="grid grid-cols-3 gap-4">
-                <div><Label>Stock Level</Label><Input type="number" value={form.stock_level} onChange={(e) => updateField("stock_level", Number(e.target.value))} /></div>
-                <div>
-                  <Label>Availability</Label>
-                  <Select value={form.availability_status} onValueChange={(v) => updateField("availability_status", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="In Stock">In Stock</SelectItem>
-                      <SelectItem value="Low Stock">Low Stock</SelectItem>
-                      <SelectItem value="Out of Stock">Out of Stock</SelectItem>
-                    </SelectContent>
-                  </Select>
+            </div>
+            <Separator className="my-1" />
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <Label>SKU / Product Code *</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="sku-mode-switch" className="text-xs text-muted-foreground">
+                    {skuMode === "auto" ? "Auto-generated" : "Manual entry"}
+                  </Label>
+                  <Switch
+                    id="sku-mode-switch"
+                    checked={skuMode === "manual"}
+                    onCheckedChange={(checked) => {
+                      const newMode = checked ? "manual" : "auto";
+                      setSkuMode(newMode);
+                      if (newMode === "auto") {
+                        updateField("product_code", generateSKU(form));
+                      }
+                    }}
+                  />
                 </div>
-                <div className="flex items-center gap-2 pt-6">
-                  <Switch id="featured-switch" checked={form.is_featured} onCheckedChange={(v) => updateField("is_featured", v)} />
-                  <Label htmlFor="featured-switch">Featured</Label>
-                </div>
               </div>
+              <Input
+                value={form.product_code}
+                onChange={(e) => updateField("product_code", e.target.value)}
+                disabled={skuMode === "auto"}
+                placeholder={skuMode === "auto" ? "Auto-generated from product details" : "Enter manufacturer SKU code"}
+                className={skuMode === "auto" ? "font-mono text-sm bg-muted" : "font-mono text-sm"}
+              />
+              {skuMode === "auto" && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  SKU is auto-generated: Category–Style–Color–Width–Seq (8-12 chars). Avoids ambiguous characters (O/I).
+                </p>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div><Label>Width (mm)</Label><Input type="number" value={form.width_mm} onChange={(e) => updateField("width_mm", Number(e.target.value))} /></div>
+              <div><Label>Height (mm)</Label><Input type="number" value={form.height_mm} onChange={(e) => updateField("height_mm", Number(e.target.value))} /></div>
+              <div><Label>Depth (mm)</Label><Input type="number" value={form.depth_mm} onChange={(e) => updateField("depth_mm", Number(e.target.value))} /></div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div><Label>Retail Price (CAD)</Label><Input type="number" step="0.01" value={form.price_retail_usd} onChange={(e) => updateField("price_retail_usd", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+              <div><Label>Discounted Price (CAD)</Label><Input type="number" step="0.01" value={form.price_discounted_usd} onChange={(e) => updateField("price_discounted_usd", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+              <div><Label>Discount %</Label><Input type="number" step="0.01" value={form.discount_percentage} onChange={(e) => updateField("discount_percentage", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+            </div>
+            <div><Label>Short Description</Label><Input value={form.short_description || ""} onChange={(e) => updateField("short_description", e.target.value)} /></div>
+            <div><Label>Long Description</Label><Textarea value={form.long_description || ""} onChange={(e) => updateField("long_description", e.target.value)} /></div>
+            <ImageUpload label="Main Image" value={form.main_image_url || null} onChange={(url) => updateField("main_image_url", url || "")} />
+            <FileUpload label="Installation Instructions (PDF)" value={form.installation_instructions_url || null} onChange={(url) => updateField("installation_instructions_url", url || "")} />
+            <div className="grid grid-cols-3 gap-4">
+              <div><Label>Stock Level</Label><Input type="number" value={form.stock_level} onChange={(e) => updateField("stock_level", Number(e.target.value))} /></div>
               <div>
-                <Label>Compatible Kitchen Layouts</Label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {["L-Shape", "U-Shape", "Galley", "Straight", "Island", "Peninsula", "G-Shape"].map((layout) => {
-                    const selected = (form.compatible_kitchen_layouts || []).includes(layout);
-                    return (
-                      <Badge
-                        key={layout}
-                        variant={selected ? "default" : "outline"}
-                        className="cursor-pointer select-none"
-                        onClick={() => {
-                          const current = form.compatible_kitchen_layouts || [];
-                          updateField(
-                            "compatible_kitchen_layouts",
-                            selected ? current.filter((l) => l !== layout) : [...current, layout]
-                          );
-                        }}
-                      >
-                        {layout}
-                      </Badge>
-                    );
-                  })}
-                </div>
-              </div>
-              <Separator className="my-2" />
-              <h3 className="font-semibold text-foreground">Countertop Options</h3>
-              <div>
-                <Label>Countertop Availability</Label>
-                <Select value={form.countertop_option} onValueChange={(v) => updateField("countertop_option", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select option" /></SelectTrigger>
+                <Label>Availability</Label>
+                <Select value={form.availability_status} onValueChange={(v) => updateField("availability_status", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="no">No</SelectItem>
-                    <SelectItem value="yes">Yes</SelectItem>
-                    <SelectItem value="optional">Optional (Add-on)</SelectItem>
+                    <SelectItem value="In Stock">In Stock</SelectItem>
+                    <SelectItem value="Low Stock">Low Stock</SelectItem>
+                    <SelectItem value="Out of Stock">Out of Stock</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              {(form.countertop_option === "yes" || form.countertop_option === "optional") && (
-                <>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div><Label>Material</Label><Input value={form.countertop_material || ""} onChange={(e) => updateField("countertop_material", e.target.value)} placeholder="e.g. Quartz, Granite" /></div>
-                    <div><Label>Thickness</Label><Input value={form.countertop_thickness || ""} onChange={(e) => updateField("countertop_thickness", e.target.value)} placeholder="e.g. 20mm, 30mm" /></div>
-                    <div><Label>Finish</Label><Input value={form.countertop_finish || ""} onChange={(e) => updateField("countertop_finish", e.target.value)} placeholder="e.g. Polished, Matte" /></div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div><Label>Countertop Stock</Label><Input type="number" value={form.countertop_stock} onChange={(e) => updateField("countertop_stock", Number(e.target.value))} /></div>
-                    {form.countertop_option === "yes" && (
-                      <div className="flex items-center gap-2 pt-6">
-                        <Switch id="ct-included" checked={form.countertop_included} onCheckedChange={(v) => updateField("countertop_included", v)} />
-                        <Label htmlFor="ct-included">Included with product</Label>
-                      </div>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div><Label>CT Retail Price (CAD)</Label><Input type="number" step="0.01" value={form.countertop_price_retail} onChange={(e) => updateField("countertop_price_retail", e.target.value === "" ? "" : Number(e.target.value))} /></div>
-                    <div><Label>CT Discounted Price (CAD)</Label><Input type="number" step="0.01" value={form.countertop_price_discounted} onChange={(e) => updateField("countertop_price_discounted", e.target.value === "" ? "" : Number(e.target.value))} /></div>
-                    <div><Label>CT Discount %</Label><Input type="number" step="0.01" value={form.countertop_discount_percentage} onChange={(e) => updateField("countertop_discount_percentage", e.target.value === "" ? "" : Number(e.target.value))} /></div>
-                  </div>
-                </>
-              )}
-              <MultiImageUpload label="Additional Images" value={form.additional_image_urls || []} onChange={(urls) => updateField("additional_image_urls", urls)} />
-              <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? "Saving..." : editingProduct ? "Update Product" : "Create Product"}</Button>
+              <div className="flex items-center gap-2 pt-6">
+                <Switch id="featured-switch" checked={form.is_featured} onCheckedChange={(v) => updateField("is_featured", v)} />
+                <Label htmlFor="featured-switch">Featured</Label>
+              </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      </main>
+            <div>
+              <Label>Compatible Kitchen Layouts</Label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {["L-Shape", "U-Shape", "Galley", "Straight", "Island", "Peninsula", "G-Shape"].map((layout) => {
+                  const selected = (form.compatible_kitchen_layouts || []).includes(layout);
+                  return (
+                    <Badge
+                      key={layout}
+                      variant={selected ? "default" : "outline"}
+                      className="cursor-pointer select-none"
+                      onClick={() => {
+                        const current = form.compatible_kitchen_layouts || [];
+                        updateField(
+                          "compatible_kitchen_layouts",
+                          selected ? current.filter((l) => l !== layout) : [...current, layout]
+                        );
+                      }}
+                    >
+                      {layout}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </div>
+            <Separator className="my-2" />
+            <h3 className="font-semibold text-foreground">Countertop Options</h3>
+            <div>
+              <Label>Countertop Availability</Label>
+              <Select value={form.countertop_option} onValueChange={(v) => updateField("countertop_option", v)}>
+                <SelectTrigger><SelectValue placeholder="Select option" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no">No</SelectItem>
+                  <SelectItem value="yes">Yes</SelectItem>
+                  <SelectItem value="optional">Optional (Add-on)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {(form.countertop_option === "yes" || form.countertop_option === "optional") && (
+              <>
+                <div className="grid grid-cols-3 gap-4">
+                  <div><Label>Material</Label><Input value={form.countertop_material || ""} onChange={(e) => updateField("countertop_material", e.target.value)} placeholder="e.g. Quartz, Granite" /></div>
+                  <div><Label>Thickness</Label><Input value={form.countertop_thickness || ""} onChange={(e) => updateField("countertop_thickness", e.target.value)} placeholder="e.g. 20mm, 30mm" /></div>
+                  <div><Label>Finish</Label><Input value={form.countertop_finish || ""} onChange={(e) => updateField("countertop_finish", e.target.value)} placeholder="e.g. Polished, Matte" /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><Label>Countertop Stock</Label><Input type="number" value={form.countertop_stock} onChange={(e) => updateField("countertop_stock", Number(e.target.value))} /></div>
+                  {form.countertop_option === "yes" && (
+                    <div className="flex items-center gap-2 pt-6">
+                      <Switch id="ct-included" checked={form.countertop_included} onCheckedChange={(v) => updateField("countertop_included", v)} />
+                      <Label htmlFor="ct-included">Included with product</Label>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div><Label>CT Retail Price (CAD)</Label><Input type="number" step="0.01" value={form.countertop_price_retail} onChange={(e) => updateField("countertop_price_retail", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+                  <div><Label>CT Discounted Price (CAD)</Label><Input type="number" step="0.01" value={form.countertop_price_discounted} onChange={(e) => updateField("countertop_price_discounted", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+                  <div><Label>CT Discount %</Label><Input type="number" step="0.01" value={form.countertop_discount_percentage} onChange={(e) => updateField("countertop_discount_percentage", e.target.value === "" ? "" : Number(e.target.value))} /></div>
+                </div>
+              </>
+            )}
+            <MultiImageUpload label="Additional Images" value={form.additional_image_urls || []} onChange={(urls) => updateField("additional_image_urls", urls)} />
+            <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? "Saving..." : editingProduct ? "Update Product" : "Create Product"}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
