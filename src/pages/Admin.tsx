@@ -82,6 +82,8 @@ const Admin = () => {
         return <AdminTrustSignalsTab />;
       case "faq":
         return <AdminFAQTab />;
+      case "blog":
+        return <AdminBlogTab />;
       case "content":
         return (
           <div className="space-y-8">
