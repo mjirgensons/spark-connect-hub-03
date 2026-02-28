@@ -60,6 +60,7 @@ const ProductShowcase = () => {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Browse our curated selection of surplus luxury European cabinetry — all at 50–80% below retail.
           </p>
+          <p className="text-xs text-muted-foreground mt-2">Savings based on MSRP. Actual retail prices may vary.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">

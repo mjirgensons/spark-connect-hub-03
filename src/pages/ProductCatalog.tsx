@@ -384,6 +384,7 @@ const ProductCatalog = () => {
                               </span>
                             )}
                           </div>
+                          <p className="text-xs text-muted-foreground">Excl. HST</p>
 
                           <Button variant="outline" size="sm" className="w-full border-2 border-foreground mt-2">
                             View Details

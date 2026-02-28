@@ -125,6 +125,7 @@ const OtherProducts = () => {
                           <span className="text-lg font-bold text-foreground">${product.ourPrice.toLocaleString()}</span>
                           <span className="text-xs text-muted-foreground line-through">${product.retailPrice.toLocaleString()}</span>
                         </div>
+                        <p className="text-[10px] text-muted-foreground">Excl. HST</p>
                       </CardContent>
                     </Card>
                   </CarouselItem>
