@@ -79,6 +79,7 @@ const AccountOverview = lazy(() => import("./pages/account/AccountOverview"));
 const AccountOrders = lazy(() => import("./pages/account/AccountOrders"));
 const AccountAddresses = lazy(() => import("./pages/account/AccountAddresses"));
 const AccountSettings = lazy(() => import("./pages/account/AccountSettings"));
+const AccountWishlist = lazy(() => import("./pages/account/AccountWishlist"));
 
 // Lazy-loaded: Heavy pages
 const Checkout = lazy(() => import("./pages/Checkout"));
