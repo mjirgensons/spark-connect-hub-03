@@ -27,6 +27,8 @@ import AboutPage from "./pages/AboutPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import SearchResults from "./pages/SearchResults";
+import QuoteRequest from "./pages/QuoteRequest";
+import QuoteSuccess from "./pages/QuoteSuccess";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import ClientMatches from "./pages/client/ClientMatches";
 import ClientNewMatch from "./pages/client/ClientNewMatch";
