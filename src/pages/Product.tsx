@@ -157,7 +157,7 @@ const Product = () => {
             {/* Specs */}
             <div className="space-y-4">
               <h2 className="text-lg font-serif font-semibold text-foreground">Specifications</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">
                   <Ruler className="w-4 h-4 text-muted-foreground" />
                   <div>
