@@ -5,6 +5,7 @@ import ProductShowcase from "@/components/landing/ProductShowcase";
 import OtherProducts from "@/components/landing/OtherProducts";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Benefits from "@/components/landing/Benefits";
+import TrustSignals from "@/components/landing/TrustSignals";
 import ForContractors from "@/components/landing/ForContractors";
 import CTA from "@/components/landing/CTA";
 import Footer from "@/components/landing/Footer";
