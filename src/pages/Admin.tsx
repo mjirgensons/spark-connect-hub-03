@@ -20,6 +20,8 @@ import { ImageUpload, MultiImageUpload, getImageOptSummary } from "@/components/
 import { FileUpload } from "@/components/admin/FileUpload";
 import FooterPagesAdmin from "@/components/admin/FooterPagesAdmin";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
+import SiteSettingsAdmin from "@/components/admin/SiteSettingsAdmin";
+import LegalPagesAdmin from "@/components/admin/LegalPagesAdmin";
 
 interface Category {
   id: string;
