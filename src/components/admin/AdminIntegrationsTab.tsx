@@ -412,7 +412,8 @@ const AdminIntegrationsTab = () => {
                   <Input
                     value={webhookPaths[we.event] || we.path}
                     onChange={e => setWebhookPaths(p => ({ ...p, [we.event]: e.target.value }))}
-                    className="h-7 text-xs font-mono"
+                    className="h-7 text-xs font-mono min-w-[260px]"
+                    title={webhookPaths[we.event] || we.path}
                   />
                 </TableCell>
                 <TableCell className="py-1.5 px-2 text-center">
