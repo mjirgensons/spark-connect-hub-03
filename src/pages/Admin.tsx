@@ -130,7 +130,7 @@ const Admin = () => {
 
         <main className="flex-1 p-6 min-w-0 overflow-x-auto">
           <h2 className="text-xl font-serif font-bold text-foreground mb-4 capitalize">
-            {activeSection === "cookie-manager" ? "Cookie Manager" : activeSection === "trust-signals" ? "Trust Signals" : activeSection === "faq" ? "FAQ" : activeSection === "reviews" ? "Reviews" : activeSection}
+            {activeSection === "cookie-manager" ? "Cookie Manager" : activeSection === "trust-signals" ? "Trust Signals" : activeSection === "faq" ? "FAQ" : activeSection === "reviews" ? "Reviews" : activeSection === "blog" ? "Blog" : activeSection}
           </h2>
           {renderSection()}
         </main>

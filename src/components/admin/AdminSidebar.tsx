@@ -54,6 +54,7 @@ const navItems: { id: AdminSection; label: string; icon: React.ElementType }[] =
   { id: "content", label: "Content", icon: FileEdit },
   { id: "trust-signals", label: "Trust Signals", icon: Shield },
   { id: "faq", label: "FAQ", icon: HelpCircle },
+  { id: "blog", label: "Blog", icon: BookOpen },
   { id: "cookie-manager", label: "Cookie Manager", icon: Cookie },
   { id: "settings", label: "Settings", icon: Settings },
 ];

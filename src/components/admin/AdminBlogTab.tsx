@@ -174,10 +174,10 @@ const AdminBlogTab = () => {
         : payload;
 
       if (editing) {
-        const { error } = await supabase.from("blog_posts").update(payload).eq("id", editing.id);
+        const { error } = await supabase.from("blog_posts").update(finalPayload).eq("id", editing.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("blog_posts").insert(payload);
+        const { error } = await supabase.from("blog_posts").insert(finalPayload);
         if (error) throw error;
       }
     },
