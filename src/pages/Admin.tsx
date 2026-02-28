@@ -23,6 +23,7 @@ import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import SiteSettingsAdmin from "@/components/admin/SiteSettingsAdmin";
 import LegalPagesAdmin from "@/components/admin/LegalPagesAdmin";
 import CookieCategoriesAdmin from "@/components/admin/CookieCategoriesAdmin";
+import CookieRegistryAdmin from "@/components/admin/CookieRegistryAdmin";
 
 interface Category {
   id: string;
@@ -699,7 +700,10 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="cookie-manager">
-            <CookieCategoriesAdmin />
+            <div className="space-y-8">
+              <CookieCategoriesAdmin />
+              <CookieRegistryAdmin />
+            </div>
           </TabsContent>
         </Tabs>
 
