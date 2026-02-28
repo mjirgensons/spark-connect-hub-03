@@ -1,5 +1,17 @@
 import { supabase } from "@/integrations/supabase/client";
 
+// Check if analytics cookies are consented
+const hasAnalyticsConsent = (): boolean => {
+  try {
+    const raw = localStorage.getItem("fm_cookie_consent");
+    if (!raw) return false;
+    const prefs = JSON.parse(raw);
+    return prefs?.analytics === true;
+  } catch {
+    return false;
+  }
+};
+
 // Generate a unique session ID
 const generateSessionId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -49,6 +61,7 @@ export const trackEvent = async (
   eventValue?: number,
   metadata?: Record<string, unknown>
 ) => {
+  if (!hasAnalyticsConsent()) return;
   try {
     await supabase.from("analytics_events").insert({
       ...getCommonData(),
@@ -103,6 +116,7 @@ let sessionInitialized = false;
 
 export const initSession = async () => {
   if (sessionInitialized) return;
+  if (!hasAnalyticsConsent()) return;
   sessionInitialized = true;
 
   const common = getCommonData();

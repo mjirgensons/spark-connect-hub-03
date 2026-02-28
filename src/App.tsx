@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { HideChatOnAdmin } from "./components/HideChatOnAdmin";
+import CookieConsent from "./components/CookieConsent";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import "./App.css";
 import Index from "./pages/Index";
@@ -75,6 +76,7 @@ const App = () => (
         <ScrollToTop />
         <HideChatOnAdmin />
         <AnalyticsTracker />
+        <CookieConsent />
         <Routes>
           <Route path="/" element={isPreview ? <Index /> : <UnderConstruction />} />
           <Route path="/product/:id" element={<Product />} />
