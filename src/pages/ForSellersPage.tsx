@@ -164,6 +164,7 @@ const ForSellersPage = () => {
 
     <Footer />
   </div>
-);
+  );
+};
 
 export default ForSellersPage;

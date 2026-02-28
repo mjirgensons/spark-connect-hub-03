@@ -189,6 +189,7 @@ const ForContractorsPage = () => {
 
     <Footer />
   </div>
-);
+  );
+};
 
 export default ForContractorsPage;

@@ -114,6 +114,8 @@ const faqGroups = [
 const allQuestions = faqGroups.flatMap((g) => g.items);
 
 const FAQPage = () => {
+  usePageMeta("FAQ", "Frequently asked questions about FitMatch — how dimension matching works, pricing, delivery, returns, and joining as a contractor or seller.");
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",

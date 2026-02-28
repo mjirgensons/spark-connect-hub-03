@@ -194,6 +194,7 @@ const HowItWorksPage = () => {
 
     <Footer />
   </div>
-);
+  );
+};
 
 export default HowItWorksPage;
