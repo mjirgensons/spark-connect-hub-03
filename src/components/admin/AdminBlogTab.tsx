@@ -169,11 +169,9 @@ const AdminBlogTab = () => {
       };
 
       // Auto-set published_at
-      if (form.status === "published") {
-        if (!editing || editing.status !== "published") {
-          payload.published_at = new Date().toISOString();
-        }
-      }
+      const finalPayload = form.status === "published" && (!editing || editing.status !== "published")
+        ? { ...payload, published_at: new Date().toISOString() }
+        : payload;
 
       if (editing) {
         const { error } = await supabase.from("blog_posts").update(payload).eq("id", editing.id);
