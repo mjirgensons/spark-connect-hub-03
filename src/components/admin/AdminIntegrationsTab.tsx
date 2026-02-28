@@ -117,6 +117,7 @@ const AdminIntegrationsTab = () => {
   const [healthChecking, setHealthChecking] = useState(false);
   const [webhookPaths, setWebhookPaths] = useState<Record<string, string>>({});
   const [lastFired, setLastFired] = useState<Record<string, string>>({});
+  const [lastStatus, setLastStatus] = useState<Record<string, string>>({});
   const [autoCheckInterval, setAutoCheckInterval] = useState(5); // minutes
   const refreshRef = useRef<ReturnType<typeof setInterval>>();
   const healthCheckRef = useRef<ReturnType<typeof setInterval>>();
