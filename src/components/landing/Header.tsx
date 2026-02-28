@@ -118,6 +118,10 @@ const Header = () => {
                   {renderNavItem(item)}
                 </div>
               ))}
+              <Link to="/account/wishlist" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground min-h-[44px]" onClick={() => setIsMenuOpen(false)}>
+                <Heart className="w-4 h-4" />
+                Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
+              </Link>
               <Link to="/cart" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground min-h-[44px]" onClick={() => setIsMenuOpen(false)}>
                 <ShoppingCart className="w-4 h-4" />
                 Cart {itemCount > 0 && `(${itemCount})`}

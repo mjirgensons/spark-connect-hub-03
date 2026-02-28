@@ -206,6 +206,7 @@ const App = () => (
         </Routes>
         </Suspense>
       </BrowserRouter>
+      </WishlistProvider>
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
