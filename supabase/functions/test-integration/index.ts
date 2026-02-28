@@ -55,6 +55,30 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Service-based health check — requires integration lookup
+    if (!service_name) {
+      return new Response(JSON.stringify({ status: "error", message: "service_name required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: integration, error } = await supabase
+      .from("integrations")
+      .select("*")
+      .eq("service_name", service_name)
+      .maybeSingle();
+
+    if (error || !integration) {
+      return new Response(
+        JSON.stringify({ status: "error", message: "Integration not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const config = integration.config || {};
+    const creds = integration.encrypted_credentials || {};
+
     switch (service_name) {
       case "mailgun": {
         const apiKey = creds.api_key;
