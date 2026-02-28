@@ -4,7 +4,7 @@ import { getCookieConsent } from "./CookieConsent";
 
 export const HideChatOnAdmin = () => {
   const { pathname } = useLocation();
-  const [, setTick] = useState(0);
+  const [consentTick, setConsentTick] = useState(0);
 
   // Re-check on consent changes
   useEffect(() => {
