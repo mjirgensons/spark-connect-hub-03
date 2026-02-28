@@ -85,6 +85,8 @@ const Admin = () => {
         return <AdminFAQTab />;
       case "blog":
         return <AdminBlogTab />;
+      case "newsletter":
+        return <AdminNewsletterTab />;
       case "content":
         return (
           <div className="space-y-8">
