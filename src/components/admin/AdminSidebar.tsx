@@ -20,6 +20,7 @@ import {
   MessageSquare,
   BookOpen,
   Mail,
+  Send,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
