@@ -138,10 +138,11 @@ const AdminIntegrationsTab = () => {
   const fetchLastFired = useCallback(async () => {
     const fired: Record<string, string> = {};
     for (const we of WEBHOOK_EVENTS) {
+      // Match both exact event and .test variant
       const { data } = await supabase
         .from("webhook_logs")
         .select("created_at")
-        .eq("event_type", we.event)
+        .or(`event_type.eq.${we.event},event_type.eq.${we.event}.test`)
         .eq("status", "delivered")
         .order("created_at", { ascending: false })
         .limit(1)
