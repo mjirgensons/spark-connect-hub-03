@@ -687,6 +687,14 @@ const Admin = () => {
           <TabsContent value="analytics">
             <AnalyticsDashboard />
           </TabsContent>
+
+          <TabsContent value="site-settings">
+            <SiteSettingsAdmin />
+          </TabsContent>
+
+          <TabsContent value="legal-pages">
+            <LegalPagesAdmin />
+          </TabsContent>
         </Tabs>
 
         {/* Product Form Dialog */}
