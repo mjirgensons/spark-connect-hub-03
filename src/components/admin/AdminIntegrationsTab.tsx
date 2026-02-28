@@ -323,11 +323,13 @@ const AdminIntegrationsTab = () => {
         await supabase.from("integrations").update({
           last_health_check: new Date().toISOString(),
           last_health_status: healthStatus,
+          status: healthStatus === "healthy" ? "connected" : "error",
         } as any).eq("id", integration.id);
       } catch {
         await supabase.from("integrations").update({
           last_health_check: new Date().toISOString(),
           last_health_status: "unhealthy",
+          status: "error",
         } as any).eq("id", integration.id);
       }
     }
