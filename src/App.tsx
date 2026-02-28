@@ -118,6 +118,7 @@ const App = () => (
 
           {/* Seller routes */}
           <Route path="/seller" element={<RoleGuard allowedRoles={['seller']}><DashboardLayout role="seller" /></RoleGuard>}>
+            <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<SellerDashboard />} />
             <Route path="products" element={<SellerProducts />} />
             <Route path="products/new" element={<SellerNewProduct />} />
