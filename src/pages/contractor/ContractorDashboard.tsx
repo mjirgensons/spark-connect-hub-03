@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { useProfile } from "@/hooks/useProfile";
 import { Briefcase, FolderOpen, CheckCircle, Star } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const stats = [
   { label: "Available Jobs", value: "0", icon: Briefcase },
