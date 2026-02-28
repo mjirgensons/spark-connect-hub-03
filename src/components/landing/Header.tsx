@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import SearchBar from "@/components/SearchBar";
 
 type NavItem =
   | { label: string; type: "anchor"; href: string }
