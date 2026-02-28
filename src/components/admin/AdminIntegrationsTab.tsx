@@ -700,10 +700,28 @@ const AdminIntegrationsTab = () => {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-bold text-foreground">System Health</h3>
-          <Button variant="outline" size="sm" className="h-7 text-xs border-2" disabled={healthChecking} onClick={handleRunHealthCheck}>
-            {healthChecking ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Activity className="w-3 h-3 mr-1" />}
-            Run Health Check
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Label className="text-xs text-muted-foreground whitespace-nowrap">Auto-check every</Label>
+              <Select value={String(autoCheckInterval)} onValueChange={v => setAutoCheckInterval(Number(v))}>
+                <SelectTrigger className="w-[100px] h-7 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Off</SelectItem>
+                  <SelectItem value="1">1 min</SelectItem>
+                  <SelectItem value="2">2 min</SelectItem>
+                  <SelectItem value="5">5 min</SelectItem>
+                  <SelectItem value="10">10 min</SelectItem>
+                  <SelectItem value="15">15 min</SelectItem>
+                  <SelectItem value="30">30 min</SelectItem>
+                  <SelectItem value="60">1 hour</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="outline" size="sm" className="h-7 text-xs border-2" disabled={healthChecking} onClick={handleRunHealthCheck}>
+              {healthChecking ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Activity className="w-3 h-3 mr-1" />}
+              Run Now
+            </Button>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           {integrations.map(i => {
