@@ -8,7 +8,7 @@ import { dispatchWebhook } from "@/lib/webhookDispatcher";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Edit2, Loader2 } from "lucide-react";
+import { Edit2, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 const shippingLabels: Record<string, string> = {
