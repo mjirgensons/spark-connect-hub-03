@@ -23,7 +23,7 @@ const Product = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*, categories(name)")
+        .select("*, categories(name, slug)")
         .eq("id", id!)
         .is("deleted_at", null)
         .single();
