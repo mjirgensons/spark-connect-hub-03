@@ -704,6 +704,7 @@ const Admin = () => {
             <div className="space-y-8">
               <CookieCategoriesAdmin />
               <CookieRegistryAdmin />
+              <ConsentLogsAdmin />
             </div>
           </TabsContent>
         </Tabs>
