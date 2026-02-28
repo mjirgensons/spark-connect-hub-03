@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -15,6 +15,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Shield, Settings } from "lucide-react";
+import EmailCommLogTab from "./EmailCommLogTab";
+import EmailConsentTab from "./EmailConsentTab";
+import EmailSettingsTab from "./EmailSettingsTab";
 
 interface EmailTemplate {
   id: string;
@@ -451,35 +454,11 @@ const AdminEmailTemplatesTab = () => {
         />
       )}
 
-      {internalTab === "comm-log" && (
-        <Card className="border-2 border-border">
-          <CardContent className="p-8 text-center">
-            <MessageSquare className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-            <h3 className="text-lg font-serif font-bold text-foreground mb-1">Communication Log</h3>
-            <p className="text-sm text-muted-foreground">Coming soon — View all sent and received emails with delivery status tracking.</p>
-          </CardContent>
-        </Card>
-      )}
+      {internalTab === "comm-log" && <EmailCommLogTab />}
 
-      {internalTab === "consent" && (
-        <Card className="border-2 border-border">
-          <CardContent className="p-8 text-center">
-            <Shield className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-            <h3 className="text-lg font-serif font-bold text-foreground mb-1">Email Consent</h3>
-            <p className="text-sm text-muted-foreground">Coming soon — CASL-compliant consent audit trail and management.</p>
-          </CardContent>
-        </Card>
-      )}
+      {internalTab === "consent" && <EmailConsentTab />}
 
-      {internalTab === "settings" && (
-        <Card className="border-2 border-border">
-          <CardContent className="p-8 text-center">
-            <Settings className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-            <h3 className="text-lg font-serif font-bold text-foreground mb-1">Email Settings</h3>
-            <p className="text-sm text-muted-foreground">Coming soon — Configure default sender, SMTP routing, and email processing rules.</p>
-          </CardContent>
-        </Card>
-      )}
+      {internalTab === "settings" && <EmailSettingsTab />}
 
       {/* Template Editor Sheet */}
       <Sheet open={editorOpen} onOpenChange={setEditorOpen}>
