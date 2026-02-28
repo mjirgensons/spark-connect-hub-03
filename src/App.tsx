@@ -69,6 +69,7 @@ const AnalyticsTracker = () => {
   return null;
 };
 
+// Cart provider wraps all routes for global cart state
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
