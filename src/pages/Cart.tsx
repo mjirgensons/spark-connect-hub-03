@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft } from "lucide-react";
+import TrustBadgeBar from "@/components/TrustBadgeBar";
 import { toast } from "sonner";
 
 const Cart = () => {
@@ -133,6 +134,8 @@ const Cart = () => {
                     <span>Estimated Total</span>
                     <span>${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
+
+                  <TrustBadgeBar />
 
                   <Button size="lg" className="w-full mt-4 min-h-[48px] shadow-[2px_2px_0px_0px_hsl(var(--foreground))] sm:shadow-[4px_4px_0px_0px_hsl(var(--foreground))]" asChild>
                     <Link to="/checkout">Proceed to Checkout</Link>
