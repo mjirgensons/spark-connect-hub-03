@@ -20,6 +20,7 @@ import AdminCustomersTab from "@/components/admin/AdminCustomersTab";
 import AdminIntegrationsTab from "@/components/admin/AdminIntegrationsTab";
 import AdminQuotesTab from "@/components/admin/AdminQuotesTab";
 import AdminProductsTab from "@/components/admin/AdminProductsTab";
+import AdminTrustSignalsTab from "@/components/admin/AdminTrustSignalsTab";
 
 const Admin = () => {
   const { user, loading, signOut } = useAuth();
