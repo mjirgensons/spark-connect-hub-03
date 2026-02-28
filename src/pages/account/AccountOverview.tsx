@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Package, DollarSign, Clock, ShoppingBag, MessageSquare } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OrderCardSkeleton } from "@/components/ui/order-card-skeleton";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { format } from "date-fns";
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive"> = {
