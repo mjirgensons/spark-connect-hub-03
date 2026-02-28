@@ -241,6 +241,14 @@ const StepReview = () => {
           )}
         </Button>
       </div>
+
+      {/* Trust badge */}
+      {placing && (
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Lock className="w-4 h-4" />
+          <span>Secured by Stripe</span>
+        </div>
+      )}
     </div>
   );
 };
