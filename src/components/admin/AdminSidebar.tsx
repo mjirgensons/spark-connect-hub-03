@@ -27,6 +27,7 @@ export type AdminSection =
   | "quotes"
   | "products"
   | "customers"
+  | "reviews"
   | "integrations"
   | "content"
   | "trust-signals"
