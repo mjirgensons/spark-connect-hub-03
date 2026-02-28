@@ -3,27 +3,60 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
+type NavItem =
+  | { label: string; type: "anchor"; href: string }
+  | { label: string; type: "route"; to: string };
+
+const navLinks: NavItem[] = [
+  { label: "Browse", type: "route", to: "/browse" },
+  { label: "Cabinets", type: "anchor", href: "#cabinets" },
+  { label: "More Products", type: "anchor", href: "#other-products" },
+  { label: "How It Works", type: "route", to: "/how-it-works" },
+  { label: "Benefits", type: "anchor", href: "#benefits" },
+  { label: "For Contractors", type: "route", to: "/for-contractors" },
+  { label: "For Sellers", type: "route", to: "/for-sellers" },
+  { label: "Contact", type: "anchor", href: "#contact" },
+];
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
 
-  const navLinks = [
-    { label: "Cabinets", href: "#cabinets" },
-    { label: "More Products", href: "#other-products" },
-    { label: "How It Works", href: "#how-it-works" },
-    { label: "Benefits", href: "#benefits" },
-    { label: "For Contractors", href: "#contractors" },
-    { label: "Contact", href: "#contact" },
-  ];
-
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (!isHome) {
       e.preventDefault();
       navigate("/" + href);
     }
     setIsMenuOpen(false);
+  };
+
+  const linkClass = "text-sm font-medium text-muted-foreground hover:text-foreground transition-colors";
+
+  const renderNavItem = (item: NavItem) => {
+    if (item.type === "route") {
+      return (
+        <Link
+          key={item.label}
+          to={item.to}
+          className={linkClass}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          {item.label}
+        </Link>
+      );
+    }
+    return (
+      <a
+        key={item.label}
+        href={isHome ? item.href : "/" + item.href}
+        className={linkClass}
+        onClick={(e) => handleAnchorClick(e, item.href)}
+      >
+        {item.label}
+      </a>
+    );
   };
 
   return (
@@ -41,21 +74,16 @@ const Header = () => {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={isHome ? link.href : "/" + link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                onClick={(e) => handleNavClick(e, link.href)}
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map(renderNavItem)}
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm">Sign In</Button>
-            <Button size="sm">Get Started</Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/login">Sign In</Link>
+            </Button>
+            <Button size="sm" asChild>
+              <Link to="/register">Get Started</Link>
+            </Button>
           </div>
 
           <button className="md:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
@@ -66,19 +94,14 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <nav className="flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={isHome ? link.href : "/" + link.href}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={(e) => handleNavClick(e, link.href)}
-                >
-                  {link.label}
-                </a>
-              ))}
+              {navLinks.map(renderNavItem)}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                <Button variant="ghost" size="sm">Sign In</Button>
-                <Button size="sm">Get Started</Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link to="/register" onClick={() => setIsMenuOpen(false)}>Get Started</Link>
+                </Button>
               </div>
             </nav>
           </div>
