@@ -28,11 +28,29 @@ interface CookieDefinition {
   type: string;
 }
 
+interface BannerSettings {
+  cookie_banner_text: string;
+  cookie_accept_text: string;
+  cookie_reject_text: string;
+  cookie_settings_text: string;
+  cookie_policy_link_text: string;
+  cookie_banner_version: string;
+}
+
+const DEFAULT_SETTINGS: BannerSettings = {
+  cookie_banner_text: "We use cookies to improve your experience and analyze site traffic. You can manage your preferences at any time.",
+  cookie_accept_text: "Accept All",
+  cookie_reject_text: "Reject Non-Essential",
+  cookie_settings_text: "Cookie Settings",
+  cookie_policy_link_text: "Read our Cookie Policy",
+  cookie_banner_version: "1.0",
+};
+
 type ConsentMap = Record<string, boolean>;
 
 const STORAGE_KEY = "fm_cookie_consent";
+const VERSION_KEY = "fm_cookie_banner_version";
 const SESSION_KEY = "fm_session_id";
-const BANNER_VERSION = "1.0";
 
 const getSessionId = (): string => {
   let id = sessionStorage.getItem(SESSION_KEY);
@@ -53,25 +71,25 @@ export const getCookieConsent = (): ConsentMap | null => {
   }
 };
 
-const saveConsent = (prefs: ConsentMap) => {
+const saveConsent = (prefs: ConsentMap, bannerVersion: string) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-  // Dispatch event so other components (HideChatOnAdmin) can react
+  localStorage.setItem(VERSION_KEY, bannerVersion);
   window.dispatchEvent(new Event("fm_consent_change"));
 };
 
-const logConsent = async (action: string, categories: ConsentMap) => {
+const logConsent = async (action: string, categories: ConsentMap, bannerVersion: string) => {
   try {
     await supabase.from("consent_logs").insert({
       session_id: getSessionId(),
       action,
       categories,
       page_url: window.location.href,
-      banner_version: BANNER_VERSION,
+      banner_version: bannerVersion,
       user_agent: navigator.userAgent,
       ip_hash: null,
     } as any);
   } catch {
-    // Silent fail — logging should never break the app
+    // Silent fail
   }
 };
 
@@ -84,6 +102,23 @@ const CookieConsent = () => {
   const [isUpdate, setIsUpdate] = useState(false);
 
   const isAdmin = location.pathname.startsWith("/admin");
+
+  // Fetch banner settings
+  const { data: settings = DEFAULT_SETTINGS } = useQuery<BannerSettings>({
+    queryKey: ["cookie_banner_settings"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("key, value")
+        .in("key", Object.keys(DEFAULT_SETTINGS));
+      const result = { ...DEFAULT_SETTINGS };
+      (data || []).forEach((row: any) => {
+        if (row.key in result) (result as any)[row.key] = row.value;
+      });
+      return result;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
   // Fetch active categories
   const { data: categories = [] } = useQuery<CookieCategory[]>({
@@ -114,15 +149,20 @@ const CookieConsent = () => {
 
   useEffect(() => {
     const stored = getCookieConsent();
-    if (stored) {
+    const storedVersion = localStorage.getItem(VERSION_KEY);
+
+    if (stored && storedVersion === settings.cookie_banner_version) {
       setConsentGiven(true);
       setPrefs(stored);
     } else {
       setShowBanner(true);
+      setConsentGiven(false);
     }
-  }, []);
+  }, [settings.cookie_banner_version]);
 
   if (isAdmin) return null;
+
+  const bannerVersion = settings.cookie_banner_version;
 
   const buildAllTrue = (): ConsentMap => {
     const map: ConsentMap = {};
@@ -138,30 +178,30 @@ const CookieConsent = () => {
 
   const handleAcceptAll = () => {
     const all = buildAllTrue();
-    saveConsent(all);
-    logConsent("accept_all", all);
+    saveConsent(all, bannerVersion);
+    logConsent("accept_all", all, bannerVersion);
     setPrefs(all);
     setShowBanner(false);
+    setShowSettings(false);
     setConsentGiven(true);
   };
 
   const handleRejectNonEssential = () => {
     const minimal = buildRequiredOnly();
-    saveConsent(minimal);
-    logConsent("reject_non_essential", minimal);
+    saveConsent(minimal, bannerVersion);
+    logConsent("reject_non_essential", minimal, bannerVersion);
     setPrefs(minimal);
     setShowBanner(false);
     setConsentGiven(true);
   };
 
   const handleSavePreferences = () => {
-    // Ensure required categories are always true
     const finalPrefs = { ...prefs };
     categories.forEach((c) => {
       if (c.is_required) finalPrefs[c.slug] = true;
     });
-    saveConsent(finalPrefs);
-    logConsent(isUpdate ? "update" : "custom", finalPrefs);
+    saveConsent(finalPrefs, bannerVersion);
+    logConsent(isUpdate ? "update" : "custom", finalPrefs, bannerVersion);
     setPrefs(finalPrefs);
     setShowSettings(false);
     setShowBanner(false);
@@ -171,7 +211,6 @@ const CookieConsent = () => {
 
   const handleOpenSettings = () => {
     setIsUpdate(false);
-    // Initialize toggles: required=true, others=false for new visitors
     if (!consentGiven) {
       setPrefs(buildRequiredOnly());
     }
@@ -196,14 +235,12 @@ const CookieConsent = () => {
           <div className="container mx-auto">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               <div className="flex-1 space-y-1">
-                <p className="text-sm">
-                  We use cookies to improve your experience and analyze site traffic. You can manage your preferences at any time.
-                </p>
+                <p className="text-sm">{settings.cookie_banner_text}</p>
                 <Link
                   to="/page/cookie-policy"
                   className="text-xs underline text-gray-400 hover:text-background transition-colors"
                 >
-                  Cookie Policy
+                  {settings.cookie_policy_link_text}
                 </Link>
               </div>
               <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto shrink-0">
@@ -211,20 +248,20 @@ const CookieConsent = () => {
                   onClick={handleAcceptAll}
                   className="bg-background text-foreground hover:bg-gray-200 border-0 w-full sm:w-auto"
                 >
-                  Accept All
+                  {settings.cookie_accept_text}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={handleRejectNonEssential}
                   className="border-2 border-background text-background bg-transparent hover:bg-background/10 w-full sm:w-auto"
                 >
-                  Reject Non-Essential
+                  {settings.cookie_reject_text}
                 </Button>
                 <button
                   onClick={handleOpenSettings}
                   className="text-sm underline text-gray-400 hover:text-background transition-colors py-2"
                 >
-                  Cookie Settings
+                  {settings.cookie_settings_text}
                 </button>
               </div>
             </div>
@@ -232,7 +269,7 @@ const CookieConsent = () => {
         </div>
       )}
 
-      {/* Floating cookie icon (after consent given) */}
+      {/* Floating cookie icon */}
       {consentGiven && !showBanner && (
         <button
           onClick={handleReopenFromIcon}
@@ -269,7 +306,6 @@ const CookieConsent = () => {
                       }
                     />
                   </div>
-
                   {catDefs.length > 0 && (
                     <Collapsible>
                       <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
@@ -294,13 +330,12 @@ const CookieConsent = () => {
                 </div>
               );
             })}
-
             <div className="flex gap-2 pt-2">
               <Button onClick={handleSavePreferences} className="flex-1">
                 Save Preferences
               </Button>
               <Button variant="outline" onClick={handleAcceptAll} className="flex-1">
-                Accept All
+                {settings.cookie_accept_text}
               </Button>
             </div>
           </div>
