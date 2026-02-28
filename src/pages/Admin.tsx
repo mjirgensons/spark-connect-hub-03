@@ -73,6 +73,8 @@ const Admin = () => {
         return <AdminCustomersTab />;
       case "integrations":
         return <AdminIntegrationsTab />;
+      case "trust-signals":
+        return <AdminTrustSignalsTab />;
       case "content":
         return (
           <div className="space-y-8">
