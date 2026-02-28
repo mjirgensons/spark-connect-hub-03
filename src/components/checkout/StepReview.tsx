@@ -111,12 +111,23 @@ const StepReview = () => {
         },
       });
 
-      // 5. TODO: Stripe checkout session creation (Prompt I4)
-      // For now, show success and redirect
-      toast.success(`Order ${order.order_number} created!`);
+      // 5. Call Stripe checkout session Edge Function
+      const { data: sessionData, error: sessionErr } = await supabase.functions.invoke(
+        "create-checkout-session",
+        { body: { order_id: order.id } }
+      );
+
+      if (sessionErr || !sessionData?.url) {
+        const msg = sessionData?.error || "Could not create payment session.";
+        toast.error(msg);
+        // Order is created but payment failed to initiate — don't clear cart
+        return;
+      }
+
+      // 6. Clear cart and redirect to Stripe
       cartDispatch({ type: "CLEAR_CART" });
       reset();
-      navigate("/");
+      window.location.href = sessionData.url;
     } catch (err: unknown) {
       console.error("Order creation failed:", err);
       toast.error("Something went wrong. Please try again.");
