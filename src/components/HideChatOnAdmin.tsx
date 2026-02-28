@@ -8,7 +8,7 @@ export const HideChatOnAdmin = () => {
 
   // Re-check on consent changes
   useEffect(() => {
-    const handler = () => setTick((t) => t + 1);
+    const handler = () => setConsentTick((t) => t + 1);
     window.addEventListener("fm_consent_change", handler);
     return () => window.removeEventListener("fm_consent_change", handler);
   }, []);
