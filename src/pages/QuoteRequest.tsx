@@ -232,6 +232,7 @@ const QuoteRequest = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-10 pt-24 md:pt-10 max-w-3xl">
+        <Breadcrumbs items={[{ label: "Request a Quote" }]} />
         <div className="flex items-center gap-3 mb-8">
           <FileText className="w-8 h-8 text-primary" />
           <div>

@@ -97,6 +97,7 @@ const SearchResults = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1 container mx-auto px-4 pt-24 pb-12">
+        <Breadcrumbs items={[{ label: "Search Results" }]} />
         <h1 className="font-serif text-2xl md:text-3xl font-bold mb-6">{headingText}</h1>
 
         {isLoading ? (

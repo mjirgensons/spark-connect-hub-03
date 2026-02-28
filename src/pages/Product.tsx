@@ -83,6 +83,15 @@ const Product = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-10 pt-24 md:pt-10">
+        <Breadcrumbs
+          items={[
+            { label: "Browse", href: "/browse" },
+            ...(product.categories?.name
+              ? [{ label: product.categories.name, href: "/browse" }]
+              : []),
+            { label: product.product_name },
+          ]}
+        />
         {/* Back link */}
         <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4" />

@@ -77,6 +77,7 @@ const AccountOverview = () => {
 
   return (
     <div className="space-y-8">
+      <Breadcrumbs items={[{ label: "My Account" }]} />
       <h1 className="text-2xl md:text-3xl font-bold font-serif">
         Welcome back, {firstName}
       </h1>

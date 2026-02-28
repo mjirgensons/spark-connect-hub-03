@@ -57,6 +57,7 @@ const AccountOrders = () => {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: "My Account", href: "/account" }, { label: "Orders" }]} />
       <h1 className="text-2xl font-bold font-serif">Your Orders</h1>
 
       {!orders || orders.length === 0 ? (
