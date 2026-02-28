@@ -159,6 +159,14 @@ const App = () => (
             <Route path="profile" element={<BuilderProfile />} />
           </Route>
 
+          {/* Account routes (any authenticated user) */}
+          <Route path="/account" element={<AccountLayout />}>
+            <Route index element={<AccountOverview />} />
+            <Route path="orders" element={<AccountOrders />} />
+            <Route path="addresses" element={<AccountAddresses />} />
+            <Route path="settings" element={<AccountSettings />} />
+          </Route>
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
