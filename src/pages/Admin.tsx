@@ -20,6 +20,7 @@ import AdminCustomersTab from "@/components/admin/AdminCustomersTab";
 import AdminIntegrationsTab from "@/components/admin/AdminIntegrationsTab";
 import AdminQuotesTab from "@/components/admin/AdminQuotesTab";
 import AdminProductsTab from "@/components/admin/AdminProductsTab";
+import AdminTrustSignalsTab from "@/components/admin/AdminTrustSignalsTab";
 
 const Admin = () => {
   const { user, loading, signOut } = useAuth();
@@ -72,6 +73,8 @@ const Admin = () => {
         return <AdminCustomersTab />;
       case "integrations":
         return <AdminIntegrationsTab />;
+      case "trust-signals":
+        return <AdminTrustSignalsTab />;
       case "content":
         return (
           <div className="space-y-8">
@@ -118,7 +121,7 @@ const Admin = () => {
 
         <main className="flex-1 p-6 min-w-0 overflow-x-auto">
           <h2 className="text-xl font-serif font-bold text-foreground mb-4 capitalize">
-            {activeSection === "cookie-manager" ? "Cookie Manager" : activeSection}
+            {activeSection === "cookie-manager" ? "Cookie Manager" : activeSection === "trust-signals" ? "Trust Signals" : activeSection}
           </h2>
           {renderSection()}
         </main>
