@@ -233,6 +233,92 @@ export type Database = {
         }
         Relationships: []
       }
+      communication_logs: {
+        Row: {
+          clicked_at: string | null
+          created_at: string | null
+          direction: string
+          error_message: string | null
+          from_address: string
+          html_body: string | null
+          id: string
+          locale: string | null
+          mailgun_message_id: string | null
+          metadata: Json | null
+          opened_at: string | null
+          pinecone_synced: boolean | null
+          plain_text_body: string | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          reply_to: string | null
+          status: string | null
+          subject: string
+          template_key: string | null
+          to_address: string
+          user_email: string
+          user_id: string | null
+          user_type: string | null
+        }
+        Insert: {
+          clicked_at?: string | null
+          created_at?: string | null
+          direction: string
+          error_message?: string | null
+          from_address: string
+          html_body?: string | null
+          id?: string
+          locale?: string | null
+          mailgun_message_id?: string | null
+          metadata?: Json | null
+          opened_at?: string | null
+          pinecone_synced?: boolean | null
+          plain_text_body?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          reply_to?: string | null
+          status?: string | null
+          subject: string
+          template_key?: string | null
+          to_address: string
+          user_email: string
+          user_id?: string | null
+          user_type?: string | null
+        }
+        Update: {
+          clicked_at?: string | null
+          created_at?: string | null
+          direction?: string
+          error_message?: string | null
+          from_address?: string
+          html_body?: string | null
+          id?: string
+          locale?: string | null
+          mailgun_message_id?: string | null
+          metadata?: Json | null
+          opened_at?: string | null
+          pinecone_synced?: boolean | null
+          plain_text_body?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          reply_to?: string | null
+          status?: string | null
+          subject?: string
+          template_key?: string | null
+          to_address?: string
+          user_email?: string
+          user_id?: string | null
+          user_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consent_logs: {
         Row: {
           action: string
@@ -398,6 +484,122 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_consent_log: {
+        Row: {
+          consent_category: string
+          consent_text: string
+          consent_type: string
+          created_at: string | null
+          email: string
+          granted: boolean
+          id: string
+          ip_address: string | null
+          source: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          consent_category: string
+          consent_text: string
+          consent_type: string
+          created_at?: string | null
+          email: string
+          granted: boolean
+          id?: string
+          ip_address?: string | null
+          source: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          consent_category?: string
+          consent_text?: string
+          consent_type?: string
+          created_at?: string | null
+          email?: string
+          granted?: boolean
+          id?: string
+          ip_address?: string | null
+          source?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_consent_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          casl_category: string | null
+          category: string
+          created_at: string | null
+          customer_type: string
+          display_name: string
+          from_email: string | null
+          from_name: string | null
+          html_body: string
+          id: string
+          is_active: boolean | null
+          locale: string | null
+          plain_text_body: string | null
+          reply_to: string | null
+          requires_consent: boolean | null
+          subject: string
+          template_key: string
+          updated_at: string | null
+          variables_schema: Json | null
+          version: number | null
+        }
+        Insert: {
+          casl_category?: string | null
+          category?: string
+          created_at?: string | null
+          customer_type?: string
+          display_name: string
+          from_email?: string | null
+          from_name?: string | null
+          html_body: string
+          id?: string
+          is_active?: boolean | null
+          locale?: string | null
+          plain_text_body?: string | null
+          reply_to?: string | null
+          requires_consent?: boolean | null
+          subject: string
+          template_key: string
+          updated_at?: string | null
+          variables_schema?: Json | null
+          version?: number | null
+        }
+        Update: {
+          casl_category?: string | null
+          category?: string
+          created_at?: string | null
+          customer_type?: string
+          display_name?: string
+          from_email?: string | null
+          from_name?: string | null
+          html_body?: string
+          id?: string
+          is_active?: boolean | null
+          locale?: string | null
+          plain_text_body?: string | null
+          reply_to?: string | null
+          requires_consent?: boolean | null
+          subject?: string
+          template_key?: string
+          updated_at?: string | null
+          variables_schema?: Json | null
+          version?: number | null
+        }
+        Relationships: []
       }
       faq_items: {
         Row: {
