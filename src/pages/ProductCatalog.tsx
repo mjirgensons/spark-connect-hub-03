@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { SlidersHorizontal, X } from "lucide-react";
 
 const MM_TO_INCH = 0.0393701;
-const fmt = (mm: number) => `${mm}mm (${(mm * MM_TO_INCH).toFixed(1)}″)`;
+const fmt = (mm: number) => `${mm}mm / ${(mm * MM_TO_INCH).toFixed(1)}″`;
 const fmtPrice = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
 type SortOption = "price-asc" | "price-desc" | "newest" | "discount";
