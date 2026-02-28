@@ -13,6 +13,7 @@ import { SearchX } from "lucide-react";
 import { ProductCardSkeleton } from "@/components/ui/product-card-skeleton";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import WishlistButton from "@/components/WishlistButton";
+import CompareButton from "@/components/CompareButton";
 
 const MM_TO_INCH = 0.0393701;
 const fmtPrice = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -172,6 +173,9 @@ const SearchResults = () => {
                           </Badge>
                         )}
                         {matchBadge}
+                      </div>
+                      <div className="absolute bottom-2 right-2 z-10">
+                        <CompareButton productId={product.id} />
                       </div>
                     </div>
                     <div className="p-4 space-y-2">

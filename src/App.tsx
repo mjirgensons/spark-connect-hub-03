@@ -11,6 +11,8 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import "./App.css";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
+import { CompareProvider } from "./contexts/CompareContext";
+import CompareBar from "./components/CompareBar";
 import Index from "./pages/Index";
 import Product from "./pages/Product";
 import Cart from "./pages/Cart";
@@ -87,6 +89,7 @@ const AccountWishlist = lazy(() => import("./pages/account/AccountWishlist"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const OrderConfirmation = lazy(() => import("./pages/OrderConfirmation"));
 const QuoteRequest = lazy(() => import("./pages/QuoteRequest"));
+const ComparePage = lazy(() => import("./pages/ComparePage"));
 
 const PRODUCTION_DOMAINS = ["fitmatch.ca", "www.fitmatch.ca", "spark-connect-hub-03.lovable.app"];
 const isProduction = PRODUCTION_DOMAINS.includes(window.location.hostname);
@@ -109,6 +112,7 @@ const AnalyticsTracker = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <CompareProvider>
       <CartProvider>
       <WishlistProvider>
       <Toaster />
@@ -118,6 +122,7 @@ const App = () => (
         <HideChatOnAdmin />
         <AnalyticsTracker />
         <CookieConsent />
+        <CompareBar />
         <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={isPreview ? <Index /> : <UnderConstruction />} />
@@ -142,6 +147,7 @@ const App = () => (
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
+          <Route path="/compare" element={<ComparePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
@@ -212,6 +218,7 @@ const App = () => (
       </BrowserRouter>
       </WishlistProvider>
       </CartProvider>
+      </CompareProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

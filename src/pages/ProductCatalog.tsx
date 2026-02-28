@@ -23,6 +23,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { SlidersHorizontal, X } from "lucide-react";
 import WishlistButton from "@/components/WishlistButton";
+import CompareButton from "@/components/CompareButton";
 
 const MM_TO_INCH = 0.0393701;
 const fmt = (mm: number) => `${mm}mm / ${(mm * MM_TO_INCH).toFixed(1)}″`;
@@ -362,11 +363,16 @@ const ProductCatalog = () => {
                               No Image
                             </div>
                           )}
-                          {product.discount_percentage > 0 && (
-                            <Badge className="absolute top-2 right-2 bg-green-600 text-white border-0 font-mono text-xs">
-                              -{Math.round(product.discount_percentage)}%
-                            </Badge>
-                          )}
+                          <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                            {product.discount_percentage > 0 && (
+                              <Badge className="bg-green-600 text-white border-0 font-mono text-xs">
+                                -{Math.round(product.discount_percentage)}%
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="absolute bottom-2 right-2 z-10">
+                            <CompareButton productId={product.id} />
+                          </div>
                         </div>
 
                         {/* Info */}

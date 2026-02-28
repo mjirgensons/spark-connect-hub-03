@@ -516,6 +516,39 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_subscribers: {
+        Row: {
+          consent_text: string
+          email: string
+          id: string
+          is_active: boolean
+          name: string | null
+          source: string
+          subscribed_at: string
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          consent_text: string
+          email: string
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          source?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          consent_text?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          source?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string

@@ -16,6 +16,7 @@ import TrustBadgeBar from "@/components/TrustBadgeBar";
 import ProductReviews from "@/components/ProductReviews";
 import WishlistButton from "@/components/WishlistButton";
 import { toast } from "sonner";
+import CompareButton from "@/components/CompareButton";
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
@@ -313,6 +314,7 @@ const Product = () => {
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 {isDeactivated ? "Currently Unavailable" : qtyInCart > 0 ? `In Cart (${qtyInCart})` : "Add to Cart"}
               </Button>
+              <CompareButton productId={product.id} variant="text" />
               {product.installation_instructions_url && (
                 <a
                   href={isDeactivated ? undefined : product.installation_instructions_url}

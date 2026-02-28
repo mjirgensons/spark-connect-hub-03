@@ -1,10 +1,6 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Linkedin, MapPin, Mail, Phone } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 const linkColumns = [
   {
@@ -62,25 +58,6 @@ const linkColumns = [
 ];
 
 const Footer = () => {
-  const { toast } = useToast();
-  const [email, setEmail] = useState("");
-  const [consent, setConsent] = useState(false);
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!consent) {
-      toast({
-        title: "Consent required",
-        description: "Please consent to receive emails to subscribe.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (!email.trim()) return;
-    toast({ title: "Thanks for subscribing!", description: "We'll keep you updated." });
-    setEmail("");
-    setConsent(false);
-  };
 
   return (
     <footer className="bg-foreground text-background">
@@ -149,38 +126,7 @@ const Footer = () => {
           <div className="grid md:grid-cols-2 gap-12">
             {/* Newsletter */}
             <div>
-              <h4 className="font-sans font-bold text-sm tracking-wider uppercase mb-4">
-                Stay Updated
-              </h4>
-              <form onSubmit={handleSubscribe} className="space-y-3">
-                <div className="flex gap-2">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-background text-foreground border-2 border-background flex-1"
-                  />
-                  <Button
-                    type="submit"
-                    className="bg-foreground text-background border-2 border-background hover:bg-gray-900 shrink-0"
-                  >
-                    Subscribe
-                  </Button>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Checkbox
-                    id="newsletter-consent"
-                    checked={consent}
-                    onCheckedChange={(v) => setConsent(v === true)}
-                    className="mt-0.5 border-gray-400 data-[state=checked]:bg-background data-[state=checked]:text-foreground"
-                  />
-                  <label htmlFor="newsletter-consent" className="text-xs text-gray-400 leading-relaxed cursor-pointer">
-                    I consent to receive marketing emails from FitMatch about products, promotions, and renovation tips. I can unsubscribe at any time.
-                  </label>
-                </div>
-              </form>
+              <NewsletterSignup source="footer" />
             </div>
 
             {/* Contact */}
