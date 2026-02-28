@@ -663,13 +663,7 @@ const Admin = () => {
       case "customers":
         return <AdminCustomersTab />;
       case "integrations":
-        return (
-          <Card className="border-2 border-border">
-            <CardContent className="p-8 text-center text-muted-foreground">
-              <p className="text-sm">Integrations management — coming soon.</p>
-            </CardContent>
-          </Card>
-        );
+        return <AdminIntegrationsTab />;
       case "content":
         return (
           <div className="space-y-8">
