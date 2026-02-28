@@ -150,7 +150,7 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
             <Menu size={20} />
           </button>
           <span className="font-sans text-sm">
-            {session?.user?.email ?? "User"}
+            {profile?.full_name ?? profile?.email ?? "User"}
           </span>
           <Button variant="outline" size="sm" onClick={handleLogout}>
             <LogOut size={14} className="mr-1" />
