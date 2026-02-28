@@ -375,6 +375,213 @@ export type Database = {
         }
         Relationships: []
       }
+      integrations: {
+        Row: {
+          category: string
+          config: Json
+          created_at: string
+          display_name: string
+          encrypted_credentials: Json | null
+          id: string
+          is_enabled: boolean
+          last_health_check: string | null
+          last_health_status: string | null
+          notes: string | null
+          service_name: string
+          status: string
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          category: string
+          config?: Json
+          created_at?: string
+          display_name: string
+          encrypted_credentials?: Json | null
+          id?: string
+          is_enabled?: boolean
+          last_health_check?: string | null
+          last_health_status?: string | null
+          notes?: string | null
+          service_name: string
+          status?: string
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          category?: string
+          config?: Json
+          created_at?: string
+          display_name?: string
+          encrypted_credentials?: Json | null
+          id?: string
+          is_enabled?: boolean
+          last_health_check?: string | null
+          last_health_status?: string | null
+          notes?: string | null
+          service_name?: string
+          status?: string
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          order_id: string
+          product_id: string | null
+          product_image: string | null
+          product_name: string
+          product_sku: string | null
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          order_id: string
+          product_id?: string | null
+          product_image?: string | null
+          product_name: string
+          product_sku?: string | null
+          quantity?: number
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          order_id?: string
+          product_id?: string | null
+          product_image?: string | null
+          product_name?: string
+          product_sku?: string | null
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          currency: string
+          estimated_delivery: string | null
+          guest_email: string | null
+          id: string
+          notes: string | null
+          order_number: string
+          paid_at: string | null
+          payment_status: string
+          shipping_address_line_1: string
+          shipping_address_line_2: string | null
+          shipping_city: string
+          shipping_cost: number
+          shipping_country: string
+          shipping_method: string | null
+          shipping_name: string
+          shipping_phone: string | null
+          shipping_postal_code: string
+          shipping_province: string
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          total: number
+          tracking_number: string | null
+          tracking_url: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          estimated_delivery?: string | null
+          guest_email?: string | null
+          id?: string
+          notes?: string | null
+          order_number: string
+          paid_at?: string | null
+          payment_status?: string
+          shipping_address_line_1: string
+          shipping_address_line_2?: string | null
+          shipping_city: string
+          shipping_cost?: number
+          shipping_country?: string
+          shipping_method?: string | null
+          shipping_name: string
+          shipping_phone?: string | null
+          shipping_postal_code: string
+          shipping_province: string
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          total?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          estimated_delivery?: string | null
+          guest_email?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string
+          paid_at?: string | null
+          payment_status?: string
+          shipping_address_line_1?: string
+          shipping_address_line_2?: string | null
+          shipping_city?: string
+          shipping_cost?: number
+          shipping_country?: string
+          shipping_method?: string | null
+          shipping_name?: string
+          shipping_phone?: string | null
+          shipping_postal_code?: string
+          shipping_province?: string
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          total?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           additional_image_urls: string[] | null
@@ -642,103 +849,158 @@ export type Database = {
           },
         ]
       }
-      quote_requests: {
+      quote_request_items: {
         Row: {
-          budget_range: string | null
-          category: string | null
-          client_id: string
           created_at: string
-          depth_mm: number
-          height_mm: number
           id: string
           notes: string | null
-          status: string
-          style_preference: string | null
-          width_mm: number
+          product_id: string | null
+          product_name: string
+          quantity: number
+          quote_request_id: string
         }
         Insert: {
-          budget_range?: string | null
-          category?: string | null
-          client_id: string
           created_at?: string
-          depth_mm: number
-          height_mm: number
           id?: string
           notes?: string | null
-          status?: string
-          style_preference?: string | null
-          width_mm: number
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          quote_request_id: string
         }
         Update: {
-          budget_range?: string | null
-          category?: string | null
-          client_id?: string
           created_at?: string
-          depth_mm?: number
-          height_mm?: number
           id?: string
           notes?: string | null
-          status?: string
-          style_preference?: string | null
-          width_mm?: number
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          quote_request_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "quote_requests_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "quote_request_items_product_id_fkey"
+            columns: ["product_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      quotes: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          lead_time_days: number | null
-          price: number
-          quote_request_id: string
-          seller_id: string
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          lead_time_days?: number | null
-          price: number
-          quote_request_id: string
-          seller_id: string
-          status?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          lead_time_days?: number | null
-          price?: number
-          quote_request_id?: string
-          seller_id?: string
-          status?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "quotes_quote_request_id_fkey"
+            foreignKeyName: "quote_request_items_quote_request_id_fkey"
             columns: ["quote_request_id"]
             isOneToOne: false
             referencedRelation: "quote_requests"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "quotes_seller_id_fkey"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
+      }
+      quote_requests: {
+        Row: {
+          admin_notes: string | null
+          company_name: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          delivery_address: string | null
+          id: string
+          notes: string | null
+          project_timeline: string | null
+          project_type: string | null
+          quote_number: string
+          quoted_at: string | null
+          quoted_total: number | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          company_name?: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          delivery_address?: string | null
+          id?: string
+          notes?: string | null
+          project_timeline?: string | null
+          project_type?: string | null
+          quote_number: string
+          quoted_at?: string | null
+          quoted_total?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          company_name?: string | null
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          delivery_address?: string | null
+          id?: string
+          notes?: string | null
+          project_timeline?: string | null
+          project_type?: string | null
+          quote_number?: string
+          quoted_at?: string | null
+          quoted_total?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      shipping_addresses: {
+        Row: {
+          address_line_1: string
+          address_line_2: string | null
+          city: string
+          country: string
+          created_at: string
+          full_name: string
+          id: string
+          is_default: boolean
+          phone: string | null
+          postal_code: string
+          province: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address_line_1: string
+          address_line_2?: string | null
+          city: string
+          country?: string
+          created_at?: string
+          full_name: string
+          id?: string
+          is_default?: boolean
+          phone?: string | null
+          postal_code: string
+          province: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address_line_1?: string
+          address_line_2?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          is_default?: boolean
+          phone?: string | null
+          postal_code?: string
+          province?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       site_settings: {
         Row: {
@@ -763,6 +1025,68 @@ export type Database = {
           value?: string
         }
         Relationships: []
+      }
+      webhook_logs: {
+        Row: {
+          created_at: string
+          direction: string
+          duration_ms: number | null
+          error_message: string | null
+          event_type: string
+          id: string
+          integration_id: string | null
+          max_retries: number
+          next_retry_at: string | null
+          request_payload: Json | null
+          response_body: string | null
+          response_status: number | null
+          retry_count: number
+          status: string
+          webhook_url: string
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          duration_ms?: number | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          integration_id?: string | null
+          max_retries?: number
+          next_retry_at?: string | null
+          request_payload?: Json | null
+          response_body?: string | null
+          response_status?: number | null
+          retry_count?: number
+          status?: string
+          webhook_url: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          integration_id?: string | null
+          max_retries?: number
+          next_retry_at?: string | null
+          request_payload?: Json | null
+          response_body?: string | null
+          response_status?: number | null
+          retry_count?: number
+          status?: string
+          webhook_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_logs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
