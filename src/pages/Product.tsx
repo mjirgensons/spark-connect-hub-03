@@ -108,6 +108,7 @@ const Product = () => {
                   ${Number(product.price_retail_usd).toLocaleString()}
                 </span>
               </div>
+              <p className="text-xs text-muted-foreground">Plus applicable HST (13%)</p>
               <p className="text-sm text-muted-foreground">
                 You save <span className="font-semibold text-foreground">${savings.toLocaleString()}</span>
               </p>

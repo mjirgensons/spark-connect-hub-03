@@ -60,6 +60,7 @@ const ProductShowcase = () => {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Browse our curated selection of surplus luxury European cabinetry — all at 50–80% below retail.
           </p>
+          <p className="text-xs text-muted-foreground mt-2">Savings based on MSRP. Actual retail prices may vary.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
@@ -92,6 +93,7 @@ const ProductShowcase = () => {
                         <span className="text-2xl font-bold text-foreground">${Number(product.price_discounted_usd).toLocaleString()}</span>
                         <span className="text-sm text-muted-foreground line-through mb-0.5">${Number(product.price_retail_usd).toLocaleString()}</span>
                       </div>
+                      <p className="text-xs text-muted-foreground">Excl. HST</p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -112,6 +114,7 @@ const ProductShowcase = () => {
                       <span className="text-2xl font-bold text-foreground">${product.ourPrice.toLocaleString()}</span>
                       <span className="text-sm text-muted-foreground line-through mb-0.5">${product.retailPrice.toLocaleString()}</span>
                     </div>
+                    <p className="text-xs text-muted-foreground">Excl. HST</p>
                   </CardContent>
                 </Card>
               ))}
