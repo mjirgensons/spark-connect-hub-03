@@ -42,8 +42,13 @@ const AccountOrders = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-5 h-5 animate-spin" />
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-40" />
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <OrderCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }

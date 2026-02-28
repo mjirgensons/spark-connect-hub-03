@@ -6,6 +6,7 @@ import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import DimensionMatcher from "@/components/DimensionMatcher";
 import { Card } from "@/components/ui/card";
+import { ProductCardSkeleton } from "@/components/ui/product-card-skeleton";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";

@@ -34,9 +34,7 @@ const Product = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
-          <p className="text-muted-foreground">Loading product...</p>
-        </div>
+        <ProductDetailSkeleton />
         <Footer />
       </div>
     );

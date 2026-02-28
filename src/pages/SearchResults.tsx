@@ -99,8 +99,10 @@ const SearchResults = () => {
         <h1 className="font-serif text-2xl md:text-3xl font-bold mb-6">{headingText}</h1>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
           </div>
         ) : results.length === 0 ? (
           <div
