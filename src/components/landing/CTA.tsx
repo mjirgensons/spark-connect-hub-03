@@ -62,6 +62,7 @@ const CTA = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [caslConsent, setCaslConsent] = useState(false);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
