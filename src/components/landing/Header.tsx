@@ -103,6 +103,10 @@ const Header = () => {
           <div className="md:hidden py-4 border-t border-border">
             <nav className="flex flex-col gap-4">
               {navLinks.map(renderNavItem)}
+              <Link to="/cart" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setIsMenuOpen(false)}>
+                <ShoppingCart className="w-4 h-4" />
+                Cart {itemCount > 0 && `(${itemCount})`}
+              </Link>
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>

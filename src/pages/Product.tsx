@@ -281,9 +281,15 @@ const Product = () => {
             <Separator />
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-2">
-              <Button size="lg" className="flex-1 shadow-[0_4px_12px_hsla(var(--primary),0.3)]" disabled={isDeactivated}>
-                {isDeactivated ? "Currently Unavailable" : "Request a Quote"}
+            <div className="flex gap-3 pt-2 flex-wrap">
+              <Button
+                size="lg"
+                className="flex-1 shadow-[4px_4px_0px_0px_hsl(var(--foreground))]"
+                disabled={isDeactivated || qtyInCart >= product.stock_level}
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                {isDeactivated ? "Currently Unavailable" : qtyInCart > 0 ? `In Cart (${qtyInCart})` : "Add to Cart"}
               </Button>
               {product.installation_instructions_url && (
                 <a
