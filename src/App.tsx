@@ -57,6 +57,11 @@ import BuilderNewProject from "./pages/builder/BuilderNewProject";
 import BuilderMatches from "./pages/builder/BuilderMatches";
 import BuilderMessages from "./pages/builder/BuilderMessages";
 import BuilderProfile from "./pages/builder/BuilderProfile";
+import AccountLayout from "./pages/account/AccountLayout";
+import AccountOverview from "./pages/account/AccountOverview";
+import AccountOrders from "./pages/account/AccountOrders";
+import AccountAddresses from "./pages/account/AccountAddresses";
+import AccountSettings from "./pages/account/AccountSettings";
 import RoleGuard from "./components/RoleGuard";
 import DashboardLayout from "./components/DashboardLayout";
 
@@ -152,6 +157,14 @@ const App = () => (
             <Route path="matches" element={<BuilderMatches />} />
             <Route path="messages" element={<BuilderMessages />} />
             <Route path="profile" element={<BuilderProfile />} />
+          </Route>
+
+          {/* Account routes (any authenticated user) */}
+          <Route path="/account" element={<AccountLayout />}>
+            <Route index element={<AccountOverview />} />
+            <Route path="orders" element={<AccountOrders />} />
+            <Route path="addresses" element={<AccountAddresses />} />
+            <Route path="settings" element={<AccountSettings />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
