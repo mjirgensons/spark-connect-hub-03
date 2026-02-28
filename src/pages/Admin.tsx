@@ -524,6 +524,7 @@ const Admin = () => {
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="site-settings">Site Settings</TabsTrigger>
               <TabsTrigger value="legal-pages">Legal Pages</TabsTrigger>
+              <TabsTrigger value="cookie-manager">Cookie Manager</TabsTrigger>
             </TabsList>
             <Button onClick={openCreate}><Plus className="w-4 h-4 mr-1" /> Add Product</Button>
           </div>
