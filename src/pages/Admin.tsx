@@ -24,6 +24,7 @@ import SiteSettingsAdmin from "@/components/admin/SiteSettingsAdmin";
 import LegalPagesAdmin from "@/components/admin/LegalPagesAdmin";
 import CookieCategoriesAdmin from "@/components/admin/CookieCategoriesAdmin";
 import CookieRegistryAdmin from "@/components/admin/CookieRegistryAdmin";
+import ConsentLogsAdmin from "@/components/admin/ConsentLogsAdmin";
 
 interface Category {
   id: string;
