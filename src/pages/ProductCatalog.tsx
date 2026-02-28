@@ -372,7 +372,7 @@ const ProductCatalog = () => {
                           </div>
 
                           <p className="font-mono text-xs text-muted-foreground">
-                            {product.width_mm}×{product.height_mm}×{product.depth_mm} mm
+                            {product.width_mm}×{product.height_mm}×{product.depth_mm} mm / {(product.width_mm * MM_TO_INCH).toFixed(1)}″×{(product.height_mm * MM_TO_INCH).toFixed(1)}″×{(product.depth_mm * MM_TO_INCH).toFixed(1)}″
                           </p>
 
                           <div className="flex items-baseline gap-2">
