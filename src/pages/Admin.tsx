@@ -23,6 +23,7 @@ import AdminProductsTab from "@/components/admin/AdminProductsTab";
 import AdminTrustSignalsTab from "@/components/admin/AdminTrustSignalsTab";
 import AdminFAQTab from "@/components/admin/AdminFAQTab";
 import AdminReviewsTab from "@/components/admin/AdminReviewsTab";
+import AdminEmailTemplatesTab from "@/components/admin/AdminEmailTemplatesTab";
 import AdminBlogTab from "@/components/admin/AdminBlogTab";
 import AdminNewsletterTab from "@/components/admin/AdminNewsletterTab";
 
