@@ -703,6 +703,7 @@ const Admin = () => {
 
           <TabsContent value="cookie-manager">
             <div className="space-y-8">
+              <BannerSettingsAdmin />
               <CookieCategoriesAdmin />
               <CookieRegistryAdmin />
               <ConsentLogsAdmin />
