@@ -252,7 +252,7 @@ const Product = () => {
                         <Badge variant="destructive" className="text-xs">{product.countertop_discount_percentage}% OFF</Badge>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                       {product.countertop_stock != null && product.countertop_stock > 0 && (
                         <div><p className="text-xs text-muted-foreground">Units in Stock</p><p className="font-medium text-foreground">{product.countertop_stock}</p></div>
                       )}

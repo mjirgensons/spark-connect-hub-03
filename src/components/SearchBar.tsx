@@ -224,8 +224,8 @@ const SearchBar = () => {
                   </div>
                 ))}
               </div>
-              <div className="flex items-end gap-3">
-                <div className="w-36">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+                <div className="sm:w-36">
                   <label className="text-xs font-bold uppercase tracking-wider mb-1.5 block text-muted-foreground">
                     Tolerance
                   </label>

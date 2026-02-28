@@ -45,20 +45,20 @@ const DimensionMatcher = () => {
           className="max-w-3xl mx-auto border-[3px] border-foreground bg-background p-6 md:p-10"
           style={{ boxShadow: "8px 8px 0 0 hsl(var(--foreground))" }}
         >
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 border-2 border-foreground bg-primary">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2.5 border-2 border-foreground bg-primary shrink-0">
                 <Ruler className="w-6 h-6 text-primary-foreground" />
               </div>
-              <div>
-                <h2 className="font-serif text-xl md:text-2xl font-bold">FitMatch — Dimension Matcher</h2>
+              <div className="min-w-0">
+                <h2 className="font-serif text-lg sm:text-xl md:text-2xl font-bold">FitMatch — Dimension Matcher</h2>
                 <p className="text-sm text-muted-foreground">
                   Enter your opening dimensions and find cabinets that fit
                 </p>
               </div>
             </div>
             {/* Unit toggle */}
-            <div className="flex border-2 border-border overflow-hidden shrink-0">
+            <div className="flex border-2 border-border overflow-hidden shrink-0 self-start sm:self-auto">
               <button
                 className={`px-3 py-1.5 text-xs font-bold transition-colors ${
                   unit === "in" ? "bg-foreground text-background" : "bg-background text-foreground hover:bg-accent"
