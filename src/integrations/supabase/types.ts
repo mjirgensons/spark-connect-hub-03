@@ -179,6 +179,42 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_logs: {
+        Row: {
+          action: string
+          banner_version: string | null
+          categories: Json
+          created_at: string
+          id: string
+          ip_hash: string | null
+          page_url: string | null
+          session_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          banner_version?: string | null
+          categories?: Json
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          page_url?: string | null
+          session_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          banner_version?: string | null
+          categories?: Json
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          page_url?: string | null
+          session_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       contractor_details: {
         Row: {
           bio: string | null
@@ -219,6 +255,92 @@ export type Database = {
             columns: ["id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cookie_categories: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          is_required: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          is_required?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          is_required?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cookie_definitions: {
+        Row: {
+          category_id: string
+          created_at: string
+          duration: string
+          id: string
+          is_active: boolean
+          name: string
+          provider: string
+          purpose: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          duration?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          provider?: string
+          purpose?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          duration?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          provider?: string
+          purpose?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cookie_definitions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "cookie_categories"
             referencedColumns: ["id"]
           },
         ]
