@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import DimensionMatcher from "@/components/DimensionMatcher";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { Card } from "@/components/ui/card";
 import { ProductCardSkeleton } from "@/components/ui/product-card-skeleton";
 import { Button } from "@/components/ui/button";
