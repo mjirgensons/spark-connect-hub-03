@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { SlidersHorizontal, X } from "lucide-react";
+import WishlistButton from "@/components/WishlistButton";
 
 const MM_TO_INCH = 0.0393701;
 const fmt = (mm: number) => `${mm}mm / ${(mm * MM_TO_INCH).toFixed(1)}″`;
@@ -346,6 +347,9 @@ const ProductCatalog = () => {
                       >
                         {/* Image */}
                         <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+                          <div className="absolute top-2 left-2 z-10">
+                            <WishlistButton productId={product.id} size="sm" />
+                          </div>
                           {product.main_image_url ? (
                             <img
                               src={product.main_image_url}

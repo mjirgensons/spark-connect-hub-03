@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { SearchX } from "lucide-react";
 import { ProductCardSkeleton } from "@/components/ui/product-card-skeleton";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import WishlistButton from "@/components/WishlistButton";
 
 const MM_TO_INCH = 0.0393701;
 const fmtPrice = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -151,6 +152,9 @@ const SearchResults = () => {
                     style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}
                   >
                     <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+                      <div className="absolute top-2 left-2 z-10">
+                        <WishlistButton productId={product.id} size="sm" />
+                      </div>
                       {product.main_image_url ? (
                         <img
                           src={product.main_image_url}

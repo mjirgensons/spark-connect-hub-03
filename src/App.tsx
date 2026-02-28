@@ -10,6 +10,7 @@ import CookieConsent from "./components/CookieConsent";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import "./App.css";
 import { CartProvider } from "./contexts/CartContext";
+import { WishlistProvider } from "./contexts/WishlistContext";
 import Index from "./pages/Index";
 import Product from "./pages/Product";
 import Cart from "./pages/Cart";
@@ -78,6 +79,7 @@ const AccountOverview = lazy(() => import("./pages/account/AccountOverview"));
 const AccountOrders = lazy(() => import("./pages/account/AccountOrders"));
 const AccountAddresses = lazy(() => import("./pages/account/AccountAddresses"));
 const AccountSettings = lazy(() => import("./pages/account/AccountSettings"));
+const AccountWishlist = lazy(() => import("./pages/account/AccountWishlist"));
 
 // Lazy-loaded: Heavy pages
 const Checkout = lazy(() => import("./pages/Checkout"));
@@ -106,6 +108,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <CartProvider>
+      <WishlistProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
@@ -193,6 +196,7 @@ const App = () => (
           <Route path="/account" element={<AccountLayout />}>
             <Route index element={<AccountOverview />} />
             <Route path="orders" element={<AccountOrders />} />
+            <Route path="wishlist" element={<AccountWishlist />} />
             <Route path="addresses" element={<AccountAddresses />} />
             <Route path="settings" element={<AccountSettings />} />
           </Route>
@@ -202,6 +206,7 @@ const App = () => (
         </Routes>
         </Suspense>
       </BrowserRouter>
+      </WishlistProvider>
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>

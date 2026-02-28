@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingCart } from "lucide-react";
+import { Menu, X, ShoppingCart, Heart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import SearchBar from "@/components/SearchBar";
 
 type NavItem =
@@ -26,6 +27,7 @@ const Header = () => {
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
   const { itemCount } = useCart();
+  const { wishlistCount } = useWishlist();
 
   const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (!isHome) {
@@ -82,6 +84,12 @@ const Header = () => {
 
           <div className="flex items-center gap-1">
             <SearchBar />
+            <Link to="/account/wishlist" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+              <Heart className="w-5 h-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-primary-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{wishlistCount}</span>
+              )}
+            </Link>
             <Link to="/cart" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
               <ShoppingCart className="w-5 h-5" />
               {itemCount > 0 && (
@@ -110,6 +118,10 @@ const Header = () => {
                   {renderNavItem(item)}
                 </div>
               ))}
+              <Link to="/account/wishlist" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground min-h-[44px]" onClick={() => setIsMenuOpen(false)}>
+                <Heart className="w-4 h-4" />
+                Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
+              </Link>
               <Link to="/cart" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground min-h-[44px]" onClick={() => setIsMenuOpen(false)}>
                 <ShoppingCart className="w-4 h-4" />
                 Cart {itemCount > 0 && `(${itemCount})`}

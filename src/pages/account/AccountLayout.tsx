@@ -5,11 +5,12 @@ import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, LayoutDashboard, Package, MapPin, Settings, LogOut } from "lucide-react";
+import { Loader2, LayoutDashboard, Package, Heart, MapPin, Settings, LogOut } from "lucide-react";
 
 const NAV_ITEMS = [
   { to: "/account", label: "Overview", icon: LayoutDashboard, end: true },
   { to: "/account/orders", label: "Orders", icon: Package, end: false },
+  { to: "/account/wishlist", label: "Wishlist", icon: Heart, end: false },
   { to: "/account/addresses", label: "Addresses", icon: MapPin, end: false },
   { to: "/account/settings", label: "Settings", icon: Settings, end: false },
 ];
