@@ -134,6 +134,7 @@ const App = () => (
 
           {/* Builder routes */}
           <Route path="/builder" element={<RoleGuard allowedRoles={['builder']}><DashboardLayout role="builder" /></RoleGuard>}>
+            <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<BuilderDashboard />} />
             <Route path="projects" element={<BuilderProjects />} />
             <Route path="projects/new" element={<BuilderNewProject />} />
