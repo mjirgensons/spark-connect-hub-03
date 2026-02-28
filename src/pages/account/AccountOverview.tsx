@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Package, DollarSign, Clock, ShoppingBag, MessageSquare } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { OrderCardSkeleton } from "@/components/ui/order-card-skeleton";
 import { format } from "date-fns";
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive"> = {
