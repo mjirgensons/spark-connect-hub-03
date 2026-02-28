@@ -27,6 +27,7 @@ const Header = () => {
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
   const { itemCount } = useCart();
+  const { wishlistCount } = useWishlist();
 
   const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (!isHome) {
