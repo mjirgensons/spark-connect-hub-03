@@ -117,6 +117,7 @@ const AdminIntegrationsTab = () => {
   const [healthChecking, setHealthChecking] = useState(false);
   const [webhookPaths, setWebhookPaths] = useState<Record<string, string>>({});
   const [lastFired, setLastFired] = useState<Record<string, string>>({});
+  const [lastStatus, setLastStatus] = useState<Record<string, string>>({});
   const [autoCheckInterval, setAutoCheckInterval] = useState(5); // minutes
   const refreshRef = useRef<ReturnType<typeof setInterval>>();
   const healthCheckRef = useRef<ReturnType<typeof setInterval>>();
@@ -137,19 +138,23 @@ const AdminIntegrationsTab = () => {
 
   const fetchLastFired = useCallback(async () => {
     const fired: Record<string, string> = {};
+    const statuses: Record<string, string> = {};
     for (const we of WEBHOOK_EVENTS) {
-      // Match both exact event and .test variant
+      // Get the most recent log for this event (regardless of status)
       const { data } = await supabase
         .from("webhook_logs")
-        .select("created_at")
+        .select("created_at, status")
         .or(`event_type.eq.${we.event},event_type.eq.${we.event}.test`)
-        .eq("status", "delivered")
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (data) fired[we.event] = data.created_at;
+      if (data) {
+        fired[we.event] = data.created_at;
+        statuses[we.event] = data.status as string;
+      }
     }
     setLastFired(fired);
+    setLastStatus(statuses);
   }, []);
 
   useEffect(() => {
@@ -447,8 +452,10 @@ const AdminIntegrationsTab = () => {
                   />
                 </TableCell>
                 <TableCell className="py-1.5 px-2 text-center">
-                  {lastFired[we.event] ? (
+                  {lastStatus[we.event] === "delivered" ? (
                     <CheckCircle className="w-3.5 h-3.5 text-green-600 mx-auto" />
+                  ) : lastStatus[we.event] === "failed" ? (
+                    <XCircle className="w-3.5 h-3.5 text-destructive mx-auto" />
                   ) : (
                     <Circle className="w-3.5 h-3.5 text-muted-foreground mx-auto" />
                   )}
@@ -458,7 +465,7 @@ const AdminIntegrationsTab = () => {
                 </TableCell>
                 <TableCell className="py-1.5 px-2 text-center">
                   <Button
-                    variant="outline"
+                    variant={lastStatus[we.event] === "failed" ? "destructive" : lastStatus[we.event] === "delivered" ? "default" : "outline"}
                     size="sm"
                     className="h-6 text-[10px] px-2"
                     disabled={testing === we.event}
