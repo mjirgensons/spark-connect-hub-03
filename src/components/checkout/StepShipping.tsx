@@ -39,7 +39,7 @@ const shippingOptions: {
 const StepShipping = () => {
   const { info, shippingMethod, setShippingMethod, setShippingCost, setStep } = useCheckout();
   const { subtotal, items } = useCart();
-  const [selected, setSelected] = useState<ShippingMethod>(shippingMethod ?? "standard");
+  const [selected, setSelected] = useState<ShippingMethod>(shippingMethod ?? "standard"); // eslint-disable-line
 
   const option = shippingOptions.find((o) => o.id === selected)!;
   const shipCost = option.getPrice(subtotal);

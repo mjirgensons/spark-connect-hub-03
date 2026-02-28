@@ -59,17 +59,17 @@ export async function dispatchWebhook(
   // Log to webhook_logs (fire-and-forget)
   supabase
     .from("webhook_logs")
-    .insert({
+    .insert([{
       event_type: payload.eventType,
-      direction: "outbound",
+      direction: "outbound" as const,
       webhook_url: webhookUrl || "n8n (not configured)",
-      request_payload: payload.data as Record<string, unknown>,
+      request_payload: payload.data as unknown as Record<string, unknown>,
       response_status: responseStatus,
       response_body: responseBody.slice(0, 2000),
       duration_ms: durationMs,
       status,
       error_message: errorMessage,
-    })
+    }])
     .then(({ error }) => {
       if (error) console.warn("[webhook] Failed to log webhook attempt:", error.message);
     });
