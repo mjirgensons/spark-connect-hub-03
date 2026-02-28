@@ -90,6 +90,10 @@ const WEBHOOK_EVENTS = [
   { event: "user.signup", path: "/webhook/user-signup" },
   { event: "user.first_purchase", path: "/webhook/user-first-purchase" },
   { event: "health.check", path: "/webhook/health-check" },
+  { event: "email.send", path: "/webhook/email-send" },
+  { event: "email.test", path: "/webhook/email-test" },
+  { event: "email.inbound", path: "/webhook/inbound-email" },
+  { event: "email.tracking", path: "/webhook/mailgun-events" },
 ];
 
 const STRIPE_EVENTS = [

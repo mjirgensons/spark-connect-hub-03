@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Download, Plus, Users, UserCheck, UserX } from "lucide-react";
+import { Download, Plus, Users, UserCheck, UserX } from "lucide-react";
 import { format, subDays } from "date-fns";
 
 interface ConsentLog {

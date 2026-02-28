@@ -454,35 +454,11 @@ const AdminEmailTemplatesTab = () => {
         />
       )}
 
-      {internalTab === "comm-log" && (
-        <Card className="border-2 border-border">
-          <CardContent className="p-8 text-center">
-            <MessageSquare className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-            <h3 className="text-lg font-serif font-bold text-foreground mb-1">Communication Log</h3>
-            <p className="text-sm text-muted-foreground">Coming soon — View all sent and received emails with delivery status tracking.</p>
-          </CardContent>
-        </Card>
-      )}
+      {internalTab === "comm-log" && <EmailCommLogTab />}
 
-      {internalTab === "consent" && (
-        <Card className="border-2 border-border">
-          <CardContent className="p-8 text-center">
-            <Shield className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-            <h3 className="text-lg font-serif font-bold text-foreground mb-1">Email Consent</h3>
-            <p className="text-sm text-muted-foreground">Coming soon — CASL-compliant consent audit trail and management.</p>
-          </CardContent>
-        </Card>
-      )}
+      {internalTab === "consent" && <EmailConsentTab />}
 
-      {internalTab === "settings" && (
-        <Card className="border-2 border-border">
-          <CardContent className="p-8 text-center">
-            <Settings className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-            <h3 className="text-lg font-serif font-bold text-foreground mb-1">Email Settings</h3>
-            <p className="text-sm text-muted-foreground">Coming soon — Configure default sender, SMTP routing, and email processing rules.</p>
-          </CardContent>
-        </Card>
-      )}
+      {internalTab === "settings" && <EmailSettingsTab />}
 
       {/* Template Editor Sheet */}
       <Sheet open={editorOpen} onOpenChange={setEditorOpen}>
