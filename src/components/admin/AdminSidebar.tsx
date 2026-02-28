@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  Shield,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
