@@ -61,6 +61,7 @@ export const trackEvent = async (
   eventValue?: number,
   metadata?: Record<string, unknown>
 ) => {
+  if (!hasAnalyticsConsent()) return;
   try {
     await supabase.from("analytics_events").insert({
       ...getCommonData(),
