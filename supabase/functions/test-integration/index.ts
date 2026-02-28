@@ -42,7 +42,43 @@ Deno.serve(async (req) => {
     const creds = integration.encrypted_credentials || {};
     const start = Date.now();
 
+    // Support testing individual webhook paths (for n8n registry)
+    const { webhook_test_url, webhook_test_payload } = await req.json().catch(() => ({})) || {};
+
     let result: { status: string; message: string; latency_ms?: number };
+
+    // If a direct webhook test URL is provided, test it directly
+    if (webhook_test_url) {
+      try {
+        const payload = webhook_test_payload || { test: true, timestamp: new Date().toISOString() };
+        const res = await fetch(webhook_test_url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const body = await res.text();
+        const isHtml = body.trim().startsWith("<!") || body.includes("<html");
+        result = res.ok
+          ? { status: "healthy", message: `Webhook responded with ${res.status}` }
+          : {
+              status: "error",
+              message: isHtml
+                ? `Returned HTML (status ${res.status}) — check if workflow is active`
+                : `Returned ${res.status}: ${body.substring(0, 200)}`,
+            };
+        result.latency_ms = Date.now() - start;
+        return new Response(JSON.stringify(result), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      } catch (e) {
+        result = { status: "error", message: `Unreachable: ${e.message}`, latency_ms: Date.now() - start };
+        return new Response(JSON.stringify(result), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
     switch (service_name) {
       case "mailgun": {
