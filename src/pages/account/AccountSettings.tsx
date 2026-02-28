@@ -88,6 +88,7 @@ const AccountSettings = () => {
 
   return (
     <div className="space-y-8">
+      <Breadcrumbs items={[{ label: "My Account", href: "/account" }, { label: "Settings" }]} />
       <h1 className="text-2xl font-bold font-serif">Account Settings</h1>
 
       {/* Profile */}
