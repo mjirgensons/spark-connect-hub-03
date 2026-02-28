@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, Copy, Loader2, ShoppingBag, Truck, HelpCircle } from "lucide-react";
+import { CheckCircle2, Copy, Loader2, ShoppingBag, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface OrderRow {
