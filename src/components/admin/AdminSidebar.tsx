@@ -19,6 +19,7 @@ import {
   HelpCircle,
   MessageSquare,
   BookOpen,
+  Mail,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
