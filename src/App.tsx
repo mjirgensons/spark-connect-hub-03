@@ -57,6 +57,11 @@ import BuilderNewProject from "./pages/builder/BuilderNewProject";
 import BuilderMatches from "./pages/builder/BuilderMatches";
 import BuilderMessages from "./pages/builder/BuilderMessages";
 import BuilderProfile from "./pages/builder/BuilderProfile";
+import AccountLayout from "./pages/account/AccountLayout";
+import AccountOverview from "./pages/account/AccountOverview";
+import AccountOrders from "./pages/account/AccountOrders";
+import AccountAddresses from "./pages/account/AccountAddresses";
+import AccountSettings from "./pages/account/AccountSettings";
 import RoleGuard from "./components/RoleGuard";
 import DashboardLayout from "./components/DashboardLayout";
 
