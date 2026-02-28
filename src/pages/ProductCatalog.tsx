@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import DimensionMatcher from "@/components/DimensionMatcher";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { Card } from "@/components/ui/card";
 import { ProductCardSkeleton } from "@/components/ui/product-card-skeleton";
 import { Button } from "@/components/ui/button";
@@ -267,6 +268,7 @@ const ProductCatalog = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1 container mx-auto px-4 pt-24 pb-12">
+        <Breadcrumbs items={[{ label: "Browse Cabinets" }]} />
         <h1 className="font-serif text-3xl md:text-4xl font-bold mb-4">Browse Cabinets</h1>
         <DimensionMatcher />
         <div className="flex gap-8 mt-8">

@@ -3,6 +3,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Package, Eye, ShoppingCart, FileText, PlusCircle } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const stats = [
   { label: "Products Listed", value: "0", icon: Package },
@@ -16,6 +17,7 @@ const SellerDashboard = () => {
 
   return (
     <div className="space-y-8">
+      <Breadcrumbs items={[{ label: "Dashboard" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">
         Welcome back, {profile?.full_name?.split(" ")[0] || "there"}
       </h1>

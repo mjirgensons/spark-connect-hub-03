@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -114,6 +115,7 @@ const SellerNewProduct = () => {
 
   return (
     <div className="space-y-6 max-w-3xl">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/seller/dashboard" }, { label: "Products", href: "/seller/products" }, { label: "New Product" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">Add New Product</h1>
 
       {/* Basic Info */}

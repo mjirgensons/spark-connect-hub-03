@@ -1,8 +1,10 @@
 import { Card } from "@/components/ui/card";
 import { Briefcase } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const ContractorJobs = () => (
   <div className="space-y-6">
+    <Breadcrumbs items={[{ label: "Dashboard", href: "/contractor/dashboard" }, { label: "Jobs" }]} />
     <h1 className="font-serif text-2xl md:text-3xl font-bold">Available Jobs</h1>
     <Card
       className="border-2 border-foreground p-8 text-center"

@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const AccountSettings = () => {
   const { user, signOut } = useAuth();
@@ -87,6 +88,7 @@ const AccountSettings = () => {
 
   return (
     <div className="space-y-8">
+      <Breadcrumbs items={[{ label: "My Account", href: "/account" }, { label: "Settings" }]} />
       <h1 className="text-2xl font-bold font-serif">Account Settings</h1>
 
       {/* Profile */}

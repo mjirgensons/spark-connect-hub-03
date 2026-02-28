@@ -1,11 +1,13 @@
 import { useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const ClientProjectDetail = () => {
   const { projectId } = useParams();
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/client/dashboard" }, { label: "Projects", href: "/client/projects" }, { label: "Project Detail" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">Project Detail</h1>
       <Card
         className="border-2 border-foreground p-8 text-center"

@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Package, DollarSign, Clock, ShoppingBag, MessageSquare } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OrderCardSkeleton } from "@/components/ui/order-card-skeleton";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { format } from "date-fns";
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive"> = {
@@ -76,6 +77,7 @@ const AccountOverview = () => {
 
   return (
     <div className="space-y-8">
+      <Breadcrumbs items={[{ label: "My Account" }]} />
       <h1 className="text-2xl md:text-3xl font-bold font-serif">
         Welcome back, {firstName}
       </h1>

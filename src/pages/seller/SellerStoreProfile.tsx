@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -56,6 +57,7 @@ const SellerStoreProfile = () => {
 
   return (
     <div className="space-y-6 max-w-xl">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/seller/dashboard" }, { label: "Store Profile" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">Store Profile</h1>
 
       <Card className="border-2 border-foreground p-6 space-y-5" style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>

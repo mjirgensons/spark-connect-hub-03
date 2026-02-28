@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SearchX } from "lucide-react";
 import { ProductCardSkeleton } from "@/components/ui/product-card-skeleton";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const MM_TO_INCH = 0.0393701;
 const fmtPrice = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -96,6 +97,7 @@ const SearchResults = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1 container mx-auto px-4 pt-24 pb-12">
+        <Breadcrumbs items={[{ label: "Search Results" }]} />
         <h1 className="font-serif text-2xl md:text-3xl font-bold mb-6">{headingText}</h1>
 
         {isLoading ? (

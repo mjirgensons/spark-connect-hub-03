@@ -2,9 +2,11 @@ import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Package, PlusCircle } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const SellerProducts = () => (
   <div className="space-y-6">
+    <Breadcrumbs items={[{ label: "Dashboard", href: "/seller/dashboard" }, { label: "Products" }]} />
     <div className="flex items-center justify-between">
       <h1 className="font-serif text-2xl md:text-3xl font-bold">My Products</h1>
       <Button asChild>

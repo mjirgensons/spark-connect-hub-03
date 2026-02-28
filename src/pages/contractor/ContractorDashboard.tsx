@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { useProfile } from "@/hooks/useProfile";
 import { Briefcase, FolderOpen, CheckCircle, Star } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const stats = [
   { label: "Available Jobs", value: "0", icon: Briefcase },
@@ -14,6 +15,7 @@ const ContractorDashboard = () => {
 
   return (
     <div className="space-y-8">
+      <Breadcrumbs items={[{ label: "Dashboard" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">
         Welcome back, {profile?.full_name?.split(" ")[0] || "there"}
       </h1>

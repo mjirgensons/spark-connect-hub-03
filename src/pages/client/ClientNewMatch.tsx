@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ const ClientNewMatch = () => {
 
   return (
     <div className="space-y-6 max-w-2xl">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/client/dashboard" }, { label: "New Match" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">New Match Request</h1>
       <p className="text-muted-foreground text-sm">
         Tell us your opening dimensions and preferences. We'll find cabinets that fit.

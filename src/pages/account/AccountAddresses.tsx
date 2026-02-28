@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Pencil, Trash2, MapPin, Star } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const PROVINCES = [
   "Alberta", "British Columbia", "Manitoba", "New Brunswick",
@@ -138,6 +139,7 @@ const AccountAddresses = () => {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: "My Account", href: "/account" }, { label: "Addresses" }]} />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold font-serif">Saved Addresses</h1>
         <Button className="gap-2 border-2 shadow-[3px_3px_0px_0px_hsl(var(--foreground))]" onClick={openNew}>

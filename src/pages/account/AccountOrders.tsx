@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronDown, ChevronUp, ExternalLink, ShoppingBag } from "lucide-react";
 import { OrderCardSkeleton } from "@/components/ui/order-card-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { format } from "date-fns";
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive"> = {
@@ -56,6 +57,7 @@ const AccountOrders = () => {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: "My Account", href: "/account" }, { label: "Orders" }]} />
       <h1 className="text-2xl font-bold font-serif">Your Orders</h1>
 
       {!orders || orders.length === 0 ? (

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +50,7 @@ const ClientMatches = () => {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/client/dashboard" }, { label: "Matches" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">My Matches</h1>
 
       {/* Dimension input (always visible) */}
