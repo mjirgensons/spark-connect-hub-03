@@ -58,6 +58,25 @@ const Product = () => {
 
   const savings = product.price_retail_usd - product.price_discounted_usd;
   const isDeactivated = product.availability_status === "Deactivated";
+  const { dispatch, getItemQuantity } = useCart();
+  const qtyInCart = getItemQuantity(product.id);
+
+  const handleAddToCart = () => {
+    dispatch({
+      type: "ADD_ITEM",
+      payload: {
+        productId: product.id,
+        name: product.product_name,
+        image: product.main_image_url || "/placeholder.svg",
+        price: product.price_discounted_usd,
+        dimensions: `${product.width_mm} × ${product.height_mm} × ${product.depth_mm} mm`,
+        maxStock: product.stock_level,
+      },
+    });
+    toast.success("Added to cart", {
+      action: { label: "View Cart", onClick: () => window.location.href = "/cart" },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
