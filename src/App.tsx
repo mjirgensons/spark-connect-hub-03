@@ -31,6 +31,7 @@ import DashboardLayout from "./components/DashboardLayout";
 // Lazy-loaded: Admin
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const Admin = lazy(() => import("./pages/Admin"));
+const FAQPage = lazy(() => import("./pages/FAQPage"));
 
 // Lazy-loaded: Client dashboard
 const ClientDashboard = lazy(() => import("./pages/client/ClientDashboard"));
@@ -133,6 +134,7 @@ const App = () => (
           <Route path="/for-contractors" element={<ForContractorsPage />} />
           <Route path="/for-sellers" element={<ForSellersPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/faq" element={<FAQPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 

@@ -20,6 +20,7 @@ const quickLinks = [
   { label: "Browse All Cabinets", to: "/browse", icon: LayoutGrid },
   { label: "Kitchen Cabinets", to: "/browse?category=kitchen", icon: ChefHat },
   { label: "Bathroom Vanities", to: "/browse?category=vanity", icon: Bath },
+  { label: "FAQ", to: "/faq", icon: HelpCircle },
   { label: "How It Works", to: "/how-it-works", icon: HelpCircle },
   { label: "Request a Quote", to: "/quote-request", icon: FileText },
   { label: "Contact Us", to: "/about", icon: Mail },
