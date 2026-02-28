@@ -33,6 +33,7 @@ export type AdminSection =
   | "content"
   | "trust-signals"
   | "faq"
+  | "blog"
   | "cookie-manager"
   | "settings";
 
