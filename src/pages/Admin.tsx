@@ -30,6 +30,7 @@ import AdminDashboardTab from "@/components/admin/AdminDashboardTab";
 import AdminOrdersTab from "@/components/admin/AdminOrdersTab";
 import AdminCustomersTab from "@/components/admin/AdminCustomersTab";
 import AdminIntegrationsTab from "@/components/admin/AdminIntegrationsTab";
+import AdminQuotesTab from "@/components/admin/AdminQuotesTab";
 
 interface Category {
   id: string;
