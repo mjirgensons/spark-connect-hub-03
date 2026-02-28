@@ -1,31 +1,78 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Shield } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Shield, ChevronDown } from "lucide-react";
 
-interface CookiePreferences {
-  essential: boolean;
-  analytics: boolean;
-  functional: boolean;
+interface CookieCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  is_required: boolean;
+  sort_order: number;
 }
 
-const STORAGE_KEY = "fm_cookie_consent";
+interface CookieDefinition {
+  id: string;
+  category_id: string;
+  name: string;
+  provider: string;
+  purpose: string;
+  duration: string;
+  type: string;
+}
 
-export const getCookieConsent = (): CookiePreferences | null => {
+type ConsentMap = Record<string, boolean>;
+
+const STORAGE_KEY = "fm_cookie_consent";
+const SESSION_KEY = "fm_session_id";
+const BANNER_VERSION = "1.0";
+
+const getSessionId = (): string => {
+  let id = sessionStorage.getItem(SESSION_KEY);
+  if (!id) {
+    id = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    sessionStorage.setItem(SESSION_KEY, id);
+  }
+  return id;
+};
+
+export const getCookieConsent = (): ConsentMap | null => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as CookiePreferences;
+    return JSON.parse(raw) as ConsentMap;
   } catch {
     return null;
   }
 };
 
-const saveConsent = (prefs: CookiePreferences) => {
+const saveConsent = (prefs: ConsentMap) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+  // Dispatch event so other components (HideChatOnAdmin) can react
+  window.dispatchEvent(new Event("fm_consent_change"));
+};
+
+const logConsent = async (action: string, categories: ConsentMap) => {
+  try {
+    await supabase.from("consent_logs").insert({
+      session_id: getSessionId(),
+      action,
+      categories,
+      page_url: window.location.href,
+      banner_version: BANNER_VERSION,
+      user_agent: navigator.userAgent,
+      ip_hash: null,
+    } as any);
+  } catch {
+    // Silent fail — logging should never break the app
+  }
 };
 
 const CookieConsent = () => {
@@ -33,14 +80,37 @@ const CookieConsent = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [consentGiven, setConsentGiven] = useState(false);
-  const [prefs, setPrefs] = useState<CookiePreferences>({
-    essential: true,
-    analytics: false,
-    functional: false,
+  const [prefs, setPrefs] = useState<ConsentMap>({});
+  const [isUpdate, setIsUpdate] = useState(false);
+
+  const isAdmin = location.pathname.startsWith("/admin");
+
+  // Fetch active categories
+  const { data: categories = [] } = useQuery<CookieCategory[]>({
+    queryKey: ["cookie_categories_active"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("cookie_categories")
+        .select("id, name, slug, description, is_required, sort_order")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      return (data as any) || [];
+    },
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Don't render on admin routes
-  const isAdmin = location.pathname.startsWith("/admin");
+  // Fetch active definitions
+  const { data: definitions = [] } = useQuery<CookieDefinition[]>({
+    queryKey: ["cookie_definitions_active"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("cookie_definitions")
+        .select("id, category_id, name, provider, purpose, duration, type")
+        .eq("is_active", true);
+      return (data as any) || [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
   useEffect(() => {
     const stored = getCookieConsent();
@@ -54,38 +124,69 @@ const CookieConsent = () => {
 
   if (isAdmin) return null;
 
+  const buildAllTrue = (): ConsentMap => {
+    const map: ConsentMap = {};
+    categories.forEach((c) => { map[c.slug] = true; });
+    return map;
+  };
+
+  const buildRequiredOnly = (): ConsentMap => {
+    const map: ConsentMap = {};
+    categories.forEach((c) => { map[c.slug] = c.is_required; });
+    return map;
+  };
+
   const handleAcceptAll = () => {
-    const all: CookiePreferences = { essential: true, analytics: true, functional: true };
+    const all = buildAllTrue();
     saveConsent(all);
+    logConsent("accept_all", all);
     setPrefs(all);
     setShowBanner(false);
     setConsentGiven(true);
   };
 
   const handleRejectNonEssential = () => {
-    const minimal: CookiePreferences = { essential: true, analytics: false, functional: false };
+    const minimal = buildRequiredOnly();
     saveConsent(minimal);
+    logConsent("reject_non_essential", minimal);
     setPrefs(minimal);
     setShowBanner(false);
     setConsentGiven(true);
   };
 
   const handleSavePreferences = () => {
-    saveConsent(prefs);
+    // Ensure required categories are always true
+    const finalPrefs = { ...prefs };
+    categories.forEach((c) => {
+      if (c.is_required) finalPrefs[c.slug] = true;
+    });
+    saveConsent(finalPrefs);
+    logConsent(isUpdate ? "update" : "custom", finalPrefs);
+    setPrefs(finalPrefs);
     setShowSettings(false);
     setShowBanner(false);
     setConsentGiven(true);
+    setIsUpdate(false);
   };
 
   const handleOpenSettings = () => {
+    setIsUpdate(false);
+    // Initialize toggles: required=true, others=false for new visitors
+    if (!consentGiven) {
+      setPrefs(buildRequiredOnly());
+    }
     setShowSettings(true);
   };
 
   const handleReopenFromIcon = () => {
     const stored = getCookieConsent();
     if (stored) setPrefs(stored);
+    setIsUpdate(true);
     setShowSettings(true);
   };
+
+  const defsForCategory = (categoryId: string) =>
+    definitions.filter((d) => d.category_id === categoryId);
 
   return (
     <>
@@ -145,49 +246,54 @@ const CookieConsent = () => {
 
       {/* Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Cookie Preferences</DialogTitle>
           </DialogHeader>
-          <div className="space-y-6 py-4">
-            {/* Essential */}
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <Label className="font-bold text-sm">Essential Cookies</Label>
-                <p className="text-xs text-muted-foreground">
-                  Required for the site to function. These cannot be disabled.
-                </p>
-              </div>
-              <Switch checked disabled className="opacity-50" />
-            </div>
+          <div className="space-y-4 py-4">
+            {categories.map((cat) => {
+              const catDefs = defsForCategory(cat.id);
+              return (
+                <div key={cat.id} className="space-y-2">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1 flex-1">
+                      <Label className="font-bold text-sm">{cat.name}</Label>
+                      <p className="text-xs text-muted-foreground">{cat.description}</p>
+                    </div>
+                    <Switch
+                      checked={cat.is_required ? true : (prefs[cat.slug] ?? false)}
+                      disabled={cat.is_required}
+                      className={cat.is_required ? "opacity-50" : ""}
+                      onCheckedChange={(v) =>
+                        setPrefs((p) => ({ ...p, [cat.slug]: v }))
+                      }
+                    />
+                  </div>
 
-            {/* Analytics */}
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <Label className="font-bold text-sm">Analytics Cookies</Label>
-                <p className="text-xs text-muted-foreground">
-                  Help us understand how you use our site so we can improve it.
-                </p>
-              </div>
-              <Switch
-                checked={prefs.analytics}
-                onCheckedChange={(v) => setPrefs((p) => ({ ...p, analytics: v }))}
-              />
-            </div>
-
-            {/* Functional */}
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <Label className="font-bold text-sm">Functional Cookies</Label>
-                <p className="text-xs text-muted-foreground">
-                  Enable enhanced features like voice chat and remembering your preferences.
-                </p>
-              </div>
-              <Switch
-                checked={prefs.functional}
-                onCheckedChange={(v) => setPrefs((p) => ({ ...p, functional: v }))}
-              />
-            </div>
+                  {catDefs.length > 0 && (
+                    <Collapsible>
+                      <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                        <ChevronDown className="w-3 h-3" />
+                        {catDefs.length} cookie{catDefs.length !== 1 ? "s" : ""} in this category
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="mt-2 space-y-2 pl-2 border-l-2 border-border">
+                          {catDefs.map((def) => (
+                            <div key={def.id} className="space-y-0.5">
+                              <p className="text-xs font-semibold font-mono">{def.name}</p>
+                              <p className="text-[10px] text-muted-foreground">
+                                {def.provider} · {def.duration} · {def.type}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground">{def.purpose}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
+                </div>
+              );
+            })}
 
             <div className="flex gap-2 pt-2">
               <Button onClick={handleSavePreferences} className="flex-1">
