@@ -16,38 +16,13 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { service_name } = await req.json();
-    if (!service_name) {
-      return new Response(JSON.stringify({ status: "error", message: "service_name required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const reqBody = await req.json();
+    const { service_name, webhook_test_url, webhook_test_payload } = reqBody;
 
-    // Fetch integration config
-    const { data: integration, error } = await supabase
-      .from("integrations")
-      .select("*")
-      .eq("service_name", service_name)
-      .maybeSingle();
-
-    if (error || !integration) {
-      return new Response(
-        JSON.stringify({ status: "error", message: "Integration not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const config = integration.config || {};
-    const creds = integration.encrypted_credentials || {};
     const start = Date.now();
-
-    // Support testing individual webhook paths (for n8n registry)
-    const { webhook_test_url, webhook_test_payload } = await req.json().catch(() => ({})) || {};
-
     let result: { status: string; message: string; latency_ms?: number };
 
-    // If a direct webhook test URL is provided, test it directly
+    // Direct webhook test mode (no integration lookup needed)
     if (webhook_test_url) {
       try {
         const payload = webhook_test_payload || { test: true, timestamp: new Date().toISOString() };
