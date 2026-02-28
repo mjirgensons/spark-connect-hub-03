@@ -313,8 +313,8 @@ const ProductCatalog = () => {
 
             {productsLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-80 border-2 border-muted animate-pulse bg-muted" />
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <ProductCardSkeleton key={i} />
                 ))}
               </div>
             ) : filtered.length === 0 ? (
