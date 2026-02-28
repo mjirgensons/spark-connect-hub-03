@@ -102,6 +102,7 @@ const OtherProducts = () => {
                             <span className="text-lg font-bold text-foreground">${Number(product.price_discounted_usd).toLocaleString()}</span>
                             <span className="text-xs text-muted-foreground line-through">${Number(product.price_retail_usd).toLocaleString()}</span>
                           </div>
+                          <p className="text-[10px] text-muted-foreground">Excl. HST</p>
                         </CardContent>
                       </Card>
                     </Link>
