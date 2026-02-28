@@ -29,6 +29,7 @@ export type AdminSection =
   | "integrations"
   | "content"
   | "trust-signals"
+  | "faq"
   | "cookie-manager"
   | "settings";
 
