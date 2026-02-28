@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { Loader2 } from "lucide-react";
 
 interface RoleGuardProps {
   allowedRoles: string[];
@@ -8,12 +10,13 @@ interface RoleGuardProps {
 }
 
 const RoleGuard = ({ allowedRoles, children }: RoleGuardProps) => {
-  const { session, loading } = useAuth();
+  const { session, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
 
-  if (loading) {
+  if (authLoading || profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="font-sans text-lg">Loading...</p>
+        <Loader2 className="w-8 h-8 animate-spin text-foreground" />
       </div>
     );
   }
@@ -22,8 +25,10 @@ const RoleGuard = ({ allowedRoles, children }: RoleGuardProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // TODO: After profiles table is created, check user_type against allowedRoles
-  // For now, render children for any authenticated user
+  if (profile && !allowedRoles.includes(profile.user_type)) {
+    return <Navigate to={`/${profile.user_type}/dashboard`} replace />;
+  }
+
   return <>{children}</>;
 };
 
