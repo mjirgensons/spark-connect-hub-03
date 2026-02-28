@@ -113,7 +113,7 @@ const SearchBar = () => {
     <>
       {/* Icon trigger — same style as shopping cart */}
       <button
-        className="relative p-2 text-muted-foreground hover:text-foreground transition-colors"
+        className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
         onClick={() => setDialogOpen(true)}
         aria-label="Search"
       >
