@@ -17,6 +17,7 @@ import {
   X,
   Shield,
   HelpCircle,
+  MessageSquare,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
