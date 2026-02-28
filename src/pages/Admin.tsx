@@ -23,6 +23,7 @@ import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import SiteSettingsAdmin from "@/components/admin/SiteSettingsAdmin";
 import LegalPagesAdmin from "@/components/admin/LegalPagesAdmin";
 import CookieCategoriesAdmin from "@/components/admin/CookieCategoriesAdmin";
+import CookieRegistryAdmin from "@/components/admin/CookieRegistryAdmin";
 
 interface Category {
   id: string;
