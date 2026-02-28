@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Package, Ruler, Palette, Layers, Info } from "lucide-react";
+import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart } from "lucide-react";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import ProductGallery from "@/components/ProductGallery";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
