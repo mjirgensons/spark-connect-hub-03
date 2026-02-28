@@ -17,6 +17,7 @@ import {
   X,
   Shield,
   HelpCircle,
+  MessageSquare,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -26,6 +27,7 @@ export type AdminSection =
   | "quotes"
   | "products"
   | "customers"
+  | "reviews"
   | "integrations"
   | "content"
   | "trust-signals"
@@ -45,6 +47,7 @@ const navItems: { id: AdminSection; label: string; icon: React.ElementType }[] =
   { id: "quotes", label: "Quotes", icon: FileText },
   { id: "products", label: "Products", icon: Package },
   { id: "customers", label: "Customers", icon: Users },
+  { id: "reviews", label: "Reviews", icon: MessageSquare },
   { id: "integrations", label: "Integrations", icon: Plug },
   { id: "content", label: "Content", icon: FileEdit },
   { id: "trust-signals", label: "Trust Signals", icon: Shield },

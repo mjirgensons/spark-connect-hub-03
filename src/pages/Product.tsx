@@ -13,6 +13,7 @@ import { ProductDetailSkeleton } from "@/components/ui/product-detail-skeleton";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useCart } from "@/contexts/CartContext";
 import TrustBadgeBar from "@/components/TrustBadgeBar";
+import ProductReviews from "@/components/ProductReviews";
 import { toast } from "sonner";
 
 const Product = () => {
@@ -324,6 +325,10 @@ const Product = () => {
 
             <TrustBadgeBar />
           </div>
+        </div>
+        {/* Reviews */}
+        <div className="mt-16">
+          <ProductReviews productId={product.id} />
         </div>
       </main>
 
