@@ -132,9 +132,12 @@ const Product = () => {
               {product.categories?.name && (
                 <Badge variant="outline" className="mb-2">{product.categories.name}</Badge>
               )}
-              <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
-                {product.product_name}
-              </h1>
+              <div className="flex items-start justify-between gap-3">
+                <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
+                  {product.product_name}
+                </h1>
+                <WishlistButton productId={product.id} size="md" />
+              </div>
               <p className="text-sm text-muted-foreground mt-1">SKU: {product.product_code}</p>
             </div>
 
