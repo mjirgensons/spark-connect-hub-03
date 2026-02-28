@@ -1,5 +1,6 @@
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,8 @@ const faqGroups = [
 const allQuestions = faqGroups.flatMap((g) => g.items);
 
 const FAQPage = () => {
+  usePageMeta("FAQ", "Frequently asked questions about FitMatch — how dimension matching works, pricing, delivery, returns, and joining as a contractor or seller.");
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",

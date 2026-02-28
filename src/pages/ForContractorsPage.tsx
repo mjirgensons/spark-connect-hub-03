@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -58,7 +59,9 @@ const trades = [
   { icon: Paintbrush, label: "Painter" },
 ];
 
-const ForContractorsPage = () => (
+const ForContractorsPage = () => {
+  usePageMeta("For Contractors", "Join FitMatch as a verified GTA contractor. Get matched to cabinet installation projects with MEP drawings, specs, and qualified leads.");
+  return (
   <div className="min-h-screen flex flex-col bg-background">
     <Header />
 
@@ -186,6 +189,7 @@ const ForContractorsPage = () => (
 
     <Footer />
   </div>
-);
+  );
+};
 
 export default ForContractorsPage;

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -77,7 +78,9 @@ const deliverables = [
   },
 ];
 
-const HowItWorksPage = () => (
+const HowItWorksPage = () => {
+  usePageMeta("How It Works", "Learn how FitMatch matches surplus European cabinets to your space dimensions, bundles contractors and countertops, and saves you 50-80%.");
+  return (
   <div className="min-h-screen flex flex-col bg-background">
     <Header />
 
@@ -191,6 +194,7 @@ const HowItWorksPage = () => (
 
     <Footer />
   </div>
-);
+  );
+};
 
 export default HowItWorksPage;

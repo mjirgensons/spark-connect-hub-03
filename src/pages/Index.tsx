@@ -9,8 +9,10 @@ import TrustSignals from "@/components/landing/TrustSignals";
 import ForContractors from "@/components/landing/ForContractors";
 import CTA from "@/components/landing/CTA";
 import Footer from "@/components/landing/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const Index = () => {
+  usePageMeta();
   return (
     <div className="min-h-screen bg-background">
       <Header />

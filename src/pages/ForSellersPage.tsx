@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -53,7 +54,9 @@ const howSteps = [
   { number: "3", title: "Receive Orders & RFQs", text: "Accept orders for in-stock items or respond to custom quote requests from clients and builders." },
 ];
 
-const ForSellersPage = () => (
+const ForSellersPage = () => {
+  usePageMeta("For Sellers", "List your surplus European cabinets on FitMatch. Reach GTA buyers through automatic dimension matching. Free to list, commission-based.");
+  return (
   <div className="min-h-screen flex flex-col bg-background">
     <Header />
 
@@ -161,6 +164,7 @@ const ForSellersPage = () => (
 
     <Footer />
   </div>
-);
+  );
+};
 
 export default ForSellersPage;

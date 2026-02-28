@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
@@ -45,6 +46,7 @@ const timelines = [
 ];
 
 const QuoteRequest = () => {
+  usePageMeta("Request a Quote", "Request a custom quote for bulk or B2B cabinet orders. Ideal for contractors, builders, and developers in the GTA.");
   const navigate = useNavigate();
   const { items: cartItems } = useCart();
   const { user } = useAuth();

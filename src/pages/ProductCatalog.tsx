@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +50,7 @@ const DEFAULT_FILTERS: Filters = {
 };
 
 const ProductCatalog = () => {
+  usePageMeta("Browse Cabinets", "Browse premium European kitchen and bathroom cabinets at 50-80% off retail. Filter by size, style, and color. GTA delivery available.");
   const [filters, setFilters] = useState<Filters>({ ...DEFAULT_FILTERS });
   const [sort, setSort] = useState<SortOption>("newest");
   const [mobileOpen, setMobileOpen] = useState(false);
