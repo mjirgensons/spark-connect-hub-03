@@ -122,6 +122,7 @@ const CTA = () => {
         timeline: formData.timeline,
         layoutOther: formData.layout === "other-layout" ? formData.layoutOther.trim() : "",
         styleOther: formData.style === "other-style" ? formData.styleOther.trim() : "",
+        caslConsent: true,
       };
 
       const { data, error } = await supabase.functions.invoke("submit-cabinet-match", {
