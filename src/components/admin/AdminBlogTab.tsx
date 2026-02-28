@@ -154,7 +154,7 @@ const AdminBlogTab = () => {
         .map((t) => t.trim())
         .filter(Boolean);
 
-      const payload: Record<string, any> = {
+      const payload = {
         title: form.title,
         slug: form.slug,
         excerpt: form.excerpt || null,
