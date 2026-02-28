@@ -195,11 +195,11 @@ const SearchBar = () => {
               )}
             </div>
           ) : (
-            <div className="p-6 space-y-5">
+            <div className="p-4 sm:p-6 space-y-5">
               <p className="text-sm text-muted-foreground">
                 Enter your opening dimensions to find cabinets that fit.
               </p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {[
                   { label: "Width", value: dimW, set: setDimW },
                   { label: "Depth", value: dimD, set: setDimD },
