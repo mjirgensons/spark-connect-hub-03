@@ -23,6 +23,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { SlidersHorizontal, X } from "lucide-react";
 import WishlistButton from "@/components/WishlistButton";
+import CompareButton from "@/components/CompareButton";
 
 const MM_TO_INCH = 0.0393701;
 const fmt = (mm: number) => `${mm}mm / ${(mm * MM_TO_INCH).toFixed(1)}″`;
