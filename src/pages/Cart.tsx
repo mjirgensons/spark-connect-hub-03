@@ -134,8 +134,8 @@ const Cart = () => {
                     <span>${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
 
-                  <Button size="lg" className="w-full mt-4 shadow-[4px_4px_0px_0px_hsl(var(--foreground))]">
-                    Proceed to Checkout
+                  <Button size="lg" className="w-full mt-4 shadow-[4px_4px_0px_0px_hsl(var(--foreground))]" asChild>
+                    <Link to="/checkout">Proceed to Checkout</Link>
                   </Button>
 
                   <div className="text-center space-y-2 pt-2">
