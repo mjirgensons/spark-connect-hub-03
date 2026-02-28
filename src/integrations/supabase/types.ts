@@ -179,6 +179,50 @@ export type Database = {
         }
         Relationships: []
       }
+      contractor_details: {
+        Row: {
+          bio: string | null
+          id: string
+          is_verified: boolean | null
+          jobs_completed: number | null
+          portfolio_url: string | null
+          rating: number | null
+          service_areas: string[]
+          trade_types: string[]
+          years_experience: number | null
+        }
+        Insert: {
+          bio?: string | null
+          id: string
+          is_verified?: boolean | null
+          jobs_completed?: number | null
+          portfolio_url?: string | null
+          rating?: number | null
+          service_areas?: string[]
+          trade_types?: string[]
+          years_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          id?: string
+          is_verified?: boolean | null
+          jobs_completed?: number | null
+          portfolio_url?: string | null
+          rating?: number | null
+          service_areas?: string[]
+          trade_types?: string[]
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contractor_details_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       footer_pages: {
         Row: {
           content: string
@@ -379,6 +423,200 @@ export type Database = {
           user_type?: string
         }
         Relationships: []
+      }
+      project_contractors: {
+        Row: {
+          contractor_id: string
+          created_at: string
+          id: string
+          project_id: string
+          status: string
+          trade_type: string
+        }
+        Insert: {
+          contractor_id: string
+          created_at?: string
+          id?: string
+          project_id: string
+          status?: string
+          trade_type: string
+        }
+        Update: {
+          contractor_id?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          status?: string
+          trade_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_contractors_contractor_id_fkey"
+            columns: ["contractor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_contractors_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          opening_depth_mm: number | null
+          opening_height_mm: number | null
+          opening_width_mm: number | null
+          product_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opening_depth_mm?: number | null
+          opening_height_mm?: number | null
+          opening_width_mm?: number | null
+          product_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opening_depth_mm?: number | null
+          opening_height_mm?: number | null
+          opening_width_mm?: number | null
+          product_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_requests: {
+        Row: {
+          budget_range: string | null
+          category: string | null
+          client_id: string
+          created_at: string
+          depth_mm: number
+          height_mm: number
+          id: string
+          notes: string | null
+          status: string
+          style_preference: string | null
+          width_mm: number
+        }
+        Insert: {
+          budget_range?: string | null
+          category?: string | null
+          client_id: string
+          created_at?: string
+          depth_mm: number
+          height_mm: number
+          id?: string
+          notes?: string | null
+          status?: string
+          style_preference?: string | null
+          width_mm: number
+        }
+        Update: {
+          budget_range?: string | null
+          category?: string | null
+          client_id?: string
+          created_at?: string
+          depth_mm?: number
+          height_mm?: number
+          id?: string
+          notes?: string | null
+          status?: string
+          style_preference?: string | null
+          width_mm?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          lead_time_days: number | null
+          price: number
+          quote_request_id: string
+          seller_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_time_days?: number | null
+          price: number
+          quote_request_id: string
+          seller_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_time_days?: number | null
+          price?: number
+          quote_request_id?: string
+          seller_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_quote_request_id_fkey"
+            columns: ["quote_request_id"]
+            isOneToOne: false
+            referencedRelation: "quote_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
