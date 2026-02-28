@@ -29,6 +29,7 @@ import AdminSidebar, { type AdminSection } from "@/components/admin/AdminSidebar
 import AdminDashboardTab from "@/components/admin/AdminDashboardTab";
 import AdminOrdersTab from "@/components/admin/AdminOrdersTab";
 import AdminCustomersTab from "@/components/admin/AdminCustomersTab";
+import AdminIntegrationsTab from "@/components/admin/AdminIntegrationsTab";
 
 interface Category {
   id: string;
