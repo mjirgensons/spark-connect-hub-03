@@ -35,6 +35,7 @@ export type AdminSection =
   | "trust-signals"
   | "faq"
   | "blog"
+  | "newsletter"
   | "cookie-manager"
   | "settings";
 
