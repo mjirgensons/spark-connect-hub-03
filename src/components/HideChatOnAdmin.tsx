@@ -21,7 +21,7 @@ export const HideChatOnAdmin = () => {
     const consent = getCookieConsent();
     const functionalAllowed = consent?.functional === true;
 
-    widget.style.display = isAdminRoute || !functionalAllowed ? "none" : "";
+    widget.style.display = "none";
   }, [pathname, consentTick]);
 
   return null;
