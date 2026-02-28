@@ -93,6 +93,11 @@ const CTA = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!caslConsent) {
+      toast({ title: "Consent required", description: "Please consent to receive communications to submit your request.", variant: "destructive" });
+      return;
+    }
+
     const validationError = validateForm();
     if (validationError) {
       toast({ title: "Missing information", description: validationError, variant: "destructive" });
