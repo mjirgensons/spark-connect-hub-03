@@ -196,6 +196,7 @@ const App = () => (
           <Route path="/account" element={<AccountLayout />}>
             <Route index element={<AccountOverview />} />
             <Route path="orders" element={<AccountOrders />} />
+            <Route path="wishlist" element={<AccountWishlist />} />
             <Route path="addresses" element={<AccountAddresses />} />
             <Route path="settings" element={<AccountSettings />} />
           </Route>
