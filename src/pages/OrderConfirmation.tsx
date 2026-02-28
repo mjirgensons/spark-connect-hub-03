@@ -212,13 +212,8 @@ const OrderConfirmation = () => {
               </div>
               <Badge
                 variant={order?.payment_status === "paid" ? "default" : "secondary"}
-                className={
-                  order?.payment_status === "paid"
-                    ? "bg-green-600 text-white hover:bg-green-700"
-                    : ""
-                }
               >
-                {order?.payment_status === "paid" ? "Paid" : order?.payment_status ?? "—"}
+                {order?.payment_status === "paid" ? "✓ Paid" : order?.payment_status ?? "—"}
               </Badge>
             </div>
             <Separator />
