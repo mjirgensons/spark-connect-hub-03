@@ -113,6 +113,7 @@ const ProductShowcase = () => {
                       <span className="text-2xl font-bold text-foreground">${product.ourPrice.toLocaleString()}</span>
                       <span className="text-sm text-muted-foreground line-through mb-0.5">${product.retailPrice.toLocaleString()}</span>
                     </div>
+                    <p className="text-xs text-muted-foreground">Excl. HST</p>
                   </CardContent>
                 </Card>
               ))}
