@@ -13,8 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const AccountSettings = () => {
+  usePageMeta("Account Settings");
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();

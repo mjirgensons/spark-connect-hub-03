@@ -23,7 +23,7 @@ const Product = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*, categories(name)")
+        .select("*, categories(name, slug)")
         .eq("id", id!)
         .is("deleted_at", null)
         .single();
@@ -95,7 +95,7 @@ const Product = () => {
           items={[
             { label: "Browse", href: "/browse" },
             ...(product.categories?.name
-              ? [{ label: product.categories.name, href: "/browse" }]
+              ? [{ label: product.categories.name, href: `/browse?category=${(product.categories as any)?.slug || ""}` }]
               : []),
             { label: product.product_name },
           ]}

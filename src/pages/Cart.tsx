@@ -8,8 +8,10 @@ import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft } from "lucide-react";
 import TrustBadgeBar from "@/components/TrustBadgeBar";
 import { toast } from "sonner";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const Cart = () => {
+  usePageMeta("Your Cart");
   const { items, itemCount, subtotal, dispatch } = useCart();
 
   const taxRate = 0.13;

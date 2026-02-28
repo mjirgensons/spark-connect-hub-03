@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Pencil, Trash2, MapPin, Star } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const PROVINCES = [
   "Alberta", "British Columbia", "Manitoba", "New Brunswick",
@@ -37,6 +38,7 @@ const addressSchema = z.object({
 type AddressForm = z.infer<typeof addressSchema>;
 
 const AccountAddresses = () => {
+  usePageMeta("My Addresses");
   const { user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
