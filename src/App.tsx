@@ -122,6 +122,7 @@ const App = () => (
         <HideChatOnAdmin />
         <AnalyticsTracker />
         <CookieConsent />
+        <CompareBar />
         <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={isPreview ? <Index /> : <UnderConstruction />} />
