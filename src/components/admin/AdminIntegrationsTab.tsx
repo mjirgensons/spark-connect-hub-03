@@ -89,6 +89,7 @@ const WEBHOOK_EVENTS = [
   { event: "marketing.restock_alert", path: "/webhook/marketing-restock" },
   { event: "user.signup", path: "/webhook/user-signup" },
   { event: "user.first_purchase", path: "/webhook/user-first-purchase" },
+  { event: "health.check", path: "/webhook/health-check" },
 ];
 
 const STRIPE_EVENTS = [
