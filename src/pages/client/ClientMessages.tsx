@@ -1,8 +1,10 @@
 import { Card } from "@/components/ui/card";
 import { MessageSquare } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const ClientMessages = () => (
   <div className="space-y-6">
+    <Breadcrumbs items={[{ label: "Dashboard", href: "/client/dashboard" }, { label: "Messages" }]} />
     <h1 className="font-serif text-2xl md:text-3xl font-bold">Messages</h1>
     <Card
       className="border-2 border-foreground p-8 text-center"

@@ -50,6 +50,7 @@ const ClientMatches = () => {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/client/dashboard" }, { label: "Matches" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">My Matches</h1>
 
       {/* Dimension input (always visible) */}

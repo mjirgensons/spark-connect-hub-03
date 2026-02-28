@@ -83,6 +83,7 @@ const ContractorProfile = () => {
 
   return (
     <div className="space-y-6 max-w-2xl">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/contractor/dashboard" }, { label: "Profile" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">My Profile</h1>
 
       <Card

@@ -1,8 +1,10 @@
 import { Card } from "@/components/ui/card";
 import { FolderOpen } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const ClientProjects = () => (
   <div className="space-y-6">
+    <Breadcrumbs items={[{ label: "Dashboard", href: "/client/dashboard" }, { label: "Projects" }]} />
     <h1 className="font-serif text-2xl md:text-3xl font-bold">My Projects</h1>
     <Card
       className="border-2 border-foreground p-8 text-center"
