@@ -79,13 +79,14 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ role }: DashboardLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { session, signOut } = useAuth();
+  const { signOut } = useAuth();
+  const { profile } = useProfile();
   const navigate = useNavigate();
   const items = navConfig[role];
 
   const handleLogout = async () => {
     await signOut();
-    navigate("/login");
+    navigate("/");
   };
 
   return (
