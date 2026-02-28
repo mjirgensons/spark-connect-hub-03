@@ -58,25 +58,6 @@ const linkColumns = [
 ];
 
 const Footer = () => {
-  const { toast } = useToast();
-  const [email, setEmail] = useState("");
-  const [consent, setConsent] = useState(false);
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!consent) {
-      toast({
-        title: "Consent required",
-        description: "Please consent to receive emails to subscribe.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (!email.trim()) return;
-    toast({ title: "Thanks for subscribing!", description: "We'll keep you updated." });
-    setEmail("");
-    setConsent(false);
-  };
 
   return (
     <footer className="bg-foreground text-background">
