@@ -89,6 +89,7 @@ const AccountWishlist = lazy(() => import("./pages/account/AccountWishlist"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const OrderConfirmation = lazy(() => import("./pages/OrderConfirmation"));
 const QuoteRequest = lazy(() => import("./pages/QuoteRequest"));
+const ComparePage = lazy(() => import("./pages/ComparePage"));
 
 const PRODUCTION_DOMAINS = ["fitmatch.ca", "www.fitmatch.ca", "spark-connect-hub-03.lovable.app"];
 const isProduction = PRODUCTION_DOMAINS.includes(window.location.hostname);
