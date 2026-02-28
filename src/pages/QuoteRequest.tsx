@@ -46,6 +46,7 @@ const timelines = [
 ];
 
 const QuoteRequest = () => {
+  usePageMeta("Request a Quote", "Request a custom quote for bulk or B2B cabinet orders. Ideal for contractors, builders, and developers in the GTA.");
   const navigate = useNavigate();
   const { items: cartItems } = useCart();
   const { user } = useAuth();
