@@ -95,7 +95,7 @@ const Product = () => {
           items={[
             { label: "Browse", href: "/browse" },
             ...(product.categories?.name
-              ? [{ label: product.categories.name, href: "/browse" }]
+              ? [{ label: product.categories.name, href: `/browse?category=${(product.categories as any)?.slug || ""}` }]
               : []),
             { label: product.product_name },
           ]}

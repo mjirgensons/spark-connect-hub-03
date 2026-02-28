@@ -9,8 +9,10 @@ import StepInformation from "@/components/checkout/StepInformation";
 import StepShipping from "@/components/checkout/StepShipping";
 import StepReview from "@/components/checkout/StepReview";
 import { toast } from "sonner";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const CheckoutContent = () => {
+  usePageMeta("Checkout");
   const { items } = useCart();
   const { step } = useCheckout();
   const navigate = useNavigate();

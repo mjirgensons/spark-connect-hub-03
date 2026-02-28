@@ -15,6 +15,7 @@ import {
   Mail,
   ArrowRight,
 } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const quickLinks = [
   { label: "Browse All Cabinets", to: "/browse", icon: LayoutGrid },
@@ -27,6 +28,7 @@ const quickLinks = [
 ];
 
 const NotFound = () => {
+  usePageMeta("Page Not Found");
   const location = useLocation();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");

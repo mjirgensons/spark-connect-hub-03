@@ -12,6 +12,7 @@ import { OrderCardSkeleton } from "@/components/ui/order-card-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { format } from "date-fns";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive"> = {
   pending: "secondary",
@@ -24,6 +25,7 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive"> = 
 };
 
 const AccountOrders = () => {
+  usePageMeta("My Orders");
   const { user } = useAuth();
   const [expanded, setExpanded] = useState<string | null>(null);
 
