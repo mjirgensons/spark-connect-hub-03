@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { Link, useNavigate } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { Card } from "@/components/ui/card";
