@@ -364,7 +364,7 @@ const AdminIntegrationsTab = () => {
     if (!configSheet) return null;
     const cat = configSheet.category;
 
-    if (cat === "email") return renderMailgunConfig();
+    if (cat === "email") return <p className="text-sm text-muted-foreground">Email configuration has moved to the dedicated <strong>Email</strong> section in the sidebar.</p>;
     if (cat === "payment") return renderStripeConfig();
     if (cat === "automation") return renderN8nConfig();
     if (cat === "chatbot") return renderChatbotConfig();

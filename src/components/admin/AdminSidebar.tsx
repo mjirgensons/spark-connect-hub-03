@@ -54,6 +54,7 @@ const navItems: { id: AdminSection; label: string; icon: React.ElementType }[] =
   { id: "products", label: "Products", icon: Package },
   { id: "customers", label: "Customers", icon: Users },
   { id: "reviews", label: "Reviews", icon: MessageSquare },
+  { id: "email", label: "Email", icon: Send },
   { id: "integrations", label: "Integrations", icon: Plug },
   { id: "content", label: "Content", icon: FileEdit },
   { id: "trust-signals", label: "Trust Signals", icon: Shield },
