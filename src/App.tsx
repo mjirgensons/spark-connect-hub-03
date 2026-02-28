@@ -76,6 +76,7 @@ const App = () => (
         <ScrollToTop />
         <HideChatOnAdmin />
         <AnalyticsTracker />
+        <CookieConsent />
         <Routes>
           <Route path="/" element={isPreview ? <Index /> : <UnderConstruction />} />
           <Route path="/product/:id" element={<Product />} />
