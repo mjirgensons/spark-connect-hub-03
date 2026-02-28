@@ -112,6 +112,7 @@ const AnalyticsTracker = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <CompareProvider>
       <CartProvider>
       <WishlistProvider>
       <Toaster />
