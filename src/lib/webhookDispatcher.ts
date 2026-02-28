@@ -63,7 +63,7 @@ export async function dispatchWebhook(
       event_type: payload.eventType,
       direction: "outbound" as const,
       webhook_url: webhookUrl || "n8n (not configured)",
-      request_payload: payload.data as unknown as Record<string, unknown>,
+      request_payload: JSON.parse(JSON.stringify(payload.data)),
       response_status: responseStatus,
       response_body: responseBody.slice(0, 2000),
       duration_ms: durationMs,
