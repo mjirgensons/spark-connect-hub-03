@@ -161,11 +161,40 @@ const AdminIntegrationsTab = () => {
     load();
   }, [fetchIntegrations, fetchWebhookLogs, fetchLastFired]);
 
-  // Auto-refresh webhook logs
+  // Auto-refresh webhook logs every 30s
   useEffect(() => {
     refreshRef.current = setInterval(fetchWebhookLogs, 30000);
     return () => { if (refreshRef.current) clearInterval(refreshRef.current); };
   }, [fetchWebhookLogs]);
+
+  // Automated health check on interval
+  useEffect(() => {
+    if (autoCheckInterval <= 0) return;
+    const runAutoHealth = async () => {
+      for (const integration of integrations.filter(i => i.is_enabled)) {
+        try {
+          const { data } = await supabase.functions.invoke("test-integration", {
+            body: { service_name: integration.service_name },
+          });
+          const healthStatus = data?.status === "healthy" ? "healthy" : "unhealthy";
+          await supabase.from("integrations").update({
+            last_health_check: new Date().toISOString(),
+            last_health_status: healthStatus,
+            status: healthStatus === "healthy" ? "connected" : "error",
+          } as any).eq("id", integration.id);
+        } catch {
+          await supabase.from("integrations").update({
+            last_health_check: new Date().toISOString(),
+            last_health_status: "unhealthy",
+            status: "error",
+          } as any).eq("id", integration.id);
+        }
+      }
+      await fetchIntegrations();
+    };
+    healthCheckRef.current = setInterval(runAutoHealth, autoCheckInterval * 60 * 1000);
+    return () => { if (healthCheckRef.current) clearInterval(healthCheckRef.current); };
+  }, [autoCheckInterval, integrations, fetchIntegrations]);
 
   const openConfig = (integration: Integration) => {
     setConfigSheet(integration);
