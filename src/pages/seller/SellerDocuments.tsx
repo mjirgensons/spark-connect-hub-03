@@ -16,6 +16,7 @@ const SellerDocuments = () => {
 
   return (
     <div className="space-y-6 max-w-2xl">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/seller/dashboard" }, { label: "Documents" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">Documents</h1>
 
       <Card className="border-2 border-foreground p-6" style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>

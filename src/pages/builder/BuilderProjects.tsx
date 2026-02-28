@@ -2,9 +2,11 @@ import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FolderOpen, PlusCircle } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const BuilderProjects = () => (
   <div className="space-y-6">
+    <Breadcrumbs items={[{ label: "Dashboard", href: "/builder/dashboard" }, { label: "Projects" }]} />
     <div className="flex items-center justify-between">
       <h1 className="font-serif text-2xl md:text-3xl font-bold">Projects</h1>
       <Button asChild><Link to="/builder/projects/new"><PlusCircle size={16} className="mr-2" /> New Project</Link></Button>

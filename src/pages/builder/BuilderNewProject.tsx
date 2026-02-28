@@ -30,6 +30,7 @@ const BuilderNewProject = () => {
 
   return (
     <div className="space-y-6 max-w-2xl">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/builder/dashboard" }, { label: "Projects", href: "/builder/projects" }, { label: "New Project" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">New Project</h1>
 
       <Card className="border-2 border-foreground p-6 space-y-4" style={cardStyle}>

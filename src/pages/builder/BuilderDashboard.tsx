@@ -29,6 +29,7 @@ const BuilderDashboard = () => {
 
   return (
     <div className="space-y-8">
+      <Breadcrumbs items={[{ label: "Dashboard" }]} />
       <h1 className="font-serif text-2xl md:text-3xl font-bold">
         Welcome back, {profile?.full_name?.split(" ")[0] || "there"}
       </h1>
