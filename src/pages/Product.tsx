@@ -290,10 +290,10 @@ const Product = () => {
             <Separator />
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-2 flex-wrap">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
                 size="lg"
-                className="flex-1 shadow-[4px_4px_0px_0px_hsl(var(--foreground))]"
+                className="w-full sm:flex-1 min-h-[48px] shadow-[2px_2px_0px_0px_hsl(var(--foreground))] sm:shadow-[4px_4px_0px_0px_hsl(var(--foreground))]"
                 disabled={isDeactivated || qtyInCart >= product.stock_level}
                 onClick={handleAddToCart}
               >
