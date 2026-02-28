@@ -1035,6 +1035,42 @@ export type Database = {
         }
         Relationships: []
       }
+      trust_signals: {
+        Row: {
+          created_at: string
+          icon_name: string
+          id: string
+          is_active: boolean
+          label: string
+          sort_order: number
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icon_name: string
+          id?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icon_name?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       webhook_logs: {
         Row: {
           created_at: string
