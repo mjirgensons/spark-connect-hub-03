@@ -1,10 +1,5 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Linkedin, MapPin, Mail, Phone } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
 import NewsletterSignup from "@/components/NewsletterSignup";
 
 const linkColumns = [
