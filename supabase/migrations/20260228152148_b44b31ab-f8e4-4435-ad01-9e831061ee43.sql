@@ -1,0 +1,4 @@
+ALTER TABLE public.products 
+  ADD COLUMN IF NOT EXISTS width_inches NUMERIC(6,2),
+  ADD COLUMN IF NOT EXISTS depth_inches NUMERIC(6,2),
+  ADD COLUMN IF NOT EXISTS height_inches NUMERIC(6,2);
