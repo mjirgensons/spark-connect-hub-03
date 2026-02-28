@@ -100,11 +100,10 @@ const Header = () => {
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
-          </button>
         </div>
 
         {isMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-border">
+          <div className="md:hidden py-4 border-t border-border">
             <nav className="flex flex-col gap-4">
               {navLinks.map(renderNavItem)}
               <Link to="/cart" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setIsMenuOpen(false)}>
