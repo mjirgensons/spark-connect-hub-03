@@ -697,6 +697,10 @@ const Admin = () => {
           <TabsContent value="legal-pages">
             <LegalPagesAdmin />
           </TabsContent>
+
+          <TabsContent value="cookie-manager">
+            <CookieCategoriesAdmin />
+          </TabsContent>
         </Tabs>
 
         {/* Product Form Dialog */}
