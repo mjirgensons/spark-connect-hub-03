@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowRight, Send, ChevronDown, ChevronUp, Info } from "lucide-react";
 
 const layoutDescriptions: Record<string, string> = {
@@ -61,6 +62,7 @@ const CTA = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [caslConsent, setCaslConsent] = useState(false);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -91,6 +93,11 @@ const CTA = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!caslConsent) {
+      toast({ title: "Consent required", description: "Please consent to receive communications to submit your request.", variant: "destructive" });
+      return;
+    }
+
     const validationError = validateForm();
     if (validationError) {
       toast({ title: "Missing information", description: validationError, variant: "destructive" });
@@ -115,6 +122,7 @@ const CTA = () => {
         timeline: formData.timeline,
         layoutOther: formData.layout === "other-layout" ? formData.layoutOther.trim() : "",
         styleOther: formData.style === "other-style" ? formData.styleOther.trim() : "",
+        caslConsent: true,
       };
 
       const { data, error } = await supabase.functions.invoke("submit-cabinet-match", {
@@ -507,6 +515,24 @@ const CTA = () => {
                       <SelectItem value="exploring">Just Exploring</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                {/* CASL Consent */}
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="casl-consent"
+                      checked={caslConsent}
+                      onCheckedChange={(v) => setCaslConsent(v === true)}
+                      className="mt-0.5 border-background/40 data-[state=checked]:bg-[hsl(var(--gold))] data-[state=checked]:border-[hsl(var(--gold))]"
+                    />
+                    <label htmlFor="casl-consent" className="text-sm text-background/70 leading-relaxed cursor-pointer">
+                      I consent to receive emails from FitMatch about my cabinet match request and related offers. I can unsubscribe at any time.
+                    </label>
+                  </div>
+                  <p className="text-xs text-background/40 pl-7">
+                    FitMatch, 137 Chrislea Rd, Woodbridge, ON L4L 8N6 | info@fitmatch.ca
+                  </p>
                 </div>
 
                 {/* Submit */}
