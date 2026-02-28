@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
