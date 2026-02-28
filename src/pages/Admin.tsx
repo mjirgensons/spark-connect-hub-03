@@ -30,6 +30,7 @@ import AdminDashboardTab from "@/components/admin/AdminDashboardTab";
 import AdminOrdersTab from "@/components/admin/AdminOrdersTab";
 import AdminCustomersTab from "@/components/admin/AdminCustomersTab";
 import AdminIntegrationsTab from "@/components/admin/AdminIntegrationsTab";
+import AdminQuotesTab from "@/components/admin/AdminQuotesTab";
 
 interface Category {
   id: string;
@@ -651,13 +652,7 @@ const Admin = () => {
       case "orders":
         return <AdminOrdersTab />;
       case "quotes":
-        return (
-          <Card className="border-2 border-border">
-            <CardContent className="p-8 text-center text-muted-foreground">
-              <p className="text-sm">Quotes management — coming soon.</p>
-            </CardContent>
-          </Card>
-        );
+        return <AdminQuotesTab />;
       case "products":
         return renderProducts();
       case "customers":
