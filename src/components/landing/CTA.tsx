@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowRight, Send, ChevronDown, ChevronUp, Info } from "lucide-react";
 
 const layoutDescriptions: Record<string, string> = {
