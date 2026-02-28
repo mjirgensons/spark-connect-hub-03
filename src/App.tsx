@@ -31,6 +31,7 @@ import DashboardLayout from "./components/DashboardLayout";
 // Lazy-loaded: Admin
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const Admin = lazy(() => import("./pages/Admin"));
+const FAQPage = lazy(() => import("./pages/FAQPage"));
 
 // Lazy-loaded: Client dashboard
 const ClientDashboard = lazy(() => import("./pages/client/ClientDashboard"));
