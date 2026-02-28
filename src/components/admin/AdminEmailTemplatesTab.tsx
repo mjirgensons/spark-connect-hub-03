@@ -15,6 +15,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Shield, Settings } from "lucide-react";
+import EmailCommLogTab from "./EmailCommLogTab";
+import EmailConsentTab from "./EmailConsentTab";
+import EmailSettingsTab from "./EmailSettingsTab";
 
 interface EmailTemplate {
   id: string;
