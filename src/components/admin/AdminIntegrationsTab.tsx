@@ -89,6 +89,7 @@ const WEBHOOK_EVENTS = [
   { event: "marketing.restock_alert", path: "/webhook/marketing-restock" },
   { event: "user.signup", path: "/webhook/user-signup" },
   { event: "user.first_purchase", path: "/webhook/user-first-purchase" },
+  { event: "health.check", path: "/webhook/health-check" },
 ];
 
 const STRIPE_EVENTS = [
@@ -411,7 +412,8 @@ const AdminIntegrationsTab = () => {
                   <Input
                     value={webhookPaths[we.event] || we.path}
                     onChange={e => setWebhookPaths(p => ({ ...p, [we.event]: e.target.value }))}
-                    className="h-7 text-xs font-mono"
+                    className="h-7 text-xs font-mono min-w-[260px]"
+                    title={webhookPaths[we.event] || we.path}
                   />
                 </TableCell>
                 <TableCell className="py-1.5 px-2 text-center">
