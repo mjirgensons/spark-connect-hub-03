@@ -152,6 +152,9 @@ const SearchResults = () => {
                     style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}
                   >
                     <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+                      <div className="absolute top-2 left-2 z-10">
+                        <WishlistButton productId={product.id} size="sm" />
+                      </div>
                       {product.main_image_url ? (
                         <img
                           src={product.main_image_url}
