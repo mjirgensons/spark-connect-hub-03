@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
@@ -693,20 +693,19 @@ const AdminIntegrationsTab = () => {
       </div>
 
       {/* Configuration Sheet */}
-      <Sheet open={!!configSheet} onOpenChange={open => { if (!open) setConfigSheet(null); }}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="text-foreground">{configSheet?.display_name} Configuration</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6 space-y-6">
+      <Dialog open={!!configSheet} onOpenChange={open => { if (!open) setConfigSheet(null); }}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">{configSheet?.display_name} Configuration</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-6">
             {renderConfigContent()}
-            <Separator />
             <Button onClick={handleSaveConfig} disabled={saving} className="w-full">
-              {saving ? "Saving..." : "Save Configuration"}
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Save Configuration
             </Button>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* Payload Viewer Dialog */}
       <Dialog open={!!payloadDialog} onOpenChange={open => { if (!open) setPayloadDialog(null); }}>
