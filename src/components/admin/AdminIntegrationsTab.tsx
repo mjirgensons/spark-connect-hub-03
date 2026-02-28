@@ -281,7 +281,7 @@ const AdminIntegrationsTab = () => {
         status: ok ? "delivered" : "failed",
         error_message: ok ? null : (data?.message || error?.message),
       }] as any);
-      fetchWebhookLogs();
+      await Promise.all([fetchWebhookLogs(), fetchLastFired()]);
     } catch (e: any) {
       toast({ title: "Test failed", description: e.message, variant: "destructive" });
     }
