@@ -40,6 +40,7 @@ const linkColumns = [
     title: "SUPPORT",
     links: [
       { label: "Help Center", to: "#" },
+      { label: "Get a Quote", to: "/quote-request" },
       { label: "Warranty Info", to: "/page/warranty-information" },
       { label: "Installation FAQ", to: "/page/installation-guide" },
       { label: "Shipping Info", to: "/page/shipping-delivery" },

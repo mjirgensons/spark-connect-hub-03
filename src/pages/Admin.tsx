@@ -652,13 +652,7 @@ const Admin = () => {
       case "orders":
         return <AdminOrdersTab />;
       case "quotes":
-        return (
-          <Card className="border-2 border-border">
-            <CardContent className="p-8 text-center text-muted-foreground">
-              <p className="text-sm">Quotes management — coming soon.</p>
-            </CardContent>
-          </Card>
-        );
+        return <AdminQuotesTab />;
       case "products":
         return renderProducts();
       case "customers":

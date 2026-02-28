@@ -139,7 +139,7 @@ const Cart = () => {
                   </Button>
 
                   <div className="text-center space-y-2 pt-2">
-                    <Link to="/browse" className="text-sm text-muted-foreground hover:text-foreground underline transition-colors">
+                    <Link to="/quote-request" className="text-sm text-muted-foreground hover:text-foreground underline transition-colors">
                       Request a Quote Instead
                     </Link>
                     <br />
