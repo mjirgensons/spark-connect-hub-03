@@ -305,9 +305,9 @@ const Product = () => {
                   href={isDeactivated ? undefined : product.installation_instructions_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`flex-1 ${isDeactivated ? "pointer-events-none" : ""}`}
+                  className={`w-full sm:flex-1 ${isDeactivated ? "pointer-events-none" : ""}`}
                 >
-                  <Button variant="outline" size="sm" className="w-full h-full text-xs shadow-[0_4px_12px_hsla(var(--muted-foreground),0.3)]" disabled={isDeactivated}>
+                  <Button variant="outline" size="sm" className="w-full h-full min-h-[44px] text-xs shadow-[0_4px_12px_hsla(var(--muted-foreground),0.3)]" disabled={isDeactivated}>
                     Download Installation Instructions
                   </Button>
                 </a>
