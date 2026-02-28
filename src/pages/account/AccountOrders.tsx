@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronDown, ChevronUp, ExternalLink, ShoppingBag } from "lucide-react";
 import { OrderCardSkeleton } from "@/components/ui/order-card-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { format } from "date-fns";
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive"> = {
