@@ -373,21 +373,7 @@ const AdminIntegrationsTab = () => {
     return <p className="text-sm text-muted-foreground">No configuration available.</p>;
   };
 
-  const renderMailgunConfig = () => (
-    <div className="space-y-4">
-      <div><Label>API Key</Label><Input type="password" value={credForm.api_key || ""} onChange={e => setCredForm(p => ({ ...p, api_key: e.target.value }))} placeholder="key-xxxxxxxx" /></div>
-      <div><Label>Domain</Label><Input value={configForm.domain || ""} onChange={e => setConfigForm(p => ({ ...p, domain: e.target.value }))} placeholder="fitmatch.ca" /></div>
-      <div><Label>Region</Label>
-        <Select value={configForm.region || "US"} onValueChange={v => setConfigForm(p => ({ ...p, region: v }))}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent><SelectItem value="US">US</SelectItem><SelectItem value="EU">EU</SelectItem></SelectContent>
-        </Select>
-      </div>
-      <div><Label>From Email</Label><Input value={configForm.from_email || ""} onChange={e => setConfigForm(p => ({ ...p, from_email: e.target.value }))} placeholder="orders@fitmatch.ca" /></div>
-      <div><Label>From Name</Label><Input value={configForm.from_name || ""} onChange={e => setConfigForm(p => ({ ...p, from_name: e.target.value }))} placeholder="FitMatch" /></div>
-      {renderTestButton("mailgun")}
-    </div>
-  );
+  // Mailgun config removed — email configuration moved to Email section
 
   const renderStripeConfig = () => {
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
