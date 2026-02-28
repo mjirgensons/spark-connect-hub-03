@@ -314,6 +314,8 @@ const Product = () => {
                 </a>
               )}
             </div>
+
+            <TrustBadgeBar />
           </div>
         </div>
       </main>
