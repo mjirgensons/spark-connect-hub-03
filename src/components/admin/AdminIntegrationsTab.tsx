@@ -258,24 +258,22 @@ const AdminIntegrationsTab = () => {
 
   const handleRetryWebhook = async (log: WebhookLog) => {
     try {
-      const res = await fetch(log.webhook_url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(log.request_payload),
+      const { data, error } = await supabase.functions.invoke("test-integration", {
+        body: { service_name: "n8n", webhook_test_url: log.webhook_url, webhook_test_payload: log.request_payload },
       });
-      const body = await res.text();
+      const ok = data?.status === "healthy";
       await supabase.from("webhook_logs").insert([{
         event_type: log.event_type,
         direction: "outbound",
         webhook_url: log.webhook_url,
         request_payload: log.request_payload,
-        response_status: res.status,
-        response_body: body.slice(0, 2000),
-        duration_ms: 0,
-        status: res.ok ? "delivered" : "failed",
-        error_message: res.ok ? null : `HTTP ${res.status}`,
+        response_status: ok ? 200 : 0,
+        response_body: data?.message || null,
+        duration_ms: data?.latency_ms || 0,
+        status: ok ? "delivered" : "failed",
+        error_message: ok ? null : (data?.message || error?.message),
       }] as any);
-      toast({ title: res.ok ? "Retry successful" : "Retry failed" });
+      toast({ title: ok ? "Retry successful" : "Retry failed" });
       fetchWebhookLogs();
     } catch (e: any) {
       toast({ title: "Retry failed", description: e.message, variant: "destructive" });
