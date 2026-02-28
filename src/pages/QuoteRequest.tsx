@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { dispatchWebhook } from "@/lib/webhookDispatcher";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
