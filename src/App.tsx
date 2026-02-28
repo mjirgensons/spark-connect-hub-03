@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,11 +13,7 @@ import { CartProvider } from "./contexts/CartContext";
 import Index from "./pages/Index";
 import Product from "./pages/Product";
 import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import OrderConfirmation from "./pages/OrderConfirmation";
 import NotFound from "./pages/NotFound";
-import AdminLogin from "./pages/AdminLogin";
-import Admin from "./pages/Admin";
 import FooterPage from "./pages/FooterPage";
 import UnderConstruction from "./pages/UnderConstruction";
 import ProductCatalog from "./pages/ProductCatalog";
@@ -27,52 +24,76 @@ import AboutPage from "./pages/AboutPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import SearchResults from "./pages/SearchResults";
-import QuoteRequest from "./pages/QuoteRequest";
 import QuoteSuccess from "./pages/QuoteSuccess";
-import ClientDashboard from "./pages/client/ClientDashboard";
-import ClientMatches from "./pages/client/ClientMatches";
-import ClientNewMatch from "./pages/client/ClientNewMatch";
-import ClientProjects from "./pages/client/ClientProjects";
-import ClientProjectDetail from "./pages/client/ClientProjectDetail";
-import ClientMessages from "./pages/client/ClientMessages";
-import ClientProfile from "./pages/client/ClientProfile";
-import ContractorDashboard from "./pages/contractor/ContractorDashboard";
-import ContractorJobs from "./pages/contractor/ContractorJobs";
-import ContractorJobDetail from "./pages/contractor/ContractorJobDetail";
-import ContractorProjects from "./pages/contractor/ContractorProjects";
-import ContractorProjectDetail from "./pages/contractor/ContractorProjectDetail";
-import ContractorMessages from "./pages/contractor/ContractorMessages";
-import ContractorProfile from "./pages/contractor/ContractorProfile";
-import SellerDashboard from "./pages/seller/SellerDashboard";
-import SellerProducts from "./pages/seller/SellerProducts";
-import SellerNewProduct from "./pages/seller/SellerNewProduct";
-import SellerEditProduct from "./pages/seller/SellerEditProduct";
-import SellerDocuments from "./pages/seller/SellerDocuments";
-import SellerQuotes from "./pages/seller/SellerQuotes";
-import SellerQuoteDetail from "./pages/seller/SellerQuoteDetail";
-import SellerOrders from "./pages/seller/SellerOrders";
-import SellerAnalytics from "./pages/seller/SellerAnalytics";
-import SellerMessages from "./pages/seller/SellerMessages";
-import SellerStoreProfile from "./pages/seller/SellerStoreProfile";
-import BuilderDashboard from "./pages/builder/BuilderDashboard";
-import BuilderProjects from "./pages/builder/BuilderProjects";
-import BuilderNewProject from "./pages/builder/BuilderNewProject";
-import BuilderMatches from "./pages/builder/BuilderMatches";
-import BuilderMessages from "./pages/builder/BuilderMessages";
-import BuilderProfile from "./pages/builder/BuilderProfile";
-import AccountLayout from "./pages/account/AccountLayout";
-import AccountOverview from "./pages/account/AccountOverview";
-import AccountOrders from "./pages/account/AccountOrders";
-import AccountAddresses from "./pages/account/AccountAddresses";
-import AccountSettings from "./pages/account/AccountSettings";
 import RoleGuard from "./components/RoleGuard";
 import DashboardLayout from "./components/DashboardLayout";
+
+// Lazy-loaded: Admin
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const Admin = lazy(() => import("./pages/Admin"));
+
+// Lazy-loaded: Client dashboard
+const ClientDashboard = lazy(() => import("./pages/client/ClientDashboard"));
+const ClientMatches = lazy(() => import("./pages/client/ClientMatches"));
+const ClientNewMatch = lazy(() => import("./pages/client/ClientNewMatch"));
+const ClientProjects = lazy(() => import("./pages/client/ClientProjects"));
+const ClientProjectDetail = lazy(() => import("./pages/client/ClientProjectDetail"));
+const ClientMessages = lazy(() => import("./pages/client/ClientMessages"));
+const ClientProfile = lazy(() => import("./pages/client/ClientProfile"));
+
+// Lazy-loaded: Contractor dashboard
+const ContractorDashboard = lazy(() => import("./pages/contractor/ContractorDashboard"));
+const ContractorJobs = lazy(() => import("./pages/contractor/ContractorJobs"));
+const ContractorJobDetail = lazy(() => import("./pages/contractor/ContractorJobDetail"));
+const ContractorProjects = lazy(() => import("./pages/contractor/ContractorProjects"));
+const ContractorProjectDetail = lazy(() => import("./pages/contractor/ContractorProjectDetail"));
+const ContractorMessages = lazy(() => import("./pages/contractor/ContractorMessages"));
+const ContractorProfile = lazy(() => import("./pages/contractor/ContractorProfile"));
+
+// Lazy-loaded: Seller dashboard
+const SellerDashboard = lazy(() => import("./pages/seller/SellerDashboard"));
+const SellerProducts = lazy(() => import("./pages/seller/SellerProducts"));
+const SellerNewProduct = lazy(() => import("./pages/seller/SellerNewProduct"));
+const SellerEditProduct = lazy(() => import("./pages/seller/SellerEditProduct"));
+const SellerDocuments = lazy(() => import("./pages/seller/SellerDocuments"));
+const SellerQuotes = lazy(() => import("./pages/seller/SellerQuotes"));
+const SellerQuoteDetail = lazy(() => import("./pages/seller/SellerQuoteDetail"));
+const SellerOrders = lazy(() => import("./pages/seller/SellerOrders"));
+const SellerAnalytics = lazy(() => import("./pages/seller/SellerAnalytics"));
+const SellerMessages = lazy(() => import("./pages/seller/SellerMessages"));
+const SellerStoreProfile = lazy(() => import("./pages/seller/SellerStoreProfile"));
+
+// Lazy-loaded: Builder dashboard
+const BuilderDashboard = lazy(() => import("./pages/builder/BuilderDashboard"));
+const BuilderProjects = lazy(() => import("./pages/builder/BuilderProjects"));
+const BuilderNewProject = lazy(() => import("./pages/builder/BuilderNewProject"));
+const BuilderMatches = lazy(() => import("./pages/builder/BuilderMatches"));
+const BuilderMessages = lazy(() => import("./pages/builder/BuilderMessages"));
+const BuilderProfile = lazy(() => import("./pages/builder/BuilderProfile"));
+
+// Lazy-loaded: Account pages
+const AccountLayout = lazy(() => import("./pages/account/AccountLayout"));
+const AccountOverview = lazy(() => import("./pages/account/AccountOverview"));
+const AccountOrders = lazy(() => import("./pages/account/AccountOrders"));
+const AccountAddresses = lazy(() => import("./pages/account/AccountAddresses"));
+const AccountSettings = lazy(() => import("./pages/account/AccountSettings"));
+
+// Lazy-loaded: Heavy pages
+const Checkout = lazy(() => import("./pages/Checkout"));
+const OrderConfirmation = lazy(() => import("./pages/OrderConfirmation"));
+const QuoteRequest = lazy(() => import("./pages/QuoteRequest"));
 
 const PRODUCTION_DOMAINS = ["fitmatch.ca", "www.fitmatch.ca", "spark-connect-hub-03.lovable.app"];
 const isProduction = PRODUCTION_DOMAINS.includes(window.location.hostname);
 const isPreview = !isProduction;
 
 const queryClient = new QueryClient();
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="w-8 h-8 border-4 border-foreground border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const AnalyticsTracker = () => {
   useAnalytics();
@@ -91,6 +112,7 @@ const App = () => (
         <HideChatOnAdmin />
         <AnalyticsTracker />
         <CookieConsent />
+        <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={isPreview ? <Index /> : <UnderConstruction />} />
           <Route path="/product/:id" element={<Product />} />
