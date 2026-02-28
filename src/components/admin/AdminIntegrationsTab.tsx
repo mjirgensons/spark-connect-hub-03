@@ -117,7 +117,9 @@ const AdminIntegrationsTab = () => {
   const [healthChecking, setHealthChecking] = useState(false);
   const [webhookPaths, setWebhookPaths] = useState<Record<string, string>>({});
   const [lastFired, setLastFired] = useState<Record<string, string>>({});
+  const [autoCheckInterval, setAutoCheckInterval] = useState(5); // minutes
   const refreshRef = useRef<ReturnType<typeof setInterval>>();
+  const healthCheckRef = useRef<ReturnType<typeof setInterval>>();
 
   const fetchIntegrations = useCallback(async () => {
     const { data } = await supabase.from("integrations").select("*").order("category");
@@ -136,10 +138,11 @@ const AdminIntegrationsTab = () => {
   const fetchLastFired = useCallback(async () => {
     const fired: Record<string, string> = {};
     for (const we of WEBHOOK_EVENTS) {
+      // Match both exact event and .test variant
       const { data } = await supabase
         .from("webhook_logs")
         .select("created_at")
-        .eq("event_type", we.event)
+        .or(`event_type.eq.${we.event},event_type.eq.${we.event}.test`)
         .eq("status", "delivered")
         .order("created_at", { ascending: false })
         .limit(1)
@@ -158,11 +161,40 @@ const AdminIntegrationsTab = () => {
     load();
   }, [fetchIntegrations, fetchWebhookLogs, fetchLastFired]);
 
-  // Auto-refresh webhook logs
+  // Auto-refresh webhook logs every 30s
   useEffect(() => {
     refreshRef.current = setInterval(fetchWebhookLogs, 30000);
     return () => { if (refreshRef.current) clearInterval(refreshRef.current); };
   }, [fetchWebhookLogs]);
+
+  // Automated health check on interval
+  useEffect(() => {
+    if (autoCheckInterval <= 0) return;
+    const runAutoHealth = async () => {
+      for (const integration of integrations.filter(i => i.is_enabled)) {
+        try {
+          const { data } = await supabase.functions.invoke("test-integration", {
+            body: { service_name: integration.service_name },
+          });
+          const healthStatus = data?.status === "healthy" ? "healthy" : "unhealthy";
+          await supabase.from("integrations").update({
+            last_health_check: new Date().toISOString(),
+            last_health_status: healthStatus,
+            status: healthStatus === "healthy" ? "connected" : "error",
+          } as any).eq("id", integration.id);
+        } catch {
+          await supabase.from("integrations").update({
+            last_health_check: new Date().toISOString(),
+            last_health_status: "unhealthy",
+            status: "error",
+          } as any).eq("id", integration.id);
+        }
+      }
+      await fetchIntegrations();
+    };
+    healthCheckRef.current = setInterval(runAutoHealth, autoCheckInterval * 60 * 1000);
+    return () => { if (healthCheckRef.current) clearInterval(healthCheckRef.current); };
+  }, [autoCheckInterval, integrations, fetchIntegrations]);
 
   const openConfig = (integration: Integration) => {
     setConfigSheet(integration);
@@ -249,7 +281,7 @@ const AdminIntegrationsTab = () => {
         status: ok ? "delivered" : "failed",
         error_message: ok ? null : (data?.message || error?.message),
       }] as any);
-      fetchWebhookLogs();
+      await Promise.all([fetchWebhookLogs(), fetchLastFired()]);
     } catch (e: any) {
       toast({ title: "Test failed", description: e.message, variant: "destructive" });
     }
@@ -291,11 +323,13 @@ const AdminIntegrationsTab = () => {
         await supabase.from("integrations").update({
           last_health_check: new Date().toISOString(),
           last_health_status: healthStatus,
+          status: healthStatus === "healthy" ? "connected" : "error",
         } as any).eq("id", integration.id);
       } catch {
         await supabase.from("integrations").update({
           last_health_check: new Date().toISOString(),
           last_health_status: "unhealthy",
+          status: "error",
         } as any).eq("id", integration.id);
       }
     }
@@ -666,10 +700,28 @@ const AdminIntegrationsTab = () => {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-bold text-foreground">System Health</h3>
-          <Button variant="outline" size="sm" className="h-7 text-xs border-2" disabled={healthChecking} onClick={handleRunHealthCheck}>
-            {healthChecking ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Activity className="w-3 h-3 mr-1" />}
-            Run Health Check
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Label className="text-xs text-muted-foreground whitespace-nowrap">Auto-check every</Label>
+              <Select value={String(autoCheckInterval)} onValueChange={v => setAutoCheckInterval(Number(v))}>
+                <SelectTrigger className="w-[100px] h-7 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Off</SelectItem>
+                  <SelectItem value="1">1 min</SelectItem>
+                  <SelectItem value="2">2 min</SelectItem>
+                  <SelectItem value="5">5 min</SelectItem>
+                  <SelectItem value="10">10 min</SelectItem>
+                  <SelectItem value="15">15 min</SelectItem>
+                  <SelectItem value="30">30 min</SelectItem>
+                  <SelectItem value="60">1 hour</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="outline" size="sm" className="h-7 text-xs border-2" disabled={healthChecking} onClick={handleRunHealthCheck}>
+              {healthChecking ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Activity className="w-3 h-3 mr-1" />}
+              Run Now
+            </Button>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           {integrations.map(i => {
