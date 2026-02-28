@@ -22,7 +22,7 @@ export const HideChatOnAdmin = () => {
     const functionalAllowed = consent?.functional === true;
 
     widget.style.display = isAdminRoute || !functionalAllowed ? "none" : "";
-  }, [pathname, setTick]);
+  }, [pathname, consentTick]);
 
   return null;
 };
