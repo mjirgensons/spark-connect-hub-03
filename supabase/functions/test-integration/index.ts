@@ -119,11 +119,19 @@ Deno.serve(async (req) => {
         }
         try {
           const healthUrl = `${webhookBaseUrl.replace(/\/+$/, "")}/webhook/health-check`;
-          const res = await fetch(healthUrl, {
+          // Try POST first, fall back to GET if n8n says POST not registered
+          let res = await fetch(healthUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ping: true, timestamp: new Date().toISOString() }),
           });
+          if (!res.ok) {
+            const body = await res.text();
+            if (body.includes("not registered for POST")) {
+              // Retry with GET
+              res = await fetch(healthUrl);
+            }
+          }
           const contentType = res.headers.get("content-type") || "";
           if (!res.ok) {
             const body = await res.text();
