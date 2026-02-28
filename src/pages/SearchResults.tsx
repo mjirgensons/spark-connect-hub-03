@@ -174,6 +174,9 @@ const SearchResults = () => {
                         )}
                         {matchBadge}
                       </div>
+                      <div className="absolute bottom-2 right-2 z-10">
+                        <CompareButton productId={product.id} />
+                      </div>
                     </div>
                     <div className="p-4 space-y-2">
                       <div className="flex items-start justify-between gap-2">

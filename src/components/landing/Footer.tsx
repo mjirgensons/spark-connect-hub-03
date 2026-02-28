@@ -150,38 +150,7 @@ const Footer = () => {
           <div className="grid md:grid-cols-2 gap-12">
             {/* Newsletter */}
             <div>
-              <h4 className="font-sans font-bold text-sm tracking-wider uppercase mb-4">
-                Stay Updated
-              </h4>
-              <form onSubmit={handleSubscribe} className="space-y-3">
-                <div className="flex gap-2">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-background text-foreground border-2 border-background flex-1"
-                  />
-                  <Button
-                    type="submit"
-                    className="bg-foreground text-background border-2 border-background hover:bg-gray-900 shrink-0"
-                  >
-                    Subscribe
-                  </Button>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Checkbox
-                    id="newsletter-consent"
-                    checked={consent}
-                    onCheckedChange={(v) => setConsent(v === true)}
-                    className="mt-0.5 border-gray-400 data-[state=checked]:bg-background data-[state=checked]:text-foreground"
-                  />
-                  <label htmlFor="newsletter-consent" className="text-xs text-gray-400 leading-relaxed cursor-pointer">
-                    I consent to receive marketing emails from FitMatch about products, promotions, and renovation tips. I can unsubscribe at any time.
-                  </label>
-                </div>
-              </form>
+              <NewsletterSignup source="footer" />
             </div>
 
             {/* Contact */}

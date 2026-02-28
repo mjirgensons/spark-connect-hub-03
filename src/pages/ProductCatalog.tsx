@@ -363,11 +363,16 @@ const ProductCatalog = () => {
                               No Image
                             </div>
                           )}
-                          {product.discount_percentage > 0 && (
-                            <Badge className="absolute top-2 right-2 bg-green-600 text-white border-0 font-mono text-xs">
-                              -{Math.round(product.discount_percentage)}%
-                            </Badge>
-                          )}
+                          <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                            {product.discount_percentage > 0 && (
+                              <Badge className="bg-green-600 text-white border-0 font-mono text-xs">
+                                -{Math.round(product.discount_percentage)}%
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="absolute bottom-2 right-2 z-10">
+                            <CompareButton productId={product.id} />
+                          </div>
                         </div>
 
                         {/* Info */}

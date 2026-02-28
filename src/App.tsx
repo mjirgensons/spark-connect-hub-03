@@ -218,6 +218,7 @@ const App = () => (
       </BrowserRouter>
       </WishlistProvider>
       </CartProvider>
+      </CompareProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
