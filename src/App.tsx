@@ -94,6 +94,7 @@ const App = () => (
 
           {/* Client routes */}
           <Route path="/client" element={<RoleGuard allowedRoles={['client']}><DashboardLayout role="client" /></RoleGuard>}>
+            <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<ClientDashboard />} />
             <Route path="matches" element={<ClientMatches />} />
             <Route path="match/new" element={<ClientNewMatch />} />
