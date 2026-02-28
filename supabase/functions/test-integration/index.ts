@@ -77,20 +77,31 @@ Deno.serve(async (req) => {
         break;
       }
       case "n8n": {
-        const baseUrl = config.base_url || integration.webhook_url;
-        if (!baseUrl) {
-          result = { status: "error", message: "n8n base URL required" };
+        const webhookBaseUrl = config.webhook_base_url || config.base_url || integration.webhook_url;
+        if (!webhookBaseUrl) {
+          result = { status: "error", message: "n8n webhook base URL required" };
           break;
         }
         try {
-          const res = await fetch(`${baseUrl.replace(/\/+$/, "")}/webhook/health-check`, {
+          const healthUrl = `${webhookBaseUrl.replace(/\/+$/, "")}/webhook/health-check`;
+          const res = await fetch(healthUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ping: true, timestamp: new Date().toISOString() }),
           });
-          result = res.ok
-            ? { status: "healthy", message: "n8n webhook responding" }
-            : { status: "error", message: `n8n returned ${res.status}` };
+          const contentType = res.headers.get("content-type") || "";
+          if (!res.ok) {
+            const body = await res.text();
+            const isHtml = body.trim().startsWith("<!") || body.includes("<html");
+            result = {
+              status: "error",
+              message: isHtml
+                ? `n8n returned HTML (status ${res.status}) — likely a login page or missing workflow. Ensure the health-check workflow is active.`
+                : `n8n returned ${res.status}: ${body.substring(0, 200)}`,
+            };
+          } else {
+            result = { status: "healthy", message: "n8n webhook responding" };
+          }
         } catch (e) {
           result = { status: "error", message: `n8n unreachable: ${e.message}` };
         }
