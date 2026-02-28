@@ -345,6 +345,42 @@ export type Database = {
           },
         ]
       }
+      faq_items: {
+        Row: {
+          answer: string
+          created_at: string
+          group_id: string
+          group_title: string
+          id: string
+          is_active: boolean
+          question: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          group_id: string
+          group_title: string
+          id?: string
+          is_active?: boolean
+          question: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          group_id?: string
+          group_title?: string
+          id?: string
+          is_active?: boolean
+          question?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       footer_pages: {
         Row: {
           content: string
