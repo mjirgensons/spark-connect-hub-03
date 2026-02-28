@@ -23,6 +23,7 @@ import AdminProductsTab from "@/components/admin/AdminProductsTab";
 import AdminTrustSignalsTab from "@/components/admin/AdminTrustSignalsTab";
 import AdminFAQTab from "@/components/admin/AdminFAQTab";
 import AdminReviewsTab from "@/components/admin/AdminReviewsTab";
+import AdminEmailTemplatesTab from "@/components/admin/AdminEmailTemplatesTab";
 import AdminBlogTab from "@/components/admin/AdminBlogTab";
 import AdminNewsletterTab from "@/components/admin/AdminNewsletterTab";
 
@@ -77,6 +78,8 @@ const Admin = () => {
         return <AdminCustomersTab />;
       case "reviews":
         return <AdminReviewsTab />;
+      case "email":
+        return <AdminEmailTemplatesTab />;
       case "integrations":
         return <AdminIntegrationsTab />;
       case "trust-signals":
@@ -133,7 +136,7 @@ const Admin = () => {
 
         <main className="flex-1 p-6 min-w-0 overflow-x-auto">
           <h2 className="text-xl font-serif font-bold text-foreground mb-4 capitalize">
-            {activeSection === "cookie-manager" ? "Cookie Manager" : activeSection === "trust-signals" ? "Trust Signals" : activeSection === "faq" ? "FAQ" : activeSection === "reviews" ? "Reviews" : activeSection === "blog" ? "Blog" : activeSection === "newsletter" ? "Newsletter" : activeSection}
+            {activeSection === "email" ? "Email Communication" : activeSection === "cookie-manager" ? "Cookie Manager" : activeSection === "trust-signals" ? "Trust Signals" : activeSection === "faq" ? "FAQ" : activeSection === "reviews" ? "Reviews" : activeSection === "blog" ? "Blog" : activeSection === "newsletter" ? "Newsletter" : activeSection}
           </h2>
           {renderSection()}
         </main>
