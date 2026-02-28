@@ -16,7 +16,46 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { service_name } = await req.json();
+    const reqBody = await req.json();
+    const { service_name, webhook_test_url, webhook_test_payload } = reqBody;
+
+    const start = Date.now();
+    let result: { status: string; message: string; latency_ms?: number };
+
+    // Direct webhook test mode (no integration lookup needed)
+    if (webhook_test_url) {
+      try {
+        const payload = webhook_test_payload || { test: true, timestamp: new Date().toISOString() };
+        const res = await fetch(webhook_test_url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const body = await res.text();
+        const isHtml = body.trim().startsWith("<!") || body.includes("<html");
+        result = res.ok
+          ? { status: "healthy", message: `Webhook responded with ${res.status}` }
+          : {
+              status: "error",
+              message: isHtml
+                ? `Returned HTML (status ${res.status}) — check if workflow is active`
+                : `Returned ${res.status}: ${body.substring(0, 200)}`,
+            };
+        result.latency_ms = Date.now() - start;
+        return new Response(JSON.stringify(result), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      } catch (e) {
+        result = { status: "error", message: `Unreachable: ${e.message}`, latency_ms: Date.now() - start };
+        return new Response(JSON.stringify(result), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Service-based health check — requires integration lookup
     if (!service_name) {
       return new Response(JSON.stringify({ status: "error", message: "service_name required" }), {
         status: 400,
@@ -24,7 +63,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch integration config
     const { data: integration, error } = await supabase
       .from("integrations")
       .select("*")
@@ -40,9 +78,6 @@ Deno.serve(async (req) => {
 
     const config = integration.config || {};
     const creds = integration.encrypted_credentials || {};
-    const start = Date.now();
-
-    let result: { status: string; message: string; latency_ms?: number };
 
     switch (service_name) {
       case "mailgun": {
@@ -77,20 +112,31 @@ Deno.serve(async (req) => {
         break;
       }
       case "n8n": {
-        const baseUrl = config.base_url || integration.webhook_url;
-        if (!baseUrl) {
-          result = { status: "error", message: "n8n base URL required" };
+        const webhookBaseUrl = config.webhook_base_url || config.base_url || integration.webhook_url;
+        if (!webhookBaseUrl) {
+          result = { status: "error", message: "n8n webhook base URL required" };
           break;
         }
         try {
-          const res = await fetch(`${baseUrl.replace(/\/+$/, "")}/webhook/health-check`, {
+          const healthUrl = `${webhookBaseUrl.replace(/\/+$/, "")}/webhook/health-check`;
+          const res = await fetch(healthUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ping: true, timestamp: new Date().toISOString() }),
           });
-          result = res.ok
-            ? { status: "healthy", message: "n8n webhook responding" }
-            : { status: "error", message: `n8n returned ${res.status}` };
+          const contentType = res.headers.get("content-type") || "";
+          if (!res.ok) {
+            const body = await res.text();
+            const isHtml = body.trim().startsWith("<!") || body.includes("<html");
+            result = {
+              status: "error",
+              message: isHtml
+                ? `n8n returned HTML (status ${res.status}) — likely a login page or missing workflow. Ensure the health-check workflow is active.`
+                : `n8n returned ${res.status}: ${body.substring(0, 200)}`,
+            };
+          } else {
+            result = { status: "healthy", message: "n8n webhook responding" };
+          }
         } catch (e) {
           result = { status: "error", message: `n8n unreachable: ${e.message}` };
         }
