@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
+import DimensionMatcher from "@/components/DimensionMatcher";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -265,9 +266,9 @@ const ProductCatalog = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1 container mx-auto px-4 pt-24 pb-12">
-        <h1 className="font-serif text-3xl md:text-4xl font-bold mb-8">Browse Cabinets</h1>
-
-        <div className="flex gap-8">
+        <h1 className="font-serif text-3xl md:text-4xl font-bold mb-4">Browse Cabinets</h1>
+        <DimensionMatcher />
+        <div className="flex gap-8 mt-8">
           {/* Desktop sidebar */}
           <aside className="hidden lg:block w-64 shrink-0">
             <div

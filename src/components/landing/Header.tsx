@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import SearchBar from "@/components/SearchBar";
 
 type NavItem =
   | { label: string; type: "anchor"; href: string }
@@ -75,32 +76,35 @@ const Header = () => {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-6">
             {navLinks.map(renderNavItem)}
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <SearchBar />
             <Link to="/cart" className="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
               <ShoppingCart className="w-5 h-5" />
               {itemCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{itemCount}</span>
               )}
             </Link>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/login">Sign In</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link to="/register">Get Started</Link>
-            </Button>
+            <div className="hidden md:flex items-center gap-2">
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/login">Sign In</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link to="/register">Get Started</Link>
+              </Button>
+            </div>
           </div>
 
-          <button className="md:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
+          <button className="lg:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
+          <div className="lg:hidden py-4 border-t border-border">
             <nav className="flex flex-col gap-4">
               {navLinks.map(renderNavItem)}
               <Link to="/cart" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setIsMenuOpen(false)}>

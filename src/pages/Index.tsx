@@ -1,5 +1,6 @@
 import Header from "@/components/landing/Header";
 import Hero from "@/components/landing/Hero";
+import DimensionMatcher from "@/components/DimensionMatcher";
 import ProductShowcase from "@/components/landing/ProductShowcase";
 import OtherProducts from "@/components/landing/OtherProducts";
 import HowItWorks from "@/components/landing/HowItWorks";
@@ -13,6 +14,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <Hero />
+      <DimensionMatcher />
       <ProductShowcase />
       <OtherProducts />
       <HowItWorks />

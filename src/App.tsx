@@ -26,6 +26,7 @@ import ForSellersPage from "./pages/ForSellersPage";
 import AboutPage from "./pages/AboutPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import SearchResults from "./pages/SearchResults";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import ClientMatches from "./pages/client/ClientMatches";
 import ClientNewMatch from "./pages/client/ClientNewMatch";
@@ -101,6 +102,7 @@ const App = () => (
 
           {/* Public routes */}
           <Route path="/browse" element={<ProductCatalog />} />
+          <Route path="/search" element={<SearchResults />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/for-contractors" element={<ForContractorsPage />} />
           <Route path="/for-sellers" element={<ForSellersPage />} />
