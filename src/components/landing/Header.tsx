@@ -38,7 +38,7 @@ const Header = () => {
     setIsMenuOpen(false);
   };
 
-  const linkClass = "text-sm font-medium text-muted-foreground hover:text-foreground transition-colors";
+  const linkClass = "text-xs font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap";
 
   const renderNavItem = (item: NavItem) => {
     if (item.type === "route") {
@@ -79,7 +79,7 @@ const Header = () => {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-3 xl:gap-5">
             {navLinks.map(renderNavItem)}
           </nav>
 
@@ -97,7 +97,7 @@ const Header = () => {
                 <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{itemCount}</span>
               )}
             </Link>
-            <div className="hidden md:flex items-center gap-2 ml-2">
+            <div className="hidden lg:flex items-center gap-2 ml-2">
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/login">Sign In</Link>
               </Button>
@@ -105,14 +105,14 @@ const Header = () => {
                 <Link to="/register">Get Started</Link>
               </Button>
             </div>
-            <button className="md:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
+            <button className="lg:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
+          <div className="lg:hidden py-4 border-t border-border">
             <nav className="flex flex-col gap-1">
               {navLinks.map((item) => (
                 <div key={item.label} className="min-h-[44px] flex items-center">
