@@ -42,7 +42,7 @@ interface EmailTemplate {
   updated_at: string;
 }
 
-type InternalTab = "templates" | "comm-log" | "consent" | "settings";
+type InternalTab = "templates" | "comm-log" | "consent" | "settings" | "wf8-test";
 
 const CATEGORY_COLORS: Record<string, string> = {
   transactional: "bg-blue-600 text-white hover:bg-blue-700",
