@@ -112,7 +112,7 @@ const Header = () => {
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
+          <div className="lg:hidden py-4 border-t border-border">
             <nav className="flex flex-col gap-1">
               {navLinks.map((item) => (
                 <div key={item.label} className="min-h-[44px] flex items-center">
