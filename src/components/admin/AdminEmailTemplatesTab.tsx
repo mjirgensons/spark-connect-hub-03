@@ -14,10 +14,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Shield, Settings } from "lucide-react";
+import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Shield, Settings, FlaskConical } from "lucide-react";
 import EmailCommLogTab from "./EmailCommLogTab";
 import EmailConsentTab from "./EmailConsentTab";
 import EmailSettingsTab from "./EmailSettingsTab";
+import EmailWF8TestTab from "./EmailWF8TestTab";
 
 interface EmailTemplate {
   id: string;
@@ -41,7 +42,7 @@ interface EmailTemplate {
   updated_at: string;
 }
 
-type InternalTab = "templates" | "comm-log" | "consent" | "settings";
+type InternalTab = "templates" | "comm-log" | "consent" | "settings" | "wf8-test";
 
 const CATEGORY_COLORS: Record<string, string> = {
   transactional: "bg-blue-600 text-white hover:bg-blue-700",
@@ -411,6 +412,7 @@ const AdminEmailTemplatesTab = () => {
     { id: "comm-log", label: "Communication Log", icon: MessageSquare },
     { id: "consent", label: "Consent", icon: Shield },
     { id: "settings", label: "Settings", icon: Settings },
+    { id: "wf8-test", label: "WF-8 Test", icon: FlaskConical },
   ];
 
   return (
@@ -460,6 +462,7 @@ const AdminEmailTemplatesTab = () => {
 
       {internalTab === "settings" && <EmailSettingsTab />}
 
+      {internalTab === "wf8-test" && <EmailWF8TestTab />}
       {/* Template Editor Sheet */}
       <Sheet open={editorOpen} onOpenChange={setEditorOpen}>
         <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
