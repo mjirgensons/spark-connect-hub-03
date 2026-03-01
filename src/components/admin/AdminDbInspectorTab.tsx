@@ -49,7 +49,6 @@ const AdminDbInspectorTab = () => {
       } else {
         setError(msg);
       }
-      }
     } finally {
       setLoading(false);
     }
