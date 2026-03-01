@@ -73,7 +73,7 @@ const Header = () => {
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
               <span className="text-primary-foreground font-serif font-bold text-xl">F</span>
             </div>
-            <div className="hidden sm:block min-w-0">
+            <div className="hidden xl:block min-w-0">
               <span className="font-serif text-xl font-semibold text-foreground">Fit-Match</span>
               <span className="block text-xs text-muted-foreground -mt-1">Luxury Cabinet Exchange</span>
             </div>
