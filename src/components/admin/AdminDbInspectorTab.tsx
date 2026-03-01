@@ -44,8 +44,8 @@ const AdminDbInspectorTab = () => {
       setLastExport(new Date().toLocaleString());
     } catch (err: any) {
       const msg = err?.message || String(err);
-      if (msg.includes("does not exist")) {
-        setError("Function get_full_schema_dump() does not exist. The migration SQL may not have been applied yet.");
+      if (msg.includes("PGRST") || msg.includes("schema cache") || msg.includes("does not exist")) {
+        setError(`RPC not available in this environment yet. Please refresh the app and try again. If you're on the published site, publish latest changes first. Raw error: ${msg}`);
       } else {
         setError(msg);
       }
