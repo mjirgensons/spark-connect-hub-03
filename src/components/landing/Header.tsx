@@ -79,7 +79,7 @@ const Header = () => {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-3 xl:gap-5">
             {navLinks.map(renderNavItem)}
           </nav>
 
