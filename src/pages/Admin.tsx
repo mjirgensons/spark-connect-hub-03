@@ -26,6 +26,9 @@ import AdminReviewsTab from "@/components/admin/AdminReviewsTab";
 import AdminEmailTemplatesTab from "@/components/admin/AdminEmailTemplatesTab";
 import AdminBlogTab from "@/components/admin/AdminBlogTab";
 import AdminNewsletterTab from "@/components/admin/AdminNewsletterTab";
+import AdminDbInspectorTab from "@/components/admin/AdminDbInspectorTab";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 
 const Admin = () => {
   const { user, loading, signOut } = useAuth();
@@ -108,7 +111,20 @@ const Admin = () => {
           </div>
         );
       case "settings":
-        return <SiteSettingsAdmin />;
+        return (
+          <div className="space-y-6">
+            <Collapsible>
+              <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                <ChevronDown className="w-4 h-4" />
+                🔍 Database Inspector (Dev Tools)
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-3">
+                <AdminDbInspectorTab />
+              </CollapsibleContent>
+            </Collapsible>
+            <SiteSettingsAdmin />
+          </div>
+        );
       default:
         return null;
     }

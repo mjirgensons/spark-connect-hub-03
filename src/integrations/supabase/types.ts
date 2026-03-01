@@ -1542,6 +1542,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_full_schema_dump: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
