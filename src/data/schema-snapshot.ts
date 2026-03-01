@@ -742,4 +742,4 @@ RLS: Users can read own wishlist (SELECT)
   is_admin()
 `;
 
-export const SCHEMA_GENERATED_AT = "2026-03-01T20:57:17Z";
+export const SCHEMA_GENERATED_AT = "2026-03-01T21:05:39Z";
