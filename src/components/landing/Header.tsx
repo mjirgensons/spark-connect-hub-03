@@ -97,7 +97,7 @@ const Header = () => {
                 <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{itemCount}</span>
               )}
             </Link>
-            <div className="hidden md:flex items-center gap-2 ml-2">
+            <div className="hidden lg:flex items-center gap-2 ml-2">
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/login">Sign In</Link>
               </Button>
