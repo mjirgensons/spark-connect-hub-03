@@ -26,6 +26,9 @@ import AdminReviewsTab from "@/components/admin/AdminReviewsTab";
 import AdminEmailTemplatesTab from "@/components/admin/AdminEmailTemplatesTab";
 import AdminBlogTab from "@/components/admin/AdminBlogTab";
 import AdminNewsletterTab from "@/components/admin/AdminNewsletterTab";
+import AdminDbInspectorTab from "@/components/admin/AdminDbInspectorTab";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 
 const Admin = () => {
   const { user, loading, signOut } = useAuth();
