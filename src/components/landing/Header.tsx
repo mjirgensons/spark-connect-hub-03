@@ -38,7 +38,7 @@ const Header = () => {
     setIsMenuOpen(false);
   };
 
-  const linkClass = "text-sm font-medium text-muted-foreground hover:text-foreground transition-colors";
+  const linkClass = "text-xs font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap";
 
   const renderNavItem = (item: NavItem) => {
     if (item.type === "route") {
