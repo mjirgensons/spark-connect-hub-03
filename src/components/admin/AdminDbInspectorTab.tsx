@@ -18,17 +18,36 @@ const AdminDbInspectorTab = () => {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: rpcError } = await supabase.rpc("get_full_schema_dump" as any);
-      if (rpcError) throw rpcError;
-      setSchemaText(data as string);
+      // Use raw fetch to bypass typed client restrictions
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+
+      const res = await fetch(`${supabaseUrl}/rest/v1/rpc/get_full_schema_dump`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": supabaseKey,
+          "Authorization": `Bearer ${accessToken || supabaseKey}`,
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!res.ok) {
+        const errBody = await res.text();
+        throw new Error(errBody || `HTTP ${res.status}`);
+      }
+
+      const result = await res.json();
+      setSchemaText(result as string);
       setLastExport(new Date().toLocaleString());
     } catch (err: any) {
       const msg = err?.message || String(err);
-      setError(msg);
       if (msg.includes("does not exist")) {
-        setError(
-          "Function get_full_schema_dump() does not exist. The migration SQL may not have been applied yet."
-        );
+        setError("Function get_full_schema_dump() does not exist. The migration SQL may not have been applied yet.");
+      } else {
+        setError(msg);
       }
     } finally {
       setLoading(false);
