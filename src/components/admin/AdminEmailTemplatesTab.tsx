@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Shield, Settings } from "lucide-react";
+import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Shield, Settings, FlaskConical } from "lucide-react";
 import EmailCommLogTab from "./EmailCommLogTab";
 import EmailConsentTab from "./EmailConsentTab";
 import EmailSettingsTab from "./EmailSettingsTab";
