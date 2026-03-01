@@ -18,6 +18,7 @@ import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Sh
 import EmailCommLogTab from "./EmailCommLogTab";
 import EmailConsentTab from "./EmailConsentTab";
 import EmailSettingsTab from "./EmailSettingsTab";
+import EmailWF8TestTab from "./EmailWF8TestTab";
 
 interface EmailTemplate {
   id: string;
