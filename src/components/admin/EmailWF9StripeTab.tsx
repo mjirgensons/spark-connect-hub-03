@@ -84,10 +84,10 @@ const WF9_SETTINGS = [
   },
 ] as const;
 
-const STRIPE_EVENTS: { event: string; path: string; stripeType: string }[] = [
-  { event: "payment.completed", path: "/webhook/stripe-payment-completed", stripeType: "checkout.session.completed" },
-  { event: "payment.failed", path: "/webhook/stripe-payment-failed", stripeType: "payment_intent.payment_failed" },
-  { event: "payment.refunded", path: "/webhook/stripe-refund", stripeType: "charge.refunded" },
+const STRIPE_EVENTS: { event: string; friendlyName: string; path: string; stripeType: string }[] = [
+  { event: "checkout.session.completed", friendlyName: "payment.completed", path: "/webhook/stripe-payment-completed", stripeType: "checkout.session.completed" },
+  { event: "checkout.session.expired", friendlyName: "payment.failed", path: "/webhook/stripe-payment-failed", stripeType: "checkout.session.expired" },
+  { event: "charge.refunded", friendlyName: "payment.refunded", path: "/webhook/stripe-refund", stripeType: "charge.refunded" },
 ];
 
 const REQUIRED_TEMPLATES = ["order_confirmation", "payment_receipt", "payment_failed", "refund_processed"];
