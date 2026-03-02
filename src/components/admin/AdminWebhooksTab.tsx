@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, Loader2, Eye, EyeOff, ExternalLink, Webhook, CreditCard, Mail } from "lucide-react";
+import { RefreshCw, Loader2, Eye, EyeOff, ExternalLink, Webhook, CreditCard, Mail, ArrowRight } from "lucide-react";
 
 const neoCard = "border-2 border-foreground shadow-[4px_4px_0px_0px_hsl(var(--foreground))]";
 
@@ -30,9 +31,9 @@ const PROVIDERS = [
     icon: CreditCard,
     description: "Payment lifecycle events forwarded to n8n via WF-9.",
     eventTypes: [
-      { type: "checkout.session.completed", workflow: "WF-9", settingKey: "stripe_checkout_completed_webhook_url" },
-      { type: "checkout.session.expired", workflow: "WF-9", settingKey: "stripe_checkout_expired_webhook_url" },
-      { type: "charge.refunded", workflow: "WF-9", settingKey: "stripe_charge_refunded_webhook_url" },
+      { type: "checkout.session.completed", workflow: "WF-9", settingKey: "stripe_checkout_completed_webhook_url", endpointKey: "wf9_checkout_completed" },
+      { type: "checkout.session.expired", workflow: "WF-9", settingKey: "stripe_checkout_expired_webhook_url", endpointKey: "wf9_checkout_expired" },
+      { type: "charge.refunded", workflow: "WF-9", settingKey: "stripe_charge_refunded_webhook_url", endpointKey: "wf9_charge_refunded" },
     ],
     logFilter: "event_type.ilike.%checkout%,event_type.ilike.%charge%,event_type.ilike.test:checkout%,event_type.ilike.test:charge%",
     adminSection: "integrations" as const,
@@ -44,9 +45,9 @@ const PROVIDERS = [
     icon: Mail,
     description: "Email delivery tracking events (open, click, bounce, etc.).",
     eventTypes: [
-      { type: "email.send", workflow: "WF-8", settingKey: null },
-      { type: "email.tracking", workflow: "WF-8", settingKey: null },
-      { type: "email.inbound", workflow: "WF-8", settingKey: null },
+      { type: "email.send", workflow: "WF-8", settingKey: null, endpointKey: "wf8_email_send" },
+      { type: "email.tracking", workflow: "WF-8", settingKey: null, endpointKey: "wf8_email_tracking" },
+      { type: "email.inbound", workflow: "WF-8", settingKey: null, endpointKey: "wf8_email_inbound" },
     ],
     logFilter: "event_type.ilike.%email%,event_type.ilike.%mailgun%",
     adminSection: "integrations" as const,
@@ -59,6 +60,7 @@ interface AdminWebhooksTabProps {
 }
 
 const AdminWebhooksTab = ({ onNavigate }: AdminWebhooksTabProps) => {
+  const routerNavigate = useNavigate();
   const { toast } = useToast();
   const [recentLogs, setRecentLogs] = useState<WebhookLogRow[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
@@ -125,19 +127,29 @@ const AdminWebhooksTab = ({ onNavigate }: AdminWebhooksTabProps) => {
                   {provider.eventTypes.map((evt) => {
                     const url = evt.settingKey ? wf9Urls[evt.settingKey] : null;
                     return (
-                      <div key={evt.type} className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2">
-                          <code className="font-mono bg-muted px-1.5 py-0.5 rounded">{evt.type}</code>
-                          <Badge variant="outline" className="text-[10px] border">{evt.workflow}</Badge>
+                      <div key={evt.type} className="flex items-center justify-between text-xs gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <code className="font-mono bg-muted px-1.5 py-0.5 rounded truncate">{evt.type}</code>
+                          <Badge variant="outline" className="text-[10px] border shrink-0">{evt.workflow}</Badge>
                         </div>
-                        {evt.settingKey && (
-                          <Badge
-                            variant={url ? "default" : "secondary"}
-                            className="text-[10px]"
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {evt.settingKey && (
+                            <Badge
+                              variant={url ? "default" : "secondary"}
+                              className="text-[10px]"
+                            >
+                              {url ? "Configured" : "Not set"}
+                            </Badge>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-1.5 text-[10px] gap-0.5"
+                            onClick={() => routerNavigate(`/admin/webhooks/${provider.id}/${evt.endpointKey}`)}
                           >
-                            {url ? "Configured" : "Not set"}
-                          </Badge>
-                        )}
+                            Details <ArrowRight className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     );
                   })}

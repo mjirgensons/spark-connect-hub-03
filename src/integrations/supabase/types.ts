@@ -1451,12 +1451,17 @@ export type Database = {
           created_at: string
           direction: string
           duration_ms: number | null
+          endpoint_key: string | null
           error_message: string | null
+          event_id: string | null
           event_type: string
           id: string
           integration_id: string | null
+          is_replay: boolean
+          is_test: boolean
           max_retries: number
           next_retry_at: string | null
+          provider: string | null
           request_payload: Json | null
           response_body: string | null
           response_status: number | null
@@ -1468,12 +1473,17 @@ export type Database = {
           created_at?: string
           direction: string
           duration_ms?: number | null
+          endpoint_key?: string | null
           error_message?: string | null
+          event_id?: string | null
           event_type: string
           id?: string
           integration_id?: string | null
+          is_replay?: boolean
+          is_test?: boolean
           max_retries?: number
           next_retry_at?: string | null
+          provider?: string | null
           request_payload?: Json | null
           response_body?: string | null
           response_status?: number | null
@@ -1485,12 +1495,17 @@ export type Database = {
           created_at?: string
           direction?: string
           duration_ms?: number | null
+          endpoint_key?: string | null
           error_message?: string | null
+          event_id?: string | null
           event_type?: string
           id?: string
           integration_id?: string | null
+          is_replay?: boolean
+          is_test?: boolean
           max_retries?: number
           next_retry_at?: string | null
+          provider?: string | null
           request_payload?: Json | null
           response_body?: string | null
           response_status?: number | null

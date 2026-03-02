@@ -41,11 +41,17 @@ serve(async (req) => {
       event = JSON.parse(body) as Stripe.Event;
     }
 
-    // ── WF-9: Map Stripe event type → site_settings key ──
+    // ── WF-9: Map Stripe event type → site_settings key + endpoint_key ──
     const EVENT_TO_SETTING: Record<string, string> = {
       "checkout.session.completed": "stripe_checkout_completed_webhook_url",
       "checkout.session.expired":   "stripe_checkout_expired_webhook_url",
       "charge.refunded":            "stripe_charge_refunded_webhook_url",
+    };
+
+    const EVENT_TO_ENDPOINT: Record<string, string> = {
+      "checkout.session.completed": "wf9_checkout_completed",
+      "checkout.session.expired":   "wf9_checkout_expired",
+      "charge.refunded":            "wf9_charge_refunded",
     };
 
     // Helper: read a single WF-9 URL from site_settings
@@ -78,18 +84,20 @@ serve(async (req) => {
       if (!url) {
         await supabase.from("webhook_logs").insert({
           event_type: eventType,
+          event_id: event.id,
+          provider: "stripe",
+          endpoint_key: EVENT_TO_ENDPOINT[eventType] || eventType,
           direction: "outbound",
           webhook_url: `wf9:${EVENT_TO_SETTING[eventType] || eventType} (not configured)`,
           request_payload: { event_id: event.id },
           status: "skipped",
           error_message: `Missing WF-9 webhook URL for ${eventType}`,
         });
-        return; // skip silently — return 200 to Stripe
+        return;
       }
 
       const start = Date.now();
       try {
-        // Plain POST to n8n — no Supabase keys leaked
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -98,6 +106,9 @@ serve(async (req) => {
         const resBody = await res.text().catch(() => "");
         await supabase.from("webhook_logs").insert({
           event_type: eventType,
+          event_id: event.id,
+          provider: "stripe",
+          endpoint_key: EVENT_TO_ENDPOINT[eventType] || eventType,
           direction: "outbound",
           webhook_url: url,
           request_payload: { event_id: event.id, type: eventType },
@@ -110,6 +121,9 @@ serve(async (req) => {
       } catch (err) {
         await supabase.from("webhook_logs").insert({
           event_type: eventType,
+          event_id: event.id,
+          provider: "stripe",
+          endpoint_key: EVENT_TO_ENDPOINT[eventType] || eventType,
           direction: "outbound",
           webhook_url: url,
           request_payload: { event_id: event.id },
@@ -161,6 +175,9 @@ serve(async (req) => {
     // Log inbound webhook
     await supabase.from("webhook_logs").insert({
       event_type: event.type,
+      event_id: event.id,
+      provider: "stripe",
+      endpoint_key: EVENT_TO_ENDPOINT[event.type] || null,
       direction: "inbound",
       webhook_url: `stripe-webhook/${event.type}`,
       request_payload: { event_id: event.id, type: event.type },
