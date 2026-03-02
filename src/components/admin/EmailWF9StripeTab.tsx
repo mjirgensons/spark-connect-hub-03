@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, ChevronDown, ChevronRight, Loader2, CheckCircle2, XCircle, Play, Eye, EyeOff } from "lucide-react";
+import { RefreshCw, ChevronDown, ChevronRight, Loader2, CheckCircle2, XCircle, Play, Eye, EyeOff, Save, X, FlaskConical } from "lucide-react";
 
 const neoCard = "border-2 border-foreground shadow-[4px_4px_0px_0px_hsl(var(--foreground))]";
 
@@ -45,6 +47,28 @@ interface WebhookLogRow {
   response_body: string | null;
 }
 
+// ─── WF-9 URL config ───
+const WF9_SETTINGS = [
+  {
+    key: "stripe_checkout_completed_webhook_url",
+    label: "checkout.session.completed",
+    stripeType: "checkout.session.completed",
+    description: "Paste the PRODUCTION URL from your n8n Webhook node that handles successful checkout completions.",
+  },
+  {
+    key: "stripe_checkout_expired_webhook_url",
+    label: "checkout.session.expired",
+    stripeType: "checkout.session.expired",
+    description: "Paste the PRODUCTION URL from your n8n Webhook node that handles expired/abandoned checkout sessions.",
+  },
+  {
+    key: "stripe_charge_refunded_webhook_url",
+    label: "charge.refunded",
+    stripeType: "charge.refunded",
+    description: "Paste the PRODUCTION URL from your n8n Webhook node that handles refund events.",
+  },
+] as const;
+
 const STRIPE_EVENTS: { event: string; path: string; stripeType: string }[] = [
   { event: "payment.completed", path: "/webhook/stripe-payment-completed", stripeType: "checkout.session.completed" },
   { event: "payment.failed", path: "/webhook/stripe-payment-failed", stripeType: "payment_intent.payment_failed" },
@@ -53,14 +77,32 @@ const STRIPE_EVENTS: { event: string; path: string; stripeType: string }[] = [
 
 const REQUIRED_TEMPLATES = ["order_confirmation", "payment_receipt", "payment_failed", "refund_processed"];
 
+const isValidHttpsUrl = (url: string) => {
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
 const EmailWF9StripeTab = () => {
   const { toast } = useToast();
 
   // ─── Section collapsible state ───
+  const [s0Open, setS0Open] = useState(true);
   const [s1Open, setS1Open] = useState(true);
   const [s2Open, setS2Open] = useState(true);
   const [s3Open, setS3Open] = useState(true);
   const [s4Open, setS4Open] = useState(true);
+
+  // ─── Section 0: WF-9 URL management ───
+  const [wf9Urls, setWf9Urls] = useState<Record<string, string>>({});
+  const [wf9Saved, setWf9Saved] = useState<Record<string, string>>({});
+  const [wf9Loading, setWf9Loading] = useState(false);
+  const [wf9Saving, setWf9Saving] = useState(false);
+  const [wf9Testing, setWf9Testing] = useState<string | null>(null);
+  const [wf9Errors, setWf9Errors] = useState<Record<string, string>>({});
 
   // ─── Section 1: Pre-flight ───
   const [checks, setChecks] = useState<PreflightCheck[]>([]);
@@ -82,6 +124,125 @@ const EmailWF9StripeTab = () => {
   const [activityLogs, setActivityLogs] = useState<WebhookLogRow[]>([]);
   const [activityLoading, setActivityLoading] = useState(false);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
+  const hasUnsavedWf9Changes = WF9_SETTINGS.some((s) => (wf9Urls[s.key] ?? "") !== (wf9Saved[s.key] ?? ""));
+
+  // ═══════════════════════════════════════════
+  // Section 0: WF-9 URL management
+  // ═══════════════════════════════════════════
+  const loadWf9Urls = useCallback(async () => {
+    setWf9Loading(true);
+    const keys = WF9_SETTINGS.map((s) => s.key);
+    const { data } = await supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", keys);
+
+    const map: Record<string, string> = {};
+    (data || []).forEach((row) => { map[row.key] = row.value || ""; });
+    setWf9Urls({ ...map });
+    setWf9Saved({ ...map });
+    setWf9Loading(false);
+  }, []);
+
+  const saveWf9Urls = async () => {
+    setWf9Saving(true);
+    try {
+      // Upsert all 3 keys
+      const upserts = WF9_SETTINGS.map((s) => ({
+        key: s.key,
+        value: wf9Urls[s.key] ?? "",
+        description: s.description,
+      }));
+
+      for (const row of upserts) {
+        const { data: existing } = await supabase
+          .from("site_settings")
+          .select("id")
+          .eq("key", row.key)
+          .maybeSingle();
+
+        if (existing) {
+          const { error } = await supabase
+            .from("site_settings")
+            .update({ value: row.value, description: row.description })
+            .eq("key", row.key);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from("site_settings")
+            .insert({ key: row.key, value: row.value, description: row.description });
+          if (error) throw error;
+        }
+      }
+
+      setWf9Saved({ ...wf9Urls });
+      toast({ title: "✅ WF-9 Stripe → n8n URLs saved." });
+    } catch (err: any) {
+      toast({
+        title: "Failed to save WF-9 URLs",
+        description: "Please try again or contact support.",
+        variant: "destructive",
+      });
+    }
+    setWf9Saving(false);
+  };
+
+  const testWf9Url = async (settingKey: string, stripeType: string) => {
+    const url = wf9Urls[settingKey]?.trim();
+
+    // Validate
+    if (!url) {
+      setWf9Errors((prev) => ({ ...prev, [settingKey]: "URL cannot be empty." }));
+      return;
+    }
+    if (!isValidHttpsUrl(url)) {
+      setWf9Errors((prev) => ({ ...prev, [settingKey]: "URL must start with https://." }));
+      return;
+    }
+    setWf9Errors((prev) => ({ ...prev, [settingKey]: "" }));
+
+    // If unsaved, save first
+    if (hasUnsavedWf9Changes) {
+      await saveWf9Urls();
+    }
+
+    setWf9Testing(settingKey);
+    try {
+      const fnUrl = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/stripe-webhook-test`;
+      const res = await fetch(fnUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ stripe_event_type: stripeType }),
+      });
+      const json = await res.json();
+
+      if (json.status === "success") {
+        toast({
+          title: `✅ Test: ${stripeType}`,
+          description: json.message,
+        });
+      } else {
+        toast({
+          title: `❌ Test: ${stripeType}`,
+          description: json.message,
+          variant: "destructive",
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: "Network error",
+        description: err.message,
+        variant: "destructive",
+      });
+    }
+    setWf9Testing(null);
+    setTimeout(() => loadActivity(), 2000);
+  };
 
   // ═══════════════════════════════════════════
   // Section 1: Pre-Flight Checklist
@@ -125,7 +286,6 @@ const EmailWF9StripeTab = () => {
       detail: n8nInt ? (n8nInt.is_enabled ? "Enabled" : "Disabled") : "No row found",
     });
 
-    // Store n8n base URL for section 2
     const n8nCfg = n8nInt?.config as Record<string, any> | null;
     const base = n8nCfg?.webhook_base_url || n8nCfg?.base_url || n8nInt?.webhook_url || "";
     setN8nBaseUrl(base ? String(base).replace(/\/+$/, "") : null);
@@ -310,7 +470,7 @@ const EmailWF9StripeTab = () => {
     const { data } = await supabase
       .from("webhook_logs")
       .select("id, event_type, direction, status, webhook_url, response_status, created_at, request_payload, response_body")
-      .or("event_type.ilike.%stripe%,event_type.ilike.%payment%,event_type.ilike.%refund%")
+      .or("event_type.ilike.%stripe%,event_type.ilike.%payment%,event_type.ilike.%refund%,event_type.ilike.%checkout%,event_type.ilike.%charge%,event_type.ilike.test:%")
       .order("created_at", { ascending: false })
       .limit(20);
     setActivityLogs((data || []) as WebhookLogRow[]);
@@ -319,6 +479,7 @@ const EmailWF9StripeTab = () => {
 
   // ─── Initial load + polling ───
   useEffect(() => {
+    loadWf9Urls();
     runPreflight();
     loadEndpoints();
     loadConsent();
@@ -331,7 +492,7 @@ const EmailWF9StripeTab = () => {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [runPreflight, loadEndpoints, loadConsent, loadActivity]);
+  }, [loadWf9Urls, runPreflight, loadEndpoints, loadConsent, loadActivity]);
 
   const formatTs = (ts: string | null) => {
     if (!ts) return "—";
@@ -342,6 +503,90 @@ const EmailWF9StripeTab = () => {
 
   return (
     <div className="space-y-6">
+      {/* ━━━ SECTION 0: WF-9 WEBHOOK URL MANAGEMENT ━━━ */}
+      <Collapsible open={s0Open} onOpenChange={setS0Open}>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" className="w-full justify-start text-lg font-serif font-bold gap-2 px-0">
+            {s0Open ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+            WF-9 Stripe → n8n Webhook URLs
+            {hasUnsavedWf9Changes && <Badge variant="destructive" className="text-xs ml-2">Unsaved</Badge>}
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4 pt-2">
+          <p className="text-sm text-muted-foreground">
+            Configure the n8n Webhook node PRODUCTION URLs for each Stripe event type. The <code className="font-mono text-xs bg-muted px-1 rounded">stripe-webhook</code> edge function reads these from the database at runtime.
+          </p>
+
+          {wf9Loading ? (
+            <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Loading URLs…</div>
+          ) : (
+            <Card className={neoCard}>
+              <CardContent className="pt-6 space-y-6">
+                {WF9_SETTINGS.map((setting) => (
+                  <div key={setting.key} className="space-y-2">
+                    <Label className="font-mono text-sm font-semibold">{setting.label}</Label>
+                    <div className="flex gap-2">
+                      <div className="flex-1 space-y-1">
+                        <Input
+                          placeholder="https://your-n8n-instance.com/webhook/..."
+                          value={wf9Urls[setting.key] ?? ""}
+                          onChange={(e) => {
+                            setWf9Urls((prev) => ({ ...prev, [setting.key]: e.target.value }));
+                            setWf9Errors((prev) => ({ ...prev, [setting.key]: "" }));
+                          }}
+                          className="font-mono text-xs"
+                        />
+                        {wf9Errors[setting.key] && (
+                          <p className="text-xs text-destructive">{wf9Errors[setting.key]}</p>
+                        )}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="border-2 shrink-0"
+                        title="Clear URL"
+                        onClick={() => {
+                          setWf9Urls((prev) => ({ ...prev, [setting.key]: "" }));
+                          setWf9Errors((prev) => ({ ...prev, [setting.key]: "" }));
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-2 shrink-0 text-xs gap-1"
+                        disabled={wf9Testing !== null}
+                        onClick={() => testWf9Url(setting.key, setting.stripeType)}
+                      >
+                        {wf9Testing === setting.key ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <FlaskConical className="w-3 h-3" />
+                        )}
+                        Test
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{setting.description}</p>
+                  </div>
+                ))}
+
+                <div className="flex justify-end pt-2">
+                  <Button
+                    onClick={saveWf9Urls}
+                    disabled={wf9Saving || !hasUnsavedWf9Changes}
+                    className="gap-2"
+                  >
+                    {wf9Saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    Save WF-9 URLs
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+
       {/* ━━━ SECTION 1: PRE-FLIGHT CHECKLIST ━━━ */}
       <Collapsible open={s1Open} onOpenChange={setS1Open}>
         <CollapsibleTrigger asChild>
