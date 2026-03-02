@@ -143,6 +143,7 @@ serve(async (req) => {
           .from("orders")
           .update({
             payment_status: "paid",
+            stripe_checkout_session_id: session.id,
             stripe_payment_intent_id: (session.payment_intent as string) || null,
             paid_at: new Date().toISOString(),
             status: "confirmed",
