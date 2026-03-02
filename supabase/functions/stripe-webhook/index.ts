@@ -41,51 +41,55 @@ serve(async (req) => {
       event = JSON.parse(body) as Stripe.Event;
     }
 
-    // Load WF-9 webhook URLs from site_settings
-    const WF9_URL_KEYS: Record<string, string> = {
-      "/webhook/stripe-payment-completed": "stripe_checkout_completed_webhook_url",
-      "/webhook/stripe-payment-failed": "stripe_checkout_expired_webhook_url",
-      "/webhook/stripe-refund": "stripe_charge_refunded_webhook_url",
+    // ── WF-9: Map Stripe event type → site_settings key ──
+    const EVENT_TO_SETTING: Record<string, string> = {
+      "checkout.session.completed": "stripe_checkout_completed_webhook_url",
+      "checkout.session.expired":   "stripe_checkout_expired_webhook_url",
+      "charge.refunded":            "stripe_charge_refunded_webhook_url",
     };
 
-    const { data: wf9Settings } = await supabase
-      .from("site_settings")
-      .select("key, value")
-      .in("key", Object.values(WF9_URL_KEYS));
+    // Helper: read a single WF-9 URL from site_settings
+    const getWf9Url = async (eventType: string): Promise<string | null> => {
+      const settingKey = EVENT_TO_SETTING[eventType];
+      if (!settingKey) return null;
 
-    const wf9Map: Record<string, string> = {};
-    (wf9Settings || []).forEach((row: any) => { wf9Map[row.key] = row.value; });
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", settingKey)
+        .maybeSingle();
 
-    // Fallback: n8n base URL from integrations table
-    const { data: n8nInt } = await supabase
-      .from("integrations")
-      .select("webhook_url, config")
-      .eq("service_name", "n8n")
-      .eq("is_enabled", true)
-      .maybeSingle();
+      if (error) {
+        console.error(`[stripe-webhook] Error reading site_settings key "${settingKey}":`, error.message);
+        return null;
+      }
 
-    const n8nBaseUrl = n8nInt?.webhook_url?.replace(/\/+$/, "") || null;
+      const url = data?.value?.trim() || null;
+      if (!url) {
+        console.warn(`[stripe-webhook] Missing WF-9 webhook URL for ${eventType} (key: ${settingKey})`);
+      }
+      return url;
+    };
 
-    // Helper: forward event to n8n using WF-9 URL or fallback
-    const forwardToN8n = async (path: string) => {
-      const settingKey = WF9_URL_KEYS[path];
-      const wf9Url = settingKey ? wf9Map[settingKey] : null;
-      const url = (wf9Url && wf9Url.trim()) ? wf9Url.trim() : (n8nBaseUrl ? n8nBaseUrl + path : null);
+    // Helper: forward the full Stripe event to the WF-9 URL
+    const forwardToWf9 = async (eventType: string) => {
+      const url = await getWf9Url(eventType);
 
       if (!url) {
-        console.warn("[stripe-webhook] No webhook URL configured for", path);
         await supabase.from("webhook_logs").insert({
-          event_type: event.type,
+          event_type: eventType,
           direction: "outbound",
-          webhook_url: `n8n ${path} (not configured)`,
+          webhook_url: `wf9:${EVENT_TO_SETTING[eventType] || eventType} (not configured)`,
           request_payload: { event_id: event.id },
           status: "skipped",
-          error_message: "No WF-9 URL or n8n fallback configured",
+          error_message: `Missing WF-9 webhook URL for ${eventType}`,
         });
-        return;
+        return; // skip silently — return 200 to Stripe
       }
+
       const start = Date.now();
       try {
+        // Plain POST to n8n — no Supabase keys leaked
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -93,10 +97,10 @@ serve(async (req) => {
         });
         const resBody = await res.text().catch(() => "");
         await supabase.from("webhook_logs").insert({
-          event_type: event.type,
+          event_type: eventType,
           direction: "outbound",
           webhook_url: url,
-          request_payload: { event_id: event.id, type: event.type },
+          request_payload: { event_id: event.id, type: eventType },
           response_status: res.status,
           response_body: resBody.slice(0, 2000),
           duration_ms: Date.now() - start,
@@ -105,7 +109,7 @@ serve(async (req) => {
         });
       } catch (err) {
         await supabase.from("webhook_logs").insert({
-          event_type: event.type,
+          event_type: eventType,
           direction: "outbound",
           webhook_url: url,
           request_payload: { event_id: event.id },
@@ -116,7 +120,7 @@ serve(async (req) => {
       }
     };
 
-    // Handle events
+    // ── Handle events ──
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       const orderId = session.metadata?.order_id;
@@ -131,7 +135,7 @@ serve(async (req) => {
           })
           .eq("id", orderId);
       }
-      await forwardToN8n("/webhook/stripe-payment-completed");
+      await forwardToWf9("checkout.session.completed");
     } else if (event.type === "checkout.session.expired") {
       const session = event.data.object as Stripe.Checkout.Session;
       const orderId = session.metadata?.order_id;
@@ -141,7 +145,7 @@ serve(async (req) => {
           .update({ payment_status: "failed" })
           .eq("id", orderId);
       }
-      await forwardToN8n("/webhook/stripe-payment-failed");
+      await forwardToWf9("checkout.session.expired");
     } else if (event.type === "charge.refunded") {
       const charge = event.data.object as Stripe.Charge;
       const paymentIntent = charge.payment_intent as string;
@@ -151,7 +155,7 @@ serve(async (req) => {
           .update({ payment_status: "refunded", status: "refunded" })
           .eq("stripe_payment_intent_id", paymentIntent);
       }
-      await forwardToN8n("/webhook/stripe-refund");
+      await forwardToWf9("charge.refunded");
     }
 
     // Log inbound webhook
