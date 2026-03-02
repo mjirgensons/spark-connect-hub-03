@@ -465,6 +465,7 @@ const AdminEmailTemplatesTab = () => {
       {internalTab === "settings" && <EmailSettingsTab />}
 
       {internalTab === "wf8-test" && <EmailWF8TestTab />}
+      {internalTab === "wf9-stripe" && <EmailWF9StripeTab />}
       {/* Template Editor Sheet */}
       <Sheet open={editorOpen} onOpenChange={setEditorOpen}>
         <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
