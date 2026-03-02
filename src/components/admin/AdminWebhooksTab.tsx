@@ -127,19 +127,29 @@ const AdminWebhooksTab = ({ onNavigate }: AdminWebhooksTabProps) => {
                   {provider.eventTypes.map((evt) => {
                     const url = evt.settingKey ? wf9Urls[evt.settingKey] : null;
                     return (
-                      <div key={evt.type} className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2">
-                          <code className="font-mono bg-muted px-1.5 py-0.5 rounded">{evt.type}</code>
-                          <Badge variant="outline" className="text-[10px] border">{evt.workflow}</Badge>
+                      <div key={evt.type} className="flex items-center justify-between text-xs gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <code className="font-mono bg-muted px-1.5 py-0.5 rounded truncate">{evt.type}</code>
+                          <Badge variant="outline" className="text-[10px] border shrink-0">{evt.workflow}</Badge>
                         </div>
-                        {evt.settingKey && (
-                          <Badge
-                            variant={url ? "default" : "secondary"}
-                            className="text-[10px]"
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {evt.settingKey && (
+                            <Badge
+                              variant={url ? "default" : "secondary"}
+                              className="text-[10px]"
+                            >
+                              {url ? "Configured" : "Not set"}
+                            </Badge>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-1.5 text-[10px] gap-0.5"
+                            onClick={() => routerNavigate(`/admin/webhooks/${provider.id}/${evt.endpointKey}`)}
                           >
-                            {url ? "Configured" : "Not set"}
-                          </Badge>
-                        )}
+                            Details <ArrowRight className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     );
                   })}
