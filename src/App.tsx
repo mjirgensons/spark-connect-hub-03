@@ -133,6 +133,7 @@ const App = () => (
           <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/webhooks/:provider/:endpointKey" element={<WebhookDetail />} />
           <Route path="/page/:slug" element={<FooterPage />} />
           <Route path="/coming-soon" element={<UnderConstruction />} />
 

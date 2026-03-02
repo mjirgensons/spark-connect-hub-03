@@ -20,7 +20,6 @@ import {
   XCircle,
   CreditCard,
   Mail,
-  LogOut,
 } from "lucide-react";
 
 const neoCard = "border-2 border-foreground shadow-[4px_4px_0px_0px_hsl(var(--foreground))]";
