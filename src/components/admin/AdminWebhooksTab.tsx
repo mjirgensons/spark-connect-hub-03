@@ -60,6 +60,7 @@ interface AdminWebhooksTabProps {
 }
 
 const AdminWebhooksTab = ({ onNavigate }: AdminWebhooksTabProps) => {
+  const routerNavigate = useNavigate();
   const { toast } = useToast();
   const [recentLogs, setRecentLogs] = useState<WebhookLogRow[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
