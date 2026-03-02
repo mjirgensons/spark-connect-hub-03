@@ -21,6 +21,7 @@ import {
   BookOpen,
   Mail,
   Send,
+  Webhook,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -33,6 +34,7 @@ export type AdminSection =
   | "reviews"
   | "email"
   | "integrations"
+  | "webhooks"
   | "content"
   | "trust-signals"
   | "faq"
@@ -47,22 +49,38 @@ interface AdminSidebarProps {
   productCount?: number;
 }
 
-const navItems: { id: AdminSection; label: string; icon: React.ElementType }[] = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "orders", label: "Orders", icon: ShoppingCart },
-  { id: "quotes", label: "Quotes", icon: FileText },
-  { id: "products", label: "Products", icon: Package },
-  { id: "customers", label: "Customers", icon: Users },
-  { id: "reviews", label: "Reviews", icon: MessageSquare },
-  { id: "email", label: "Email", icon: Send },
-  { id: "integrations", label: "Integrations", icon: Plug },
-  { id: "content", label: "Content", icon: FileEdit },
-  { id: "trust-signals", label: "Trust Signals", icon: Shield },
-  { id: "faq", label: "FAQ", icon: HelpCircle },
-  { id: "blog", label: "Blog", icon: BookOpen },
-  { id: "newsletter", label: "Newsletter", icon: Mail },
-  { id: "cookie-manager", label: "Cookie Manager", icon: Cookie },
-  { id: "settings", label: "Settings", icon: Settings },
+interface NavGroup {
+  label: string;
+  items: { id: AdminSection; label: string; icon: React.ElementType }[];
+}
+
+const navGroups: NavGroup[] = [
+  {
+    label: "Content & Operations",
+    items: [
+      { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { id: "orders", label: "Orders", icon: ShoppingCart },
+      { id: "quotes", label: "Quotes", icon: FileText },
+      { id: "products", label: "Products", icon: Package },
+      { id: "customers", label: "Customers", icon: Users },
+      { id: "reviews", label: "Reviews", icon: MessageSquare },
+      { id: "email", label: "Email", icon: Send },
+      { id: "content", label: "Content", icon: FileEdit },
+      { id: "trust-signals", label: "Trust Signals", icon: Shield },
+      { id: "faq", label: "FAQ", icon: HelpCircle },
+      { id: "blog", label: "Blog", icon: BookOpen },
+      { id: "newsletter", label: "Newsletter", icon: Mail },
+      { id: "cookie-manager", label: "Cookie Manager", icon: Cookie },
+    ],
+  },
+  {
+    label: "System & Developer",
+    items: [
+      { id: "integrations", label: "Integrations", icon: Plug },
+      { id: "webhooks", label: "Webhooks & Events", icon: Webhook },
+      { id: "settings", label: "System Settings", icon: Settings },
+    ],
+  },
 ];
 
 const AdminSidebar = ({ active, onNavigate, productCount }: AdminSidebarProps) => {
@@ -76,33 +94,45 @@ const AdminSidebar = ({ active, onNavigate, productCount }: AdminSidebarProps) =
   };
 
   const sidebarContent = (
-    <nav className="flex flex-col gap-1 p-2">
-      {navItems.map((item) => {
-        const Icon = item.icon;
-        const isActive = active === item.id;
-        return (
-          <button
-            key={item.id}
-            onClick={() => handleNav(item.id)}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors border-2 border-transparent",
-              collapsed && !isMobile ? "justify-center px-2" : "",
-              isActive
-                ? "bg-foreground text-background border-foreground"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground"
-            )}
-            title={collapsed ? item.label : undefined}
-          >
-            <Icon className="w-4 h-4 shrink-0" />
-            {(!collapsed || isMobile) && (
-              <span className="truncate">
-                {item.label}
-                {item.id === "products" && productCount !== undefined ? ` (${productCount})` : ""}
-              </span>
-            )}
-          </button>
-        );
-      })}
+    <nav className="flex flex-col gap-0.5 p-2">
+      {navGroups.map((group) => (
+        <div key={group.label} className="mb-2">
+          {(!collapsed || isMobile) && (
+            <p className="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 select-none">
+              {group.label}
+            </p>
+          )}
+          {collapsed && !isMobile && (
+            <div className="border-t border-border my-2" />
+          )}
+          {group.items.map((item) => {
+            const Icon = item.icon;
+            const isActive = active === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNav(item.id)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors border-2 border-transparent w-full",
+                  collapsed && !isMobile ? "justify-center px-2" : "",
+                  isActive
+                    ? "bg-foreground text-background border-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                )}
+                title={collapsed ? item.label : undefined}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                {(!collapsed || isMobile) && (
+                  <span className="truncate">
+                    {item.label}
+                    {item.id === "products" && productCount !== undefined ? ` (${productCount})` : ""}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 
