@@ -175,6 +175,9 @@ serve(async (req) => {
     // Log inbound webhook
     await supabase.from("webhook_logs").insert({
       event_type: event.type,
+      event_id: event.id,
+      provider: "stripe",
+      endpoint_key: EVENT_TO_ENDPOINT[event.type] || null,
       direction: "inbound",
       webhook_url: `stripe-webhook/${event.type}`,
       request_payload: { event_id: event.id, type: event.type },
