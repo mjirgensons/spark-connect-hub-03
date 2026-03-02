@@ -48,31 +48,46 @@ interface WebhookLogRow {
 }
 
 // ─── WF-9 URL config ───
+/**
+ * ─── Stripe → n8n WF-9 Endpoint Mapping ───
+ *
+ * Stripe event type           │ Friendly name       │ n8n Webhook path
+ * ────────────────────────────┼─────────────────────┼──────────────────────────────────
+ * checkout.session.completed  │ payment.completed   │ /webhook/stripe-payment-completed
+ * checkout.session.expired    │ payment.failed      │ /webhook/stripe-payment-failed
+ * charge.refunded             │ payment.refunded    │ /webhook/stripe-refund
+ */
 const WF9_SETTINGS = [
   {
     key: "stripe_checkout_completed_webhook_url",
     label: "checkout.session.completed",
     stripeType: "checkout.session.completed",
-    description: "Paste the PRODUCTION URL from your n8n Webhook node that handles successful checkout completions.",
+    friendlyName: "payment.completed",
+    n8nPath: "/webhook/stripe-payment-completed",
+    description: "Paste the PRODUCTION URL from the 'Stripe Payment Completed Webhook' node in WF-9.",
   },
   {
     key: "stripe_checkout_expired_webhook_url",
     label: "checkout.session.expired",
     stripeType: "checkout.session.expired",
-    description: "Paste the PRODUCTION URL from your n8n Webhook node that handles expired/abandoned checkout sessions.",
+    friendlyName: "payment.failed",
+    n8nPath: "/webhook/stripe-payment-failed",
+    description: "Paste the PRODUCTION URL from the 'Stripe Payment Failed Webhook' node in WF-9.",
   },
   {
     key: "stripe_charge_refunded_webhook_url",
     label: "charge.refunded",
     stripeType: "charge.refunded",
-    description: "Paste the PRODUCTION URL from your n8n Webhook node that handles refund events.",
+    friendlyName: "payment.refunded",
+    n8nPath: "/webhook/stripe-refund",
+    description: "Paste the PRODUCTION URL from the 'Stripe Refund Webhook' node in WF-9.",
   },
 ] as const;
 
-const STRIPE_EVENTS: { event: string; path: string; stripeType: string }[] = [
-  { event: "payment.completed", path: "/webhook/stripe-payment-completed", stripeType: "checkout.session.completed" },
-  { event: "payment.failed", path: "/webhook/stripe-payment-failed", stripeType: "payment_intent.payment_failed" },
-  { event: "payment.refunded", path: "/webhook/stripe-refund", stripeType: "charge.refunded" },
+const STRIPE_EVENTS: { event: string; friendlyName: string; path: string; stripeType: string }[] = [
+  { event: "checkout.session.completed", friendlyName: "payment.completed", path: "/webhook/stripe-payment-completed", stripeType: "checkout.session.completed" },
+  { event: "checkout.session.expired", friendlyName: "payment.failed", path: "/webhook/stripe-payment-failed", stripeType: "checkout.session.expired" },
+  { event: "charge.refunded", friendlyName: "payment.refunded", path: "/webhook/stripe-refund", stripeType: "charge.refunded" },
 ];
 
 const REQUIRED_TEMPLATES = ["order_confirmation", "payment_receipt", "payment_failed", "refund_processed"];
@@ -650,9 +665,16 @@ const EmailWF9StripeTab = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {endpoints.map((ep, i) => (
+                    {endpoints.map((ep, i) => {
+                      const evtDef = STRIPE_EVENTS[i];
+                      return (
                       <TableRow key={ep.event}>
-                        <TableCell className="font-mono text-xs">{ep.event}</TableCell>
+                        <TableCell>
+                          <code className="font-mono text-xs font-semibold">{evtDef?.event ?? ep.event}</code>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            ({evtDef?.friendlyName ?? "—"} → {evtDef?.path ?? ep.path})
+                          </p>
+                        </TableCell>
                         <TableCell className="font-mono text-xs">{ep.path}</TableCell>
                         <TableCell className="text-xs">{formatTs(ep.lastFired)}</TableCell>
                         <TableCell>
@@ -677,7 +699,8 @@ const EmailWF9StripeTab = () => {
                           </Button>
                         </TableCell>
                       </TableRow>
-                    ))}
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}
