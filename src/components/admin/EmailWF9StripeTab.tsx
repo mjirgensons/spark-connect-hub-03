@@ -48,24 +48,39 @@ interface WebhookLogRow {
 }
 
 // ─── WF-9 URL config ───
+/**
+ * ─── Stripe → n8n WF-9 Endpoint Mapping ───
+ *
+ * Stripe event type           │ Friendly name       │ n8n Webhook path
+ * ────────────────────────────┼─────────────────────┼──────────────────────────────────
+ * checkout.session.completed  │ payment.completed   │ /webhook/stripe-payment-completed
+ * checkout.session.expired    │ payment.failed      │ /webhook/stripe-payment-failed
+ * charge.refunded             │ payment.refunded    │ /webhook/stripe-refund
+ */
 const WF9_SETTINGS = [
   {
     key: "stripe_checkout_completed_webhook_url",
     label: "checkout.session.completed",
     stripeType: "checkout.session.completed",
-    description: "Paste the PRODUCTION URL from your n8n Webhook node that handles successful checkout completions.",
+    friendlyName: "payment.completed",
+    n8nPath: "/webhook/stripe-payment-completed",
+    description: "Paste the PRODUCTION URL from the 'Stripe Payment Completed Webhook' node in WF-9.",
   },
   {
     key: "stripe_checkout_expired_webhook_url",
     label: "checkout.session.expired",
     stripeType: "checkout.session.expired",
-    description: "Paste the PRODUCTION URL from your n8n Webhook node that handles expired/abandoned checkout sessions.",
+    friendlyName: "payment.failed",
+    n8nPath: "/webhook/stripe-payment-failed",
+    description: "Paste the PRODUCTION URL from the 'Stripe Payment Failed Webhook' node in WF-9.",
   },
   {
     key: "stripe_charge_refunded_webhook_url",
     label: "charge.refunded",
     stripeType: "charge.refunded",
-    description: "Paste the PRODUCTION URL from your n8n Webhook node that handles refund events.",
+    friendlyName: "payment.refunded",
+    n8nPath: "/webhook/stripe-refund",
+    description: "Paste the PRODUCTION URL from the 'Stripe Refund Webhook' node in WF-9.",
   },
 ] as const;
 
