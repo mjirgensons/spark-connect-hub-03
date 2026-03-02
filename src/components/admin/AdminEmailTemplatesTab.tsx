@@ -414,6 +414,7 @@ const AdminEmailTemplatesTab = () => {
     { id: "consent", label: "Consent", icon: Shield },
     { id: "settings", label: "Settings", icon: Settings },
     { id: "wf8-test", label: "WF-8 Test", icon: FlaskConical },
+    { id: "wf9-stripe", label: "WF-9 Stripe", icon: CreditCard },
   ];
 
   return (
