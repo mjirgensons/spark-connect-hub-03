@@ -34,6 +34,7 @@ import DashboardLayout from "./components/DashboardLayout";
 // Lazy-loaded: Admin
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const Admin = lazy(() => import("./pages/Admin"));
+const WebhookDetail = lazy(() => import("./pages/admin/WebhookDetail"));
 const FAQPage = lazy(() => import("./pages/FAQPage"));
 const BlogPage = lazy(() => import("./pages/BlogPage"));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
