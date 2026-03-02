@@ -41,11 +41,17 @@ serve(async (req) => {
       event = JSON.parse(body) as Stripe.Event;
     }
 
-    // ── WF-9: Map Stripe event type → site_settings key ──
+    // ── WF-9: Map Stripe event type → site_settings key + endpoint_key ──
     const EVENT_TO_SETTING: Record<string, string> = {
       "checkout.session.completed": "stripe_checkout_completed_webhook_url",
       "checkout.session.expired":   "stripe_checkout_expired_webhook_url",
       "charge.refunded":            "stripe_charge_refunded_webhook_url",
+    };
+
+    const EVENT_TO_ENDPOINT: Record<string, string> = {
+      "checkout.session.completed": "wf9_checkout_completed",
+      "checkout.session.expired":   "wf9_checkout_expired",
+      "charge.refunded":            "wf9_charge_refunded",
     };
 
     // Helper: read a single WF-9 URL from site_settings
