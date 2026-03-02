@@ -665,9 +665,16 @@ const EmailWF9StripeTab = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {endpoints.map((ep, i) => (
+                    {endpoints.map((ep, i) => {
+                      const evtDef = STRIPE_EVENTS[i];
+                      return (
                       <TableRow key={ep.event}>
-                        <TableCell className="font-mono text-xs">{ep.event}</TableCell>
+                        <TableCell>
+                          <code className="font-mono text-xs font-semibold">{evtDef?.event ?? ep.event}</code>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            ({evtDef?.friendlyName ?? "—"} → {evtDef?.path ?? ep.path})
+                          </p>
+                        </TableCell>
                         <TableCell className="font-mono text-xs">{ep.path}</TableCell>
                         <TableCell className="text-xs">{formatTs(ep.lastFired)}</TableCell>
                         <TableCell>
