@@ -41,7 +41,22 @@ serve(async (req) => {
       event = JSON.parse(body) as Stripe.Event;
     }
 
-    // Get n8n config for forwarding
+    // Load WF-9 webhook URLs from site_settings
+    const WF9_URL_KEYS: Record<string, string> = {
+      "/webhook/stripe-payment-completed": "stripe_checkout_completed_webhook_url",
+      "/webhook/stripe-payment-failed": "stripe_checkout_expired_webhook_url",
+      "/webhook/stripe-refund": "stripe_charge_refunded_webhook_url",
+    };
+
+    const { data: wf9Settings } = await supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", Object.values(WF9_URL_KEYS));
+
+    const wf9Map: Record<string, string> = {};
+    (wf9Settings || []).forEach((row: any) => { wf9Map[row.key] = row.value; });
+
+    // Fallback: n8n base URL from integrations table
     const { data: n8nInt } = await supabase
       .from("integrations")
       .select("webhook_url, config")
@@ -51,23 +66,24 @@ serve(async (req) => {
 
     const n8nBaseUrl = n8nInt?.webhook_url?.replace(/\/+$/, "") || null;
 
-    // Helper: forward event to n8n
+    // Helper: forward event to n8n using WF-9 URL or fallback
     const forwardToN8n = async (path: string) => {
-      if (!n8nBaseUrl) {
-        console.warn("[stripe-webhook] n8n not configured, skipping forward");
-        // Log skipped forward
+      const settingKey = WF9_URL_KEYS[path];
+      const wf9Url = settingKey ? wf9Map[settingKey] : null;
+      const url = (wf9Url && wf9Url.trim()) ? wf9Url.trim() : (n8nBaseUrl ? n8nBaseUrl + path : null);
+
+      if (!url) {
+        console.warn("[stripe-webhook] No webhook URL configured for", path);
         await supabase.from("webhook_logs").insert({
           event_type: event.type,
           direction: "outbound",
-          webhook_url: "n8n (not configured)",
+          webhook_url: `n8n ${path} (not configured)`,
           request_payload: { event_id: event.id },
           status: "skipped",
-          error_message: "n8n integration not configured",
+          error_message: "No WF-9 URL or n8n fallback configured",
         });
         return;
       }
-
-      const url = n8nBaseUrl + path;
       const start = Date.now();
       try {
         const res = await fetch(url, {

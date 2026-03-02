@@ -379,6 +379,48 @@ const AdminIntegrationsTab = () => {
 
   // Mailgun config removed — email configuration moved to Email section
 
+  // WF-9 Stripe webhook URL settings
+  const WF9_SETTINGS = [
+    { key: "stripe_checkout_completed_webhook_url", label: "Checkout completed (WF-9) webhook URL", help: "n8n Production URL for checkout.session.completed events" },
+    { key: "stripe_checkout_expired_webhook_url", label: "Checkout expired (WF-9) webhook URL", help: "n8n Production URL for checkout.session.expired events" },
+    { key: "stripe_charge_refunded_webhook_url", label: "Charge refunded (WF-9) webhook URL", help: "n8n Production URL for charge.refunded events" },
+  ];
+  const [wf9Urls, setWf9Urls] = useState<Record<string, string>>({});
+  const [wf9Saving, setWf9Saving] = useState(false);
+  const [wf9Loaded, setWf9Loaded] = useState(false);
+
+  const loadWf9Urls = useCallback(async () => {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", WF9_SETTINGS.map(s => s.key));
+    const map: Record<string, string> = {};
+    (data || []).forEach((row: any) => { map[row.key] = row.value; });
+    setWf9Urls(map);
+    setWf9Loaded(true);
+  }, []);
+
+  useEffect(() => { loadWf9Urls(); }, [loadWf9Urls]);
+
+  const saveWf9Urls = async () => {
+    setWf9Saving(true);
+    for (const s of WF9_SETTINGS) {
+      const val = wf9Urls[s.key] ?? "";
+      const { data: existing } = await supabase
+        .from("site_settings")
+        .select("id")
+        .eq("key", s.key)
+        .maybeSingle();
+      if (existing) {
+        await supabase.from("site_settings").update({ value: val } as any).eq("key", s.key);
+      } else {
+        await supabase.from("site_settings").insert({ key: s.key, value: val, description: s.help } as any);
+      }
+    }
+    setWf9Saving(false);
+    toast({ title: "WF-9 webhook URLs saved" });
+  };
+
   const renderStripeConfig = () => {
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
     const webhookUrl = `https://${projectId}.supabase.co/functions/v1/stripe-webhook`;
@@ -406,6 +448,30 @@ const AdminIntegrationsTab = () => {
           </div>
         </div>
         {renderTestButton("stripe")}
+
+        <Separator className="my-4" />
+
+        <div className="space-y-4">
+          <h4 className="text-sm font-bold text-foreground">WF-9 Stripe → n8n Webhook URLs</h4>
+          <p className="text-xs text-muted-foreground">
+            Enter the <strong>n8n Webhook Production URLs</strong> from your WF-9 workflow. The stripe-webhook edge function will forward events to these URLs instead of constructing paths from the n8n base URL.
+          </p>
+          {wf9Loaded ? WF9_SETTINGS.map(s => (
+            <div key={s.key}>
+              <Label className="text-xs font-semibold">{s.label}</Label>
+              <Input
+                value={wf9Urls[s.key] || ""}
+                onChange={e => setWf9Urls(p => ({ ...p, [s.key]: e.target.value }))}
+                placeholder="https://your-n8n.app.n8n.cloud/webhook/..."
+                className="font-mono text-xs"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">{s.help}</p>
+            </div>
+          )) : <p className="text-xs text-muted-foreground">Loading…</p>}
+          <Button onClick={saveWf9Urls} disabled={wf9Saving} size="sm">
+            {wf9Saving ? "Saving…" : "Save WF-9 URLs"}
+          </Button>
+        </div>
       </div>
     );
   };
