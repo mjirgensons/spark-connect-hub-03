@@ -27,8 +27,28 @@ import AdminEmailTemplatesTab from "@/components/admin/AdminEmailTemplatesTab";
 import AdminBlogTab from "@/components/admin/AdminBlogTab";
 import AdminNewsletterTab from "@/components/admin/AdminNewsletterTab";
 import AdminDbInspectorTab from "@/components/admin/AdminDbInspectorTab";
+import AdminWebhooksTab from "@/components/admin/AdminWebhooksTab";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
+
+const SECTION_TITLES: Record<AdminSection, string> = {
+  dashboard: "Dashboard",
+  orders: "Orders",
+  quotes: "Quotes",
+  products: "Products",
+  customers: "Customers",
+  reviews: "Reviews",
+  email: "Email Communication",
+  integrations: "Integrations",
+  webhooks: "Webhooks & Events",
+  content: "Content",
+  "trust-signals": "Trust Signals",
+  faq: "FAQ",
+  blog: "Blog",
+  newsletter: "Newsletter",
+  "cookie-manager": "Cookie Manager",
+  settings: "System Settings",
+};
 
 const Admin = () => {
   const { user, loading, signOut } = useAuth();
@@ -85,6 +105,8 @@ const Admin = () => {
         return <AdminEmailTemplatesTab />;
       case "integrations":
         return <AdminIntegrationsTab />;
+      case "webhooks":
+        return <AdminWebhooksTab onNavigate={(s) => setActiveSection(s as AdminSection)} />;
       case "trust-signals":
         return <AdminTrustSignalsTab />;
       case "faq":
@@ -151,8 +173,8 @@ const Admin = () => {
         />
 
         <main className="flex-1 p-6 min-w-0 overflow-x-auto">
-          <h2 className="text-xl font-serif font-bold text-foreground mb-4 capitalize">
-            {activeSection === "email" ? "Email Communication" : activeSection === "cookie-manager" ? "Cookie Manager" : activeSection === "trust-signals" ? "Trust Signals" : activeSection === "faq" ? "FAQ" : activeSection === "reviews" ? "Reviews" : activeSection === "blog" ? "Blog" : activeSection === "newsletter" ? "Newsletter" : activeSection}
+          <h2 className="text-xl font-serif font-bold text-foreground mb-4">
+            {SECTION_TITLES[activeSection] || activeSection}
           </h2>
           {renderSection()}
         </main>
