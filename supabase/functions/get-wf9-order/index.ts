@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { order_number, stripe_checkout_session_id } = body ?? {};
+    const { order_number, stripe_checkout_session_id, stripe_payment_intent_id } = body ?? {};
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -51,9 +51,16 @@ Deno.serve(async (req) => {
         .eq("stripe_checkout_session_id", stripe_checkout_session_id)
         .limit(1)
         .single();
+    } else if (stripe_payment_intent_id) {
+      query = supabase
+        .from("orders")
+        .select("*")
+        .eq("stripe_payment_intent_id", stripe_payment_intent_id)
+        .limit(1)
+        .single();
     } else {
       return new Response(
-        JSON.stringify({ error: "order_number or stripe_checkout_session_id required" }),
+        JSON.stringify({ error: "order_number, stripe_checkout_session_id, or stripe_payment_intent_id required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
