@@ -64,6 +64,9 @@ const EmailCommLogTab = () => {
   const [simulateReplyBody, setSimulateReplyBody] = useState("Test reply from admin panel.");
   const [simulateSending, setSimulateSending] = useState(false);
 
+  // Seed WF-10 test data state
+  const [seeding, setSeeding] = useState(false);
+
   // Filters
   const [direction, setDirection] = useState("all");
   const [status, setStatus] = useState("all");
@@ -179,11 +182,47 @@ const EmailCommLogTab = () => {
     }
   };
 
+  const handleSeedWf10 = async () => {
+    setSeeding(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const resp = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/seed-wf10-test-data`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.access_token || ""}`,
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
+      const result = await resp.json();
+      if (result.success) {
+        toast({ title: "✅ WF‑10 test data seeded", description: "Look for an outbound row to wf10-test@example.com in the Communication Log and use Simulate Reply on it." });
+        fetchLogs();
+      } else {
+        toast({ title: "Seed Error", description: result.error || result.detail || "Unknown error", variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Network Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   const canSimulate = (log: CommLog) => log.direction === "outbound" && !!log.mailgun_message_id;
 
   return (
     <div className="space-y-4">
-      {/* Stats */}
+      {/* Header with Seed button */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-serif font-bold text-foreground">Communication Log</h3>
+        <Button variant="outline" size="sm" className="border-2 text-xs" onClick={handleSeedWf10} disabled={seeding}>
+          {seeding ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Seeding…</> : "🌱 Seed WF‑10 Test Data"}
+        </Button>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: "Sent (30d)", value: stats.sent, icon: Mail },
