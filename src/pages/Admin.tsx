@@ -105,6 +105,8 @@ const Admin = () => {
         return <AdminReviewsTab />;
       case "email":
         return <AdminEmailTemplatesTab />;
+      case "email-test-console":
+        return <EmailTestConsoleTab />;
       case "integrations":
         return <AdminIntegrationsTab />;
       case "webhooks":

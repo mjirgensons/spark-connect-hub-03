@@ -22,6 +22,7 @@ import {
   Mail,
   Send,
   Webhook,
+  FlaskConical,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
