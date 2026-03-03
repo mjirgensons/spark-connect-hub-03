@@ -40,6 +40,7 @@ const SECTION_TITLES: Record<AdminSection, string> = {
   customers: "Customers",
   reviews: "Reviews",
   email: "Email Communication",
+  "email-test-console": "Email Test Console",
   integrations: "Integrations",
   webhooks: "Webhooks & Events",
   content: "Content",
