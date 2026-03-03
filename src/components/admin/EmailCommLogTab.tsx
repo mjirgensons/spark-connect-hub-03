@@ -505,10 +505,17 @@ const EmailCommLogTab = () => {
                 </div>
               </div>
 
+              {/* Error display */}
+              {simulateError && (
+                <div className="bg-destructive/10 border border-destructive/30 rounded p-3 text-sm text-destructive">
+                  {simulateError}
+                </div>
+              )}
+
               {/* Actions */}
               <div className="flex gap-2 pt-2">
                 <Button onClick={handleSendSimulate} disabled={simulateSending || !simulateFromEmail || !simulateReplyBody} className="flex-1">
-                  {simulateSending ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Sending…</> : "Send to WF‑10"}
+                  {simulateSending ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Sending to WF‑10…</> : "Send to WF‑10"}
                 </Button>
                 <Button variant="outline" className="border-2" onClick={() => setSimulateLog(null)} disabled={simulateSending}>
                   Cancel
