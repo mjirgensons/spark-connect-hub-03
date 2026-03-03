@@ -67,6 +67,9 @@ const EmailCommLogTab = () => {
   // Seed WF-10 test data state
   const [seeding, setSeeding] = useState(false);
 
+  // Create WF-10 test user state
+  const [creatingTestUser, setCreatingTestUser] = useState(false);
+
   // Filters
   const [direction, setDirection] = useState("all");
   const [status, setStatus] = useState("all");
