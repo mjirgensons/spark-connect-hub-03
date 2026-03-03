@@ -17,8 +17,37 @@ Deno.serve(async (req) => {
     })
   }
 
+  // Auth: accept either x-api-secret OR a valid admin JWT
   const secret = req.headers.get('x-api-secret')
-  if (secret !== Deno.env.get('N8N_WEBHOOK_SECRET')) {
+  const authHeader = req.headers.get('authorization')
+  let isAuthorized = false
+
+  if (secret === Deno.env.get('N8N_WEBHOOK_SECRET')) {
+    isAuthorized = true
+  } else if (authHeader) {
+    // Verify JWT and check admin status
+    const token = authHeader.replace('Bearer ', '')
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: `Bearer ${token}` } } }
+    )
+    const { data: { user } } = await supabaseAuth.auth.getUser()
+    if (user) {
+      const adminCheck = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      )
+      const { data: adminRow } = await adminCheck
+        .from('admin_emails')
+        .select('id')
+        .eq('email', user.email || '')
+        .maybeSingle()
+      if (adminRow) isAuthorized = true
+    }
+  }
+
+  if (!isAuthorized) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
