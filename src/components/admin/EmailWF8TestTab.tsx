@@ -5,11 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, ChevronDown, ChevronRight, Search, Play, ClipboardList, Loader2 } from "lucide-react";
+import { RefreshCw, ChevronDown, ChevronRight, ChevronLeft, Search, Play, ClipboardList, Loader2, Send, CheckCircle, AlertTriangle, Radio } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
 
 // ─── Neobrutalism card style ───
 const neoCard = "border-2 border-foreground shadow-[4px_4px_0px_0px_hsl(var(--foreground))]";
@@ -26,6 +29,21 @@ interface TemplateRow {
 interface StatusCount { status: string; count: number }
 interface ConsentTypeCount { consent_type: string; count: number }
 interface SettingRow { key: string; value: string }
+
+interface OutboundLog {
+  id: string;
+  user_email: string;
+  to_address: string;
+  subject: string;
+  status: string | null;
+  mailgun_message_id: string | null;
+  related_entity_type: string | null;
+  related_entity_id: string | null;
+  created_at: string;
+  template_key: string | null;
+}
+
+const WF10_PAGE_SIZE = 10;
 
 const EmailWF8TestTab = () => {
   const { toast } = useToast();
@@ -55,10 +73,29 @@ const EmailWF8TestTab = () => {
   const [latestLogs, setLatestLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
 
+  // ─── Section 4: WF-10 state ───
+  const [wf10OutboundLogs, setWf10OutboundLogs] = useState<OutboundLog[]>([]);
+  const [wf10OutboundLoading, setWf10OutboundLoading] = useState(true);
+  const [wf10OutboundPage, setWf10OutboundPage] = useState(0);
+  const [wf10OutboundTotal, setWf10OutboundTotal] = useState(0);
+  const [wf10SelectedLog, setWf10SelectedLog] = useState<OutboundLog | null>(null);
+  const [wf10FromEmail, setWf10FromEmail] = useState("");
+  const [wf10ReplyBody, setWf10ReplyBody] = useState("WF‑10 test reply from admin panel.");
+  const [wf10Sending, setWf10Sending] = useState(false);
+  const [wf10Status, setWf10Status] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [wf10DebugPayload, setWf10DebugPayload] = useState<any>(null);
+
   // ─── Collapsible state ───
   const [s1Open, setS1Open] = useState(true);
   const [s2Open, setS2Open] = useState(true);
   const [s3Open, setS3Open] = useState(true);
+  const [s4Open, setS4Open] = useState(true);
+
+  const formatDate = (d: string) => {
+    const diff = Date.now() - new Date(d).getTime();
+    if (diff < 86400000) return formatDistanceToNow(new Date(d), { addSuffix: true });
+    return format(new Date(d), "MMM d, yyyy HH:mm");
+  };
 
   // ─── Section 1: Diagnostics ───
   const runDiagnostics = useCallback(async () => {
@@ -75,7 +112,6 @@ const EmailWF8TestTab = () => {
     setTemplates((tplRes.data || []) as TemplateRow[]);
     setCommTotal(commCountRes.count || 0);
 
-    // Group statuses manually
     const statusMap: Record<string, number> = {};
     (commStatusRes.data || []).forEach((r: any) => { statusMap[r.status] = (statusMap[r.status] || 0) + 1; });
     setCommByStatus(Object.entries(statusMap).map(([status, count]) => ({ status, count })));
@@ -101,7 +137,23 @@ const EmailWF8TestTab = () => {
     setAdminEmail(adminRes.data?.email || "admin@fitmatch.ca");
   }, []);
 
+  // ─── Section 4: Load outbound logs with mailgun_message_id ───
+  const fetchWf10OutboundLogs = useCallback(async () => {
+    setWf10OutboundLoading(true);
+    const { data, count } = await supabase
+      .from("communication_logs")
+      .select("id, user_email, to_address, subject, status, mailgun_message_id, related_entity_type, related_entity_id, created_at, template_key", { count: "exact" })
+      .eq("direction", "outbound")
+      .not("mailgun_message_id", "is", null)
+      .order("created_at", { ascending: false })
+      .range(wf10OutboundPage * WF10_PAGE_SIZE, (wf10OutboundPage + 1) * WF10_PAGE_SIZE - 1);
+    setWf10OutboundLogs((data || []) as OutboundLog[]);
+    setWf10OutboundTotal(count || 0);
+    setWf10OutboundLoading(false);
+  }, [wf10OutboundPage]);
+
   useEffect(() => { runDiagnostics(); loadMeta(); }, [runDiagnostics, loadMeta]);
+  useEffect(() => { fetchWf10OutboundLogs(); }, [fetchWf10OutboundLogs]);
 
   // ─── Section 2: Fetch Template ───
   const handleFetchTemplate = async () => {
@@ -125,7 +177,6 @@ const EmailWF8TestTab = () => {
       setFetchResult(data);
     } else {
       setFetchError(`No template found for template_key="${fetchKey}", is_active=true, locale="${fetchLocale}"`);
-      // Diagnostic: check if key exists at all
       const { data: diagData } = await supabase
         .from("email_templates")
         .select("template_key, is_active, locale")
@@ -220,11 +271,7 @@ const EmailWF8TestTab = () => {
       return;
     }
     setTestLoading(index);
-    // Update admin email in payload dynamically
     const payload = { ...testPayloads[index].body };
-    if (payload.to_email === adminEmail) {
-      // already correct
-    }
 
     try {
       const res = await fetch(webhookUrl, {
@@ -242,7 +289,6 @@ const EmailWF8TestTab = () => {
         toast({ title: `❌ WF-8 error (${res.status})`, description: typeof json === "string" ? json : JSON.stringify(json).slice(0, 200), variant: "destructive" });
       }
     } catch (err: any) {
-      // Try no-cors fallback
       try {
         await fetch(webhookUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), mode: "no-cors" });
         setLastResponse({ status: "opaque (no-cors)", body: "Request sent but response hidden due to CORS." });
@@ -253,8 +299,7 @@ const EmailWF8TestTab = () => {
       }
     }
     setTestLoading(null);
-    // Auto-refresh logs after 3s
-    setTimeout(() => fetchLatestLogs(), 3000);
+    setTimeout(() => { fetchLatestLogs(); fetchWf10OutboundLogs(); }, 3000);
   };
 
   const fetchLatestLogs = async () => {
@@ -267,6 +312,62 @@ const EmailWF8TestTab = () => {
     setLatestLogs(data || []);
     setLogsLoading(false);
   };
+
+  // ─── Section 4: WF-10 handlers ───
+  const handleWf10SelectLog = (log: OutboundLog) => {
+    setWf10SelectedLog(log);
+    setWf10FromEmail(log.to_address || log.user_email);
+    setWf10Status(null);
+    setWf10DebugPayload(null);
+  };
+
+  const handleWf10SimulateReply = async () => {
+    if (!wf10SelectedLog) return;
+    setWf10Sending(true);
+    setWf10Status(null);
+    setWf10DebugPayload(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const resp = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/simulate-inbound-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.access_token || ""}`,
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            communication_log_id: wf10SelectedLog.id,
+            from_email: wf10FromEmail,
+            reply_body: wf10ReplyBody,
+          }),
+        }
+      );
+      const result = await resp.json();
+      console.log("[WF-10 Section 4] Response:", result);
+      setWf10DebugPayload(result);
+
+      if (result.success) {
+        console.log("[WF-10] payload_sent_to_wf10:", result.payload_sent_to_wf10);
+        console.log("[WF-10] outbound_log:", result.outbound_log);
+        setWf10Status({ type: "success", message: "WF‑10 test sent. A new inbound row should appear in Communication Log." });
+        toast({ title: "✅ Simulated reply sent to WF‑10" });
+      } else {
+        const errMsg = `[${result.stage || "unknown"}] ${result.error || "Unknown error"}`;
+        console.error("[WF-10 Section 4] Error:", result);
+        setWf10Status({ type: "error", message: errMsg });
+      }
+    } catch (err: any) {
+      console.error("[WF-10 Section 4] Network error:", err);
+      setWf10Status({ type: "error", message: err.message || "Network error" });
+    } finally {
+      setWf10Sending(false);
+    }
+  };
+
+  const wf10OutboundPages = Math.ceil(wf10OutboundTotal / WF10_PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -286,7 +387,6 @@ const EmailWF8TestTab = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Card 1: email_templates */}
             <Card className={neoCard}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-mono">email_templates — {templates.length} rows</CardTitle>
@@ -316,7 +416,6 @@ const EmailWF8TestTab = () => {
               </CardContent>
             </Card>
 
-            {/* Card 2: communication_logs */}
             <Card className={neoCard}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-mono">communication_logs — {commTotal} rows</CardTitle>
@@ -334,7 +433,6 @@ const EmailWF8TestTab = () => {
               </CardContent>
             </Card>
 
-            {/* Card 3: email_consent_log */}
             <Card className={neoCard}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-mono">email_consent_log — {consentTotal} rows</CardTitle>
@@ -352,7 +450,6 @@ const EmailWF8TestTab = () => {
               </CardContent>
             </Card>
 
-            {/* Card 4: site_settings (email keys) */}
             <Card className={neoCard}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-mono">site_settings (email_*) — {emailSettings.length} rows</CardTitle>
@@ -409,7 +506,6 @@ const EmailWF8TestTab = () => {
             </CardContent>
           </Card>
 
-          {/* Fetch results */}
           {fetchResult && (
             <Card className={neoCard}>
               <CardContent className="pt-6 space-y-4">
@@ -518,7 +614,6 @@ const EmailWF8TestTab = () => {
             ))}
           </div>
 
-          {/* Last Response */}
           {lastResponse && (
             <Card className={neoCard}>
               <CardHeader className="pb-2"><CardTitle className="text-sm font-mono">Last Response</CardTitle></CardHeader>
@@ -528,7 +623,6 @@ const EmailWF8TestTab = () => {
             </Card>
           )}
 
-          {/* Quick Log Check */}
           <div className="pt-4 space-y-3">
             <Button variant="outline" className="border-2" onClick={fetchLatestLogs} disabled={logsLoading}>
               {logsLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <ClipboardList className="w-4 h-4 mr-1" />}
@@ -570,6 +664,201 @@ const EmailWF8TestTab = () => {
               </Card>
             )}
           </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* ━━━ SECTION 4: WF-10 INBOUND REPLY TEST ━━━ */}
+      <Collapsible open={s4Open} onOpenChange={setS4Open}>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" className="w-full justify-start text-lg font-serif font-bold gap-2 px-0">
+            {s4Open ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+            Section 4: WF-10 Inbound Reply Test
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4 pt-2">
+
+          {/* ── 4.1 Select Outbound Email ── */}
+          <Card className={neoCard}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-mono">4.1 Select outbound email</CardTitle>
+              <p className="text-xs text-muted-foreground">Choose the outbound log WF‑10 should treat as the parent message. Only rows with a Mailgun message ID are shown.</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="border-2 border-border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs w-10"></TableHead>
+                      <TableHead className="text-xs">Date</TableHead>
+                      <TableHead className="text-xs">To</TableHead>
+                      <TableHead className="text-xs">Subject</TableHead>
+                      <TableHead className="text-xs">Status</TableHead>
+                      <TableHead className="text-xs">Mailgun ID</TableHead>
+                      <TableHead className="text-xs">Entity</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {wf10OutboundLoading ? (
+                      Array.from({ length: 3 }).map((_, i) => (
+                        <TableRow key={i}>
+                          {Array.from({ length: 7 }).map((_, j) => (
+                            <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : wf10OutboundLogs.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                          No outbound logs with Mailgun ID found. Send a WF‑8 test email first (Section 3).
+                        </TableCell>
+                      </TableRow>
+                    ) : wf10OutboundLogs.map((log) => (
+                      <TableRow
+                        key={log.id}
+                        className={`cursor-pointer ${wf10SelectedLog?.id === log.id ? "bg-accent" : ""}`}
+                        onClick={() => handleWf10SelectLog(log)}
+                      >
+                        <TableCell>
+                          <Radio className={`w-4 h-4 ${wf10SelectedLog?.id === log.id ? "text-foreground" : "text-muted-foreground/40"}`} />
+                        </TableCell>
+                        <TableCell className="text-xs whitespace-nowrap">{formatDate(log.created_at)}</TableCell>
+                        <TableCell className="text-xs max-w-[160px] truncate">{log.to_address || log.user_email}</TableCell>
+                        <TableCell className="text-xs max-w-[180px] truncate">{log.subject}</TableCell>
+                        <TableCell><Badge variant="outline" className="border-2 text-xs">{log.status || "queued"}</Badge></TableCell>
+                        <TableCell className="text-xs font-mono max-w-[160px] truncate">{log.mailgun_message_id}</TableCell>
+                        <TableCell>
+                          {log.related_entity_type ? (
+                            <Badge variant="outline" className="border-2 text-xs capitalize">{log.related_entity_type}</Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {wf10OutboundPages > 1 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">
+                    Page {wf10OutboundPage + 1} of {wf10OutboundPages} ({wf10OutboundTotal} rows)
+                  </span>
+                  <div className="flex gap-1">
+                    <Button variant="outline" size="sm" className="border-2" disabled={wf10OutboundPage === 0} onClick={() => setWf10OutboundPage(p => p - 1)}>
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="border-2" disabled={wf10OutboundPage >= wf10OutboundPages - 1} onClick={() => setWf10OutboundPage(p => p + 1)}>
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {wf10SelectedLog && (
+                <div className="border-2 border-foreground p-3 space-y-1 text-sm bg-accent/50">
+                  <p className="font-medium text-xs uppercase tracking-wide flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" /> Selected Email
+                  </p>
+                  <p className="font-mono text-xs">
+                    Selected log: <span className="select-all">{wf10SelectedLog.id}</span> – {wf10SelectedLog.subject} → {wf10SelectedLog.to_address || wf10SelectedLog.user_email} (mailgun id: <span className="select-all">{wf10SelectedLog.mailgun_message_id}</span>)
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* ── 4.2 Compose Simulated Reply ── */}
+          <Card className={neoCard}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-mono">4.2 Compose simulated reply</CardTitle>
+              <p className="text-xs text-muted-foreground">Simulate a customer replying to the selected outbound email. Sends a Mailgun-style payload to WF‑10 via the simulate-inbound-email Edge Function.</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3">
+                <div>
+                  <Label htmlFor="wf10-from-email" className="text-xs font-mono">From email</Label>
+                  <Input
+                    id="wf10-from-email"
+                    value={wf10FromEmail}
+                    onChange={(e) => setWf10FromEmail(e.target.value)}
+                    placeholder="customer@example.com"
+                    className="border-2"
+                    disabled={!wf10SelectedLog}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="wf10-reply-body" className="text-xs font-mono">Reply body</Label>
+                  <Textarea
+                    id="wf10-reply-body"
+                    value={wf10ReplyBody}
+                    onChange={(e) => setWf10ReplyBody(e.target.value)}
+                    rows={3}
+                    className="border-2"
+                    disabled={!wf10SelectedLog}
+                  />
+                </div>
+              </div>
+
+              <Button
+                onClick={handleWf10SimulateReply}
+                disabled={!wf10SelectedLog || wf10Sending}
+                className="border-2"
+              >
+                {wf10Sending ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending to WF‑10…</>
+                ) : (
+                  <><Send className="w-4 h-4 mr-2" /> Send to WF‑10</>
+                )}
+              </Button>
+
+              {!wf10SelectedLog && (
+                <p className="text-sm text-muted-foreground">↑ Select an outbound email in 4.1 first.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* ── 4.3 Result & Debug ── */}
+          <Card className={neoCard}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-mono">4.3 Result & debug</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Status line */}
+              {wf10Sending && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Sending to WF‑10…
+                </div>
+              )}
+
+              {wf10Status && (
+                <div className={`border-2 p-3 text-sm ${wf10Status.type === "success" ? "border-green-600 bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300" : "border-destructive bg-destructive/10 text-destructive"}`}>
+                  {wf10Status.type === "success" ? (
+                    <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4" /> {wf10Status.message}</span>
+                  ) : (
+                    <span className="flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> {wf10Status.message}</span>
+                  )}
+                </div>
+              )}
+
+              {/* Debug payload */}
+              {wf10DebugPayload ? (
+                <Collapsible>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-xs font-mono gap-1 px-0 text-muted-foreground">
+                      <ChevronRight className="w-3 h-3" /> Response JSON
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <pre className="text-xs bg-muted p-3 rounded max-h-60 overflow-auto whitespace-pre-wrap mt-2">{JSON.stringify(wf10DebugPayload, null, 2)}</pre>
+                  </CollapsibleContent>
+                </Collapsible>
+              ) : (
+                <p className="text-xs text-muted-foreground">No WF‑10 response yet. Run a test from 4.2 above.</p>
+              )}
+            </CardContent>
+          </Card>
+
         </CollapsibleContent>
       </Collapsible>
     </div>
