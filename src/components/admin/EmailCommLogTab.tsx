@@ -193,6 +193,7 @@ const EmailCommLogTab = () => {
       setSimulateSending(false);
     }
   };
+  const canSimulate = (log: CommLog) => log.direction === "outbound" && !!log.mailgun_message_id;
 
 
   return (
