@@ -263,17 +263,9 @@ const EmailCommLogTab = () => {
 
   return (
     <div className="space-y-4">
-      {/* Header with Seed button */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-serif font-bold text-foreground">Communication Log</h3>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="border-2 text-xs" onClick={handleCreateTestUser} disabled={creatingTestUser}>
-            {creatingTestUser ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Creating…</> : "👤 Create WF‑10 Test User"}
-          </Button>
-          <Button variant="outline" size="sm" className="border-2 text-xs" onClick={handleSeedWf10} disabled={seeding}>
-            {seeding ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Seeding…</> : "🌱 Seed WF‑10 Test Data"}
-          </Button>
-        </div>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
