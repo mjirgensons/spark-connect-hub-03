@@ -215,6 +215,36 @@ const EmailCommLogTab = () => {
     }
   };
 
+  const handleCreateTestUser = async () => {
+    setCreatingTestUser(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const resp = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/create-wf10-test-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.access_token || ""}`,
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({}),
+        }
+      );
+      const result = await resp.json();
+      if (result.success) {
+        toast({ title: "✅ WF‑10 test user created", description: `Profile: wf10-test@example.com (${result.profile_id})` });
+      } else {
+        toast({ title: "Error", description: result.error || result.detail || "Unknown error", variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Network Error", description: err.message, variant: "destructive" });
+    } finally {
+      setCreatingTestUser(false);
+    }
+  };
+
   const canSimulate = (log: CommLog) => log.direction === "outbound" && !!log.mailgun_message_id;
 
   return (
