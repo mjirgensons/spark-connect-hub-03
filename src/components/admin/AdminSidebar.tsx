@@ -66,6 +66,7 @@ const navGroups: NavGroup[] = [
       { id: "customers", label: "Customers", icon: Users },
       { id: "reviews", label: "Reviews", icon: MessageSquare },
       { id: "email", label: "Email", icon: Send },
+      { id: "email-test-console", label: "Email Test Console", icon: FlaskConical },
       { id: "content", label: "Content", icon: FileEdit },
       { id: "trust-signals", label: "Trust Signals", icon: Shield },
       { id: "faq", label: "FAQ", icon: HelpCircle },
