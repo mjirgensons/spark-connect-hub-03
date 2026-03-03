@@ -171,7 +171,9 @@ const EmailCommLogTab = () => {
         }
       );
       const result = await resp.json();
-      if (result.success) {
+      if (!resp.ok && resp.status === 400) {
+        toast({ title: "Cannot simulate reply", description: "This email has no Mailgun message ID. Use an email sent by WF‑8.", variant: "destructive" });
+      } else if (result.success) {
         toast({ title: "✅ Simulated reply sent to WF‑10", description: "Check Communication Log for a new inbound row." });
         setSimulateLog(null);
         fetchLogs();

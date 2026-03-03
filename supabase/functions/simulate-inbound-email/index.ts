@@ -91,6 +91,16 @@ Deno.serve(async (req) => {
     })
   }
 
+  if (!log.mailgun_message_id || typeof log.mailgun_message_id !== 'string' || !log.mailgun_message_id.trim()) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: 'Selected communication log has no mailgun_message_id. Send a real email via WF-8 first, or use a log created by WF-8.',
+      }),
+      { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+    )
+  }
+
   const simulatedMessageId = `<simulated-${crypto.randomUUID()}@mg.fitmatch.ca>`
 
   const payload = {
