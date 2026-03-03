@@ -28,6 +28,7 @@ import AdminBlogTab from "@/components/admin/AdminBlogTab";
 import AdminNewsletterTab from "@/components/admin/AdminNewsletterTab";
 import AdminDbInspectorTab from "@/components/admin/AdminDbInspectorTab";
 import AdminWebhooksTab from "@/components/admin/AdminWebhooksTab";
+import EmailTestConsoleTab from "@/components/admin/EmailTestConsoleTab";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 
