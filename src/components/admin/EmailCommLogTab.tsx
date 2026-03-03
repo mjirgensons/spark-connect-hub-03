@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Copy, Mail, CheckCircle, Eye, AlertTriangle } from "lucide-react";
+import { ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Copy, Mail, CheckCircle, Eye, AlertTriangle, Reply, Loader2 } from "lucide-react";
 import { format, formatDistanceToNow, subDays } from "date-fns";
 
 interface CommLog {
@@ -55,6 +57,12 @@ const EmailCommLogTab = () => {
   const [page, setPage] = useState(0);
   const [selectedLog, setSelectedLog] = useState<CommLog | null>(null);
   const [plainTextOpen, setPlainTextOpen] = useState(false);
+
+  // WF-10 Simulate Reply state
+  const [simulateLog, setSimulateLog] = useState<CommLog | null>(null);
+  const [simulateFromEmail, setSimulateFromEmail] = useState("");
+  const [simulateReplyBody, setSimulateReplyBody] = useState("Test reply from admin panel.");
+  const [simulateSending, setSimulateSending] = useState(false);
 
   // Filters
   const [direction, setDirection] = useState("all");
@@ -127,6 +135,51 @@ const EmailCommLogTab = () => {
     return format(new Date(d), "MMM d, yyyy HH:mm");
   };
 
+  const openSimulateDrawer = (log: CommLog, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSimulateLog(log);
+    setSimulateFromEmail(log.user_email);
+    setSimulateReplyBody("Test reply from admin panel.");
+  };
+
+  const handleSendSimulate = async () => {
+    if (!simulateLog) return;
+    setSimulateSending(true);
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const resp = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/simulate-inbound-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-secret": import.meta.env.VITE_N8N_WEBHOOK_SECRET || "",
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            communication_log_id: simulateLog.id,
+            from_email: simulateFromEmail,
+            reply_body: simulateReplyBody,
+          }),
+        }
+      );
+      const result = await resp.json();
+      if (result.success) {
+        toast({ title: "✅ Simulated reply sent to WF‑10", description: "Check Communication Log for a new inbound row." });
+        setSimulateLog(null);
+        fetchLogs();
+      } else {
+        toast({ title: "WF‑10 Error", description: result.wf10_response_text || result.error || "Unknown error", variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Network Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSimulateSending(false);
+    }
+  };
+
+  const canSimulate = (log: CommLog) => log.direction === "outbound" && !!log.mailgun_message_id;
+
   return (
     <div className="space-y-4">
       {/* Stats */}
@@ -198,15 +251,16 @@ const EmailCommLogTab = () => {
               <TableHead className="text-xs">Entity</TableHead>
               <TableHead className="text-xs">Status</TableHead>
               <TableHead className="text-xs w-8">Sync</TableHead>
+              <TableHead className="text-xs">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}>{Array.from({ length: 8 }).map((_, j) => <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>)}</TableRow>
+                <TableRow key={i}>{Array.from({ length: 9 }).map((_, j) => <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>)}</TableRow>
               ))
             ) : logs.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No communication logs found.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">No communication logs found.</TableCell></TableRow>
             ) : logs.map(log => (
               <TableRow key={log.id} className="cursor-pointer" onClick={() => { setSelectedLog(log); setPlainTextOpen(false); }}>
                 <TableCell className="text-xs whitespace-nowrap">{formatDate(log.created_at)}</TableCell>
@@ -217,6 +271,13 @@ const EmailCommLogTab = () => {
                 <TableCell>{log.related_entity_type ? <Badge variant="outline" className="border-2 text-xs capitalize">{log.related_entity_type}</Badge> : <span className="text-xs text-muted-foreground">—</span>}</TableCell>
                 <TableCell><Badge className={`${STATUS_COLORS[log.status || "queued"]} text-xs`}>{log.status || "queued"}</Badge></TableCell>
                 <TableCell><span className={`inline-block w-2 h-2 rounded-full ${log.pinecone_synced ? "bg-green-500" : "bg-muted-foreground/40"}`} /></TableCell>
+                <TableCell>
+                  {canSimulate(log) && (
+                    <Button variant="link" size="sm" className="text-xs h-auto p-0" onClick={(e) => openSimulateDrawer(log, e)}>
+                      <Reply className="w-3 h-3 mr-1" /> Simulate Reply
+                    </Button>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -306,6 +367,65 @@ const EmailCommLogTab = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* WF-10 Simulate Reply Sheet */}
+      <Sheet open={!!simulateLog} onOpenChange={(open) => { if (!open) setSimulateLog(null); }}>
+        <SheetContent side="right" className="w-[400px] sm:w-[440px]">
+          <SheetHeader>
+            <SheetTitle className="font-serif">Simulate Inbound Reply (WF‑10 Test)</SheetTitle>
+            <SheetDescription className="text-xs">
+              This tool simulates a customer replying to this email by sending a Mailgun‑style payload to WF‑10. Use it for testing only.
+            </SheetDescription>
+          </SheetHeader>
+          {simulateLog && (
+            <div className="space-y-4 mt-4">
+              {/* Read-only fields */}
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Recipient</Label>
+                  <p className="text-sm font-mono bg-muted p-2 rounded">{simulateLog.user_email}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Subject</Label>
+                  <p className="text-sm bg-muted p-2 rounded">{simulateLog.subject}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Mailgun Message‑Id</Label>
+                  <p className="text-xs font-mono bg-muted p-2 rounded break-all">{simulateLog.mailgun_message_id}</p>
+                </div>
+                {simulateLog.related_entity_type && (
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Entity</Label>
+                    <p className="text-sm bg-muted p-2 rounded capitalize">{simulateLog.related_entity_type} — {simulateLog.related_entity_id}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Editable fields */}
+              <div className="space-y-3 border-t pt-4">
+                <div>
+                  <Label htmlFor="sim-from">From email</Label>
+                  <Input id="sim-from" value={simulateFromEmail} onChange={e => setSimulateFromEmail(e.target.value)} className="border-2 mt-1" />
+                </div>
+                <div>
+                  <Label htmlFor="sim-body">Reply body</Label>
+                  <Textarea id="sim-body" value={simulateReplyBody} onChange={e => setSimulateReplyBody(e.target.value)} rows={4} className="border-2 mt-1" />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-2">
+                <Button onClick={handleSendSimulate} disabled={simulateSending || !simulateFromEmail || !simulateReplyBody} className="flex-1">
+                  {simulateSending ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Sending…</> : "Send to WF‑10"}
+                </Button>
+                <Button variant="outline" className="border-2" onClick={() => setSimulateLog(null)} disabled={simulateSending}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
