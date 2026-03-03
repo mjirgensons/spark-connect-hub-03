@@ -64,11 +64,6 @@ const EmailCommLogTab = () => {
   const [simulateReplyBody, setSimulateReplyBody] = useState("Test reply from admin panel.");
   const [simulateSending, setSimulateSending] = useState(false);
 
-  // Seed WF-10 test data state
-  const [seeding, setSeeding] = useState(false);
-
-  // Create WF-10 test user state
-  const [creatingTestUser, setCreatingTestUser] = useState(false);
 
   // Filters
   const [direction, setDirection] = useState("all");
