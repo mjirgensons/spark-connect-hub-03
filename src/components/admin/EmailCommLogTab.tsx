@@ -148,11 +148,14 @@ const EmailCommLogTab = () => {
     setSimulateReplyBody("Test reply from admin panel.");
   };
 
+  // WF-10 simulate error message for inline display
+  const [simulateError, setSimulateError] = useState<string | null>(null);
+
   const handleSendSimulate = async () => {
     if (!simulateLog) return;
     setSimulateSending(true);
+    setSimulateError(null);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const resp = await fetch(
         `https://${projectId}.supabase.co/functions/v1/simulate-inbound-email`,
@@ -160,8 +163,7 @@ const EmailCommLogTab = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${session?.access_token || ""}`,
-            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            "x-api-secret": import.meta.env.VITE_N8N_WEBHOOK_SECRET || "",
           },
           body: JSON.stringify({
             communication_log_id: simulateLog.id,
@@ -171,17 +173,24 @@ const EmailCommLogTab = () => {
         }
       );
       const result = await resp.json();
-      if (!resp.ok && resp.status === 400) {
-        toast({ title: "Cannot simulate reply", description: "This email has no Mailgun message ID. Use an email sent by WF‑8.", variant: "destructive" });
-      } else if (result.success) {
+      console.log("[WF-10 Simulate Reply] Response:", result);
+
+      if (result.success) {
+        console.log("[WF-10] payload_sent_to_wf10:", result.payload_sent_to_wf10);
+        console.log("[WF-10] outbound_log:", result.outbound_log);
         toast({ title: "✅ Simulated reply sent to WF‑10", description: "Check Communication Log for a new inbound row." });
         setSimulateLog(null);
+        setSimulateError(null);
         fetchLogs();
       } else {
-        toast({ title: "WF‑10 Error", description: result.wf10_response_text || result.error || "Unknown error", variant: "destructive" });
+        const errMsg = `[${result.stage || "unknown"}] ${result.error || "Unknown error"}`;
+        setSimulateError(errMsg);
+        toast({ title: "WF‑10 Error", description: errMsg, variant: "destructive" });
       }
     } catch (err: any) {
-      toast({ title: "Network Error", description: err.message, variant: "destructive" });
+      const errMsg = err.message || "Network error";
+      setSimulateError(errMsg);
+      toast({ title: "Network Error", description: errMsg, variant: "destructive" });
     } finally {
       setSimulateSending(false);
     }
