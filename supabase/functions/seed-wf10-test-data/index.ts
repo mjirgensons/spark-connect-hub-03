@@ -59,9 +59,10 @@ Deno.serve(async (req) => {
   )
 
   try {
-    // 1. Ensure test profile
     const testEmail = 'wf10-test@example.com'
-    let profileId: string
+
+    // 1. Check if test profile exists (we can't create one without an auth user)
+    let profileId: string | null = null
 
     const { data: existingProfile } = await supabase
       .from('profiles')
@@ -71,73 +72,52 @@ Deno.serve(async (req) => {
 
     if (existingProfile) {
       profileId = existingProfile.id
-    } else {
-      // Create auth user first, then profile will be created by trigger
-      // But since we use service role, we'll just insert the profile directly with a deterministic UUID
-      profileId = 'a0000000-0000-4000-8000-0000000f1000'
-      const { error: profileErr } = await supabase.from('profiles').upsert({
-        id: profileId,
-        email: testEmail,
-        user_type: 'client',
-        full_name: 'WF10 Tester',
-      }, { onConflict: 'id' })
-      if (profileErr) {
-        return new Response(JSON.stringify({ error: 'Failed to create profile', detail: profileErr.message }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
-      }
     }
+    // If no profile exists, we proceed without user_id — that's fine for testing
 
-    // 2. Ensure test order
+    // 2. Ensure test order (only if we have a profile)
     let orderId: string | null = null
     const testOrderNumber = 'WF10-TEST-001'
 
-    const { data: existingOrder } = await supabase
-      .from('orders')
-      .select('id')
-      .eq('order_number', testOrderNumber)
-      .maybeSingle()
+    if (profileId) {
+      const { data: existingOrder } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('order_number', testOrderNumber)
+        .maybeSingle()
 
-    if (existingOrder) {
-      orderId = existingOrder.id
-    } else {
-      const { data: newOrder, error: orderErr } = await supabase.from('orders').insert({
-        order_number: testOrderNumber,
-        user_id: profileId,
-        status: 'pending',
-        payment_status: 'failed',
-        subtotal: 499.99,
-        shipping_cost: 0,
-        tax_amount: 65.00,
-        tax_rate: 0.13,
-        total: 564.99,
-        currency: 'CAD',
-        shipping_name: 'WF10 Tester',
-        shipping_address_line_1: '123 Test Street',
-        shipping_city: 'Toronto',
-        shipping_province: 'ON',
-        shipping_postal_code: 'M5V 1A1',
-        shipping_country: 'CA',
-        guest_email: testEmail,
-        notes: 'WF-10 test order — safe to delete',
-      }).select('id').single()
-
-      if (orderErr) {
-        // If order creation fails (e.g. duplicate trigger), try to fetch
-        const { data: retryOrder } = await supabase
-          .from('orders')
-          .select('id')
-          .eq('order_number', testOrderNumber)
-          .maybeSingle()
-        orderId = retryOrder?.id || null
+      if (existingOrder) {
+        orderId = existingOrder.id
       } else {
-        orderId = newOrder.id
+        const { data: newOrder, error: orderErr } = await supabase.from('orders').insert({
+          order_number: testOrderNumber,
+          user_id: profileId,
+          status: 'pending',
+          payment_status: 'failed',
+          subtotal: 499.99,
+          shipping_cost: 0,
+          tax_amount: 65.00,
+          tax_rate: 0.13,
+          total: 564.99,
+          currency: 'CAD',
+          shipping_name: 'WF10 Tester',
+          shipping_address_line_1: '123 Test Street',
+          shipping_city: 'Toronto',
+          shipping_province: 'ON',
+          shipping_postal_code: 'M5V 1A1',
+          shipping_country: 'CA',
+          guest_email: testEmail,
+          notes: 'WF-10 test order — safe to delete',
+        }).select('id').single()
+
+        if (!orderErr && newOrder) {
+          orderId = newOrder.id
+        }
       }
     }
 
     // 3. Insert outbound communication log
-    const mailgunMessageId = '<wf10-test-outbound@mg.fitmatch.ca>'
+    const mailgunMessageId = `<wf10-test-${Date.now()}@mg.fitmatch.ca>`
 
     const { data: commLog, error: commErr } = await supabase.from('communication_logs').insert({
       direction: 'outbound',
