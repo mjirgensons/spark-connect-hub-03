@@ -99,14 +99,19 @@ serve(async (req) => {
 
     const customerEmail = order.guest_email || undefined;
 
+    const orderMeta = {
+      order_id: order.id,
+      order_number: order.order_number,
+    };
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       currency: "cad",
       line_items: lineItems,
       ...(customerEmail ? { customer_email: customerEmail } : {}),
-      metadata: {
-        order_id: order.id,
-        order_number: order.order_number,
+      metadata: orderMeta,
+      payment_intent_data: {
+        metadata: orderMeta,
       },
       automatic_tax: { enabled: false },
       success_url: `${siteUrl}/order-confirmation/${order.id}?session_id={CHECKOUT_SESSION_ID}`,
