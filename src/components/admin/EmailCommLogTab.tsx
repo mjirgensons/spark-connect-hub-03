@@ -146,6 +146,7 @@ const EmailCommLogTab = () => {
     setSimulateLog(log);
     setSimulateFromEmail(log.user_email);
     setSimulateReplyBody("Test reply from admin panel.");
+    setSimulateError(null);
   };
 
   // WF-10 simulate error message for inline display
