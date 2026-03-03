@@ -21,9 +21,36 @@ Deno.serve(async (req) => {
     return jsonResponse(405, { success: false, stage: 'auth', error: 'Method not allowed' })
   }
 
-  // Auth: x-api-secret only
+  // Auth: accept either x-api-secret OR a valid admin JWT
   const secret = req.headers.get('x-api-secret')
-  if (secret !== Deno.env.get('N8N_WEBHOOK_SECRET')) {
+  const authHeader = req.headers.get('authorization')
+  let isAuthorized = false
+
+  if (secret === Deno.env.get('N8N_WEBHOOK_SECRET')) {
+    isAuthorized = true
+  } else if (authHeader) {
+    const token = authHeader.replace('Bearer ', '')
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: `Bearer ${token}` } } }
+    )
+    const { data: { user } } = await supabaseAuth.auth.getUser()
+    if (user) {
+      const adminCheck = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      )
+      const { data: adminRow } = await adminCheck
+        .from('admin_emails')
+        .select('id')
+        .eq('email', user.email || '')
+        .maybeSingle()
+      if (adminRow) isAuthorized = true
+    }
+  }
+
+  if (!isAuthorized) {
     return jsonResponse(401, { success: false, stage: 'auth', error: 'unauthorized' })
   }
 

@@ -156,6 +156,7 @@ const EmailCommLogTab = () => {
     setSimulateSending(true);
     setSimulateError(null);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const resp = await fetch(
         `https://${projectId}.supabase.co/functions/v1/simulate-inbound-email`,
@@ -163,7 +164,8 @@ const EmailCommLogTab = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-api-secret": import.meta.env.VITE_N8N_WEBHOOK_SECRET || "",
+            "Authorization": `Bearer ${session?.access_token || ""}`,
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
           body: JSON.stringify({
             communication_log_id: simulateLog.id,
