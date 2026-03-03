@@ -33,6 +33,7 @@ export type AdminSection =
   | "customers"
   | "reviews"
   | "email"
+  | "email-test-console"
   | "integrations"
   | "webhooks"
   | "content"
