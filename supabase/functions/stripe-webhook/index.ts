@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
       return new Response("Stripe not configured", { status: 503 });
     }
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-01-27.acacia" });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     const body = await req.text();
     let event: Stripe.Event;
 
