@@ -58,7 +58,7 @@ const StepReview = () => {
       };
 
       const orderItems = items.map((item) => ({
-        product_id: item.productId,
+        product_id: isUuid(item.productId) ? item.productId : null,
         product_name: item.name,
         product_sku: null as string | null,
         product_image: item.image,
