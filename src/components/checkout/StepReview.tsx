@@ -17,6 +17,9 @@ const shippingLabels: Record<string, string> = {
   pickup: "Customer Pickup (Woodbridge, ON)",
 };
 
+const isUuid = (value: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+
 const StepReview = () => {
   const { info, shippingMethod, shippingCost, setStep, reset } = useCheckout();
   const { items, subtotal, dispatch: cartDispatch } = useCart();
