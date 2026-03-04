@@ -63,6 +63,22 @@ const AdminDbInspectorTab = () => {
     }
   };
 
+  const saveAsMarkdown = () => {
+    const header = `# FitMatch Database Schema\n\n> Exported: ${new Date().toISOString()}\n\n\`\`\`\n`;
+    const footer = `\n\`\`\`\n`;
+    const content = header + schemaText + footer;
+    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `fitmatch-db-schema-${new Date().toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: "Schema saved as Markdown file" });
+  };
+
   return (
     <div className="space-y-4">
       <Card className="border-2 border-foreground shadow-[4px_4px_0px_0px_hsl(var(--foreground))]">
