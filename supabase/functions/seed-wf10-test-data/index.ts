@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
       plain_text_body: 'WF‑10 test outbound email.',
       from_address: 'orders@fitmatch.ca',
       to_address: testEmail,
-      reply_to: 'support@fitmatch.ca',
+      reply_to: 'support@mg.fitmatch.ca',
       mailgun_message_id: mailgunMessageId,
       status: 'sent',
       related_entity_type: orderId ? 'order' : 'communication_log',
