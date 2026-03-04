@@ -49,13 +49,11 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Auth: accept requests with a valid apikey (Supabase gateway validates it)
+  // or the n8n webhook secret for server-to-server calls
+  const apiKey = req.headers.get("apikey") || req.headers.get("authorization");
   const apiSecret = req.headers.get("x-api-secret");
-  const apiKey = req.headers.get("apikey");
-  const isAllowed =
-    apiSecret === Deno.env.get("N8N_WEBHOOK_SECRET") ||
-    apiKey === Deno.env.get("SUPABASE_ANON_KEY");
-
-  if (!isAllowed) {
+  if (!apiKey && apiSecret !== Deno.env.get("N8N_WEBHOOK_SECRET")) {
     return new Response(JSON.stringify({ error: "unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
