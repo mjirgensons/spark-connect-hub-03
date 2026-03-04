@@ -246,7 +246,8 @@ export type Database = {
           mailgun_message_id: string | null
           metadata: Json | null
           opened_at: string | null
-          pinecone_synced: boolean | null
+          pinecone_synced: boolean
+          pinecone_synced_at: string | null
           plain_text_body: string | null
           related_entity_id: string | null
           related_entity_type: string | null
@@ -271,7 +272,8 @@ export type Database = {
           mailgun_message_id?: string | null
           metadata?: Json | null
           opened_at?: string | null
-          pinecone_synced?: boolean | null
+          pinecone_synced?: boolean
+          pinecone_synced_at?: string | null
           plain_text_body?: string | null
           related_entity_id?: string | null
           related_entity_type?: string | null
@@ -296,7 +298,8 @@ export type Database = {
           mailgun_message_id?: string | null
           metadata?: Json | null
           opened_at?: string | null
-          pinecone_synced?: boolean | null
+          pinecone_synced?: boolean
+          pinecone_synced_at?: string | null
           plain_text_body?: string | null
           related_entity_id?: string | null
           related_entity_type?: string | null
