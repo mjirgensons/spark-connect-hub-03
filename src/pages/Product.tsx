@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ import CompareButton from "@/components/CompareButton";
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
+  usePageMeta();
 
   const { data: product, isLoading, error } = useQuery({
     queryKey: ["product", id],
@@ -35,6 +37,18 @@ const Product = () => {
     },
     enabled: !!id,
   });
+
+  useEffect(() => {
+    if (product) {
+      const desc = product.short_description || `${product.product_name} — ${product.color} ${product.material} cabinet. $${Number(product.price_discounted_usd).toLocaleString()} (${product.discount_percentage}% off). Available at FitMatch.`;
+      document.title = `${product.product_name} | FitMatch`;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute("content", desc);
+    }
+  }, [product]);
+
+  const { dispatch, getItemQuantity } = useCart();
+  const qtyInCart = product ? getItemQuantity(product.id) : 0;
 
   if (isLoading) {
     return (
@@ -64,13 +78,6 @@ const Product = () => {
   const savings = product.price_retail_usd - product.price_discounted_usd;
   const isDeactivated = product.availability_status === "Deactivated";
 
-  usePageMeta(
-    product.product_name,
-    product.short_description || `${product.product_name} — ${product.color} ${product.material} cabinet. $${Number(product.price_discounted_usd).toLocaleString()} (${product.discount_percentage}% off). Available at FitMatch.`
-  );
-
-  const { dispatch, getItemQuantity } = useCart();
-  const qtyInCart = getItemQuantity(product.id);
 
   const handleAddToCart = () => {
     dispatch({
