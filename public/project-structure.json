@@ -1,0 +1,172 @@
+{
+  "project": "FitMatch.ca",
+  "generatedAt": "2026-03-04",
+  "root": {
+    "config": [
+      "index.html",
+      "package.json",
+      "tsconfig.json",
+      "tsconfig.app.json",
+      "tsconfig.node.json",
+      "vite.config.ts",
+      "vitest.config.ts",
+      "tailwind.config.ts",
+      "postcss.config.js",
+      "eslint.config.js",
+      "components.json",
+      ".env",
+      ".env.example",
+      "README.md"
+    ],
+    "public": [
+      "favicon.ico",
+      "og-image.jpg",
+      "placeholder.svg",
+      "robots.txt",
+      "sitemap.xml"
+    ]
+  },
+  "src": {
+    "entryPoints": ["main.tsx", "App.tsx", "App.css", "index.css", "vite-env.d.ts"],
+    "assets": [
+      "cabinet-1.jpg", "cabinet-2.jpg", "cabinet-3.jpg", "cabinet-4.jpg", "cabinet-5.jpg", "cabinet-6.jpg",
+      "cabinet-cream.jpg", "cabinet-dark-walnut.jpg", "cabinet-grey-modern.jpg", "cabinet-navy-blue.jpg", "cabinet-white-shaker.jpg",
+      "hero-kitchen.jpg",
+      "product-closet.jpg", "product-island.jpg", "product-island-new.jpg", "product-medicine-cabinet.jpg",
+      "product-murphy-desk.jpg", "product-tv-unit.jpg", "product-vanity.jpg", "product-vanity-new.jpg", "product-wall-bed.jpg"
+    ],
+    "contexts": [
+      "CartContext.tsx",
+      "CheckoutContext.tsx",
+      "CompareContext.tsx",
+      "WishlistContext.tsx"
+    ],
+    "hooks": [
+      "use-mobile.tsx",
+      "use-toast.ts",
+      "useAnalytics.ts",
+      "useAuth.tsx",
+      "usePageMeta.ts",
+      "useProfile.tsx"
+    ],
+    "lib": [
+      "analytics.ts",
+      "optimizeImage.ts",
+      "utils.ts",
+      "webhookDispatcher.ts"
+    ],
+    "data": ["schema-snapshot.ts"],
+    "integrations": {
+      "supabase": ["client.ts", "types.ts"],
+      "lovable": ["index.ts"]
+    },
+    "test": ["example.test.ts", "setup.ts"],
+    "pages": {
+      "topLevel": [
+        "Index.tsx", "Product.tsx", "ProductCatalog.tsx",
+        "Cart.tsx", "Checkout.tsx", "OrderConfirmation.tsx",
+        "QuoteRequest.tsx", "QuoteSuccess.tsx",
+        "Login.tsx", "Register.tsx",
+        "Admin.tsx", "AdminLogin.tsx",
+        "AboutPage.tsx", "BlogPage.tsx", "BlogPostPage.tsx",
+        "ComparePage.tsx", "FAQPage.tsx", "FooterPage.tsx",
+        "ForContractorsPage.tsx", "ForSellersPage.tsx",
+        "HowItWorksPage.tsx", "SearchResults.tsx",
+        "UnderConstruction.tsx", "NotFound.tsx"
+      ],
+      "account": [
+        "AccountLayout.tsx", "AccountOverview.tsx", "AccountAddresses.tsx",
+        "AccountOrders.tsx", "AccountSettings.tsx", "AccountWishlist.tsx"
+      ],
+      "admin": ["WebhookDetail.tsx"],
+      "builder": [
+        "BuilderDashboard.tsx", "BuilderMatches.tsx", "BuilderMessages.tsx",
+        "BuilderNewProject.tsx", "BuilderProfile.tsx", "BuilderProjects.tsx"
+      ],
+      "client": [
+        "ClientDashboard.tsx", "ClientMatches.tsx", "ClientMessages.tsx",
+        "ClientNewMatch.tsx", "ClientProfile.tsx", "ClientProjectDetail.tsx", "ClientProjects.tsx"
+      ],
+      "contractor": [
+        "ContractorDashboard.tsx", "ContractorJobDetail.tsx", "ContractorJobs.tsx",
+        "ContractorMessages.tsx", "ContractorProfile.tsx", "ContractorProjectDetail.tsx", "ContractorProjects.tsx"
+      ],
+      "seller": [
+        "SellerAnalytics.tsx", "SellerDashboard.tsx", "SellerDocuments.tsx",
+        "SellerEditProduct.tsx", "SellerMessages.tsx", "SellerNewProduct.tsx",
+        "SellerOrders.tsx", "SellerProducts.tsx", "SellerQuoteDetail.tsx",
+        "SellerQuotes.tsx", "SellerStoreProfile.tsx"
+      ]
+    },
+    "components": {
+      "topLevel": [
+        "Breadcrumbs.tsx", "CompareBar.tsx", "CompareButton.tsx", "CookieConsent.tsx",
+        "DashboardLayout.tsx", "DimensionMatcher.tsx", "HideChatOnAdmin.tsx",
+        "NavLink.tsx", "NewsletterSignup.tsx", "ProductGallery.tsx", "ProductReviews.tsx",
+        "RoleGuard.tsx", "ScrollToTop.tsx", "SearchBar.tsx", "TrustBadgeBar.tsx", "WishlistButton.tsx"
+      ],
+      "admin": [
+        "AdminBlogTab.tsx", "AdminCustomersTab.tsx", "AdminDashboardTab.tsx", "AdminDbInspectorTab.tsx",
+        "AdminEmailTemplatesTab.tsx", "AdminFAQTab.tsx", "AdminIntegrationsTab.tsx", "AdminNewsletterTab.tsx",
+        "AdminOrdersTab.tsx", "AdminProductsTab.tsx", "AdminQuotesTab.tsx", "AdminReviewsTab.tsx",
+        "AdminSidebar.tsx", "AdminTrustSignalsTab.tsx", "AdminWebhooksTab.tsx",
+        "AnalyticsDashboard.tsx", "BannerSettingsAdmin.tsx", "ConsentLogsAdmin.tsx",
+        "CookieCategoriesAdmin.tsx", "CookieRegistryAdmin.tsx",
+        "EmailCommLogTab.tsx", "EmailConsentTab.tsx", "EmailSettingsTab.tsx",
+        "EmailTestConsoleTab.tsx", "EmailWF8TestTab.tsx", "EmailWF9StripeTab.tsx",
+        "FileUpload.tsx", "FooterPagesAdmin.tsx", "ImageUpload.tsx",
+        "LegalPagesAdmin.tsx", "SiteSettingsAdmin.tsx"
+      ],
+      "checkout": [
+        "CheckoutStepper.tsx", "StepInformation.tsx", "StepReview.tsx", "StepShipping.tsx"
+      ],
+      "landing": [
+        "Benefits.tsx", "CTA.tsx", "Footer.tsx", "ForContractors.tsx", "Header.tsx",
+        "Hero.tsx", "HowItWorks.tsx", "OtherProducts.tsx", "ProductShowcase.tsx", "TrustSignals.tsx"
+      ],
+      "ui": [
+        "accordion.tsx", "alert-dialog.tsx", "alert.tsx", "aspect-ratio.tsx", "avatar.tsx",
+        "badge.tsx", "breadcrumb.tsx", "button.tsx", "calendar.tsx", "card.tsx", "carousel.tsx",
+        "chart.tsx", "checkbox.tsx", "collapsible.tsx", "command.tsx", "context-menu.tsx",
+        "dialog.tsx", "drawer.tsx", "dropdown-menu.tsx", "form.tsx", "hover-card.tsx",
+        "input-otp.tsx", "input.tsx", "label.tsx", "menubar.tsx", "navigation-menu.tsx",
+        "order-card-skeleton.tsx", "pagination.tsx", "popover.tsx", "product-card-skeleton.tsx",
+        "product-detail-skeleton.tsx", "progress.tsx", "radio-group.tsx", "resizable.tsx",
+        "scroll-area.tsx", "select.tsx", "separator.tsx", "sheet.tsx", "sidebar.tsx",
+        "skeleton.tsx", "slider.tsx", "sonner.tsx", "switch.tsx", "table.tsx", "tabs.tsx",
+        "textarea.tsx", "toast.tsx", "toaster.tsx", "toggle-group.tsx", "toggle.tsx",
+        "tooltip.tsx", "use-toast.ts"
+      ]
+    }
+  },
+  "supabase": {
+    "config": ["config.toml"],
+    "edgeFunctions": [
+      "check-consent",
+      "create-checkout-session",
+      "create-wf10-test-user",
+      "get-wf9-order-items",
+      "get-wf9-order",
+      "log-communication",
+      "log-email-consent",
+      "seed-wf10-test-data",
+      "simulate-inbound-email",
+      "stripe-webhook-test",
+      "stripe-webhook",
+      "submit-cabinet-match",
+      "test-integration",
+      "update-communication-status"
+    ]
+  },
+  "database": {
+    "tables": [
+      "admin_emails", "analytics_events", "analytics_sessions", "blog_posts", "categories",
+      "communication_logs", "consent_logs", "contractor_details", "cookie_categories",
+      "cookie_definitions", "email_consent_log", "email_templates", "faq_items", "footer_pages",
+      "integrations", "newsletter_subscribers", "order_items", "orders", "product_reviews",
+      "products", "profiles", "project_contractors", "projects", "quote_request_items",
+      "quote_requests", "shipping_addresses", "site_settings", "trust_signals", "webhook_logs", "wishlists"
+    ],
+    "functions": ["get_full_schema_dump", "is_admin"]
+  }
+}
