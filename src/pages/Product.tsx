@@ -20,6 +20,7 @@ import CompareButton from "@/components/CompareButton";
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
+  usePageMeta();
 
   const { data: product, isLoading, error } = useQuery({
     queryKey: ["product", id],
