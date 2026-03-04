@@ -78,7 +78,9 @@ const StepReview = () => {
       );
 
       if (createOrderErr || !createdOrder?.order_id) {
-        throw createOrderErr ?? new Error("Failed to create order");
+        const createErrMsg =
+          createdOrder?.error || createOrderErr?.message || "Failed to create order";
+        throw new Error(createErrMsg);
       }
 
       const order = {
