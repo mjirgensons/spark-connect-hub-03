@@ -91,8 +91,7 @@ const OrderConfirmation = () => {
 
   useEffect(() => {
     fetchOrder();
-    fetchItems();
-  }, [fetchOrder, fetchItems]);
+  }, [fetchOrder]);
 
   // Poll for payment status if still unpaid
   useEffect(() => {
