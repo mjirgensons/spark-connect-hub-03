@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Database, Copy, RefreshCw, AlertTriangle } from "lucide-react";
+import { Loader2, Database, Copy, RefreshCw, AlertTriangle, Download } from "lucide-react";
 
 const AdminDbInspectorTab = () => {
   const { toast } = useToast();
