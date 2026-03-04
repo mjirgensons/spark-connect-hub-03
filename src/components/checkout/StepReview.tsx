@@ -17,6 +17,9 @@ const shippingLabels: Record<string, string> = {
   pickup: "Customer Pickup (Woodbridge, ON)",
 };
 
+const isUuid = (value: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+
 const StepReview = () => {
   const { info, shippingMethod, shippingCost, setStep, reset } = useCheckout();
   const { items, subtotal, dispatch: cartDispatch } = useCart();
@@ -55,7 +58,7 @@ const StepReview = () => {
       };
 
       const orderItems = items.map((item) => ({
-        product_id: item.productId,
+        product_id: isUuid(item.productId) ? item.productId : null,
         product_name: item.name,
         product_sku: null as string | null,
         product_image: item.image,
@@ -75,7 +78,9 @@ const StepReview = () => {
       );
 
       if (createOrderErr || !createdOrder?.order_id) {
-        throw createOrderErr ?? new Error("Failed to create order");
+        const createErrMsg =
+          createdOrder?.error || createOrderErr?.message || "Failed to create order";
+        throw new Error(createErrMsg);
       }
 
       const order = {
@@ -138,7 +143,8 @@ const StepReview = () => {
       window.location.href = sessionData.url;
     } catch (err: unknown) {
       console.error("Order creation failed:", err);
-      toast.error("Something went wrong. Please try again.");
+      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      toast.error(message);
     } finally {
       setPlacing(false);
     }
