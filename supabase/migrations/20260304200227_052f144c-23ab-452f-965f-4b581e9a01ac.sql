@@ -1,0 +1,1 @@
+ALTER TABLE public.email_templates ALTER COLUMN reply_to SET DEFAULT 'support@mg.fitmatch.ca';

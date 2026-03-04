@@ -161,7 +161,7 @@ const emptyTemplate: Omit<EmailTemplate, "id" | "created_at" | "updated_at"> = {
   plain_text_body: "",
   from_email: "orders@fitmatch.ca",
   from_name: "FitMatch",
-  reply_to: "support@fitmatch.ca",
+  reply_to: "support@mg.fitmatch.ca",
   locale: "en-CA",
   variables_schema: [],
   is_active: true,
