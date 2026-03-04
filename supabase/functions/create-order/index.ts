@@ -77,9 +77,22 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    const fallbackOrderNumber = `FM-${new Date()
+      .toISOString()
+      .slice(0, 10)
+      .replace(/-/g, "")}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+
+    const normalizedOrder = {
+      ...order,
+      order_number:
+        order.order_number && order.order_number !== "placeholder"
+          ? order.order_number
+          : fallbackOrderNumber,
+    };
+
     const { data: createdOrder, error: orderError } = await supabase
       .from("orders")
-      .insert(order)
+      .insert(normalizedOrder)
       .select("id, order_number")
       .single();
 
