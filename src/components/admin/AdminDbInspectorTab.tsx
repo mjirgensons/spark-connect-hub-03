@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Database, Copy, RefreshCw, AlertTriangle } from "lucide-react";
+import { Loader2, Database, Copy, RefreshCw, AlertTriangle, Download } from "lucide-react";
 
 const AdminDbInspectorTab = () => {
   const { toast } = useToast();
@@ -63,6 +63,22 @@ const AdminDbInspectorTab = () => {
     }
   };
 
+  const saveAsMarkdown = () => {
+    const header = `# FitMatch Database Schema\n\n> Exported: ${new Date().toISOString()}\n\n\`\`\`\n`;
+    const footer = `\n\`\`\`\n`;
+    const content = header + schemaText + footer;
+    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `fitmatch-db-schema-${new Date().toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: "Schema saved as Markdown file" });
+  };
+
   return (
     <div className="space-y-4">
       <Card className="border-2 border-foreground shadow-[4px_4px_0px_0px_hsl(var(--foreground))]">
@@ -84,9 +100,14 @@ const AdminDbInspectorTab = () => {
                 Export Full Schema
               </Button>
               {schemaText && (
-                <Button variant="outline" onClick={copyToClipboard} className="border-2">
-                  <Copy className="w-4 h-4 mr-1" /> Copy to Clipboard
-                </Button>
+                <>
+                  <Button variant="outline" onClick={saveAsMarkdown} className="border-2">
+                    <Download className="w-4 h-4 mr-1" /> Save as Markdown
+                  </Button>
+                  <Button variant="outline" onClick={copyToClipboard} className="border-2">
+                    <Copy className="w-4 h-4 mr-1" /> Copy to Clipboard
+                  </Button>
+                </>
               )}
             </div>
           </div>
