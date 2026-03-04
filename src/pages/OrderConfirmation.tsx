@@ -65,21 +65,21 @@ const OrderConfirmation = () => {
 
   const fetchOrder = useCallback(async () => {
     if (!orderId) return;
-    const { data, error } = await supabase
-      .from("orders")
-      .select("*")
-      .eq("id", orderId)
-      .maybeSingle();
 
-    if (error || !data) {
+    const { data, error } = await supabase.functions.invoke("get-order-confirmation", {
+      body: { order_id: orderId },
+    });
+
+    if (error || !data?.order) {
       setNotFound(true);
       setLoading(false);
       return;
     }
 
-    setOrder(data as unknown as OrderRow);
+    setOrder(data.order as OrderRow);
+    if (data.items) setItems(data.items as OrderItem[]);
 
-    if (data.payment_status === "paid") {
+    if (data.order.payment_status === "paid") {
       setPaymentPending(false);
       if (pollTimer.current) clearInterval(pollTimer.current);
     } else {
@@ -89,19 +89,9 @@ const OrderConfirmation = () => {
     setLoading(false);
   }, [orderId]);
 
-  const fetchItems = useCallback(async () => {
-    if (!orderId) return;
-    const { data } = await supabase
-      .from("order_items")
-      .select("id, product_name, product_image, quantity, unit_price, total_price")
-      .eq("order_id", orderId);
-    if (data) setItems(data);
-  }, [orderId]);
-
   useEffect(() => {
     fetchOrder();
-    fetchItems();
-  }, [fetchOrder, fetchItems]);
+  }, [fetchOrder]);
 
   // Poll for payment status if still unpaid
   useEffect(() => {
