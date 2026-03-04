@@ -137,10 +137,14 @@ const StepReview = () => {
         return;
       }
 
-      // 6. Clear cart and redirect to Stripe
-      cartDispatch({ type: "CLEAR_CART" });
-      reset();
+      // 6. Redirect to Stripe first, then clear cart
+      // (clearing before redirect causes a brief flash of empty cart)
       window.location.href = sessionData.url;
+      // These run after redirect starts — browser is already navigating away
+      setTimeout(() => {
+        cartDispatch({ type: "CLEAR_CART" });
+        reset();
+      }, 500);
     } catch (err: unknown) {
       console.error("Order creation failed:", err);
       const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
