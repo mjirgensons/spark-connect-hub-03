@@ -78,8 +78,6 @@ const Product = () => {
   const savings = product.price_retail_usd - product.price_discounted_usd;
   const isDeactivated = product.availability_status === "Deactivated";
 
-  const { dispatch, getItemQuantity } = useCart();
-  const qtyInCart = getItemQuantity(product.id);
 
   const handleAddToCart = () => {
     dispatch({
