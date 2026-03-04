@@ -143,7 +143,8 @@ const StepReview = () => {
       window.location.href = sessionData.url;
     } catch (err: unknown) {
       console.error("Order creation failed:", err);
-      toast.error("Something went wrong. Please try again.");
+      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      toast.error(message);
     } finally {
       setPlacing(false);
     }
