@@ -94,7 +94,9 @@ const ComparePage = lazy(() => import("./pages/ComparePage"));
 
 const PRODUCTION_DOMAINS = ["fitmatch.ca", "www.fitmatch.ca", "spark-connect-hub-03.lovable.app"];
 const isProduction = PRODUCTION_DOMAINS.includes(window.location.hostname);
-const isPreview = !isProduction;
+const hasBypass = new URLSearchParams(window.location.search).get("preview") === "true";
+if (hasBypass) sessionStorage.setItem("preview_bypass", "true");
+const isPreview = !isProduction || sessionStorage.getItem("preview_bypass") === "true";
 
 const queryClient = new QueryClient();
 
