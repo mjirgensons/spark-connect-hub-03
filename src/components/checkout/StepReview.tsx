@@ -32,37 +32,29 @@ const StepReview = () => {
     setPlacing(true);
 
     try {
-      // 1. Create order
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert({
-          user_id: user?.id ?? null,
-          guest_email: user ? null : info.email,
-          subtotal,
-          shipping_cost: shippingCost,
-          tax_rate: 0.13,
-          tax_amount: Math.round(tax * 100) / 100,
-          total: Math.round(total * 100) / 100,
-          shipping_name: info.fullName,
-          shipping_address_line_1: info.addressLine1,
-          shipping_address_line_2: info.addressLine2 || null,
-          shipping_city: info.city,
-          shipping_province: info.province,
-          shipping_postal_code: info.postalCode,
-          shipping_phone: info.phone || null,
-          shipping_method: shippingMethod,
-          payment_status: "unpaid",
-          status: "pending",
-          order_number: "placeholder", // trigger overwrites
-        })
-        .select("id, order_number")
-        .single();
+      // 1. Create order + order items via backend function (bypasses guest RLS readback issues)
+      const orderPayload = {
+        user_id: user?.id ?? null,
+        guest_email: user ? null : info.email,
+        subtotal,
+        shipping_cost: shippingCost,
+        tax_rate: 0.13,
+        tax_amount: Math.round(tax * 100) / 100,
+        total: Math.round(total * 100) / 100,
+        shipping_name: info.fullName,
+        shipping_address_line_1: info.addressLine1,
+        shipping_address_line_2: info.addressLine2 || null,
+        shipping_city: info.city,
+        shipping_province: info.province,
+        shipping_postal_code: info.postalCode,
+        shipping_phone: info.phone || null,
+        shipping_method: shippingMethod,
+        payment_status: "unpaid",
+        status: "pending",
+        order_number: "placeholder", // trigger overwrites
+      };
 
-      if (orderErr || !order) throw orderErr ?? new Error("Failed to create order");
-
-      // 2. Create order items
       const orderItems = items.map((item) => ({
-        order_id: order.id,
         product_id: item.productId,
         product_name: item.name,
         product_sku: null as string | null,
@@ -72,8 +64,24 @@ const StepReview = () => {
         total_price: item.price * item.quantity,
       }));
 
-      const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
-      if (itemsErr) throw itemsErr;
+      const { data: createdOrder, error: createOrderErr } = await supabase.functions.invoke(
+        "create-order",
+        {
+          body: {
+            order: orderPayload,
+            items: orderItems,
+          },
+        }
+      );
+
+      if (createOrderErr || !createdOrder?.order_id) {
+        throw createOrderErr ?? new Error("Failed to create order");
+      }
+
+      const order = {
+        id: createdOrder.order_id as string,
+        order_number: createdOrder.order_number as string,
+      };
 
       // 3. Save address if requested
       if (info.saveAddress && user) {
