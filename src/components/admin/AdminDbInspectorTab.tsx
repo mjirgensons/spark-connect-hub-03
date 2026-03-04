@@ -100,9 +100,14 @@ const AdminDbInspectorTab = () => {
                 Export Full Schema
               </Button>
               {schemaText && (
-                <Button variant="outline" onClick={copyToClipboard} className="border-2">
-                  <Copy className="w-4 h-4 mr-1" /> Copy to Clipboard
-                </Button>
+                <>
+                  <Button variant="outline" onClick={saveAsMarkdown} className="border-2">
+                    <Download className="w-4 h-4 mr-1" /> Save as Markdown
+                  </Button>
+                  <Button variant="outline" onClick={copyToClipboard} className="border-2">
+                    <Copy className="w-4 h-4 mr-1" /> Copy to Clipboard
+                  </Button>
+                </>
               )}
             </div>
           </div>
