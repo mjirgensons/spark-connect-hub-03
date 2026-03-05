@@ -176,9 +176,26 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
           </Button>
         </header>
 
+        {/* Admin view banner */}
+        {adminViewSellerId && adminViewSeller && (
+          <div className="flex items-center justify-between bg-yellow-100 border-b-2 border-yellow-400 px-4 py-2">
+            <span className="font-sans text-sm font-semibold text-yellow-900">
+              Admin View — Viewing as {adminViewSeller.company_name || adminViewSeller.full_name}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-yellow-600 text-yellow-900 hover:bg-yellow-200 h-7 text-xs"
+              onClick={() => navigate("/admin?tab=sellers")}
+            >
+              Back to Admin
+            </Button>
+          </div>
+        )}
+
         {/* Page content */}
         <main className="flex-1 p-6">
-          <Outlet />
+          <Outlet context={{ adminViewSellerId }} />
         </main>
       </div>
     </div>
