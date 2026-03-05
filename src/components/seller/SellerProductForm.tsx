@@ -505,6 +505,10 @@ const SellerProductForm = () => {
                 </Select>
               </div>
             </div>
+            <div className="flex items-center gap-3">
+              <Switch id="featured-toggle" checked={isFeatured} onCheckedChange={setIsFeatured} />
+              <Label htmlFor="featured-toggle" className="text-sm">Featured Product</Label>
+            </div>
             <div><Label className={labelCls}>Visibility</Label>
               <RadioGroup value={s8.visibility} onValueChange={(v) => setS8Val("visibility", v)} className="flex gap-6 mt-1">
                 <div className="flex items-center gap-2"><RadioGroupItem value="draft" id="vis-draft" /><Label htmlFor="vis-draft">Draft</Label></div>
