@@ -112,9 +112,29 @@ const SellerProductForm = () => {
   const selectedCategory = useMemo(() => categories.find((c: any) => c.id === f.category_id), [categories, f.category_id]);
   const layoutType: string = selectedCategory?.layout_type || "standard";
 
-  const retail = parseFloat(f.price_retail);
-  const sale = parseFloat(f.price_sale);
-  const discountPct = retail > 0 && sale > 0 && sale <= retail ? Math.round((1 - sale / retail) * 100) : null;
+  // Bidirectional pricing handlers
+  const handleRetailChange = (val: string) => {
+    const r = parseFloat(val);
+    const d = parseFloat(f.discount_pct);
+    const newSale = r > 0 && d > 0 && d < 100 ? (r * (1 - d / 100)).toFixed(2) : f.price_sale;
+    setF((p) => ({ ...p, price_retail: val, price_sale: newSale }));
+  };
+  const handleSaleChange = (val: string) => {
+    const r = parseFloat(f.price_retail);
+    const s = parseFloat(val);
+    const newDisc = r > 0 && s > 0 && s <= r ? String(Math.round((1 - s / r) * 100)) : "";
+    setF((p) => ({ ...p, price_sale: val, discount_pct: newDisc }));
+  };
+  const handleDiscountChange = (val: string) => {
+    const r = parseFloat(f.price_retail);
+    const d = parseFloat(val);
+    const newSale = r > 0 && d >= 0 && d < 100 ? (r * (1 - d / 100)).toFixed(2) : f.price_sale;
+    setF((p) => ({ ...p, discount_pct: val, price_sale: newSale }));
+  };
+
+  const toggleLayout = (layout: string) => {
+    setKitchenLayouts((p) => p.includes(layout) ? p.filter((l) => l !== layout) : [...p, layout]);
+  };
 
   const dimVal = (key: string) => { const raw = (f as any)[key] as string; if (!raw) return ""; return useInches ? String(mmToIn(Number(raw))) : raw; };
   const setDim = (key: string, val: string) => { if (useInches) { set(key, val ? String(inToMm(Number(val))) : ""); } else { set(key, val); } };
