@@ -29,6 +29,7 @@ import Register from "./pages/Register";
 import SearchResults from "./pages/SearchResults";
 import QuoteSuccess from "./pages/QuoteSuccess";
 import RoleGuard from "./components/RoleGuard";
+import SellerGuard from "./components/SellerGuard";
 import DashboardLayout from "./components/DashboardLayout";
 
 // Lazy-loaded: Admin
