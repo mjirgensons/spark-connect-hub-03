@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   PlusCircle, Pencil, Trash2, Copy, Sparkles, AlertTriangle, ImageOff,
-  RotateCcw, Trash, Power, PowerOff, ArrowUp, ArrowDown, ArrowUpDown, Star,
+  RotateCcw, Trash, Power, PowerOff, ArrowUp, ArrowDown, ArrowUpDown, Star, Layers,
 } from "lucide-react";
 import { getImageOptSummary } from "@/components/admin/ImageUpload";
 
