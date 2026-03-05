@@ -84,7 +84,7 @@ const AdminSellersTab = () => {
       let query = supabase
         .from("profiles")
         .select("*")
-        .eq("user_type", "seller")
+        .or("user_type.eq.seller,seller_status.not.is.null")
         .order("created_at", { ascending: false });
 
       if (statusFilter && statusFilter !== "all") {
