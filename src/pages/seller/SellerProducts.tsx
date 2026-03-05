@@ -213,7 +213,7 @@ const SellerProducts = () => {
   };
 
   const handleDuplicate = async (product: Product) => {
-    const { id, deleted_at, created_at, updated_at, ...rest } = product as any;
+    const { id: _id, deleted_at: _da, created_at: _ca, updated_at: _ua, ...rest } = product as any;
     const newName = `${product.product_name} (Copy)`;
     const newCode = `${product.product_code}-CP`;
     const { data: newProd, error } = await supabase
