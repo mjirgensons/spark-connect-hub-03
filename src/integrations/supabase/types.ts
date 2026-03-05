@@ -213,25 +213,42 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          icon: string | null
           id: string
+          layout_type: string | null
           name: string
+          parent_category_id: string | null
           slug: string
         }
         Insert: {
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
+          layout_type?: string | null
           name: string
+          parent_category_id?: string | null
           slug: string
         }
         Update: {
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
+          layout_type?: string | null
           name?: string
+          parent_category_id?: string | null
           slug?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       communication_logs: {
         Row: {
@@ -883,13 +900,18 @@ export type Database = {
         Row: {
           created_at: string
           currency: string
+          delivery_confirmed_at: string | null
           estimated_delivery: string | null
+          funds_released_at: string | null
           guest_email: string | null
           id: string
           notes: string | null
           order_number: string
           paid_at: string | null
           payment_status: string
+          platform_fee_cents: number | null
+          seller_id: string | null
+          seller_payout_cents: number | null
           shipping_address_line_1: string
           shipping_address_line_2: string | null
           shipping_city: string
@@ -903,6 +925,9 @@ export type Database = {
           status: string
           stripe_checkout_session_id: string | null
           stripe_payment_intent_id: string | null
+          stripe_refund_id: string | null
+          stripe_transfer_group: string | null
+          stripe_transfer_id: string | null
           subtotal: number
           tax_amount: number
           tax_rate: number
@@ -915,13 +940,18 @@ export type Database = {
         Insert: {
           created_at?: string
           currency?: string
+          delivery_confirmed_at?: string | null
           estimated_delivery?: string | null
+          funds_released_at?: string | null
           guest_email?: string | null
           id?: string
           notes?: string | null
           order_number: string
           paid_at?: string | null
           payment_status?: string
+          platform_fee_cents?: number | null
+          seller_id?: string | null
+          seller_payout_cents?: number | null
           shipping_address_line_1: string
           shipping_address_line_2?: string | null
           shipping_city: string
@@ -935,6 +965,9 @@ export type Database = {
           status?: string
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_refund_id?: string | null
+          stripe_transfer_group?: string | null
+          stripe_transfer_id?: string | null
           subtotal?: number
           tax_amount?: number
           tax_rate?: number
@@ -947,13 +980,18 @@ export type Database = {
         Update: {
           created_at?: string
           currency?: string
+          delivery_confirmed_at?: string | null
           estimated_delivery?: string | null
+          funds_released_at?: string | null
           guest_email?: string | null
           id?: string
           notes?: string | null
           order_number?: string
           paid_at?: string | null
           payment_status?: string
+          platform_fee_cents?: number | null
+          seller_id?: string | null
+          seller_payout_cents?: number | null
           shipping_address_line_1?: string
           shipping_address_line_2?: string | null
           shipping_city?: string
@@ -967,6 +1005,9 @@ export type Database = {
           status?: string
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_refund_id?: string | null
+          stripe_transfer_group?: string | null
+          stripe_transfer_id?: string | null
           subtotal?: number
           tax_amount?: number
           tax_rate?: number
@@ -976,7 +1017,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_compatible_appliances: {
         Row: {
@@ -1197,6 +1246,9 @@ export type Database = {
           category_id: string | null
           color: string
           compatible_kitchen_layouts: string[] | null
+          condition: string | null
+          condition_notes: string | null
+          construction_type: string | null
           countertop_discount_percentage: number | null
           countertop_finish: string | null
           countertop_included: boolean | null
@@ -1211,25 +1263,39 @@ export type Database = {
           depth_inches: number | null
           depth_mm: number
           discount_percentage: number
+          door_material: string | null
+          door_style: string | null
+          finish_type: string | null
           height_inches: number | null
           height_mm: number
+          hinge_brand: string | null
+          hinge_model: string | null
           id: string
           installation_instructions_url: string | null
+          is_custom_order: boolean | null
           is_featured: boolean
+          lead_time_days: number | null
           long_description: string | null
           main_image_url: string | null
           manufacturer: string | null
           material: string
+          measurement_standard: string | null
           price_discounted_usd: number
           price_retail_usd: number
           product_code: string
           product_name: string
           seller_id: string | null
           short_description: string | null
+          slide_brand: string | null
+          slide_model: string | null
           stock_level: number
           style: string
           tag: string | null
+          technical_drawings_url: string | null
           updated_at: string
+          wall_a_length_mm: number | null
+          wall_b_length_mm: number | null
+          wall_c_length_mm: number | null
           width_inches: number | null
           width_mm: number
         }
@@ -1239,6 +1305,9 @@ export type Database = {
           category_id?: string | null
           color: string
           compatible_kitchen_layouts?: string[] | null
+          condition?: string | null
+          condition_notes?: string | null
+          construction_type?: string | null
           countertop_discount_percentage?: number | null
           countertop_finish?: string | null
           countertop_included?: boolean | null
@@ -1253,25 +1322,39 @@ export type Database = {
           depth_inches?: number | null
           depth_mm: number
           discount_percentage?: number
+          door_material?: string | null
+          door_style?: string | null
+          finish_type?: string | null
           height_inches?: number | null
           height_mm: number
+          hinge_brand?: string | null
+          hinge_model?: string | null
           id?: string
           installation_instructions_url?: string | null
+          is_custom_order?: boolean | null
           is_featured?: boolean
+          lead_time_days?: number | null
           long_description?: string | null
           main_image_url?: string | null
           manufacturer?: string | null
           material: string
+          measurement_standard?: string | null
           price_discounted_usd: number
           price_retail_usd: number
           product_code: string
           product_name: string
           seller_id?: string | null
           short_description?: string | null
+          slide_brand?: string | null
+          slide_model?: string | null
           stock_level?: number
           style: string
           tag?: string | null
+          technical_drawings_url?: string | null
           updated_at?: string
+          wall_a_length_mm?: number | null
+          wall_b_length_mm?: number | null
+          wall_c_length_mm?: number | null
           width_inches?: number | null
           width_mm: number
         }
@@ -1281,6 +1364,9 @@ export type Database = {
           category_id?: string | null
           color?: string
           compatible_kitchen_layouts?: string[] | null
+          condition?: string | null
+          condition_notes?: string | null
+          construction_type?: string | null
           countertop_discount_percentage?: number | null
           countertop_finish?: string | null
           countertop_included?: boolean | null
@@ -1295,25 +1381,39 @@ export type Database = {
           depth_inches?: number | null
           depth_mm?: number
           discount_percentage?: number
+          door_material?: string | null
+          door_style?: string | null
+          finish_type?: string | null
           height_inches?: number | null
           height_mm?: number
+          hinge_brand?: string | null
+          hinge_model?: string | null
           id?: string
           installation_instructions_url?: string | null
+          is_custom_order?: boolean | null
           is_featured?: boolean
+          lead_time_days?: number | null
           long_description?: string | null
           main_image_url?: string | null
           manufacturer?: string | null
           material?: string
+          measurement_standard?: string | null
           price_discounted_usd?: number
           price_retail_usd?: number
           product_code?: string
           product_name?: string
           seller_id?: string | null
           short_description?: string | null
+          slide_brand?: string | null
+          slide_model?: string | null
           stock_level?: number
           style?: string
           tag?: string | null
+          technical_drawings_url?: string | null
           updated_at?: string
+          wall_a_length_mm?: number | null
+          wall_b_length_mm?: number | null
+          wall_c_length_mm?: number | null
           width_inches?: number | null
           width_mm?: number
         }
@@ -1336,37 +1436,82 @@ export type Database = {
       }
       profiles: {
         Row: {
+          banner_url: string | null
+          bio: string | null
+          business_address: Json | null
+          business_number: string | null
+          business_type: string | null
           company_name: string | null
           created_at: string
           email: string
           full_name: string
+          gst_hst_number: string | null
           id: string
           location: string | null
+          logo_url: string | null
           phone: string | null
+          seller_branding_visible: boolean | null
+          seller_status: string | null
+          seller_tier: string | null
+          stripe_account_id: string | null
+          stripe_charges_enabled: boolean | null
+          stripe_onboarding_status: string | null
+          stripe_payouts_enabled: boolean | null
           updated_at: string
           user_type: string
+          website: string | null
         }
         Insert: {
+          banner_url?: string | null
+          bio?: string | null
+          business_address?: Json | null
+          business_number?: string | null
+          business_type?: string | null
           company_name?: string | null
           created_at?: string
           email: string
           full_name: string
+          gst_hst_number?: string | null
           id: string
           location?: string | null
+          logo_url?: string | null
           phone?: string | null
+          seller_branding_visible?: boolean | null
+          seller_status?: string | null
+          seller_tier?: string | null
+          stripe_account_id?: string | null
+          stripe_charges_enabled?: boolean | null
+          stripe_onboarding_status?: string | null
+          stripe_payouts_enabled?: boolean | null
           updated_at?: string
           user_type: string
+          website?: string | null
         }
         Update: {
+          banner_url?: string | null
+          bio?: string | null
+          business_address?: Json | null
+          business_number?: string | null
+          business_type?: string | null
           company_name?: string | null
           created_at?: string
           email?: string
           full_name?: string
+          gst_hst_number?: string | null
           id?: string
           location?: string | null
+          logo_url?: string | null
           phone?: string | null
+          seller_branding_visible?: boolean | null
+          seller_status?: string | null
+          seller_tier?: string | null
+          stripe_account_id?: string | null
+          stripe_charges_enabled?: boolean | null
+          stripe_onboarding_status?: string | null
+          stripe_payouts_enabled?: boolean | null
           updated_at?: string
           user_type?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -1609,6 +1754,66 @@ export type Database = {
           },
         ]
       }
+      seller_payouts: {
+        Row: {
+          created_at: string
+          gross_amount_cents: number
+          hst_on_commission_cents: number
+          id: string
+          order_id: string
+          payout_status: string
+          platform_fee_cents: number
+          released_at: string | null
+          seller_id: string
+          seller_payout_cents: number
+          stripe_fee_cents: number
+          stripe_transfer_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          gross_amount_cents?: number
+          hst_on_commission_cents?: number
+          id?: string
+          order_id: string
+          payout_status?: string
+          platform_fee_cents?: number
+          released_at?: string | null
+          seller_id: string
+          seller_payout_cents?: number
+          stripe_fee_cents?: number
+          stripe_transfer_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          gross_amount_cents?: number
+          hst_on_commission_cents?: number
+          id?: string
+          order_id?: string
+          payout_status?: string
+          platform_fee_cents?: number
+          released_at?: string | null
+          seller_id?: string
+          seller_payout_cents?: number
+          stripe_fee_cents?: number
+          stripe_transfer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_payouts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_payouts_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipping_addresses: {
         Row: {
           address_line_1: string
@@ -1680,6 +1885,38 @@ export type Database = {
           value?: string
         }
         Relationships: []
+      }
+      stripe_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          order_id: string | null
+          payload: Json | null
+          processed_at: string
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          order_id?: string | null
+          payload?: Json | null
+          processed_at?: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          order_id?: string | null
+          payload?: Json | null
+          processed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trust_signals: {
         Row: {
