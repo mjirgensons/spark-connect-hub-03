@@ -71,6 +71,7 @@ const SellerOrders = lazy(() => import("./pages/seller/SellerOrders"));
 const SellerAnalytics = lazy(() => import("./pages/seller/SellerAnalytics"));
 const SellerMessages = lazy(() => import("./pages/seller/SellerMessages"));
 const SellerStoreProfile = lazy(() => import("./pages/seller/SellerStoreProfile"));
+const SellerProductVariants = lazy(() => import("./pages/seller/SellerProductVariants"));
 
 // Lazy-loaded: Builder dashboard
 const BuilderDashboard = lazy(() => import("./pages/builder/BuilderDashboard"));
