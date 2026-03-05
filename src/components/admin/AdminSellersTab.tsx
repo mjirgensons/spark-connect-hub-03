@@ -84,7 +84,7 @@ const AdminSellersTab = () => {
       let query = supabase
         .from("profiles")
         .select("*")
-        .eq("user_type", "seller")
+        .or("user_type.eq.seller,seller_status.not.is.null")
         .order("created_at", { ascending: false });
 
       if (statusFilter && statusFilter !== "all") {
@@ -195,7 +195,7 @@ const AdminSellersTab = () => {
               Suspend
             </Button>
             <Button size="sm" variant="outline" className="border-primary text-primary hover:bg-primary/10 h-7 text-xs" asChild>
-              <a href={`/admin/seller-view/${seller.id}`}>
+              <a href={`/seller/dashboard?adminView=${seller.id}`}>
                 <ExternalLink className="w-3 h-3 mr-1" /> Portal
               </a>
             </Button>

@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -82,7 +84,23 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
   const { signOut } = useAuth();
   const { profile } = useProfile();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const adminViewSellerId = searchParams.get("adminView");
   const items = navConfig[role];
+
+  // Fetch the seller's company name when in admin view mode
+  const { data: adminViewSeller } = useQuery({
+    queryKey: ["admin-view-seller", adminViewSellerId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("company_name, full_name")
+        .eq("id", adminViewSellerId!)
+        .single();
+      return data;
+    },
+    enabled: !!adminViewSellerId,
+  });
 
   const handleLogout = async () => {
     await signOut();
@@ -119,23 +137,28 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
         </div>
 
         <nav className="flex flex-col gap-1 p-3">
-          {items.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 font-sans text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-foreground text-background"
-                    : "hover:bg-muted"
-                }`
-              }
-            >
-              {item.icon}
-              {item.label}
-            </NavLink>
-          ))}
+          {items.map((item) => {
+            const linkTo = adminViewSellerId
+              ? `${item.to}?adminView=${adminViewSellerId}`
+              : item.to;
+            return (
+              <NavLink
+                key={item.to}
+                to={linkTo}
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 font-sans text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-foreground text-background"
+                      : "hover:bg-muted"
+                  }`
+                }
+              >
+                {item.icon}
+                {item.label}
+              </NavLink>
+            );
+          })}
         </nav>
       </aside>
 
@@ -158,9 +181,26 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
           </Button>
         </header>
 
+        {/* Admin view banner */}
+        {adminViewSellerId && adminViewSeller && (
+          <div className="flex items-center justify-between bg-yellow-100 border-b-2 border-yellow-400 px-4 py-2">
+            <span className="font-sans text-sm font-semibold text-yellow-900">
+              Admin View — Viewing as {adminViewSeller.company_name || adminViewSeller.full_name}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-yellow-600 text-yellow-900 hover:bg-yellow-200 h-7 text-xs"
+              onClick={() => navigate("/admin?tab=sellers")}
+            >
+              Back to Admin
+            </Button>
+          </div>
+        )}
+
         {/* Page content */}
         <main className="flex-1 p-6">
-          <Outlet />
+          <Outlet context={{ adminViewSellerId }} />
         </main>
       </div>
     </div>
