@@ -419,48 +419,23 @@ const SellerProductForm = () => {
         <AccordionItem value="images" className="border rounded-lg">
           <AccordionTrigger className="px-4 font-bold text-base">7 · Images & Documents</AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
-            {/* Main image */}
-            <div>
-              <Label className={labelCls}>Main Image</Label>
-              <div className="mt-1 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => mainImgRef.current?.click()}>
-                <input ref={mainImgRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleMainImage} className="hidden" />
-                {mainImagePreview ? (
-                  <img src={mainImagePreview} alt="Preview" className="mx-auto max-h-40 rounded object-contain" />
-                ) : (
-                  <><Upload className="w-6 h-6 mx-auto mb-1 text-muted-foreground" /><p className="text-xs text-muted-foreground">Click to upload (PNG, JPEG, WebP — max 5MB)</p></>
-                )}
-              </div>
-            </div>
-
-            {/* Gallery */}
-            <div>
-              <Label className={labelCls}>Gallery Images ({galleryFiles.length}/25)</Label>
-              <div className="mt-1 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => galleryRef.current?.click()}>
-                <input ref={galleryRef} type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={handleGallery} className="hidden" />
-                <Upload className="w-6 h-6 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Click to add gallery images</p>
-              </div>
-              {galleryPreviews.length > 0 && (
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-2">
-                  {galleryPreviews.map((url, i) => (
-                    <div key={i} className="relative group">
-                      <img src={url} alt="" className="w-full aspect-square object-cover rounded" />
-                      <button onClick={() => removeGalleryImage(i)} className="absolute top-0.5 right-0.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Technical drawings */}
-            <div>
-              <Label className={labelCls}>Technical Drawings (PDF)</Label>
-              <div className="mt-1 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => techRef.current?.click()}>
-                <input ref={techRef} type="file" accept=".pdf" onChange={handleTechDrawing} className="hidden" />
-                <Upload className="w-6 h-6 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">{techDrawingFile ? techDrawingFile.name : "Click to upload PDF (max 10MB)"}</p>
-              </div>
-            </div>
+            <ImageUpload
+              value={mainImageUrl}
+              onChange={setMainImageUrl}
+              label="Main Image (auto-optimized to WebP)"
+            />
+            <MultiImageUpload
+              value={galleryUrls.length ? galleryUrls : null}
+              onChange={setGalleryUrls}
+              label="Gallery Images (auto-optimized to WebP, max 25)"
+            />
+            <FileUpload
+              value={techDrawingUrl}
+              onChange={setTechDrawingUrl}
+              label="Technical Drawings (PDF)"
+              accept=".pdf"
+              bucket="product-documents"
+            />
           </AccordionContent>
         </AccordionItem>
 
