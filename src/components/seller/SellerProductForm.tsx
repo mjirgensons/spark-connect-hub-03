@@ -77,8 +77,10 @@ const SellerProductForm = () => {
     wall_a_length_mm: "", wall_b_length_mm: "", wall_c_length_mm: "",
     hinge_brand: "", hinge_model: "", slide_brand: "", slide_model: "",
     handle_type: "", handle_finish: "",
-    price_retail: "", price_sale: "", lead_time_days: "", is_custom_order: false,
+    price_retail: "", price_sale: "", discount_pct: "", lead_time_days: "", is_custom_order: false,
   });
+  const [kitchenLayouts, setKitchenLayouts] = useState<string[]>([]);
+  const [isFeatured, setIsFeatured] = useState(false);
 
   // S5 add-ons
   const [options, setOptions] = useState<ProductOption[]>([]);
