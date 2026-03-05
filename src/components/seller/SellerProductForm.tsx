@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,9 +20,14 @@ import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
 import { FileUpload } from "@/components/admin/FileUpload";
 
 // ── helpers ──
-const generateCode = (name: string) => {
-  const initials = name.split(/\s+/).filter(Boolean).map((w) => w[0].toUpperCase()).join("").slice(0, 4);
-  return initials ? `${initials}-001` : "";
+const sanitizeSku = (s: string) => s.replace(/O/g, "X").replace(/I/g, "Y");
+const skuSegment = (val: string, len = 2) => sanitizeSku(val.replace(/[^A-Za-z]/g, "").slice(0, len).toUpperCase()).padEnd(len, "X");
+const generateSmartCode = (catName: string, style: string, color: string, widthMm: string) => {
+  const cat = skuSegment(catName || "", 2);
+  const sty = skuSegment(style || "", 2);
+  const col = skuSegment(color || "", 2);
+  const widthCm = widthMm ? String(Math.round(Number(widthMm) / 10)) : "0";
+  return `${cat}-${sty}-${col}-${widthCm}-30`;
 };
 const inToMm = (v: number) => Math.round(v * 25.4);
 const mmToIn = (v: number) => +(v / 25.4).toFixed(2);
@@ -66,7 +71,7 @@ const SellerProductForm = () => {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [useInches, setUseInches] = useState(false);
-  const [codeEdited, setCodeEdited] = useState(false);
+  const [autoSku, setAutoSku] = useState(true);
 
   // S1-S4 form state
   const [f, setF] = useState({
@@ -101,8 +106,9 @@ const SellerProductForm = () => {
   const setS8Val = (key: string, val: string) => setS8((p) => ({ ...p, [key]: val }));
 
   const handleNameChange = (name: string) => {
-    setF((p) => ({ ...p, product_name: name, ...(codeEdited ? {} : { product_code: generateCode(name) }) }));
+    setF((p) => ({ ...p, product_name: name }));
   };
+
 
   const { data: categories = [] } = useQuery({
     queryKey: ["seller-categories"],
@@ -111,6 +117,13 @@ const SellerProductForm = () => {
 
   const selectedCategory = useMemo(() => categories.find((c: any) => c.id === f.category_id), [categories, f.category_id]);
   const layoutType: string = selectedCategory?.layout_type || "standard";
+
+  // Auto-SKU generation
+  const categoryName = selectedCategory?.name || "";
+  const autoSkuValue = useMemo(() => generateSmartCode(categoryName, f.style, f.color, f.width_mm), [categoryName, f.style, f.color, f.width_mm]);
+  useEffect(() => {
+    if (autoSku) setF((p) => ({ ...p, product_code: autoSkuValue }));
+  }, [autoSku, autoSkuValue]);
 
   // Bidirectional pricing handlers
   const handleRetailChange = (val: string) => {
@@ -270,7 +283,23 @@ const SellerProductForm = () => {
           <AccordionContent className="px-4 pb-4 space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div><Label className={labelCls}>Product Name *</Label><Input value={f.product_name} onChange={(e) => handleNameChange(e.target.value)} className={inputCls} /></div>
-              <div><Label className={labelCls}>Product Code *</Label><Input value={f.product_code} onChange={(e) => { setCodeEdited(true); set("product_code", e.target.value); }} className={inputCls} placeholder="Auto-generated" /></div>
+              <div>
+                <div className="flex items-center justify-between">
+                  <Label className={labelCls}>Product Code (SKU) *</Label>
+                  <div className="flex items-center gap-1.5">
+                    <Label className="text-[10px] text-muted-foreground">Auto</Label>
+                    <Switch checked={autoSku} onCheckedChange={(v) => { setAutoSku(v); if (v) setF((p) => ({ ...p, product_code: autoSkuValue })); }} className="scale-75" />
+                  </div>
+                </div>
+                <Input
+                  value={f.product_code}
+                  onChange={(e) => set("product_code", e.target.value)}
+                  className={inputCls}
+                  placeholder={autoSku ? "Auto-generated" : "Enter SKU manually"}
+                  readOnly={autoSku}
+                />
+                {autoSku && <p className="text-[10px] text-muted-foreground mt-1">Auto: Category-Style-Color-Width-Seq (avoids O/I)</p>}
+              </div>
               <div><Label className={labelCls}>Category *</Label>
                 <Select value={f.category_id} onValueChange={(v) => set("category_id", v)}>
                   <SelectTrigger className={inputCls}><SelectValue placeholder="Select category" /></SelectTrigger>
