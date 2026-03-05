@@ -71,7 +71,7 @@ const SellerProductForm = () => {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [useInches, setUseInches] = useState(false);
-  const [codeEdited, setCodeEdited] = useState(false);
+  const [autoSku, setAutoSku] = useState(true);
 
   // S1-S4 form state
   const [f, setF] = useState({
