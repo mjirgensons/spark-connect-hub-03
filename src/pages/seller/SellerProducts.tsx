@@ -354,7 +354,7 @@ const SellerProducts = () => {
                         </button>
                       </TableCell>
                       <TableCell className="py-1.5 px-1 text-center">
-                        {p.is_featured ? <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500 mx-auto" /> : <span className="text-muted-foreground">—</span>}
+                        {p.is_featured ? <Star className="w-3.5 h-3.5 text-primary fill-primary mx-auto" /> : <span className="text-muted-foreground">—</span>}
                       </TableCell>
                       <TableCell className="py-1.5 px-2 text-right">
                         <div className="flex justify-end gap-0">
