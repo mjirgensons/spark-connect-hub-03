@@ -28,6 +28,7 @@ const inToMm = (v: number) => Math.round(v * 25.4);
 const mmToIn = (v: number) => +(v / 25.4).toFixed(2);
 
 // ── option lists ──
+const kitchenLayoutOptions = ["L-Shape", "U-Shape", "Galley", "Straight", "Island", "Peninsula", "G-Shape"];
 const doorStyles = ["shaker", "slab", "raised_panel", "recessed_panel", "beadboard", "louvered", "glass_front", "other"];
 const doorMaterials = ["solid_wood", "mdf", "thermofoil", "plywood", "particleboard", "other"];
 const finishTypes = ["paint", "stain", "lacquer", "laminate", "veneer", "melamine", "acrylic", "other"];
@@ -76,8 +77,10 @@ const SellerProductForm = () => {
     wall_a_length_mm: "", wall_b_length_mm: "", wall_c_length_mm: "",
     hinge_brand: "", hinge_model: "", slide_brand: "", slide_model: "",
     handle_type: "", handle_finish: "",
-    price_retail: "", price_sale: "", lead_time_days: "", is_custom_order: false,
+    price_retail: "", price_sale: "", discount_pct: "", lead_time_days: "", is_custom_order: false,
   });
+  const [kitchenLayouts, setKitchenLayouts] = useState<string[]>([]);
+  const [isFeatured, setIsFeatured] = useState(false);
 
   // S5 add-ons
   const [options, setOptions] = useState<ProductOption[]>([]);
@@ -109,9 +112,29 @@ const SellerProductForm = () => {
   const selectedCategory = useMemo(() => categories.find((c: any) => c.id === f.category_id), [categories, f.category_id]);
   const layoutType: string = selectedCategory?.layout_type || "standard";
 
-  const retail = parseFloat(f.price_retail);
-  const sale = parseFloat(f.price_sale);
-  const discountPct = retail > 0 && sale > 0 && sale <= retail ? Math.round((1 - sale / retail) * 100) : null;
+  // Bidirectional pricing handlers
+  const handleRetailChange = (val: string) => {
+    const r = parseFloat(val);
+    const d = parseFloat(f.discount_pct);
+    const newSale = r > 0 && d > 0 && d < 100 ? (r * (1 - d / 100)).toFixed(2) : f.price_sale;
+    setF((p) => ({ ...p, price_retail: val, price_sale: newSale }));
+  };
+  const handleSaleChange = (val: string) => {
+    const r = parseFloat(f.price_retail);
+    const s = parseFloat(val);
+    const newDisc = r > 0 && s > 0 && s <= r ? String(Math.round((1 - s / r) * 100)) : "";
+    setF((p) => ({ ...p, price_sale: val, discount_pct: newDisc }));
+  };
+  const handleDiscountChange = (val: string) => {
+    const r = parseFloat(f.price_retail);
+    const d = parseFloat(val);
+    const newSale = r > 0 && d >= 0 && d < 100 ? (r * (1 - d / 100)).toFixed(2) : f.price_sale;
+    setF((p) => ({ ...p, discount_pct: val, price_sale: newSale }));
+  };
+
+  const toggleLayout = (layout: string) => {
+    setKitchenLayouts((p) => p.includes(layout) ? p.filter((l) => l !== layout) : [...p, layout]);
+  };
 
   const dimVal = (key: string) => { const raw = (f as any)[key] as string; if (!raw) return ""; return useInches ? String(mmToIn(Number(raw))) : raw; };
   const setDim = (key: string, val: string) => { if (useInches) { set(key, val ? String(inToMm(Number(val))) : ""); } else { set(key, val); } };
@@ -159,9 +182,11 @@ const SellerProductForm = () => {
         slide_brand: f.slide_brand || null, slide_model: f.slide_model || null,
         price_retail_usd: parseFloat(f.price_retail),
         price_discounted_usd: f.price_sale ? parseFloat(f.price_sale) : parseFloat(f.price_retail),
-        discount_percentage: discountPct ?? 0,
+        discount_percentage: f.discount_pct ? Number(f.discount_pct) : 0,
         lead_time_days: f.is_custom_order && f.lead_time_days ? Number(f.lead_time_days) : null,
         is_custom_order: f.is_custom_order,
+        is_featured: isFeatured,
+        compatible_kitchen_layouts: kitchenLayouts.length ? kitchenLayouts : [],
         seller_id: user.id, availability_status: s8.availability_status,
         stock_level: Number(s8.stock_level) || 0,
         short_description: s8.short_description || null, long_description: s8.long_description || null,
@@ -274,6 +299,25 @@ const SellerProductForm = () => {
               <div><Label className={labelCls}>Condition</Label><Select value={f.condition} onValueChange={(v) => set("condition", v)}><SelectTrigger className={inputCls}><SelectValue /></SelectTrigger><SelectContent>{conditions.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent></Select></div>
               {f.condition !== "NEW" && <div className="sm:col-span-2"><Label className={labelCls}>Condition Notes</Label><Textarea value={f.condition_notes} onChange={(e) => set("condition_notes", e.target.value)} className="mt-1 resize-none" rows={2} placeholder="Describe the condition..." /></div>}
             </div>
+            <div>
+              <Label className={labelCls}>Compatible Kitchen Layouts</Label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {kitchenLayoutOptions.map((layout) => (
+                  <button
+                    key={layout}
+                    type="button"
+                    onClick={() => toggleLayout(layout)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      kitchenLayouts.includes(layout)
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-muted-foreground border-border hover:border-primary/50"
+                    }`}
+                  >
+                    {layout}
+                  </button>
+                ))}
+              </div>
+            </div>
           </AccordionContent>
         </AccordionItem>
 
@@ -316,9 +360,9 @@ const SellerProductForm = () => {
           <AccordionTrigger className="px-4 font-bold text-base">4 · Pricing</AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <div className="grid sm:grid-cols-3 gap-4">
-              <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_retail} onChange={(e) => set("price_retail", e.target.value)} className="pl-7" /></div></div>
-              <div><Label className={labelCls}>Sale Price (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_sale} onChange={(e) => set("price_sale", e.target.value)} className="pl-7" /></div></div>
-              <div><Label className={labelCls}>Discount</Label><Input value={discountPct !== null ? `${discountPct}%` : "—"} readOnly className="mt-1 bg-muted" /></div>
+              <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_retail} onChange={(e) => handleRetailChange(e.target.value)} className="pl-7" /></div></div>
+              <div><Label className={labelCls}>Sale Price (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_sale} onChange={(e) => handleSaleChange(e.target.value)} className="pl-7" /></div></div>
+              <div><Label className={labelCls}>Discount %</Label><div className="relative mt-1"><Input type="number" min="0" max="99" value={f.discount_pct} onChange={(e) => handleDiscountChange(e.target.value)} className="pr-7" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span></div></div>
             </div>
             <div className="flex items-center gap-3"><Checkbox id="custom-order" checked={f.is_custom_order} onCheckedChange={(v) => set("is_custom_order", !!v)} /><Label htmlFor="custom-order" className="text-sm">This is a custom/made-to-order product</Label></div>
             {f.is_custom_order && <div className="max-w-xs"><Label className={labelCls}>Lead Time (days)</Label><Input type="number" value={f.lead_time_days} onChange={(e) => set("lead_time_days", e.target.value)} className={inputCls} /></div>}
@@ -460,6 +504,10 @@ const SellerProductForm = () => {
                   <SelectContent>{availabilityStatuses.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch id="featured-toggle" checked={isFeatured} onCheckedChange={setIsFeatured} />
+              <Label htmlFor="featured-toggle" className="text-sm">Featured Product</Label>
             </div>
             <div><Label className={labelCls}>Visibility</Label>
               <RadioGroup value={s8.visibility} onValueChange={(v) => setS8Val("visibility", v)} className="flex gap-6 mt-1">
