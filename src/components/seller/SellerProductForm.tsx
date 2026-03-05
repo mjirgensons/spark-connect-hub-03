@@ -130,31 +130,7 @@ const SellerProductForm = () => {
   const removeAppliance = (i: number) => setAppliances((p) => p.filter((_, idx) => idx !== i));
   const updateAppliance = (i: number, key: string, val: string) => setAppliances((p) => p.map((a, idx) => idx === i ? { ...a, [key]: val } : a));
 
-  // S7 helpers
-  const handleMainImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast({ title: "Image too large", description: "Max 5MB", variant: "destructive" }); return; }
-    setMainImageFile(file);
-    setMainImagePreview(URL.createObjectURL(file));
-  };
-  const handleGallery = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const valid = files.filter((f) => f.size <= 5 * 1024 * 1024).slice(0, 25 - galleryFiles.length);
-    if (valid.length < files.length) toast({ title: "Some files skipped", description: "Max 5MB each, 25 total" });
-    setGalleryFiles((p) => [...p, ...valid]);
-    setGalleryPreviews((p) => [...p, ...valid.map((f) => URL.createObjectURL(f))]);
-  };
-  const removeGalleryImage = (i: number) => {
-    setGalleryFiles((p) => p.filter((_, idx) => idx !== i));
-    setGalleryPreviews((p) => p.filter((_, idx) => idx !== i));
-  };
-  const handleTechDrawing = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { toast({ title: "File too large", description: "Max 10MB", variant: "destructive" }); return; }
-    setTechDrawingFile(file);
-  };
+  // S7 — no manual helpers needed; ImageUpload/MultiImageUpload/FileUpload manage state
 
   // ── SUBMIT ──
   const handleSubmit = async (visibility: "draft" | "published") => {
