@@ -286,7 +286,23 @@ const SellerProductForm = () => {
           <AccordionContent className="px-4 pb-4 space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div><Label className={labelCls}>Product Name *</Label><Input value={f.product_name} onChange={(e) => handleNameChange(e.target.value)} className={inputCls} /></div>
-              <div><Label className={labelCls}>Product Code *</Label><Input value={f.product_code} onChange={(e) => { setCodeEdited(true); set("product_code", e.target.value); }} className={inputCls} placeholder="Auto-generated" /></div>
+              <div>
+                <div className="flex items-center justify-between">
+                  <Label className={labelCls}>Product Code (SKU) *</Label>
+                  <div className="flex items-center gap-1.5">
+                    <Label className="text-[10px] text-muted-foreground">Auto</Label>
+                    <Switch checked={autoSku} onCheckedChange={(v) => { setAutoSku(v); if (v) setF((p) => ({ ...p, product_code: autoSkuValue })); }} className="scale-75" />
+                  </div>
+                </div>
+                <Input
+                  value={f.product_code}
+                  onChange={(e) => set("product_code", e.target.value)}
+                  className={inputCls}
+                  placeholder={autoSku ? "Auto-generated" : "Enter SKU manually"}
+                  readOnly={autoSku}
+                />
+                {autoSku && <p className="text-[10px] text-muted-foreground mt-1">Auto: Category-Style-Color-Width-Seq (avoids O/I)</p>}
+              </div>
               <div><Label className={labelCls}>Category *</Label>
                 <Select value={f.category_id} onValueChange={(v) => set("category_id", v)}>
                   <SelectTrigger className={inputCls}><SelectValue placeholder="Select category" /></SelectTrigger>
