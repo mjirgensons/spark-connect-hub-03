@@ -721,6 +721,74 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          message_body: string
+          message_type: string
+          recipient_id: string
+          related_order_id: string | null
+          related_product_id: string | null
+          sender_id: string
+        }
+        Insert: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message_body: string
+          message_type?: string
+          recipient_id: string
+          related_order_id?: string | null
+          related_product_id?: string | null
+          sender_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message_body?: string
+          message_type?: string
+          recipient_id?: string
+          related_order_id?: string | null
+          related_product_id?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_related_order_id_fkey"
+            columns: ["related_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_related_product_id_fkey"
+            columns: ["related_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_subscribers: {
         Row: {
           consent_text: string
@@ -910,6 +978,106 @@ export type Database = {
         }
         Relationships: []
       }
+      product_compatible_appliances: {
+        Row: {
+          appliance_type: string
+          brand: string | null
+          created_at: string
+          dimensions: Json | null
+          id: string
+          model_name: string | null
+          model_number: string | null
+          notes: string | null
+          product_id: string
+          reference_url: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          appliance_type: string
+          brand?: string | null
+          created_at?: string
+          dimensions?: Json | null
+          id?: string
+          model_name?: string | null
+          model_number?: string | null
+          notes?: string | null
+          product_id: string
+          reference_url?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          appliance_type?: string
+          brand?: string | null
+          created_at?: string
+          dimensions?: Json | null
+          id?: string
+          model_name?: string | null
+          model_number?: string | null
+          notes?: string | null
+          product_id?: string
+          reference_url?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_compatible_appliances_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_options: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          inclusion_status: string
+          option_name: string
+          option_type: string
+          price_discounted: number | null
+          price_retail: number | null
+          product_id: string
+          sort_order: number | null
+          specifications: Json | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          inclusion_status?: string
+          option_name: string
+          option_type: string
+          price_discounted?: number | null
+          price_retail?: number | null
+          product_id: string
+          sort_order?: number | null
+          specifications?: Json | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          inclusion_status?: string
+          option_name?: string
+          option_type?: string
+          price_discounted?: number | null
+          price_retail?: number | null
+          product_id?: string
+          sort_order?: number | null
+          specifications?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_options_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_reviews: {
         Row: {
           admin_note: string | null
@@ -953,6 +1121,68 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          additional_image_urls: string[] | null
+          availability_status: string | null
+          color: string | null
+          created_at: string
+          finish: string | null
+          id: string
+          main_image_url: string | null
+          material: string | null
+          price_discounted: number | null
+          price_retail: number | null
+          product_id: string
+          sort_order: number | null
+          stock_level: number | null
+          updated_at: string
+          variant_name: string
+        }
+        Insert: {
+          additional_image_urls?: string[] | null
+          availability_status?: string | null
+          color?: string | null
+          created_at?: string
+          finish?: string | null
+          id?: string
+          main_image_url?: string | null
+          material?: string | null
+          price_discounted?: number | null
+          price_retail?: number | null
+          product_id: string
+          sort_order?: number | null
+          stock_level?: number | null
+          updated_at?: string
+          variant_name: string
+        }
+        Update: {
+          additional_image_urls?: string[] | null
+          availability_status?: string | null
+          color?: string | null
+          created_at?: string
+          finish?: string | null
+          id?: string
+          main_image_url?: string | null
+          material?: string | null
+          price_discounted?: number | null
+          price_retail?: number | null
+          product_id?: string
+          sort_order?: number | null
+          stock_level?: number | null
+          updated_at?: string
+          variant_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -1340,6 +1570,44 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      seller_agreements: {
+        Row: {
+          accepted_at: string
+          agreement_type: string
+          agreement_version: string
+          id: string
+          ip_address: string | null
+          seller_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          accepted_at?: string
+          agreement_type: string
+          agreement_version?: string
+          id?: string
+          ip_address?: string | null
+          seller_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          accepted_at?: string
+          agreement_type?: string
+          agreement_version?: string
+          id?: string
+          ip_address?: string | null
+          seller_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_agreements_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shipping_addresses: {
         Row: {
