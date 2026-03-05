@@ -181,8 +181,11 @@ const App = () => (
             <Route path="profile" element={<ContractorProfile />} />
           </Route>
 
-          {/* Seller routes */}
-          <Route path="/seller" element={<RoleGuard allowedRoles={['seller']}><DashboardLayout role="seller" /></RoleGuard>}>
+          {/* Seller pending (public-ish, just needs auth) */}
+          <Route path="/seller/pending" element={<SellerPending />} />
+
+          {/* Seller routes — requires approved seller */}
+          <Route path="/seller" element={<SellerGuard><DashboardLayout role="seller" /></SellerGuard>}>
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<SellerDashboard />} />
             <Route path="products" element={<SellerProducts />} />
