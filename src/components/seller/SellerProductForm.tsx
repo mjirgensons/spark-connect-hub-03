@@ -28,6 +28,7 @@ const inToMm = (v: number) => Math.round(v * 25.4);
 const mmToIn = (v: number) => +(v / 25.4).toFixed(2);
 
 // ── option lists ──
+const kitchenLayoutOptions = ["L-Shape", "U-Shape", "Galley", "Straight", "Island", "Peninsula", "G-Shape"];
 const doorStyles = ["shaker", "slab", "raised_panel", "recessed_panel", "beadboard", "louvered", "glass_front", "other"];
 const doorMaterials = ["solid_wood", "mdf", "thermofoil", "plywood", "particleboard", "other"];
 const finishTypes = ["paint", "stain", "lacquer", "laminate", "veneer", "melamine", "acrylic", "other"];
