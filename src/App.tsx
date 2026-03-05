@@ -59,6 +59,7 @@ const ContractorMessages = lazy(() => import("./pages/contractor/ContractorMessa
 const ContractorProfile = lazy(() => import("./pages/contractor/ContractorProfile"));
 
 // Lazy-loaded: Seller dashboard
+const SellerPending = lazy(() => import("./pages/seller/SellerPending"));
 const SellerDashboard = lazy(() => import("./pages/seller/SellerDashboard"));
 const SellerProducts = lazy(() => import("./pages/seller/SellerProducts"));
 const SellerNewProduct = lazy(() => import("./pages/seller/SellerNewProduct"));
