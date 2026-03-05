@@ -109,16 +109,6 @@ const SellerProductForm = () => {
     setF((p) => ({ ...p, product_name: name }));
   };
 
-  // Auto-update SKU when relevant fields change
-  const categoryName = useMemo(() => categories.find((c: any) => c.id === f.category_id)?.name || "", [categories, f.category_id]);
-  const autoSkuValue = useMemo(() => generateSmartCode(categoryName, f.style, f.color, f.width_mm), [categoryName, f.style, f.color, f.width_mm]);
-  
-  // Sync auto SKU into form state
-  const prevAutoSkuRef = useMemo(() => autoSkuValue, [autoSkuValue]);
-  if (autoSku && f.product_code !== autoSkuValue) {
-    // Use a microtask to avoid setting state during render
-    Promise.resolve().then(() => setF((p) => ({ ...p, product_code: autoSkuValue })));
-  }
 
   const { data: categories = [] } = useQuery({
     queryKey: ["seller-categories"],
