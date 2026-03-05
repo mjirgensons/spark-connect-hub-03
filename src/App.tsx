@@ -29,6 +29,7 @@ import Register from "./pages/Register";
 import SearchResults from "./pages/SearchResults";
 import QuoteSuccess from "./pages/QuoteSuccess";
 import RoleGuard from "./components/RoleGuard";
+import SellerGuard from "./components/SellerGuard";
 import DashboardLayout from "./components/DashboardLayout";
 
 // Lazy-loaded: Admin
@@ -58,6 +59,7 @@ const ContractorMessages = lazy(() => import("./pages/contractor/ContractorMessa
 const ContractorProfile = lazy(() => import("./pages/contractor/ContractorProfile"));
 
 // Lazy-loaded: Seller dashboard
+const SellerPending = lazy(() => import("./pages/seller/SellerPending"));
 const SellerDashboard = lazy(() => import("./pages/seller/SellerDashboard"));
 const SellerProducts = lazy(() => import("./pages/seller/SellerProducts"));
 const SellerNewProduct = lazy(() => import("./pages/seller/SellerNewProduct"));
@@ -179,8 +181,11 @@ const App = () => (
             <Route path="profile" element={<ContractorProfile />} />
           </Route>
 
-          {/* Seller routes */}
-          <Route path="/seller" element={<RoleGuard allowedRoles={['seller']}><DashboardLayout role="seller" /></RoleGuard>}>
+          {/* Seller pending (public-ish, just needs auth) */}
+          <Route path="/seller/pending" element={<SellerPending />} />
+
+          {/* Seller routes — requires approved seller */}
+          <Route path="/seller" element={<SellerGuard><DashboardLayout role="seller" /></SellerGuard>}>
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<SellerDashboard />} />
             <Route path="products" element={<SellerProducts />} />
