@@ -299,6 +299,25 @@ const SellerProductForm = () => {
               <div><Label className={labelCls}>Condition</Label><Select value={f.condition} onValueChange={(v) => set("condition", v)}><SelectTrigger className={inputCls}><SelectValue /></SelectTrigger><SelectContent>{conditions.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent></Select></div>
               {f.condition !== "NEW" && <div className="sm:col-span-2"><Label className={labelCls}>Condition Notes</Label><Textarea value={f.condition_notes} onChange={(e) => set("condition_notes", e.target.value)} className="mt-1 resize-none" rows={2} placeholder="Describe the condition..." /></div>}
             </div>
+            <div>
+              <Label className={labelCls}>Compatible Kitchen Layouts</Label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {kitchenLayoutOptions.map((layout) => (
+                  <button
+                    key={layout}
+                    type="button"
+                    onClick={() => toggleLayout(layout)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      kitchenLayouts.includes(layout)
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-muted-foreground border-border hover:border-primary/50"
+                    }`}
+                  >
+                    {layout}
+                  </button>
+                ))}
+              </div>
+            </div>
           </AccordionContent>
         </AccordionItem>
 
