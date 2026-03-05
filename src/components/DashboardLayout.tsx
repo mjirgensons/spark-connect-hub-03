@@ -84,7 +84,23 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
   const { signOut } = useAuth();
   const { profile } = useProfile();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const adminViewSellerId = searchParams.get("adminView");
   const items = navConfig[role];
+
+  // Fetch the seller's company name when in admin view mode
+  const { data: adminViewSeller } = useQuery({
+    queryKey: ["admin-view-seller", adminViewSellerId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("company_name, full_name")
+        .eq("id", adminViewSellerId!)
+        .single();
+      return data;
+    },
+    enabled: !!adminViewSellerId,
+  });
 
   const handleLogout = async () => {
     await signOut();
