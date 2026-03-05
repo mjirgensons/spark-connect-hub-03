@@ -118,6 +118,13 @@ const SellerProductForm = () => {
   const selectedCategory = useMemo(() => categories.find((c: any) => c.id === f.category_id), [categories, f.category_id]);
   const layoutType: string = selectedCategory?.layout_type || "standard";
 
+  // Auto-SKU generation
+  const categoryName = selectedCategory?.name || "";
+  const autoSkuValue = useMemo(() => generateSmartCode(categoryName, f.style, f.color, f.width_mm), [categoryName, f.style, f.color, f.width_mm]);
+  useEffect(() => {
+    if (autoSku) setF((p) => ({ ...p, product_code: autoSkuValue }));
+  }, [autoSku, autoSkuValue]);
+
   // Bidirectional pricing handlers
   const handleRetailChange = (val: string) => {
     const r = parseFloat(val);
