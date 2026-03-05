@@ -359,6 +359,9 @@ const SellerProducts = () => {
                       </TableCell>
                       <TableCell className="py-1.5 px-2 text-right">
                         <div className="flex justify-end gap-0">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" title="Variants" onClick={() => navigate(variantsUrl(p.id))}>
+                            <Layers className="w-3.5 h-3.5" />
+                          </Button>
                           <Button variant="ghost" size="icon" className="h-7 w-7" title="Duplicate" onClick={() => handleDuplicate(p)}>
                             <Copy className="w-3.5 h-3.5" />
                           </Button>
