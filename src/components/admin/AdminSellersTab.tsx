@@ -129,6 +129,7 @@ const AdminSellersTab = () => {
         .update({ seller_status: status } as Record<string, unknown>)
         .eq("id", sellerId);
       if (error) throw error;
+      return { sellerId, status };
     },
     onSuccess: (_, variables) => {
       const labels: Record<string, string> = {
@@ -136,11 +137,39 @@ const AdminSellersTab = () => {
         rejected: "Seller rejected",
         suspended: "Seller suspended",
       };
-      // "reactivate" maps to approved
       toast({ title: labels[variables.status] || "Seller reactivated" });
       queryClient.invalidateQueries({ queryKey: ["admin-sellers"] });
       setSelectedSeller(null);
       setConfirmAction(null);
+
+      // Fire-and-forget: notify n8n on approval
+      if (variables.status === "approved") {
+        try {
+          supabase
+            .from("profiles")
+            .select("full_name, company_name, email, id")
+            .eq("id", variables.sellerId)
+            .single()
+            .then(({ data: sellerProfile }) => {
+              if (sellerProfile) {
+                supabase.functions
+                  .invoke("notify-seller-approval", {
+                    body: {
+                      seller_name: sellerProfile.full_name,
+                      company_name: sellerProfile.company_name,
+                      email: sellerProfile.email,
+                      user_id: sellerProfile.id,
+                    },
+                  })
+                  .catch((err) =>
+                    console.warn("[webhook] notify-seller-approval failed:", err)
+                  );
+              }
+            });
+        } catch (err) {
+          console.warn("[webhook] notify-seller-approval error:", err);
+        }
+      }
     },
     onError: (err: Error) => {
       toast({ title: "Update failed", description: err.message, variant: "destructive" });
