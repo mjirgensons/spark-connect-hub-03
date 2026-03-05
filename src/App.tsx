@@ -71,6 +71,7 @@ const SellerOrders = lazy(() => import("./pages/seller/SellerOrders"));
 const SellerAnalytics = lazy(() => import("./pages/seller/SellerAnalytics"));
 const SellerMessages = lazy(() => import("./pages/seller/SellerMessages"));
 const SellerStoreProfile = lazy(() => import("./pages/seller/SellerStoreProfile"));
+const SellerProductVariants = lazy(() => import("./pages/seller/SellerProductVariants"));
 
 // Lazy-loaded: Builder dashboard
 const BuilderDashboard = lazy(() => import("./pages/builder/BuilderDashboard"));
@@ -191,6 +192,7 @@ const App = () => (
             <Route path="products" element={<SellerProducts />} />
             <Route path="products/new" element={<SellerNewProduct />} />
             <Route path="products/:productId" element={<SellerEditProduct />} />
+            <Route path="products/:id/variants" element={<SellerProductVariants />} />
             <Route path="documents" element={<SellerDocuments />} />
             <Route path="quotes" element={<SellerQuotes />} />
             <Route path="quotes/:quoteId" element={<SellerQuoteDetail />} />

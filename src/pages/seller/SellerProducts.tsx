@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   PlusCircle, Pencil, Trash2, Copy, Sparkles, AlertTriangle, ImageOff,
-  RotateCcw, Trash, Power, PowerOff, ArrowUp, ArrowDown, ArrowUpDown, Star,
+  RotateCcw, Trash, Power, PowerOff, ArrowUp, ArrowDown, ArrowUpDown, Star, Layers,
 } from "lucide-react";
 import { getImageOptSummary } from "@/components/admin/ImageUpload";
 
@@ -252,6 +252,7 @@ const SellerProducts = () => {
 
   const addProductUrl = adminViewId ? `/seller/products/new?adminView=${adminViewId}` : "/seller/products/new";
   const editUrl = (id: string) => adminViewId ? `/seller/products/edit/${id}?adminView=${adminViewId}` : `/seller/products/edit/${id}`;
+  const variantsUrl = (id: string) => adminViewId ? `/seller/products/${id}/variants?adminView=${adminViewId}` : `/seller/products/${id}/variants`;
 
   return (
     <div className="space-y-6">
@@ -358,6 +359,9 @@ const SellerProducts = () => {
                       </TableCell>
                       <TableCell className="py-1.5 px-2 text-right">
                         <div className="flex justify-end gap-0">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" title="Variants" onClick={() => navigate(variantsUrl(p.id))}>
+                            <Layers className="w-3.5 h-3.5" />
+                          </Button>
                           <Button variant="ghost" size="icon" className="h-7 w-7" title="Duplicate" onClick={() => handleDuplicate(p)}>
                             <Copy className="w-3.5 h-3.5" />
                           </Button>
