@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +15,9 @@ import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Save, Plus, Trash2, Upload, Info, X, Eye } from "lucide-react";
+import { Loader2, Save, Plus, Trash2, Info, X, Eye } from "lucide-react";
+import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
+import { FileUpload } from "@/components/admin/FileUpload";
 
 // ── helpers ──
 const generateCode = (name: string) => {
@@ -81,16 +83,11 @@ const SellerProductForm = () => {
   const [options, setOptions] = useState<ProductOption[]>([]);
   // S6 compatible appliances
   const [appliances, setAppliances] = useState<CompatAppliance[]>([]);
-  // S7 images
-  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
-  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
-  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
-  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
-  const [techDrawingFile, setTechDrawingFile] = useState<File | null>(null);
+  // S7 images (managed by shared upload components — URLs stored directly)
+  const [mainImageUrl, setMainImageUrl] = useState<string | null>(null);
+  const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
+  const [techDrawingUrl, setTechDrawingUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
-  const mainImgRef = useRef<HTMLInputElement>(null);
-  const galleryRef = useRef<HTMLInputElement>(null);
-  const techRef = useRef<HTMLInputElement>(null);
   // S8 description & visibility
   const [s8, setS8] = useState({
     short_description: "", long_description: "", stock_level: "0",
@@ -133,31 +130,7 @@ const SellerProductForm = () => {
   const removeAppliance = (i: number) => setAppliances((p) => p.filter((_, idx) => idx !== i));
   const updateAppliance = (i: number, key: string, val: string) => setAppliances((p) => p.map((a, idx) => idx === i ? { ...a, [key]: val } : a));
 
-  // S7 helpers
-  const handleMainImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast({ title: "Image too large", description: "Max 5MB", variant: "destructive" }); return; }
-    setMainImageFile(file);
-    setMainImagePreview(URL.createObjectURL(file));
-  };
-  const handleGallery = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const valid = files.filter((f) => f.size <= 5 * 1024 * 1024).slice(0, 25 - galleryFiles.length);
-    if (valid.length < files.length) toast({ title: "Some files skipped", description: "Max 5MB each, 25 total" });
-    setGalleryFiles((p) => [...p, ...valid]);
-    setGalleryPreviews((p) => [...p, ...valid.map((f) => URL.createObjectURL(f))]);
-  };
-  const removeGalleryImage = (i: number) => {
-    setGalleryFiles((p) => p.filter((_, idx) => idx !== i));
-    setGalleryPreviews((p) => p.filter((_, idx) => idx !== i));
-  };
-  const handleTechDrawing = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { toast({ title: "File too large", description: "Max 10MB", variant: "destructive" }); return; }
-    setTechDrawingFile(file);
-  };
+  // S7 — no manual helpers needed; ImageUpload/MultiImageUpload/FileUpload manage state
 
   // ── SUBMIT ──
   const handleSubmit = async (visibility: "draft" | "published") => {
@@ -199,40 +172,14 @@ const SellerProductForm = () => {
       if (prodErr || !product) throw new Error(prodErr?.message || "Failed to create product");
       const productId = product.id;
 
-      // 2. Upload images
-      setUploadProgress("Uploading images...");
-      let mainImageUrl: string | null = null;
-      let additionalUrls: string[] = [];
-      let techUrl: string | null = null;
-
-      if (mainImageFile) {
-        const ext = mainImageFile.name.split(".").pop();
-        const path = `${user.id}/${productId}/main.${ext}`;
-        const { error: upErr } = await supabase.storage.from("product-images").upload(path, mainImageFile, { upsert: true });
-        if (upErr) console.error("Main image upload error:", upErr.message);
-        else mainImageUrl = supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl;
-      }
-
-      for (const file of galleryFiles) {
-        const path = `${user.id}/${productId}/gallery/${file.name}`;
-        const { error: upErr } = await supabase.storage.from("product-images").upload(path, file, { upsert: true });
-        if (upErr) console.error("Gallery upload error:", upErr.message);
-        else additionalUrls.push(supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl);
-      }
-
-      if (techDrawingFile) {
-        const path = `${user.id}/${productId}/technical.pdf`;
-        const { error: upErr } = await supabase.storage.from("product-documents").upload(path, techDrawingFile, { upsert: true });
-        if (upErr) console.error("Tech drawing upload error:", upErr.message);
-        else techUrl = supabase.storage.from("product-documents").getPublicUrl(path).data.publicUrl;
-      }
-
-      if (mainImageUrl || additionalUrls.length || techUrl) {
-        const updates: Record<string, unknown> = {};
-        if (mainImageUrl) updates.main_image_url = mainImageUrl;
-        if (additionalUrls.length) updates.additional_image_urls = additionalUrls;
-        if (techUrl) updates.technical_drawings_url = techUrl;
-        await supabase.from("products").update(updates as any).eq("id", productId);
+      // 2. Update product with image/document URLs (already uploaded by components)
+      setUploadProgress("Saving media references...");
+      const mediaUpdates: Record<string, unknown> = {};
+      if (mainImageUrl) mediaUpdates.main_image_url = mainImageUrl;
+      if (galleryUrls.length) mediaUpdates.additional_image_urls = galleryUrls;
+      if (techDrawingUrl) mediaUpdates.technical_drawings_url = techDrawingUrl;
+      if (Object.keys(mediaUpdates).length) {
+        await supabase.from("products").update(mediaUpdates as any).eq("id", productId);
       }
 
       // 3. INSERT product_options
@@ -472,48 +419,23 @@ const SellerProductForm = () => {
         <AccordionItem value="images" className="border rounded-lg">
           <AccordionTrigger className="px-4 font-bold text-base">7 · Images & Documents</AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
-            {/* Main image */}
-            <div>
-              <Label className={labelCls}>Main Image</Label>
-              <div className="mt-1 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => mainImgRef.current?.click()}>
-                <input ref={mainImgRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleMainImage} className="hidden" />
-                {mainImagePreview ? (
-                  <img src={mainImagePreview} alt="Preview" className="mx-auto max-h-40 rounded object-contain" />
-                ) : (
-                  <><Upload className="w-6 h-6 mx-auto mb-1 text-muted-foreground" /><p className="text-xs text-muted-foreground">Click to upload (PNG, JPEG, WebP — max 5MB)</p></>
-                )}
-              </div>
-            </div>
-
-            {/* Gallery */}
-            <div>
-              <Label className={labelCls}>Gallery Images ({galleryFiles.length}/25)</Label>
-              <div className="mt-1 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => galleryRef.current?.click()}>
-                <input ref={galleryRef} type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={handleGallery} className="hidden" />
-                <Upload className="w-6 h-6 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Click to add gallery images</p>
-              </div>
-              {galleryPreviews.length > 0 && (
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-2">
-                  {galleryPreviews.map((url, i) => (
-                    <div key={i} className="relative group">
-                      <img src={url} alt="" className="w-full aspect-square object-cover rounded" />
-                      <button onClick={() => removeGalleryImage(i)} className="absolute top-0.5 right-0.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Technical drawings */}
-            <div>
-              <Label className={labelCls}>Technical Drawings (PDF)</Label>
-              <div className="mt-1 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => techRef.current?.click()}>
-                <input ref={techRef} type="file" accept=".pdf" onChange={handleTechDrawing} className="hidden" />
-                <Upload className="w-6 h-6 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">{techDrawingFile ? techDrawingFile.name : "Click to upload PDF (max 10MB)"}</p>
-              </div>
-            </div>
+            <ImageUpload
+              value={mainImageUrl}
+              onChange={setMainImageUrl}
+              label="Main Image (auto-optimized to WebP)"
+            />
+            <MultiImageUpload
+              value={galleryUrls.length ? galleryUrls : null}
+              onChange={setGalleryUrls}
+              label="Gallery Images (auto-optimized to WebP, max 25)"
+            />
+            <FileUpload
+              value={techDrawingUrl}
+              onChange={setTechDrawingUrl}
+              label="Technical Drawings (PDF)"
+              accept=".pdf"
+              bucket="product-documents"
+            />
           </AccordionContent>
         </AccordionItem>
 
