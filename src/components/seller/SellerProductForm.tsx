@@ -20,9 +20,14 @@ import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
 import { FileUpload } from "@/components/admin/FileUpload";
 
 // ── helpers ──
-const generateCode = (name: string) => {
-  const initials = name.split(/\s+/).filter(Boolean).map((w) => w[0].toUpperCase()).join("").slice(0, 4);
-  return initials ? `${initials}-001` : "";
+const sanitizeSku = (s: string) => s.replace(/O/g, "X").replace(/I/g, "Y");
+const skuSegment = (val: string, len = 2) => sanitizeSku(val.replace(/[^A-Za-z]/g, "").slice(0, len).toUpperCase()).padEnd(len, "X");
+const generateSmartCode = (catName: string, style: string, color: string, widthMm: string) => {
+  const cat = skuSegment(catName || "", 2);
+  const sty = skuSegment(style || "", 2);
+  const col = skuSegment(color || "", 2);
+  const widthCm = widthMm ? String(Math.round(Number(widthMm) / 10)) : "0";
+  return `${cat}-${sty}-${col}-${widthCm}-30`;
 };
 const inToMm = (v: number) => Math.round(v * 25.4);
 const mmToIn = (v: number) => +(v / 25.4).toFixed(2);
