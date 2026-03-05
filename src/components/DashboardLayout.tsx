@@ -137,23 +137,28 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
         </div>
 
         <nav className="flex flex-col gap-1 p-3">
-          {items.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 font-sans text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-foreground text-background"
-                    : "hover:bg-muted"
-                }`
-              }
-            >
-              {item.icon}
-              {item.label}
-            </NavLink>
-          ))}
+          {items.map((item) => {
+            const linkTo = adminViewSellerId
+              ? `${item.to}?adminView=${adminViewSellerId}`
+              : item.to;
+            return (
+              <NavLink
+                key={item.to}
+                to={linkTo}
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 font-sans text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-foreground text-background"
+                      : "hover:bg-muted"
+                  }`
+                }
+              >
+                {item.icon}
+                {item.label}
+              </NavLink>
+            );
+          })}
         </nav>
       </aside>
 
