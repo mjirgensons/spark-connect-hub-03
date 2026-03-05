@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -17,54 +18,25 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import {
-  Home,
+  ShoppingBag,
   Wrench,
   Store,
-  Building2,
   ArrowLeft,
   UserPlus,
 } from "lucide-react";
 import { z } from "zod";
 
-type UserType = "client" | "contractor" | "seller" | "builder";
+type UserType = "client" | "contractor" | "seller";
 
 const roles: { type: UserType; icon: React.ElementType; label: string; sub: string }[] = [
-  { type: "client", icon: Home, label: "I'm a Homeowner", sub: "Buy cabinets for your renovation" },
-  { type: "contractor", icon: Wrench, label: "I'm a Contractor", sub: "Get matched to local projects" },
-  { type: "seller", icon: Store, label: "I Sell Cabinets / Products", sub: "List inventory and reach buyers" },
-  { type: "builder", icon: Building2, label: "I'm a Builder / Developer", sub: "Buy in volume for projects" },
+  { type: "client", icon: ShoppingBag, label: "I'm a Buyer", sub: "Browse and purchase premium cabinetry" },
+  { type: "seller", icon: Store, label: "I'm a Seller", sub: "List and sell your cabinet products" },
+  { type: "contractor", icon: Wrench, label: "I'm a Contractor", sub: "Find projects and connect with clients" },
 ];
 
-const tradeTypes = [
-  "General Contractor",
-  "Cabinet Installer",
-  "Plumber",
-  "Electrician",
-  "Drywall / Wall Builder",
-  "Countertop Installer",
-  "Painter",
-];
+const provinces = ["ON", "BC", "AB", "QC", "MB", "SK", "NS", "NB", "NL", "PE", "NT", "YT", "NU"];
 
-const gtaAreas = [
-  "Toronto",
-  "North York",
-  "Scarborough",
-  "Etobicoke",
-  "Mississauga",
-  "Brampton",
-  "Vaughan",
-  "Richmond Hill",
-  "Markham",
-  "Oakville",
-  "Burlington",
-  "Hamilton",
-  "Ajax",
-  "Pickering",
-  "Oshawa",
-  "Newmarket",
-];
-
-const clientNeeds = ["Kitchen", "Vanity", "Bathroom", "Closet", "Other"];
+const postalCodeRegex = /^[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d$/;
 
 const baseSchema = z.object({
   fullName: z.string().trim().min(2, "Full name is required").max(100),
@@ -82,30 +54,17 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Client fields
-  const [phone, setPhone] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [lookingFor, setLookingFor] = useState<string[]>([]);
-
-  // Contractor fields
-  const [companyName, setCompanyName] = useState("");
-  const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
-  const [serviceAreas, setServiceAreas] = useState<string[]>([]);
-  const [yearsExperience, setYearsExperience] = useState("");
-
   // Seller fields
-  const [storeName, setStoreName] = useState("");
-  const [companyType, setCompanyType] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [businessType, setBusinessType] = useState("");
+  const [phone, setPhone] = useState("");
+  const [gstHstNumber, setGstHstNumber] = useState("");
+  const [street, setStreet] = useState("");
+  const [city, setCity] = useState("");
+  const [province, setProvince] = useState("");
+  const [postalCode, setPostalCode] = useState("");
   const [website, setWebsite] = useState("");
-
-  // Builder fields
-  const [builderCompany, setBuilderCompany] = useState("");
-  const [builderType, setBuilderType] = useState("");
-  const [annualVolume, setAnnualVolume] = useState("");
-
-  const toggleList = (list: string[], value: string, setter: (v: string[]) => void) => {
-    setter(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
-  };
+  const [bio, setBio] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,13 +76,59 @@ const Register = () => {
       return;
     }
 
+    // Seller-specific validation
+    if (selectedRole === "seller") {
+      if (!businessName.trim()) {
+        toast({ title: "Business Name is required", variant: "destructive" });
+        return;
+      }
+      if (!businessType) {
+        toast({ title: "Business Type is required", variant: "destructive" });
+        return;
+      }
+      if (!phone.trim()) {
+        toast({ title: "Phone is required", variant: "destructive" });
+        return;
+      }
+      if (!street.trim() || !city.trim() || !province || !postalCode.trim()) {
+        toast({ title: "Complete business address is required", variant: "destructive" });
+        return;
+      }
+      if (!postalCodeRegex.test(postalCode.trim())) {
+        toast({ title: "Invalid postal code format (e.g. A1A 1A1)", variant: "destructive" });
+        return;
+      }
+    }
+
     setLoading(true);
     try {
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      // Build metadata
+      const metadata: Record<string, unknown> = {
+        full_name: parsed.data.fullName,
+        user_type: selectedRole,
+      };
+
+      if (selectedRole === "seller") {
+        metadata.company_name = businessName.trim();
+        metadata.business_type = businessType;
+        metadata.phone = phone.trim();
+        metadata.gst_hst_number = gstHstNumber.trim() || null;
+        metadata.business_address = {
+          street: street.trim(),
+          city: city.trim(),
+          province,
+          postal_code: postalCode.trim(),
+        };
+        metadata.website = website.trim() || null;
+        metadata.bio = bio.trim() || null;
+      }
+
+      const { error: signUpError } = await supabase.auth.signUp({
         email: parsed.data.email,
         password: parsed.data.password,
         options: {
           emailRedirectTo: window.location.origin,
+          data: metadata,
         },
       });
 
@@ -132,66 +137,19 @@ const Register = () => {
         return;
       }
 
-      const userId = signUpData.user?.id;
-      if (!userId) {
-        toast({ title: "Registration failed", description: "No user ID returned", variant: "destructive" });
-        return;
+      if (selectedRole === "seller") {
+        toast({
+          title: "Check your email!",
+          description: "Verify your email, then your seller application will be reviewed.",
+        });
+        navigate("/seller/pending");
+      } else {
+        toast({
+          title: "Check your email!",
+          description: "We've sent a confirmation link to " + parsed.data.email + ". Please verify your email to sign in.",
+        });
+        navigate("/login");
       }
-
-      // Build metadata based on role
-      let extraFields: Record<string, unknown> = {};
-      switch (selectedRole) {
-        case "client":
-          extraFields = { phone, postal_code: postalCode, looking_for: lookingFor };
-          break;
-        case "contractor":
-          extraFields = {
-            company_name: companyName || null,
-            trades: selectedTrades,
-            service_areas: serviceAreas,
-            years_experience: yearsExperience,
-          };
-          break;
-        case "seller":
-          extraFields = {
-            company_name: storeName,
-            seller_type: companyType,
-            website: website || null,
-          };
-          break;
-        case "builder":
-          extraFields = {
-            company_name: builderCompany,
-            builder_type: builderType,
-            annual_volume: annualVolume,
-          };
-          break;
-      }
-
-      // Insert profile — will only succeed after email confirmation,
-      // but we attempt it now. If RLS blocks (user not confirmed yet),
-      // we handle gracefully.
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: userId,
-        user_type: selectedRole,
-        full_name: parsed.data.fullName,
-        email: parsed.data.email,
-        phone: phone || null,
-        company_name: companyName || storeName || builderCompany || null,
-        location: postalCode || null,
-      });
-
-      if (profileError) {
-        // Profile insert may fail if email not confirmed yet — that's OK
-        console.warn("Profile insert deferred:", profileError.message);
-      }
-
-      toast({
-        title: "Check your email!",
-        description: "We've sent a confirmation link to " + parsed.data.email + ". Please verify your email to sign in.",
-      });
-
-      navigate("/login");
     } catch {
       toast({ title: "An unexpected error occurred", variant: "destructive" });
     } finally {
@@ -209,199 +167,152 @@ const Register = () => {
       <main className="flex-1 container mx-auto px-4 pt-24 pb-12 max-w-2xl">
         <h1 className="font-serif text-3xl md:text-4xl font-bold text-center mb-2">Join FitMatch</h1>
         <p className="text-center text-muted-foreground mb-8">
-          Choose your role to get started.
+          Create your account to get started.
         </p>
 
-        {/* Role selection */}
-        {!selectedRole ? (
-          <div className="grid sm:grid-cols-2 gap-4">
-            {roles.map((r) => (
-              <button
-                key={r.type}
-                onClick={() => setSelectedRole(r.type)}
-                className="border-2 border-foreground p-6 bg-card text-left hover:bg-muted transition-colors"
-                style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}
-              >
-                <r.icon className="w-8 h-8 mb-3 text-foreground" />
-                <h3 className="font-sans font-bold text-base mb-1">{r.label}</h3>
-                <p className="text-sm text-muted-foreground">{r.sub}</p>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div>
-            {/* Selected role indicator */}
-            <div className="flex items-center gap-3 mb-6">
-              <button
-                onClick={() => setSelectedRole(null)}
-                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft size={16} /> Change role
-              </button>
-              <Badge variant="outline" className="border-foreground font-mono text-xs uppercase">
-                {roles.find((r) => r.type === selectedRole)?.label}
-              </Badge>
+        <form onSubmit={handleSubmit}>
+          {/* Common fields always visible */}
+          <div
+            className="border-2 border-foreground bg-card p-6 md:p-8 space-y-6 mb-8"
+            style={{ boxShadow: "6px 6px 0 0 hsl(var(--foreground))" }}
+          >
+            <div className={sectionClass}>
+              <Label className="font-sans text-sm font-semibold">Full Name *</Label>
+              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} required />
             </div>
+            <div className={sectionClass}>
+              <Label className="font-sans text-sm font-semibold">Email *</Label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} required />
+            </div>
+            <div className={sectionClass}>
+              <Label className="font-sans text-sm font-semibold">Password *</Label>
+              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} required minLength={6} />
+            </div>
+          </div>
 
-            <form
-              onSubmit={handleSubmit}
-              className="border-2 border-foreground bg-card p-6 md:p-8 space-y-6"
+          {/* Role selection cards */}
+          <h2 className="font-serif text-xl font-bold mb-4">I am a…</h2>
+          <div className="grid sm:grid-cols-3 gap-4 mb-8">
+            {roles.map((r) => {
+              const isSelected = selectedRole === r.type;
+              return (
+                <button
+                  key={r.type}
+                  type="button"
+                  onClick={() => setSelectedRole(r.type)}
+                  className={`border-2 p-6 bg-card text-left transition-colors ${
+                    isSelected
+                      ? "border-primary ring-2 ring-primary/30"
+                      : "border-foreground hover:bg-muted"
+                  }`}
+                  style={{ boxShadow: isSelected ? "4px 4px 0 0 hsl(var(--primary))" : "4px 4px 0 0 hsl(var(--foreground))" }}
+                >
+                  <r.icon className={`w-8 h-8 mb-3 ${isSelected ? "text-primary" : "text-foreground"}`} />
+                  <h3 className="font-sans font-bold text-base mb-1">{r.label}</h3>
+                  <p className="text-sm text-muted-foreground">{r.sub}</p>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Conditional seller fields */}
+          {selectedRole === "seller" && (
+            <div
+              className="border-2 border-foreground bg-card p-6 md:p-8 space-y-6 mb-8"
               style={{ boxShadow: "6px 6px 0 0 hsl(var(--foreground))" }}
             >
-              {/* Common fields */}
+              <h3 className="font-serif text-lg font-bold">Business Details</h3>
+
               <div className={sectionClass}>
-                <Label className="font-sans text-sm font-semibold">Full Name *</Label>
-                <Input value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} required />
-              </div>
-              <div className={sectionClass}>
-                <Label className="font-sans text-sm font-semibold">Email *</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} required />
-              </div>
-              <div className={sectionClass}>
-                <Label className="font-sans text-sm font-semibold">Password *</Label>
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} required minLength={6} />
+                <Label className="font-sans text-sm font-semibold">Business Name *</Label>
+                <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} className={inputClass} required />
               </div>
 
-              {/* === CLIENT FIELDS === */}
-              {selectedRole === "client" && (
-                <>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Phone (optional)</Label>
-                    <Input value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} />
-                  </div>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Postal Code</Label>
-                    <Input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className={inputClass} placeholder="e.g. M5V 2T6" />
-                  </div>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">What are you looking for?</Label>
-                    <div className="flex flex-wrap gap-3 mt-1">
-                      {clientNeeds.map((n) => (
-                        <label key={n} className="flex items-center gap-2 cursor-pointer">
-                          <Checkbox checked={lookingFor.includes(n)} onCheckedChange={() => toggleList(lookingFor, n, setLookingFor)} />
-                          <span className="text-sm">{n}</span>
-                        </label>
+              <div className={sectionClass}>
+                <Label className="font-sans text-sm font-semibold">Business Type *</Label>
+                <Select value={businessType} onValueChange={setBusinessType}>
+                  <SelectTrigger className={inputClass}>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Sole Proprietor">Sole Proprietor</SelectItem>
+                    <SelectItem value="Corporation">Corporation</SelectItem>
+                    <SelectItem value="Partnership">Partnership</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className={sectionClass}>
+                <Label className="font-sans text-sm font-semibold">Phone *</Label>
+                <Input value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} required />
+              </div>
+
+              <div className={sectionClass}>
+                <Label className="font-sans text-sm font-semibold">GST/HST Number</Label>
+                <Input value={gstHstNumber} onChange={(e) => setGstHstNumber(e.target.value)} className={inputClass} placeholder="Enter if GST/HST registered" />
+              </div>
+
+              <div className={sectionClass}>
+                <Label className="font-sans text-sm font-semibold">Street Address *</Label>
+                <Input value={street} onChange={(e) => setStreet(e.target.value)} className={inputClass} required />
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className={sectionClass}>
+                  <Label className="font-sans text-sm font-semibold">City *</Label>
+                  <Input value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} required />
+                </div>
+                <div className={sectionClass}>
+                  <Label className="font-sans text-sm font-semibold">Province *</Label>
+                  <Select value={province} onValueChange={setProvince}>
+                    <SelectTrigger className={inputClass}>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {provinces.map((p) => (
+                        <SelectItem key={p} value={p}>{p}</SelectItem>
                       ))}
-                    </div>
-                  </div>
-                </>
-              )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-              {/* === CONTRACTOR FIELDS === */}
-              {selectedRole === "contractor" && (
-                <>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Company Name (optional)</Label>
-                    <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className={inputClass} />
-                  </div>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Trade Types *</Label>
-                    <div className="flex flex-wrap gap-3 mt-1">
-                      {tradeTypes.map((t) => (
-                        <label key={t} className="flex items-center gap-2 cursor-pointer">
-                          <Checkbox checked={selectedTrades.includes(t)} onCheckedChange={() => toggleList(selectedTrades, t, setSelectedTrades)} />
-                          <span className="text-sm">{t}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Service Areas</Label>
-                    <div className="flex flex-wrap gap-3 mt-1">
-                      {gtaAreas.map((a) => (
-                        <label key={a} className="flex items-center gap-2 cursor-pointer">
-                          <Checkbox checked={serviceAreas.includes(a)} onCheckedChange={() => toggleList(serviceAreas, a, setServiceAreas)} />
-                          <span className="text-sm">{a}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Years of Experience</Label>
-                    <Input type="number" min="0" max="60" value={yearsExperience} onChange={(e) => setYearsExperience(e.target.value)} className={inputClass} />
-                  </div>
-                </>
-              )}
+              <div className={sectionClass}>
+                <Label className="font-sans text-sm font-semibold">Postal Code *</Label>
+                <Input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className={inputClass} placeholder="A1A 1A1" required />
+              </div>
 
-              {/* === SELLER FIELDS === */}
-              {selectedRole === "seller" && (
-                <>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Company / Store Name *</Label>
-                    <Input value={storeName} onChange={(e) => setStoreName(e.target.value)} className={inputClass} required />
-                  </div>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Company Type *</Label>
-                    <Select value={companyType} onValueChange={setCompanyType}>
-                      <SelectTrigger className={inputClass}>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Cabinet Maker">Cabinet Maker</SelectItem>
-                        <SelectItem value="Reseller">Reseller</SelectItem>
-                        <SelectItem value="Appliance Vendor">Appliance Vendor</SelectItem>
-                        <SelectItem value="Countertop Supplier">Countertop Supplier</SelectItem>
-                        <SelectItem value="Fixture Supplier">Fixture Supplier</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Website (optional)</Label>
-                    <Input type="url" value={website} onChange={(e) => setWebsite(e.target.value)} className={inputClass} placeholder="https://" />
-                  </div>
-                </>
-              )}
+              <div className={sectionClass}>
+                <Label className="font-sans text-sm font-semibold">Website</Label>
+                <Input value={website} onChange={(e) => setWebsite(e.target.value)} className={inputClass} placeholder="https://" />
+              </div>
 
-              {/* === BUILDER FIELDS === */}
-              {selectedRole === "builder" && (
-                <>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Company Name *</Label>
-                    <Input value={builderCompany} onChange={(e) => setBuilderCompany(e.target.value)} className={inputClass} required />
-                  </div>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Company Type *</Label>
-                    <Select value={builderType} onValueChange={setBuilderType}>
-                      <SelectTrigger className={inputClass}>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Developer">Developer</SelectItem>
-                        <SelectItem value="Architect">Architect</SelectItem>
-                        <SelectItem value="Designer">Designer</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className={sectionClass}>
-                    <Label className="font-sans text-sm font-semibold">Typical Annual Project Volume</Label>
-                    <Input value={annualVolume} onChange={(e) => setAnnualVolume(e.target.value)} className={inputClass} placeholder="e.g. 10-20 units" />
-                  </div>
-                </>
-              )}
+              <div className={sectionClass}>
+                <Label className="font-sans text-sm font-semibold">Short Description</Label>
+                <Textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  className={inputClass + " min-h-[100px]"}
+                  maxLength={500}
+                  placeholder="Tell buyers about your business and products"
+                />
+                <p className="text-xs text-muted-foreground text-right">{bio.length}/500</p>
+              </div>
+            </div>
+          )}
 
-              <Button type="submit" disabled={loading} className="w-full">
-                <UserPlus className="w-4 h-4 mr-2" />
-                {loading ? "Creating account…" : "Create Account"}
-              </Button>
-            </form>
+          <Button type="submit" disabled={loading || !selectedRole} className="w-full">
+            <UserPlus className="w-4 h-4 mr-2" />
+            {loading ? "Creating account…" : "Create Account"}
+          </Button>
+        </form>
 
-            <p className="text-center text-sm text-muted-foreground mt-6">
-              Already have an account?{" "}
-              <Link to="/login" className="font-semibold text-foreground underline">
-                Sign In
-              </Link>
-            </p>
-          </div>
-        )}
-
-        {!selectedRole && (
-          <p className="text-center text-sm text-muted-foreground mt-8">
-            Already have an account?{" "}
-            <Link to="/login" className="font-semibold text-foreground underline">
-              Sign In
-            </Link>
-          </p>
-        )}
+        <p className="text-center text-sm text-muted-foreground mt-6">
+          Already have an account?{" "}
+          <Link to="/login" className="font-semibold text-foreground underline">
+            Sign In
+          </Link>
+        </p>
       </main>
 
       <Footer />
