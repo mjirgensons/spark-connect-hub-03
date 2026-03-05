@@ -23,6 +23,7 @@ import {
   Send,
   Webhook,
   FlaskConical,
+  Store,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
