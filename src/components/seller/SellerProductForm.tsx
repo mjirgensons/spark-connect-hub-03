@@ -15,7 +15,9 @@ import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Save, Plus, Trash2, Upload, Info, X, Eye } from "lucide-react";
+import { Loader2, Save, Plus, Trash2, Info, X, Eye } from "lucide-react";
+import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
+import { FileUpload } from "@/components/admin/FileUpload";
 
 // ── helpers ──
 const generateCode = (name: string) => {
