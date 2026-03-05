@@ -172,40 +172,14 @@ const SellerProductForm = () => {
       if (prodErr || !product) throw new Error(prodErr?.message || "Failed to create product");
       const productId = product.id;
 
-      // 2. Upload images
-      setUploadProgress("Uploading images...");
-      let mainImageUrl: string | null = null;
-      let additionalUrls: string[] = [];
-      let techUrl: string | null = null;
-
-      if (mainImageFile) {
-        const ext = mainImageFile.name.split(".").pop();
-        const path = `${user.id}/${productId}/main.${ext}`;
-        const { error: upErr } = await supabase.storage.from("product-images").upload(path, mainImageFile, { upsert: true });
-        if (upErr) console.error("Main image upload error:", upErr.message);
-        else mainImageUrl = supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl;
-      }
-
-      for (const file of galleryFiles) {
-        const path = `${user.id}/${productId}/gallery/${file.name}`;
-        const { error: upErr } = await supabase.storage.from("product-images").upload(path, file, { upsert: true });
-        if (upErr) console.error("Gallery upload error:", upErr.message);
-        else additionalUrls.push(supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl);
-      }
-
-      if (techDrawingFile) {
-        const path = `${user.id}/${productId}/technical.pdf`;
-        const { error: upErr } = await supabase.storage.from("product-documents").upload(path, techDrawingFile, { upsert: true });
-        if (upErr) console.error("Tech drawing upload error:", upErr.message);
-        else techUrl = supabase.storage.from("product-documents").getPublicUrl(path).data.publicUrl;
-      }
-
-      if (mainImageUrl || additionalUrls.length || techUrl) {
-        const updates: Record<string, unknown> = {};
-        if (mainImageUrl) updates.main_image_url = mainImageUrl;
-        if (additionalUrls.length) updates.additional_image_urls = additionalUrls;
-        if (techUrl) updates.technical_drawings_url = techUrl;
-        await supabase.from("products").update(updates as any).eq("id", productId);
+      // 2. Update product with image/document URLs (already uploaded by components)
+      setUploadProgress("Saving media references...");
+      const mediaUpdates: Record<string, unknown> = {};
+      if (mainImageUrl) mediaUpdates.main_image_url = mainImageUrl;
+      if (galleryUrls.length) mediaUpdates.additional_image_urls = galleryUrls;
+      if (techDrawingUrl) mediaUpdates.technical_drawings_url = techDrawingUrl;
+      if (Object.keys(mediaUpdates).length) {
+        await supabase.from("products").update(mediaUpdates as any).eq("id", productId);
       }
 
       // 3. INSERT product_options
