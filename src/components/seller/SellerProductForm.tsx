@@ -83,16 +83,11 @@ const SellerProductForm = () => {
   const [options, setOptions] = useState<ProductOption[]>([]);
   // S6 compatible appliances
   const [appliances, setAppliances] = useState<CompatAppliance[]>([]);
-  // S7 images
-  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
-  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
-  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
-  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
-  const [techDrawingFile, setTechDrawingFile] = useState<File | null>(null);
+  // S7 images (managed by shared upload components — URLs stored directly)
+  const [mainImageUrl, setMainImageUrl] = useState<string | null>(null);
+  const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
+  const [techDrawingUrl, setTechDrawingUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
-  const mainImgRef = useRef<HTMLInputElement>(null);
-  const galleryRef = useRef<HTMLInputElement>(null);
-  const techRef = useRef<HTMLInputElement>(null);
   // S8 description & visibility
   const [s8, setS8] = useState({
     short_description: "", long_description: "", stock_level: "0",
