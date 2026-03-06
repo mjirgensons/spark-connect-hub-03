@@ -49,7 +49,7 @@ interface Product {
 }
 
 // ── Sorting ──
-type SortKey = "product_name" | "product_code" | "category" | "price_retail_usd" | "price_discounted_usd" | "stock_level" | "availability_status" | "is_featured";
+type SortKey = "product_name" | "product_code" | "category" | "price_retail_usd" | "price_discounted_usd" | "stock_level" | "availability_status" | "is_featured" | "listing_status";
 
 const statusBadge = (status: string) => {
   switch (status) {
@@ -67,16 +67,20 @@ const statusBadge = (status: string) => {
   }
 };
 
-const listingStatusBadge = (status: string) => {
+const listingStatusBadge = (status: string, rejectionReason?: string | null) => {
   switch (status) {
     case "approved":
-      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-green-500/15 text-green-700 border-green-300 whitespace-nowrap">Approved</Badge>;
+      return <Badge className="text-[9px] px-1.5 py-0 bg-green-600 text-green-50 hover:bg-green-700 whitespace-nowrap border-0">Live</Badge>;
     case "pending_review":
-      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-yellow-500/15 text-yellow-700 border-yellow-300 whitespace-nowrap">Pending Review</Badge>;
+      return <Badge className="text-[9px] px-1.5 py-0 bg-amber-500 text-amber-50 hover:bg-amber-600 whitespace-nowrap border-0">In Review</Badge>;
     case "rejected":
-      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-red-500/15 text-red-700 border-red-300 whitespace-nowrap">Rejected</Badge>;
+      return (
+        <span title={rejectionReason ? `Reason: ${rejectionReason}` : "No reason provided"} className="cursor-help">
+          <Badge className="text-[9px] px-1.5 py-0 bg-red-600 text-red-50 hover:bg-red-700 whitespace-nowrap border-0">Declined</Badge>
+        </span>
+      );
     case "draft":
-      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-muted text-muted-foreground whitespace-nowrap">Draft</Badge>;
+      return <Badge className="text-[9px] px-1.5 py-0 bg-yellow-400 text-yellow-900 hover:bg-yellow-500 whitespace-nowrap border-0">Draft</Badge>;
     default:
       return <Badge variant="outline" className="text-[9px] px-1.5 py-0 whitespace-nowrap">{status}</Badge>;
   }
@@ -100,6 +104,7 @@ const SellerProducts = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectTarget, setRejectTarget] = useState<Product | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -172,6 +177,13 @@ const SellerProducts = () => {
       .map((c) => ({ ...c, count: countMap.get(c.id)! }));
   }, [products, categories]);
 
+  // Status counts
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { approved: 0, draft: 0, pending_review: 0, rejected: 0 };
+    for (const p of products) { counts[p.listing_status || "draft"] = (counts[p.listing_status || "draft"] || 0) + 1; }
+    return counts;
+  }, [products]);
+
   // ── Sort ──
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -190,6 +202,11 @@ const SellerProducts = () => {
     // Category filter
     if (selectedCategoryId) {
       list = list.filter((p) => p.category_id === selectedCategoryId);
+    }
+
+    // Status filter
+    if (selectedStatus) {
+      list = list.filter((p) => (p.listing_status || "draft") === selectedStatus);
     }
 
     // Search filter
@@ -220,7 +237,7 @@ const SellerProducts = () => {
     }
 
     return list;
-  }, [products, selectedCategoryId, searchQuery, sortKey, sortDir, categories]);
+  }, [products, selectedCategoryId, selectedStatus, searchQuery, sortKey, sortDir, categories]);
 
   // ── Storage helpers ──
   const deleteStorageFile = async (url: string, bucket: string) => {
@@ -352,7 +369,7 @@ const SellerProducts = () => {
   const editUrl = (id: string) => adminViewId ? `/seller/products/${id}?adminView=${adminViewId}` : `/seller/products/${id}`;
   const variantsUrl = (id: string) => adminViewId ? `/seller/products/${id}/variants?adminView=${adminViewId}` : `/seller/products/${id}/variants`;
 
-  const isFiltered = !!selectedCategoryId || !!searchQuery.trim();
+  const isFiltered = !!selectedCategoryId || !!searchQuery.trim() || !!selectedStatus;
 
   return (
     <div className="space-y-6">
@@ -389,9 +406,9 @@ const SellerProducts = () => {
             <Card className="sticky top-4">
               <CardContent className="p-3 space-y-1">
                 <button
-                  onClick={() => setSelectedCategoryId(null)}
+                  onClick={() => { setSelectedCategoryId(null); setSelectedStatus(null); }}
                   className={`w-full text-left text-sm px-3 py-2 rounded-md transition-colors ${
-                    !selectedCategoryId
+                    !selectedCategoryId && !selectedStatus
                       ? "bg-primary/10 text-primary font-semibold border-l-2 border-primary"
                       : "text-foreground hover:bg-muted"
                   }`}
@@ -418,6 +435,27 @@ const SellerProducts = () => {
                     ))}
                   </>
                 )}
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-3 pt-3 pb-1">
+                  Status
+                </p>
+                {([
+                  { key: "approved", label: "Live" },
+                  { key: "draft", label: "Draft" },
+                  { key: "pending_review", label: "In Review" },
+                  { key: "rejected", label: "Declined" },
+                ] as const).map((s) => statusCounts[s.key] > 0 && (
+                  <button
+                    key={s.key}
+                    onClick={() => setSelectedStatus(selectedStatus === s.key ? null : s.key)}
+                    className={`w-full text-left text-sm px-3 py-2 rounded-md transition-colors ${
+                      selectedStatus === s.key
+                        ? "bg-primary/10 text-primary font-semibold border-l-2 border-primary"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {s.label} ({statusCounts[s.key]})
+                  </button>
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -447,6 +485,21 @@ const SellerProducts = () => {
                   {sellerCategories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>{c.name} ({c.count})</SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={selectedStatus || "all"}
+                onValueChange={(v) => setSelectedStatus(v === "all" ? null : v)}
+              >
+                <SelectTrigger className="w-[140px] h-9 text-sm">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="approved">Live ({statusCounts.approved})</SelectItem>
+                  <SelectItem value="draft">Draft ({statusCounts.draft})</SelectItem>
+                  <SelectItem value="pending_review">In Review ({statusCounts.pending_review})</SelectItem>
+                  <SelectItem value="rejected">Declined ({statusCounts.rejected})</SelectItem>
                 </SelectContent>
               </Select>
               {isFiltered && (
@@ -483,7 +536,9 @@ const SellerProducts = () => {
                       <TableHead className="py-2 px-2 w-[90px] text-center cursor-pointer select-none" onClick={() => handleSort("availability_status")}>
                         <span className="inline-flex items-center justify-center w-full">Status<SortIcon col="availability_status" /></span>
                       </TableHead>
-                      <TableHead className="py-2 px-2 w-[90px] text-center">Listing</TableHead>
+                      <TableHead className="py-2 px-2 w-[90px] text-center cursor-pointer select-none" onClick={() => handleSort("listing_status")}>
+                        <span className="inline-flex items-center justify-center w-full">Listing<SortIcon col="listing_status" /></span>
+                      </TableHead>
                       <TableHead className="py-2 px-1 w-[40px] text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
                         <span className="inline-flex items-center justify-center w-full"><Star className="w-3 h-3" /><SortIcon col="is_featured" /></span>
                       </TableHead>
@@ -525,7 +580,7 @@ const SellerProducts = () => {
                             </button>
                           </TableCell>
                           <TableCell className="py-1.5 px-2 text-center">
-                            {listingStatusBadge(p.listing_status || 'pending_review')}
+                            {listingStatusBadge(p.listing_status || 'pending_review', (p as any).listing_rejection_reason)}
                           </TableCell>
                           <TableCell className="py-1.5 px-1 text-center">
                             {p.is_featured ? <Star className="w-3.5 h-3.5 text-primary fill-primary mx-auto" /> : <span className="text-muted-foreground">—</span>}
