@@ -92,6 +92,7 @@ const SellerProducts = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const adminViewId = searchParams.get("adminView");
+  const initialStatus = searchParams.get("status");
   const sellerId = adminViewId || user?.id;
 
   const [products, setProducts] = useState<Product[]>([]);
