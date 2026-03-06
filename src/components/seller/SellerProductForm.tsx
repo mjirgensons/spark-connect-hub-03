@@ -639,7 +639,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 1 — BASIC INFO ═══ */}
         <AccordionItem value="basic" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">1 · Basic Information <SectionIndicator section="basic" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Basic Information <SectionIndicator section="basic" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -703,7 +703,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 2 — DIMENSIONS ═══ */}
         <AccordionItem value="dimensions" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">2 · Dimensions <SectionIndicator section="dimensions" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Dimensions <SectionIndicator section="dimensions" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="flex items-center gap-2"><Label className="text-xs">mm</Label><Switch checked={useInches} onCheckedChange={setUseInches} /><Label className="text-xs">inches</Label></div>
@@ -725,7 +725,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 3 — HARDWARE DETAILS ═══ */}
         <AccordionItem value="hardware" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">3 · Hardware Details <SectionIndicator section="hardware" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Hardware Details <SectionIndicator section="hardware" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <fieldset disabled={isReadOnly}>
             <HardwareSection hardware={hardware} onChange={(h) => { setHardware(h); markDirty("hardware"); }} sellerId={user?.id} productId={liveProductId} />
@@ -736,7 +736,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 4 — ADDITIONAL FEATURES ═══ */}
         <AccordionItem value="features" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">4 · Additional Features <SectionIndicator section="features" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Additional Features <SectionIndicator section="features" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <fieldset disabled={isReadOnly}>
             <AdditionalFeaturesSection features={additionalFeatures} onChange={(af) => { setAdditionalFeatures(af); markDirty("features"); }} />
@@ -747,7 +747,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 5 — PRICING ═══ */}
         <AccordionItem value="pricing" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">5 · Pricing <SectionIndicator section="pricing" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Pricing <SectionIndicator section="pricing" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="grid sm:grid-cols-3 gap-4">
@@ -764,7 +764,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 6 — ADD-ONS ═══ */}
         <AccordionItem value="addons" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">6 · Add-Ons & Inclusions <SectionIndicator section="addons" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Add-Ons & Inclusions <SectionIndicator section="addons" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             {options.length === 0 && <p className="text-sm text-muted-foreground">No add-ons yet. Click "Add Option" to include countertops, sinks, or other add-ons.</p>}
@@ -816,7 +816,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 7 — COMPATIBLE APPLIANCES ═══ */}
         <AccordionItem value="appliances" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">7 · Compatible Appliances <SectionIndicator section="appliances" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Compatible Appliances <SectionIndicator section="appliances" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="flex items-start gap-2 p-3 rounded-md bg-muted">
@@ -856,7 +856,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 8 — IMAGES & DOCUMENTS ═══ */}
         <AccordionItem value="images" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">8 · Images & Documents <SectionIndicator section="images" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Images & Documents <SectionIndicator section="images" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <ImageUpload value={mainImageUrl} onChange={(v) => { setMainImageUrl(v); markDirty("images"); }} label="Main Image (auto-optimized to WebP)" />
@@ -869,7 +869,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 9 — DESCRIPTION & VISIBILITY ═══ */}
         <AccordionItem value="details" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">9 · Description & Visibility <SectionIndicator section="details" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Description & Visibility <SectionIndicator section="details" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div>
