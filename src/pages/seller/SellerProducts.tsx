@@ -549,7 +549,7 @@ const SellerProducts = () => {
                     {filteredAndSorted.map((p) => {
                       const imgSummary = getImageOptSummary(p);
                       return (
-                        <TableRow key={p.id} className="text-xs">
+                        <TableRow key={p.id} className={`text-xs ${p.listing_status === "rejected" ? "bg-destructive/5" : ""}`}>
                           <TableCell className="py-1.5 px-2 font-medium max-w-[180px] truncate">{p.product_name}</TableCell>
                           <TableCell className="py-1.5 px-2 text-muted-foreground max-w-[110px] truncate">{p.product_code}</TableCell>
                           <TableCell className="py-1.5 px-2 max-w-[100px] truncate">{categories.find((c) => c.id === p.category_id)?.name || "—"}</TableCell>
