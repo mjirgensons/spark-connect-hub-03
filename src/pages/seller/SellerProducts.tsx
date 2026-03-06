@@ -237,7 +237,7 @@ const SellerProducts = () => {
     }
 
     return list;
-  }, [products, selectedCategoryId, searchQuery, sortKey, sortDir, categories]);
+  }, [products, selectedCategoryId, selectedStatus, searchQuery, sortKey, sortDir, categories]);
 
   // ── Storage helpers ──
   const deleteStorageFile = async (url: string, bucket: string) => {
