@@ -180,9 +180,15 @@ const AdminProductReviewTab = () => {
             </div>
           )}
 
+          {(p as any).previous_rejection_reason && (
+            <div className="p-3 rounded bg-amber-50 border border-amber-200">
+              <p className="text-sm font-medium text-amber-800">Previously declined (resubmission #{(p as any).resubmission_count || 1}):</p>
+              <p className="text-sm text-amber-700">{(p as any).previous_rejection_reason}</p>
+            </div>
+          )}
           {p.listing_rejection_reason && (
             <div className="p-3 rounded bg-red-50 border border-red-200">
-              <p className="text-sm font-medium text-red-800">Previous rejection reason:</p>
+              <p className="text-sm font-medium text-red-800">Current rejection reason:</p>
               <p className="text-sm text-red-700">{p.listing_rejection_reason}</p>
             </div>
           )}
