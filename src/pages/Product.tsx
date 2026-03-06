@@ -438,9 +438,9 @@ const Product = () => {
             ) : price > 0 ? (
               <div className="flex items-center gap-1.5">
                 {hasDiscount && (
-                  <span className="text-xs text-muted-foreground line-through">${Number(opt.price_retail).toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground line-through">${Number(opt.price_retail).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 )}
-                <span className="text-sm font-semibold text-foreground">${price.toLocaleString()}</span>
+                <span className="text-sm font-semibold text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             ) : null}
           </div>
