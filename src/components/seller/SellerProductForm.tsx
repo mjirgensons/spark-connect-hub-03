@@ -56,6 +56,10 @@ interface CompatAppliance {
   width_mm: string; height_mm: string; depth_mm: string; notes: string; reference_url: string;
 }
 
+interface SellerProductFormProps {
+  productId?: string;
+}
+
 // ── layout visual ──
 const LayoutVisual = ({ type, dims }: { type: string; dims: Record<string, string> }) => {
   const base = "border-2 border-primary/60 rounded text-[10px] flex items-center justify-center text-muted-foreground";
@@ -66,12 +70,15 @@ const LayoutVisual = ({ type, dims }: { type: string; dims: Record<string, strin
 };
 
 // ── main component ──
-const SellerProductForm = () => {
+const SellerProductForm = ({ productId }: SellerProductFormProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [useInches, setUseInches] = useState(false);
   const [autoSku, setAutoSku] = useState(true);
+  const [editDataLoaded, setEditDataLoaded] = useState(false);
+
+  const isEditMode = !!productId;
 
   // S1-S4 form state
   const [f, setF] = useState({
@@ -91,7 +98,7 @@ const SellerProductForm = () => {
   const [options, setOptions] = useState<ProductOption[]>([]);
   // S6 compatible appliances
   const [appliances, setAppliances] = useState<CompatAppliance[]>([]);
-  // S7 images (managed by shared upload components — URLs stored directly)
+  // S7 images
   const [mainImageUrl, setMainImageUrl] = useState<string | null>(null);
   const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
   const [techDrawingUrl, setTechDrawingUrl] = useState<string | null>(null);
@@ -109,11 +116,147 @@ const SellerProductForm = () => {
     setF((p) => ({ ...p, product_name: name }));
   };
 
-
   const { data: categories = [] } = useQuery({
     queryKey: ["seller-categories"],
     queryFn: async () => { const { data } = await supabase.from("categories").select("*"); return data || []; },
   });
+
+  // ── EDIT MODE: Fetch product data ──
+  const { data: existingProduct, isLoading: loadingProduct, error: productError } = useQuery({
+    queryKey: ["edit-product", productId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", productId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: isEditMode,
+  });
+
+  const { data: existingOptions = [] } = useQuery({
+    queryKey: ["edit-product-options", productId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("product_options")
+        .select("*")
+        .eq("product_id", productId!)
+        .order("sort_order");
+      return data || [];
+    },
+    enabled: isEditMode,
+  });
+
+  const { data: existingAppliances = [] } = useQuery({
+    queryKey: ["edit-product-appliances", productId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("product_compatible_appliances")
+        .select("*")
+        .eq("product_id", productId!)
+        .order("sort_order");
+      return data || [];
+    },
+    enabled: isEditMode,
+  });
+
+  // Pre-populate form with existing product data
+  useEffect(() => {
+    if (!isEditMode || !existingProduct || editDataLoaded) return;
+
+    const p = existingProduct;
+    setAutoSku(false); // In edit mode, don't auto-generate SKU
+    setF({
+      product_name: p.product_name || "",
+      product_code: p.product_code || "",
+      category_id: p.category_id || "",
+      style: p.style || "",
+      color: p.color || "",
+      material: p.material || "",
+      door_style: p.door_style || "",
+      door_material: p.door_material || "",
+      finish_type: p.finish_type || "",
+      construction_type: p.construction_type || "",
+      condition: p.condition || "NEW",
+      condition_notes: p.condition_notes || "",
+      manufacturer: p.manufacturer || "",
+      width_mm: p.width_mm ? String(p.width_mm) : "",
+      height_mm: p.height_mm ? String(p.height_mm) : "",
+      depth_mm: p.depth_mm ? String(p.depth_mm) : "",
+      wall_a_length_mm: p.wall_a_length_mm ? String(p.wall_a_length_mm) : "",
+      wall_b_length_mm: p.wall_b_length_mm ? String(p.wall_b_length_mm) : "",
+      wall_c_length_mm: p.wall_c_length_mm ? String(p.wall_c_length_mm) : "",
+      hinge_brand: p.hinge_brand || "",
+      hinge_model: p.hinge_model || "",
+      slide_brand: p.slide_brand || "",
+      slide_model: p.slide_model || "",
+      handle_type: "",
+      handle_finish: "",
+      price_retail: p.price_retail_usd ? String(p.price_retail_usd) : "",
+      price_sale: p.price_discounted_usd ? String(p.price_discounted_usd) : "",
+      discount_pct: p.discount_percentage ? String(p.discount_percentage) : "",
+      lead_time_days: p.lead_time_days ? String(p.lead_time_days) : "",
+      is_custom_order: p.is_custom_order || false,
+    });
+    setKitchenLayouts(p.compatible_kitchen_layouts || []);
+    setIsFeatured(p.is_featured || false);
+    setMainImageUrl(p.main_image_url || null);
+    setGalleryUrls(p.additional_image_urls || []);
+    setTechDrawingUrl(p.technical_drawings_url || null);
+    setS8({
+      short_description: p.short_description || "",
+      long_description: p.long_description || "",
+      stock_level: p.stock_level != null ? String(p.stock_level) : "0",
+      availability_status: p.availability_status || "In Stock",
+      visibility: p.tag || "draft",
+    });
+
+    setEditDataLoaded(true);
+  }, [isEditMode, existingProduct, editDataLoaded]);
+
+  // Pre-populate options
+  useEffect(() => {
+    if (!isEditMode || !existingOptions.length || editDataLoaded) return;
+    // This will be set together with the main product data
+  }, [isEditMode, existingOptions, editDataLoaded]);
+
+  // Actually populate options and appliances after editDataLoaded is set
+  useEffect(() => {
+    if (!editDataLoaded || !isEditMode) return;
+
+    if (existingOptions.length) {
+      setOptions(existingOptions.map((o: any) => ({
+        option_type: o.option_type || "",
+        option_name: o.option_name || "",
+        inclusion_status: o.inclusion_status || "not_included",
+        price_retail: o.price_retail ? String(o.price_retail) : "",
+        price_discounted: o.price_discounted ? String(o.price_discounted) : "",
+        description: o.description || "",
+        specs: o.specifications
+          ? Object.entries(o.specifications as Record<string, string>).map(([key, value]) => ({ key, value }))
+          : [],
+      })));
+    }
+
+    if (existingAppliances.length) {
+      setAppliances(existingAppliances.map((a: any) => {
+        const dims = (a.dimensions as any) || {};
+        return {
+          appliance_type: a.appliance_type || "",
+          brand: a.brand || "",
+          model_number: a.model_number || "",
+          model_name: a.model_name || "",
+          width_mm: dims.width_mm ? String(dims.width_mm) : "",
+          height_mm: dims.height_mm ? String(dims.height_mm) : "",
+          depth_mm: dims.depth_mm ? String(dims.depth_mm) : "",
+          notes: a.notes || "",
+          reference_url: a.reference_url || "",
+        };
+      }));
+    }
+  }, [editDataLoaded, isEditMode, existingOptions, existingAppliances]);
 
   const selectedCategory = useMemo(() => categories.find((c: any) => c.id === f.category_id), [categories, f.category_id]);
   const layoutType: string = selectedCategory?.layout_type || "standard";
@@ -122,8 +265,8 @@ const SellerProductForm = () => {
   const categoryName = selectedCategory?.name || "";
   const autoSkuValue = useMemo(() => generateSmartCode(categoryName, f.style, f.color, f.width_mm), [categoryName, f.style, f.color, f.width_mm]);
   useEffect(() => {
-    if (autoSku) setF((p) => ({ ...p, product_code: autoSkuValue }));
-  }, [autoSku, autoSkuValue]);
+    if (autoSku && !isEditMode) setF((p) => ({ ...p, product_code: autoSkuValue }));
+  }, [autoSku, autoSkuValue, isEditMode]);
 
   // Bidirectional pricing handlers
   const handleRetailChange = (val: string) => {
@@ -166,8 +309,6 @@ const SellerProductForm = () => {
   const removeAppliance = (i: number) => setAppliances((p) => p.filter((_, idx) => idx !== i));
   const updateAppliance = (i: number, key: string, val: string) => setAppliances((p) => p.map((a, idx) => idx === i ? { ...a, [key]: val } : a));
 
-  // S7 — no manual helpers needed; ImageUpload/MultiImageUpload/FileUpload manage state
-
   // ── SUBMIT ──
   const handleSubmit = async (visibility: "draft" | "published") => {
     if (!f.product_name || !f.product_code || !f.category_id || !f.price_retail) {
@@ -178,7 +319,6 @@ const SellerProductForm = () => {
 
     setSaving(true);
     try {
-      // 1. INSERT product
       const row: Record<string, unknown> = {
         product_name: f.product_name, product_code: f.product_code, category_id: f.category_id,
         style: f.style || "N/A", color: f.color || "N/A", material: f.material || "N/A",
@@ -200,32 +340,47 @@ const SellerProductForm = () => {
         is_custom_order: f.is_custom_order,
         is_featured: isFeatured,
         compatible_kitchen_layouts: kitchenLayouts.length ? kitchenLayouts : [],
-        seller_id: user.id, availability_status: s8.availability_status,
-        listing_status: 'pending_review',
+        availability_status: s8.availability_status,
         stock_level: Number(s8.stock_level) || 0,
         short_description: s8.short_description || null, long_description: s8.long_description || null,
         tag: visibility,
+        main_image_url: mainImageUrl || null,
+        additional_image_urls: galleryUrls.length ? galleryUrls : [],
+        technical_drawings_url: techDrawingUrl || null,
       };
 
-      const { data: product, error: prodErr } = await supabase.from("products").insert(row as any).select("id").single();
-      if (prodErr || !product) throw new Error(prodErr?.message || "Failed to create product");
-      const productId = product.id;
+      let finalProductId: string;
 
-      // 2. Update product with image/document URLs (already uploaded by components)
-      setUploadProgress("Saving media references...");
-      const mediaUpdates: Record<string, unknown> = {};
-      if (mainImageUrl) mediaUpdates.main_image_url = mainImageUrl;
-      if (galleryUrls.length) mediaUpdates.additional_image_urls = galleryUrls;
-      if (techDrawingUrl) mediaUpdates.technical_drawings_url = techDrawingUrl;
-      if (Object.keys(mediaUpdates).length) {
-        await supabase.from("products").update(mediaUpdates as any).eq("id", productId);
+      if (isEditMode && productId) {
+        // ── UPDATE existing product ──
+        const { error: updateErr } = await supabase
+          .from("products")
+          .update(row as any)
+          .eq("id", productId);
+        if (updateErr) throw new Error(updateErr.message);
+        finalProductId = productId;
+
+        // Replace options: delete old, insert new
+        setUploadProgress("Saving options...");
+        await supabase.from("product_options").delete().eq("product_id", productId);
+        
+        // Replace appliances: delete old, insert new
+        await supabase.from("product_compatible_appliances").delete().eq("product_id", productId);
+      } else {
+        // ── INSERT new product ──
+        row.seller_id = user.id;
+        row.listing_status = "pending_review";
+
+        const { data: product, error: prodErr } = await supabase.from("products").insert(row as any).select("id").single();
+        if (prodErr || !product) throw new Error(prodErr?.message || "Failed to create product");
+        finalProductId = product.id;
       }
 
-      // 3. INSERT product_options
+      // INSERT product_options
       setUploadProgress("Saving options...");
       if (options.length) {
         const optRows = options.filter((o) => o.option_type && o.option_name).map((o, i) => ({
-          product_id: productId,
+          product_id: finalProductId,
           option_type: o.option_type,
           option_name: o.option_name,
           inclusion_status: o.inclusion_status,
@@ -241,10 +396,10 @@ const SellerProductForm = () => {
         }
       }
 
-      // 4. INSERT compatible appliances
+      // INSERT compatible appliances
       if (appliances.length) {
         const appRows = appliances.filter((a) => a.appliance_type).map((a, i) => ({
-          product_id: productId,
+          product_id: finalProductId,
           appliance_type: a.appliance_type,
           brand: a.brand || null,
           model_number: a.model_number || null,
@@ -261,15 +416,35 @@ const SellerProductForm = () => {
       }
 
       setUploadProgress(null);
-      toast({ title: "Product created successfully!" });
+      toast({ title: isEditMode ? "Product updated successfully!" : "Product created successfully!" });
       navigate("/seller/products");
     } catch (err: any) {
-      toast({ title: "Error creating product", description: err.message, variant: "destructive" });
+      toast({ title: isEditMode ? "Error updating product" : "Error creating product", description: err.message, variant: "destructive" });
     } finally {
       setSaving(false);
       setUploadProgress(null);
     }
   };
+
+  // ── Loading / error states for edit mode ──
+  if (isEditMode && loadingProduct) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-muted-foreground">Loading product data...</span>
+      </div>
+    );
+  }
+
+  if (isEditMode && (productError || (!loadingProduct && !existingProduct))) {
+    return (
+      <div className="text-center py-20 space-y-4">
+        <h2 className="text-xl font-bold text-destructive">Product Not Found</h2>
+        <p className="text-muted-foreground">The product you're trying to edit doesn't exist or you don't have access.</p>
+        <Button variant="outline" onClick={() => navigate("/seller/products")}>Back to Products</Button>
+      </div>
+    );
+  }
 
   const labelCls = "text-xs font-semibold";
   const inputCls = "mt-1";
@@ -287,19 +462,21 @@ const SellerProductForm = () => {
               <div>
                 <div className="flex items-center justify-between">
                   <Label className={labelCls}>Product Code (SKU) *</Label>
-                  <div className="flex items-center gap-1.5">
-                    <Label className="text-[10px] text-muted-foreground">Auto</Label>
-                    <Switch checked={autoSku} onCheckedChange={(v) => { setAutoSku(v); if (v) setF((p) => ({ ...p, product_code: autoSkuValue })); }} className="scale-75" />
-                  </div>
+                  {!isEditMode && (
+                    <div className="flex items-center gap-1.5">
+                      <Label className="text-[10px] text-muted-foreground">Auto</Label>
+                      <Switch checked={autoSku} onCheckedChange={(v) => { setAutoSku(v); if (v) setF((p) => ({ ...p, product_code: autoSkuValue })); }} className="scale-75" />
+                    </div>
+                  )}
                 </div>
                 <Input
                   value={f.product_code}
                   onChange={(e) => set("product_code", e.target.value)}
                   className={inputCls}
-                  placeholder={autoSku ? "Auto-generated" : "Enter SKU manually"}
-                  readOnly={autoSku}
+                  placeholder={autoSku && !isEditMode ? "Auto-generated" : "Enter SKU manually"}
+                  readOnly={autoSku && !isEditMode}
                 />
-                {autoSku && <p className="text-[10px] text-muted-foreground mt-1">Auto: Category-Style-Color-Width-Seq (avoids O/I)</p>}
+                {autoSku && !isEditMode && <p className="text-[10px] text-muted-foreground mt-1">Auto: Category-Style-Color-Width-Seq (avoids O/I)</p>}
               </div>
               <div><Label className={labelCls}>Category *</Label>
                 <Select value={f.category_id} onValueChange={(v) => set("category_id", v)}>
@@ -554,11 +731,11 @@ const SellerProductForm = () => {
       <div className="flex gap-3 pt-2">
         <Button variant="outline" onClick={() => handleSubmit("draft")} disabled={saving}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-          Save as Draft
+          {isEditMode ? "Update as Draft" : "Save as Draft"}
         </Button>
         <Button onClick={() => handleSubmit("published")} disabled={saving}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
-          Publish
+          {isEditMode ? "Update & Publish" : "Publish"}
         </Button>
         <Button variant="ghost" onClick={() => navigate("/seller/products")} disabled={saving}>Cancel</Button>
       </div>
