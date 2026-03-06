@@ -731,6 +731,21 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     }
   };
 
+  // Cancel with unsaved changes check
+  const hasAnyDirty = Object.values(sectionDirty).some(Boolean);
+  const handleCancel = () => {
+    if (hasAnyDirty) {
+      setCancelDialogOpen(true);
+    } else {
+      navigate("/seller/products");
+    }
+  };
+  const handleSaveAndLeave = async () => {
+    setCancelDialogOpen(false);
+    await handleFullSave("draft");
+    navigate("/seller/products");
+  };
+
   // Read-only if pending review (rejected products should be editable)
   const isReadOnly = listingStatus === "pending_review";
 
