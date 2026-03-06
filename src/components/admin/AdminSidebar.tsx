@@ -5,7 +5,7 @@ import {
   LayoutDashboard,
   ShoppingCart,
   FileText,
-  Package,
+  
   Users,
   Plug,
   FileEdit,
