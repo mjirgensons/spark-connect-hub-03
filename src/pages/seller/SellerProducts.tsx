@@ -638,7 +638,7 @@ const SellerProducts = () => {
                                     <XIcon className="w-3.5 h-3.5 mr-2" /> Reject
                                   </DropdownMenuItem>
                                 )}
-                                {(adminViewId && (p.listing_status !== "approved" || p.listing_status !== "rejected")) && <DropdownMenuSeparator />}
+                                {adminViewId && <DropdownMenuSeparator />}
                                 <DropdownMenuItem className="text-destructive" onClick={() => { setDeleteTarget(p); setDeleteDialogOpen(true); }}>
                                   <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
                                 </DropdownMenuItem>
