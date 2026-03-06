@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +23,8 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Loader2, Store, MoreVertical, ExternalLink, Package, ShoppingCart, Mail, ShieldCheck, ShieldX, ShieldOff, RotateCcw } from "lucide-react";
+import { Search, Loader2, Store, MoreVertical, ExternalLink, Package, ShoppingCart, Mail, ShieldCheck, ShieldX, ShieldOff, RotateCcw, Sparkles } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 
 type SellerStatus = "pending" | "approved" | "suspended" | "rejected";
@@ -42,6 +43,7 @@ interface SellerProfile {
   website: string | null;
   bio: string | null;
   product_count: number;
+  auto_approve_products: boolean;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -101,6 +103,7 @@ const AdminSellersTab = () => {
         ...s,
         product_count: productCounts[s.id] || 0,
         business_address: s.business_address as Record<string, string> | null,
+        auto_approve_products: (s as any).auto_approve_products ?? false,
       })) as SellerProfile[];
     },
   });
@@ -266,6 +269,11 @@ const AdminSellersTab = () => {
                           <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[seller.seller_status || "pending"]}`}>
                             {seller.seller_status || "pending"}
                           </Badge>
+                          {seller.auto_approve_products && (
+                            <Badge variant="secondary" className="ml-1 text-[10px]">
+                              <Sparkles className="w-3 h-3 mr-0.5" /> Trusted
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell className="text-center text-sm">{seller.product_count}</TableCell>
                         <TableCell className="text-center">
@@ -362,6 +370,26 @@ const AdminSellersTab = () => {
                   <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[selectedSeller.seller_status || "pending"]}`}>
                     {selectedSeller.seller_status || "pending"}
                   </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-muted-foreground w-28">Auto-approve</span>
+                  <Switch
+                    checked={selectedSeller.auto_approve_products}
+                    onCheckedChange={async (checked) => {
+                      const { error } = await supabase
+                        .from("profiles")
+                        .update({ auto_approve_products: checked } as any)
+                        .eq("id", selectedSeller.id);
+                      if (error) {
+                        toast({ title: "Error", description: error.message, variant: "destructive" });
+                      } else {
+                        toast({ title: checked ? "Seller marked as trusted — products auto-approved" : "Auto-approve disabled" });
+                        setSelectedSeller({ ...selectedSeller, auto_approve_products: checked });
+                        queryClient.invalidateQueries({ queryKey: ["admin-sellers"] });
+                      }
+                    }}
+                  />
+                  <span className="text-xs text-muted-foreground">{selectedSeller.auto_approve_products ? "Trusted seller" : "Requires review"}</span>
                 </div>
               </div>
             </>

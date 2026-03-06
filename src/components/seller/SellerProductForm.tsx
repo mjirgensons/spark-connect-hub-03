@@ -408,6 +408,15 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
 
       let finalProductId: string;
 
+      // Determine listing_status based on auto_approve_products flag
+      const { data: sellerProfile } = await supabase
+        .from("profiles")
+        .select("auto_approve_products")
+        .eq("id", user.id)
+        .single();
+      const autoApprove = sellerProfile?.auto_approve_products === true;
+      row.listing_status = autoApprove ? "approved" : "pending_review";
+
       if (isEditMode && productId) {
         const { error: updateErr } = await supabase
           .from("products")
@@ -421,7 +430,6 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
         await supabase.from("product_compatible_appliances").delete().eq("product_id", productId);
       } else {
         row.seller_id = user.id;
-        row.listing_status = "pending_review";
 
         const { data: product, error: prodErr } = await supabase.from("products").insert(row as any).select("id").single();
         if (prodErr || !product) throw new Error(prodErr?.message || "Failed to create product");

@@ -19,7 +19,6 @@ import AdminOrdersTab from "@/components/admin/AdminOrdersTab";
 import AdminCustomersTab from "@/components/admin/AdminCustomersTab";
 import AdminIntegrationsTab from "@/components/admin/AdminIntegrationsTab";
 import AdminQuotesTab from "@/components/admin/AdminQuotesTab";
-import AdminProductsTab from "@/components/admin/AdminProductsTab";
 import AdminTrustSignalsTab from "@/components/admin/AdminTrustSignalsTab";
 import AdminFAQTab from "@/components/admin/AdminFAQTab";
 import AdminReviewsTab from "@/components/admin/AdminReviewsTab";
@@ -37,7 +36,6 @@ const SECTION_TITLES: Record<AdminSection, string> = {
   dashboard: "Dashboard",
   orders: "Orders",
   quotes: "Quotes",
-  products: "Products",
   sellers: "Sellers",
   customers: "Customers",
   reviews: "Reviews",
@@ -99,8 +97,6 @@ const Admin = () => {
         return <AdminOrdersTab />;
       case "quotes":
         return <AdminQuotesTab />;
-      case "products":
-        return <AdminProductsTab />;
       case "customers":
         return <AdminCustomersTab />;
       case "sellers":

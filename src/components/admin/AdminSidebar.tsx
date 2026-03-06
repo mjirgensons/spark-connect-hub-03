@@ -5,7 +5,7 @@ import {
   LayoutDashboard,
   ShoppingCart,
   FileText,
-  Package,
+  
   Users,
   Plug,
   FileEdit,
@@ -31,7 +31,6 @@ export type AdminSection =
   | "dashboard"
   | "orders"
   | "quotes"
-  | "products"
   | "customers"
   | "sellers"
   | "reviews"
@@ -50,7 +49,6 @@ export type AdminSection =
 interface AdminSidebarProps {
   active: AdminSection;
   onNavigate: (section: AdminSection) => void;
-  productCount?: number;
 }
 
 interface NavGroup {
@@ -66,7 +64,6 @@ const navGroups: NavGroup[] = [
       { id: "orders", label: "Orders", icon: ShoppingCart },
       { id: "quotes", label: "Quotes", icon: FileText },
       { id: "sellers", label: "Sellers", icon: Store },
-      { id: "products", label: "Products", icon: Package },
       { id: "customers", label: "Customers", icon: Users },
       { id: "reviews", label: "Reviews", icon: MessageSquare },
       { id: "email", label: "Email", icon: Send },
@@ -89,7 +86,7 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-const AdminSidebar = ({ active, onNavigate, productCount }: AdminSidebarProps) => {
+const AdminSidebar = ({ active, onNavigate }: AdminSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -131,7 +128,6 @@ const AdminSidebar = ({ active, onNavigate, productCount }: AdminSidebarProps) =
                 {(!collapsed || isMobile) && (
                   <span className="truncate">
                     {item.label}
-                    {item.id === "products" && productCount !== undefined ? ` (${productCount})` : ""}
                   </span>
                 )}
               </button>
