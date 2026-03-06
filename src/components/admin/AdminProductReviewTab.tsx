@@ -114,6 +114,20 @@ const AdminProductReviewTab = () => {
     setSelectedProduct(null);
   };
 
+  // Fetch product options for selected product
+  const { data: selectedProductOptions = [] } = useQuery({
+    queryKey: ["admin-review-options", selectedProduct?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("product_options")
+        .select("*")
+        .eq("product_id", selectedProduct!.id)
+        .order("sort_order");
+      return data || [];
+    },
+    enabled: !!selectedProduct?.id,
+  });
+
   // Detail view
   if (selectedProduct) {
     const p = selectedProduct;
@@ -154,7 +168,7 @@ const AdminProductReviewTab = () => {
         {/* Seller info + status */}
         <div className="p-4 rounded-lg border bg-muted/50 space-y-1">
           <p className="text-sm font-semibold">{seller.company_name || seller.full_name || "Unknown Seller"}</p>
-          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground items-center">
             <span>Status: {statusBadge(p.listing_status)}</span>
             <span>Trust: {seller.auto_approve_products ? "✅ Trusted" : "Standard"}</span>
             {seller.created_at && <span>Joined: {format(new Date(seller.created_at), "MMM d, yyyy")}</span>}
@@ -164,6 +178,11 @@ const AdminProductReviewTab = () => {
               </Badge>
             )}
           </div>
+          {p.deleted_at && (
+            <div className="mt-2 p-2 rounded bg-red-50 border border-red-200">
+              <p className="text-xs font-medium text-red-800">⚠ This product has been soft-deleted ({format(new Date(p.deleted_at), "MMM d, yyyy")})</p>
+            </div>
+          )}
           {(p as any).previous_rejection_reason && (
             <div className="mt-2 p-2 rounded bg-amber-50 border border-amber-200">
               <p className="text-xs font-medium text-amber-800">Previously declined:</p>
@@ -175,15 +194,8 @@ const AdminProductReviewTab = () => {
         {/* Top action bar */}
         {actionBar}
 
-        {/* Full product page preview via iframe */}
-        <div className="border rounded-lg overflow-hidden">
-          <iframe
-            src={`/products/${p.id}?adminView=${p.seller_id}`}
-            title={`Preview: ${p.product_name}`}
-            className="w-full border-0"
-            style={{ height: "80vh", minHeight: "600px" }}
-          />
-        </div>
+        {/* Inline product detail preview */}
+        <ProductDetailPreview product={p} productOptions={selectedProductOptions} />
 
         {/* Bottom action bar */}
         {actionBar}
