@@ -898,8 +898,11 @@ export type Database = {
       }
       orders: {
         Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
           created_at: string
           currency: string
+          delivered_at: string | null
           delivery_confirmed_at: string | null
           estimated_delivery: string | null
           funds_released_at: string | null
@@ -912,6 +915,7 @@ export type Database = {
           platform_fee_cents: number | null
           seller_id: string | null
           seller_payout_cents: number | null
+          shipped_at: string | null
           shipping_address_line_1: string
           shipping_address_line_2: string | null
           shipping_city: string
@@ -938,8 +942,11 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           currency?: string
+          delivered_at?: string | null
           delivery_confirmed_at?: string | null
           estimated_delivery?: string | null
           funds_released_at?: string | null
@@ -952,6 +959,7 @@ export type Database = {
           platform_fee_cents?: number | null
           seller_id?: string | null
           seller_payout_cents?: number | null
+          shipped_at?: string | null
           shipping_address_line_1: string
           shipping_address_line_2?: string | null
           shipping_city: string
@@ -978,8 +986,11 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           currency?: string
+          delivered_at?: string | null
           delivery_confirmed_at?: string | null
           estimated_delivery?: string | null
           funds_released_at?: string | null
@@ -992,6 +1003,7 @@ export type Database = {
           platform_fee_cents?: number | null
           seller_id?: string | null
           seller_payout_cents?: number | null
+          shipped_at?: string | null
           shipping_address_line_1?: string
           shipping_address_line_2?: string | null
           shipping_city?: string
