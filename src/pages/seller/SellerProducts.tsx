@@ -580,7 +580,7 @@ const SellerProducts = () => {
                             </button>
                           </TableCell>
                           <TableCell className="py-1.5 px-2 text-center">
-                            {listingStatusBadge(p.listing_status || 'pending_review')}
+                            {listingStatusBadge(p.listing_status || 'pending_review', (p as any).listing_rejection_reason)}
                           </TableCell>
                           <TableCell className="py-1.5 px-1 text-center">
                             {p.is_featured ? <Star className="w-3.5 h-3.5 text-primary fill-primary mx-auto" /> : <span className="text-muted-foreground">—</span>}
