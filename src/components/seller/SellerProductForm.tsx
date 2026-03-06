@@ -761,8 +761,12 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
                 {(layoutType === "straight" || layoutType === "standard" || !layoutType) && <div><Label className={labelCls}>{layoutType === "straight" ? "Wall Length" : "Width"} ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("width_mm")} onChange={(e) => setDim("width_mm", e.target.value)} className={inputCls} /></div>}
                 {(layoutType === "l_shape" || layoutType === "u_shape") && (<><div><Label className={labelCls}>Wall A ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("wall_a_length_mm")} onChange={(e) => setDim("wall_a_length_mm", e.target.value)} className={inputCls} /></div><div><Label className={labelCls}>Wall B ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("wall_b_length_mm")} onChange={(e) => setDim("wall_b_length_mm", e.target.value)} className={inputCls} /></div></>)}
                 {layoutType === "u_shape" && <div><Label className={labelCls}>Wall C ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("wall_c_length_mm")} onChange={(e) => setDim("wall_c_length_mm", e.target.value)} className={inputCls} /></div>}
-                <div><Label className={labelCls}>Height ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("height_mm")} onChange={(e) => setDim("height_mm", e.target.value)} className={inputCls} /></div>
-                <div><Label className={labelCls}>Depth ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("depth_mm")} onChange={(e) => setDim("depth_mm", e.target.value)} className={inputCls} /></div>
+                <div><Label className={labelCls}>Height ({useInches ? "in" : "mm"}) *</Label><Input type="number" value={dimVal("height_mm")} onChange={(e) => setDim("height_mm", e.target.value)} className={inputCls} />
+                  {sectionErrors.dimensions.includes("Height must be greater than 0") && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
+                </div>
+                <div><Label className={labelCls}>Depth ({useInches ? "in" : "mm"}) *</Label><Input type="number" value={dimVal("depth_mm")} onChange={(e) => setDim("depth_mm", e.target.value)} className={inputCls} />
+                  {sectionErrors.dimensions.includes("Depth must be greater than 0") && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
+                </div>
               </div>
             </>)}
             </fieldset>
