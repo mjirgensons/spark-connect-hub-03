@@ -359,8 +359,37 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     return data.id;
   };
 
+  // ── Validation helpers ──
+  const validateSection = (section: SectionKey): string[] => {
+    const errors: string[] = [];
+    if (section === "basic") {
+      if (!f.product_name.trim()) errors.push("Product Name is required");
+      if (!f.product_code.trim()) errors.push("Product Code (SKU) is required");
+      if (!f.category_id) errors.push("Category must be selected");
+    }
+    if (section === "dimensions") {
+      if (!f.width_mm || Number(f.width_mm) <= 0) errors.push("Width must be greater than 0");
+      if (!f.height_mm || Number(f.height_mm) <= 0) errors.push("Height must be greater than 0");
+      if (!f.depth_mm || Number(f.depth_mm) <= 0) errors.push("Depth must be greater than 0");
+    }
+    return errors;
+  };
+
+  const [sectionErrors, setSectionErrors] = useState<Record<SectionKey, string[]>>({
+    basic: [], dimensions: [], hardware: [], features: [],
+    pricing: [], addons: [], appliances: [], images: [], details: [],
+  });
+
   // ── Section save handlers ──
   const saveSectionToDb = async (section: SectionKey) => {
+    // Validate before saving
+    const errors = validateSection(section);
+    setSectionErrors(p => ({ ...p, [section]: errors }));
+    if (errors.length > 0) {
+      toast({ title: "Validation error", description: errors.join(". "), variant: "destructive" });
+      return;
+    }
+
     setSavingSection(section);
     try {
       const pid = await ensureProductExists();
