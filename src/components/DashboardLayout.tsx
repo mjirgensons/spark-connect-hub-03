@@ -54,6 +54,7 @@ const navConfig: Record<Role, NavItem[]> = {
     { label: "Documents", to: "/seller/documents", icon: <FileText size={18} /> },
     { label: "Quotes", to: "/seller/quotes", icon: <FileText size={18} /> },
     { label: "Orders", to: "/seller/orders", icon: <ShoppingCart size={18} /> },
+    { label: "Questions", to: "/seller/questions", icon: <Search size={18} /> },
     { label: "Analytics", to: "/seller/analytics", icon: <BarChart3 size={18} /> },
     { label: "Messages", to: "/seller/messages", icon: <MessageSquare size={18} /> },
     { label: "Store Profile", to: "/seller/store-profile", icon: <Store size={18} /> },

@@ -744,15 +744,14 @@ const Product = () => {
                     </TabsContent>
                   )}
 
-                  {/* Q&A (placeholder) */}
+                  {/* Q&A */}
                   <TabsContent value="qa" className="mt-0">
-                    <div className="text-center py-12 space-y-4">
-                      <h3 className="text-lg font-serif font-semibold text-foreground">Questions & Answers</h3>
-                      <p className="text-muted-foreground text-sm">Have a question about this product? Sign in to ask the seller.</p>
-                      <Link to="/login">
-                        <Button variant="outline">Sign In to Ask</Button>
-                      </Link>
-                    </div>
+                    <ProductQA
+                      productId={product.id}
+                      prefillText={qaPrefill?.text}
+                      prefillOptionId={qaPrefill?.optionId}
+                      onPrefillConsumed={() => setQaPrefill(null)}
+                    />
                   </TabsContent>
 
                   {/* REVIEWS */}
