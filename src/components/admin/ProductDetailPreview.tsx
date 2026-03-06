@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { Package, Ruler, Palette, Layers, Info, ChevronDown, MessageSquare, Eye } from "lucide-react";
+import { Package, Ruler, Palette, Layers, Info, ChevronDown, MessageSquare, Eye, Truck, MapPin } from "lucide-react";
 import ProductGallery from "@/components/ProductGallery";
 
 const ProductReviews = lazy(() => import("@/components/ProductReviews"));
@@ -318,6 +318,69 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
                 </div>
               </div>
             )}
+
+            {/* ── Delivery & Pickup (read-only preview) ── */}
+            {(() => {
+              const dOpt = product.delivery_option;
+              if (dOpt === 'delivery') {
+                return (
+                  <div className="border rounded-md p-4 space-y-2">
+                    <p className="text-sm font-semibold text-foreground">Delivery & Pickup</p>
+                    <div className="flex items-start gap-2">
+                      <Truck className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Delivery Available</p>
+                        <p className="text-xs text-muted-foreground">${Number(product.delivery_price || 0).toFixed(2)} — {product.delivery_zone || 'Local area'}</p>
+                        <p className="text-xs text-muted-foreground">Estimated {product.delivery_prep_days || 5} business days preparation</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              if (dOpt === 'pickup_only') {
+                return (
+                  <div className="border rounded-md p-4 space-y-2">
+                    <p className="text-sm font-semibold text-foreground">Delivery & Pickup</p>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Pickup Only</p>
+                        <p className="text-xs text-muted-foreground">{[product.pickup_address, product.pickup_city, product.pickup_province, product.pickup_postal_code].filter(Boolean).join(', ')}</p>
+                        {product.pickup_phone && <p className="text-xs text-muted-foreground">Phone: {product.pickup_phone}</p>}
+                        <p className="text-xs text-muted-foreground">Estimated {product.pickup_prep_days || 5} business days preparation</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              if (dOpt === 'both') {
+                return (
+                  <div className="border rounded-md p-4 space-y-3">
+                    <p className="text-sm font-semibold text-foreground">Delivery & Pickup</p>
+                    <div className="flex items-start gap-2 border rounded p-2">
+                      <Truck className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Delivery — ${Number(product.delivery_price || 0).toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">{product.delivery_zone || 'Local area'} · Est. {product.delivery_prep_days || 5} business days</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2 border rounded p-2">
+                      <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Pickup — Free</p>
+                        <p className="text-xs text-muted-foreground">{[product.pickup_address, product.pickup_city].filter(Boolean).join(', ')} · Est. {product.pickup_prep_days || 5} business days</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <div className="border rounded-md p-4 bg-muted/30">
+                  <p className="text-sm font-semibold text-foreground mb-1">Delivery & Pickup</p>
+                  <p className="text-xs text-muted-foreground">No delivery options configured yet</p>
+                </div>
+              );
+            })()}
 
             {/* No cart/wishlist/compare buttons — admin preview */}
             <div className="border rounded-md p-3 bg-muted/30 text-center">

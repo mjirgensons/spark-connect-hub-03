@@ -10,7 +10,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart, Download, ChevronDown, MessageSquare } from "lucide-react";
+import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart, Download, ChevronDown, MessageSquare, Truck, MapPin } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import ProductGallery from "@/components/ProductGallery";
@@ -107,6 +109,7 @@ const Product = () => {
   const [hwImageOpen, setHwImageOpen] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("specs");
   const [qaPrefill, setQaPrefill] = useState<{ text: string; optionId: string } | null>(null);
+  const [deliveryChoice, setDeliveryChoice] = useState<'delivery' | 'pickup'>('delivery');
 
   // ── Add-on checkbox state (shared between hero & tab) ──
   const [checkedAddOns, setCheckedAddOns] = useState<Set<string>>(new Set());
@@ -211,7 +214,13 @@ const Product = () => {
 
   // ── Cart handler ──
   const handleAddToCart = () => {
-    // Add main product
+    // Determine delivery info for main product
+    const dOpt = product.delivery_option || 'pickup_only';
+    const effectiveChoice: 'delivery' | 'pickup' | null =
+      dOpt === 'delivery' ? 'delivery'
+      : dOpt === 'pickup_only' ? 'pickup'
+      : deliveryChoice; // 'both' — user selected
+
     dispatch({
       type: "ADD_ITEM",
       payload: {
@@ -225,6 +234,12 @@ const Product = () => {
           ? `A: ${product.wall_a_length_mm}${hasWallB ? ` × B: ${product.wall_b_length_mm}` : ""} | H: ${product.height_mm} × D: ${product.depth_mm} mm`
           : `${product.height_mm} × ${product.depth_mm} mm`,
         maxStock: product.stock_level,
+        deliveryChoice: effectiveChoice,
+        deliveryPrice: effectiveChoice === 'delivery' ? Number(product.delivery_price) || 0 : 0,
+        deliveryPrepDays: effectiveChoice === 'delivery' ? (product.delivery_prep_days || 5) : (product.pickup_prep_days || 5),
+        pickupAddress: product.pickup_address || '',
+        pickupCity: product.pickup_city || '',
+        pickupProvince: product.pickup_province || 'Ontario',
       },
     });
 
@@ -516,6 +531,108 @@ const Product = () => {
                     </div>
                   </div>
                 )}
+
+                {/* ── Delivery & Pickup ── */}
+                {(() => {
+                  const dOpt = product.delivery_option;
+                  const hasDeliveryInfo = dOpt && dOpt !== 'pickup_only' || dOpt === 'pickup_only';
+                  const hasAnyDeliveryField = dOpt === 'delivery' || dOpt === 'pickup_only' || dOpt === 'both';
+
+                  if (!hasAnyDeliveryField) {
+                    // Legacy product without delivery info
+                    return (
+                      <div className="border rounded-md p-4 bg-muted/30">
+                        <p className="text-sm font-semibold text-foreground mb-2">Delivery & Pickup</p>
+                        <p className="text-xs text-muted-foreground mb-3">Contact seller for delivery and pickup arrangements</p>
+                        {product.seller_id && (
+                          <ContactSellerButton productId={product.id} sellerId={product.seller_id} productName={product.product_name} />
+                        )}
+                      </div>
+                    );
+                  }
+
+                  if (dOpt === 'delivery') {
+                    return (
+                      <div className="border rounded-md p-4 space-y-2">
+                        <p className="text-sm font-semibold text-foreground">Delivery & Pickup</p>
+                        <div className="flex items-start gap-2">
+                          <Truck className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                          <div>
+                            <p className="text-sm font-medium text-foreground">Delivery Available</p>
+                            <p className="text-xs text-muted-foreground">
+                              ${Number(product.delivery_price || 0).toFixed(2)} — {product.delivery_zone || 'Local area'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Estimated {product.delivery_prep_days || 5} business days preparation
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (dOpt === 'pickup_only') {
+                    return (
+                      <div className="border rounded-md p-4 space-y-2">
+                        <p className="text-sm font-semibold text-foreground">Delivery & Pickup</p>
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                          <div>
+                            <p className="text-sm font-medium text-foreground">Pickup Only</p>
+                            <p className="text-xs text-muted-foreground">
+                              {[product.pickup_address, product.pickup_city, product.pickup_province, product.pickup_postal_code].filter(Boolean).join(', ')}
+                            </p>
+                            {product.pickup_phone && (
+                              <p className="text-xs text-muted-foreground">Phone: {product.pickup_phone}</p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              Estimated {product.pickup_prep_days || 5} business days preparation
+                            </p>
+                            <p className="text-[10px] text-muted-foreground/70 mt-1">
+                              We'll notify you when your order is ready for pickup. Please do not visit before receiving confirmation.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // dOpt === 'both'
+                  return (
+                    <div className="border rounded-md p-4 space-y-3">
+                      <p className="text-sm font-semibold text-foreground">Delivery & Pickup</p>
+                      <RadioGroup value={deliveryChoice} onValueChange={(v) => setDeliveryChoice(v as 'delivery' | 'pickup')}>
+                        <label className={`flex items-start gap-3 border rounded-md p-3 cursor-pointer transition-colors ${deliveryChoice === 'delivery' ? 'border-foreground bg-muted/30' : 'border-border'}`}>
+                          <RadioGroupItem value="delivery" id="del-delivery" className="mt-0.5" />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <Truck className="w-3.5 h-3.5 text-muted-foreground" />
+                              <Label htmlFor="del-delivery" className="text-sm font-medium cursor-pointer">
+                                Delivery — ${Number(product.delivery_price || 0).toFixed(2)}
+                              </Label>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5">{product.delivery_zone || 'Local area'}</p>
+                            <p className="text-xs text-muted-foreground">Est. {product.delivery_prep_days || 5} business days prep</p>
+                          </div>
+                        </label>
+                        <label className={`flex items-start gap-3 border rounded-md p-3 cursor-pointer transition-colors ${deliveryChoice === 'pickup' ? 'border-foreground bg-muted/30' : 'border-border'}`}>
+                          <RadioGroupItem value="pickup" id="del-pickup" className="mt-0.5" />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
+                              <Label htmlFor="del-pickup" className="text-sm font-medium cursor-pointer">Pickup — Free</Label>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {[product.pickup_address, product.pickup_city, product.pickup_province].filter(Boolean).join(', ')}
+                            </p>
+                            {product.pickup_phone && <p className="text-xs text-muted-foreground">Phone: {product.pickup_phone}</p>}
+                            <p className="text-xs text-muted-foreground">Est. {product.pickup_prep_days || 5} business days prep</p>
+                          </div>
+                        </label>
+                      </RadioGroup>
+                    </div>
+                  );
+                })()}
 
                 {/* Action buttons */}
                 <div className="space-y-3 pt-1">
