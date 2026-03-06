@@ -554,9 +554,10 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
       const addonsErrs = validateSection("addons");
       const imagesErrs = validateSection("images");
       const detailsErrs = validateSection("details");
+      const deliveryErrs = validateSection("delivery");
       setSectionErrors(p => ({
         ...p, basic: basicErrs, dimensions: dimErrs, pricing: pricingErrs,
-        addons: addonsErrs, images: imagesErrs, details: detailsErrs,
+        addons: addonsErrs, images: imagesErrs, details: detailsErrs, delivery: deliveryErrs,
       }));
       const failedSections: string[] = [];
       if (basicErrs.length) failedSections.push("Section 1 · Basic Information");
@@ -565,6 +566,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
       if (addonsErrs.length) failedSections.push("Section 6 · Add-Ons");
       if (imagesErrs.length) failedSections.push("Section 8 · Images");
       if (detailsErrs.length) failedSections.push("Section 9 · Description");
+      if (deliveryErrs.length) failedSections.push("Section 10 · Delivery & Pickup");
       if (failedSections.length) {
         toast({ title: "Cannot submit: missing required fields", description: failedSections.join(", "), variant: "destructive" });
         return;
