@@ -531,17 +531,21 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
 
           {/* Q&A */}
           <TabsContent value="qa" className="mt-0">
-            <ProductQA
-              productId={product.id}
-              prefillText={qaPrefill?.text}
-              prefillOptionId={qaPrefill?.optionId}
-              onPrefillConsumed={() => setQaPrefill(null)}
-            />
+            <Suspense fallback={<div className="py-8 text-center text-muted-foreground text-sm">Loading Q&A...</div>}>
+              <ProductQA
+                productId={product.id}
+                prefillText={qaPrefill?.text}
+                prefillOptionId={qaPrefill?.optionId}
+                onPrefillConsumed={() => setQaPrefill(null)}
+              />
+            </Suspense>
           </TabsContent>
 
           {/* REVIEWS */}
           <TabsContent value="reviews" className="mt-0">
-            <ProductReviews productId={product.id} />
+            <Suspense fallback={<div className="py-8 text-center text-muted-foreground text-sm">Loading Reviews...</div>}>
+              <ProductReviews productId={product.id} />
+            </Suspense>
           </TabsContent>
         </div>
       </Tabs>
