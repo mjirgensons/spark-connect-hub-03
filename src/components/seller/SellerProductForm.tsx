@@ -765,21 +765,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     </span>
   );
 
-  // Cancel with unsaved changes check
-  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const hasAnyDirty = Object.values(sectionDirty).some(Boolean);
-  const handleCancel = () => {
-    if (hasAnyDirty) {
-      setCancelDialogOpen(true);
-    } else {
-      navigate("/seller/products");
-    }
-  };
-  const handleSaveAndLeave = async () => {
-    setCancelDialogOpen(false);
-    await handleFullSave("draft");
-    navigate("/seller/products");
-  };
+
 
   return (
     <div className="space-y-4 max-w-3xl mx-auto pb-24">
