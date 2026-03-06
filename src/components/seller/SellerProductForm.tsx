@@ -259,6 +259,19 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     }
     const af = (p as any).additional_features as any;
     if (Array.isArray(af)) setAdditionalFeatures(af);
+    // Populate delivery fields
+    setDelivery({
+      delivery_option: (p as any).delivery_option || "pickup_only",
+      delivery_price: (p as any).delivery_price ? String((p as any).delivery_price) : "",
+      delivery_zone: (p as any).delivery_zone || "",
+      delivery_prep_days: (p as any).delivery_prep_days ? String((p as any).delivery_prep_days) : "5",
+      pickup_address: (p as any).pickup_address || "",
+      pickup_city: (p as any).pickup_city || "",
+      pickup_province: (p as any).pickup_province || "Ontario",
+      pickup_postal_code: (p as any).pickup_postal_code || "",
+      pickup_phone: (p as any).pickup_phone || "",
+      pickup_prep_days: (p as any).pickup_prep_days ? String((p as any).pickup_prep_days) : "5",
+    });
     // Mark all sections as saved initially for edit mode
     setSectionSaved({ basic: true, dimensions: true, hardware: true, features: true, pricing: true, addons: true, appliances: true, images: true, details: true, delivery: true });
     setEditDataLoaded(true);
