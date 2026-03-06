@@ -561,7 +561,7 @@ const SellerProducts = () => {
                     })}
                     {filteredAndSorted.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
+                        <TableCell colSpan={12} className="text-center py-12 text-muted-foreground">
                           <div className="space-y-2">
                             {products.length === 0 ? (
                               <>
