@@ -172,6 +172,9 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
               >
                 {item.icon}
                 {item.label}
+                {item.label === "Messages" && role === "seller" && sellerUnread && sellerUnread > 0 ? (
+                  <span className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">{sellerUnread}</span>
+                ) : null}
               </NavLink>
             );
           })}
