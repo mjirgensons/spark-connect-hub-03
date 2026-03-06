@@ -18,6 +18,8 @@ import {
 import { Loader2, Save, Plus, Trash2, Info, X, Eye } from "lucide-react";
 import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
 import { FileUpload } from "@/components/admin/FileUpload";
+import HardwareSection, { emptyHardwareDetails, type HardwareDetails } from "./HardwareSection";
+import AdditionalFeaturesSection, { type FeatureItem } from "./AdditionalFeaturesSection";
 
 // ── helpers ──
 const sanitizeSku = (s: string) => s.replace(/O/g, "X").replace(/I/g, "Y");
@@ -38,9 +40,6 @@ const doorStyles = ["shaker", "slab", "raised_panel", "recessed_panel", "beadboa
 const doorMaterials = ["solid_wood", "mdf", "thermofoil", "plywood", "particleboard", "other"];
 const finishTypes = ["paint", "stain", "lacquer", "laminate", "veneer", "melamine", "acrylic", "other"];
 const conditions = ["NEW", "NEW-OB", "OVERSTK", "DISC", "EX-DISP", "FLOOR", "RETURN", "REFURB", "USED-A", "USED-B", "USED-C", "AS-IS", "PART"];
-const hingeBrands = ["Blum", "Grass", "Hettich", "Salice", "Other"];
-const slideBrands = ["Blum", "Grass", "Hettich", "Accuride", "King Slide", "Other"];
-const handleTypes = ["knob", "bar_pull", "bin_pull", "edge_pull", "finger_pull", "push_to_open", "integrated_channel", "other"];
 const optionTypes = ["countertop", "sink", "faucet", "appliance", "installation", "delivery", "backsplash", "hardware", "lighting"];
 const applianceTypes = ["refrigerator", "range", "wall_oven", "cooktop", "dishwasher", "microwave", "range_hood", "wine_cooler", "trash_compactor", "warming_drawer", "ice_maker"];
 const availabilityStatuses = ["In Stock", "Low Stock", "Deactivated"];
@@ -93,6 +92,11 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
   });
   const [kitchenLayouts, setKitchenLayouts] = useState<string[]>([]);
   const [isFeatured, setIsFeatured] = useState(false);
+
+  // Hardware details (JSONB)
+  const [hardware, setHardware] = useState<HardwareDetails>(emptyHardwareDetails);
+  // Additional features (JSONB)
+  const [additionalFeatures, setAdditionalFeatures] = useState<FeatureItem[]>([]);
 
   // S5 add-ons
   const [options, setOptions] = useState<ProductOption[]>([]);
@@ -167,7 +171,7 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
     if (!isEditMode || !existingProduct || editDataLoaded) return;
 
     const p = existingProduct;
-    setAutoSku(false); // In edit mode, don't auto-generate SKU
+    setAutoSku(false);
     setF({
       product_name: p.product_name || "",
       product_code: p.product_code || "",
@@ -213,16 +217,37 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
       visibility: p.tag || "draft",
     });
 
+    // Load hardware_details JSONB or migrate from old flat columns
+    const hw = (p as any).hardware_details as any;
+    if (hw && typeof hw === "object" && hw.hinges) {
+      setHardware({
+        hinges: { brand: hw.hinges?.brand || "", model: hw.hinges?.model || "", image_url: hw.hinges?.image_url || "", specs: hw.hinges?.specs || [] },
+        drawer_slides: { brand: hw.drawer_slides?.brand || "", model: hw.drawer_slides?.model || "", image_url: hw.drawer_slides?.image_url || "", specs: hw.drawer_slides?.specs || [] },
+        handles: { type: hw.handles?.type || "", finish: hw.handles?.finish || "", image_url: hw.handles?.image_url || "", specs: hw.handles?.specs || [] },
+      });
+    } else {
+      // Migrate from old flat columns
+      setHardware({
+        hinges: { brand: p.hinge_brand || "", model: p.hinge_model || "", image_url: "", specs: [] },
+        drawer_slides: { brand: p.slide_brand || "", model: p.slide_model || "", image_url: "", specs: [] },
+        handles: { type: "", finish: "", image_url: "", specs: [] },
+      });
+    }
+
+    // Load additional_features
+    const af = (p as any).additional_features as any;
+    if (Array.isArray(af)) {
+      setAdditionalFeatures(af);
+    }
+
     setEditDataLoaded(true);
   }, [isEditMode, existingProduct, editDataLoaded]);
 
   // Pre-populate options
   useEffect(() => {
     if (!isEditMode || !existingOptions.length || editDataLoaded) return;
-    // This will be set together with the main product data
   }, [isEditMode, existingOptions, editDataLoaded]);
 
-  // Actually populate options and appliances after editDataLoaded is set
   useEffect(() => {
     if (!editDataLoaded || !isEditMode) return;
 
@@ -261,7 +286,6 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
   const selectedCategory = useMemo(() => categories.find((c: any) => c.id === f.category_id), [categories, f.category_id]);
   const layoutType: string = selectedCategory?.layout_type || "standard";
 
-  // Auto-SKU generation
   const categoryName = selectedCategory?.name || "";
   const autoSkuValue = useMemo(() => generateSmartCode(categoryName, f.style, f.color, f.width_mm), [categoryName, f.style, f.color, f.width_mm]);
   useEffect(() => {
@@ -331,8 +355,12 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
         wall_a_length_mm: f.wall_a_length_mm ? Number(f.wall_a_length_mm) : null,
         wall_b_length_mm: f.wall_b_length_mm ? Number(f.wall_b_length_mm) : null,
         wall_c_length_mm: f.wall_c_length_mm ? Number(f.wall_c_length_mm) : null,
-        hinge_brand: f.hinge_brand || null, hinge_model: f.hinge_model || null,
-        slide_brand: f.slide_brand || null, slide_model: f.slide_model || null,
+        hinge_brand: hardware.hinges.brand || f.hinge_brand || null,
+        hinge_model: hardware.hinges.model || f.hinge_model || null,
+        slide_brand: hardware.drawer_slides.brand || f.slide_brand || null,
+        slide_model: hardware.drawer_slides.model || f.slide_model || null,
+        hardware_details: hardware,
+        additional_features: additionalFeatures.length ? additionalFeatures : null,
         price_retail_usd: parseFloat(f.price_retail),
         price_discounted_usd: f.price_sale ? parseFloat(f.price_sale) : parseFloat(f.price_retail),
         discount_percentage: f.discount_pct ? Number(f.discount_pct) : 0,
@@ -352,7 +380,6 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
       let finalProductId: string;
 
       if (isEditMode && productId) {
-        // ── UPDATE existing product ──
         const { error: updateErr } = await supabase
           .from("products")
           .update(row as any)
@@ -360,14 +387,10 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
         if (updateErr) throw new Error(updateErr.message);
         finalProductId = productId;
 
-        // Replace options: delete old, insert new
         setUploadProgress("Saving options...");
         await supabase.from("product_options").delete().eq("product_id", productId);
-        
-        // Replace appliances: delete old, insert new
         await supabase.from("product_compatible_appliances").delete().eq("product_id", productId);
       } else {
-        // ── INSERT new product ──
         row.seller_id = user.id;
         row.listing_status = "pending_review";
 
@@ -450,8 +473,8 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
   const inputCls = "mt-1";
 
   return (
-    <div className="space-y-4 max-w-3xl">
-      <Accordion type="multiple" defaultValue={["basic", "dimensions", "hardware", "pricing", "addons", "appliances", "images", "details"]} className="space-y-3">
+    <div className="space-y-4 max-w-3xl mx-auto">
+      <Accordion type="multiple" defaultValue={["basic", "dimensions", "hardware", "features", "pricing", "addons", "appliances", "images", "details"]} className="space-y-3">
 
         {/* ═══ SECTION 1 — BASIC INFO ═══ */}
         <AccordionItem value="basic" className="border rounded-lg">
@@ -547,24 +570,30 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ═══ SECTION 3 — HARDWARE ═══ */}
+        {/* ═══ SECTION 3 — HARDWARE DETAILS (upgraded) ═══ */}
         <AccordionItem value="hardware" className="border rounded-lg">
           <AccordionTrigger className="px-4 font-bold text-base">3 · Hardware Details</AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 space-y-4">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div><Label className={labelCls}>Hinge Brand</Label><Select value={f.hinge_brand} onValueChange={(v) => set("hinge_brand", v)}><SelectTrigger className={inputCls}><SelectValue placeholder="Select" /></SelectTrigger><SelectContent>{hingeBrands.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent></Select></div>
-              {f.hinge_brand && <div><Label className={labelCls}>Hinge Model</Label><Input value={f.hinge_model} onChange={(e) => set("hinge_model", e.target.value)} className={inputCls} /></div>}
-              <div><Label className={labelCls}>Drawer Slide Brand</Label><Select value={f.slide_brand} onValueChange={(v) => set("slide_brand", v)}><SelectTrigger className={inputCls}><SelectValue placeholder="Select" /></SelectTrigger><SelectContent>{slideBrands.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent></Select></div>
-              {f.slide_brand && <div><Label className={labelCls}>Drawer Slide Model</Label><Input value={f.slide_model} onChange={(e) => set("slide_model", e.target.value)} className={inputCls} /></div>}
-              <div><Label className={labelCls}>Handle Type</Label><Select value={f.handle_type} onValueChange={(v) => set("handle_type", v)}><SelectTrigger className={inputCls}><SelectValue placeholder="Select" /></SelectTrigger><SelectContent>{handleTypes.map((o) => <SelectItem key={o} value={o}>{o.replace(/_/g, " ")}</SelectItem>)}</SelectContent></Select></div>
-              <div><Label className={labelCls}>Handle Finish</Label><Input value={f.handle_finish} onChange={(e) => set("handle_finish", e.target.value)} className={inputCls} placeholder="e.g. Brushed Nickel, Matte Black" /></div>
-            </div>
+          <AccordionContent className="px-4 pb-4">
+            <HardwareSection
+              hardware={hardware}
+              onChange={setHardware}
+              sellerId={user?.id}
+              productId={productId}
+            />
           </AccordionContent>
         </AccordionItem>
 
-        {/* ═══ SECTION 4 — PRICING ═══ */}
+        {/* ═══ SECTION 4 — ADDITIONAL FEATURES (new) ═══ */}
+        <AccordionItem value="features" className="border rounded-lg">
+          <AccordionTrigger className="px-4 font-bold text-base">4 · Additional Features</AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <AdditionalFeaturesSection features={additionalFeatures} onChange={setAdditionalFeatures} />
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ═══ SECTION 5 — PRICING ═══ */}
         <AccordionItem value="pricing" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">4 · Pricing</AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">5 · Pricing</AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <div className="grid sm:grid-cols-3 gap-4">
               <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_retail} onChange={(e) => handleRetailChange(e.target.value)} className="pl-7" /></div></div>
@@ -576,9 +605,9 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ═══ SECTION 5 — ADD-ONS ═══ */}
+        {/* ═══ SECTION 6 — ADD-ONS ═══ */}
         <AccordionItem value="addons" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">5 · Add-Ons & Inclusions</AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">6 · Add-Ons & Inclusions</AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             {options.length === 0 && (
               <p className="text-sm text-muted-foreground">No add-ons yet. Click "Add Option" to include countertops, sinks, or other add-ons.</p>
@@ -627,10 +656,10 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ═══ SECTION 6 — COMPATIBLE APPLIANCES ═══ */}
+        {/* ═══ SECTION 7 — COMPATIBLE APPLIANCES ═══ */}
         {showAppliances && (
           <AccordionItem value="appliances" className="border rounded-lg">
-            <AccordionTrigger className="px-4 font-bold text-base">6 · Compatible Appliances</AccordionTrigger>
+            <AccordionTrigger className="px-4 font-bold text-base">7 · Compatible Appliances</AccordionTrigger>
             <AccordionContent className="px-4 pb-4 space-y-4">
               <div className="flex items-start gap-2 p-3 rounded-md bg-muted">
                 <Info className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
@@ -666,9 +695,9 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
           </AccordionItem>
         )}
 
-        {/* ═══ SECTION 7 — IMAGES & DOCUMENTS ═══ */}
+        {/* ═══ SECTION 8 — IMAGES & DOCUMENTS ═══ */}
         <AccordionItem value="images" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">7 · Images & Documents</AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">8 · Images & Documents</AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <ImageUpload
               value={mainImageUrl}
@@ -690,9 +719,9 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ═══ SECTION 8 — DESCRIPTION & VISIBILITY ═══ */}
+        {/* ═══ SECTION 9 — DESCRIPTION & VISIBILITY ═══ */}
         <AccordionItem value="details" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">8 · Description & Visibility</AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">9 · Description & Visibility</AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <div>
               <Label className={labelCls}>Short Description</Label>

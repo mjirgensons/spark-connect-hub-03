@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart, Wrench } from "lucide-react";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import ProductGallery from "@/components/ProductGallery";
@@ -293,6 +293,87 @@ const Product = () => {
               )}
 
             </div>
+
+            {/* Hardware Details */}
+            {(() => {
+              const hw = (product as any).hardware_details as any;
+              const hasHw = hw && typeof hw === "object" && (hw.hinges?.brand || hw.drawer_slides?.brand || hw.handles?.type);
+              // Fallback to flat columns
+              const hasFlat = !hasHw && (product.hinge_brand || product.slide_brand);
+              if (!hasHw && !hasFlat) return null;
+
+              const sections = hasHw ? [
+                { label: "Hinges", data: hw.hinges, fields: [["Brand", hw.hinges?.brand], ["Model", hw.hinges?.model]] },
+                { label: "Drawer Slides", data: hw.drawer_slides, fields: [["Brand", hw.drawer_slides?.brand], ["Model", hw.drawer_slides?.model]] },
+                { label: "Handles", data: hw.handles, fields: [["Type", hw.handles?.type], ["Finish", hw.handles?.finish]] },
+              ] : [
+                { label: "Hinges", data: null, fields: [["Brand", product.hinge_brand], ["Model", product.hinge_model]] },
+                { label: "Drawer Slides", data: null, fields: [["Brand", product.slide_brand], ["Model", product.slide_model]] },
+              ];
+
+              const activeSections = sections.filter(s => s.fields.some(([, v]) => v));
+              if (!activeSections.length) return null;
+
+              return (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <h2 className="text-lg font-serif font-semibold text-foreground flex items-center gap-2">
+                      <Wrench className="w-4 h-4" /> Hardware
+                    </h2>
+                    {activeSections.map((sec) => (
+                      <div key={sec.label} className="flex items-start gap-3 border p-3 rounded-md">
+                        {sec.data?.image_url && (
+                          <img src={sec.data.image_url} alt={sec.label} className="w-12 h-12 rounded object-cover border border-border shrink-0" />
+                        )}
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm font-semibold text-foreground">{sec.label}</p>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm">
+                            {sec.fields.map(([label, val]) => val ? (
+                              <div key={label as string}>
+                                <span className="text-muted-foreground text-xs">{label}: </span>
+                                <span className="text-foreground">{val as string}</span>
+                              </div>
+                            ) : null)}
+                          </div>
+                          {sec.data?.specs?.length > 0 && (
+                            <div className="pt-1 space-y-0.5">
+                              {sec.data.specs.map((sp: any, i: number) => (
+                                <p key={i} className="text-xs text-muted-foreground">
+                                  {sp.key}: <span className="text-foreground">{sp.value}</span>
+                                </p>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+
+            {/* Additional Features */}
+            {(() => {
+              const af = (product as any).additional_features as any[];
+              if (!af?.length) return null;
+              return (
+                <>
+                  <Separator />
+                  <div className="space-y-2">
+                    <h2 className="text-lg font-serif font-semibold text-foreground">Features</h2>
+                    <div className="border rounded-md divide-y">
+                      {af.map((feat: any, i: number) => (
+                        <div key={i} className="flex justify-between px-3 py-2 text-sm">
+                          <span className="text-muted-foreground">{feat.key}</span>
+                          <span className="text-foreground font-medium">{feat.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
 
             {/* Long description */}
             {product.long_description && (

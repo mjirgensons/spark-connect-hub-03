@@ -1356,6 +1356,7 @@ export type Database = {
       }
       products: {
         Row: {
+          additional_features: Json | null
           additional_image_urls: string[] | null
           availability_status: string
           category_id: string | null
@@ -1381,6 +1382,7 @@ export type Database = {
           door_material: string | null
           door_style: string | null
           finish_type: string | null
+          hardware_details: Json | null
           height_inches: number | null
           height_mm: number
           hinge_brand: string | null
@@ -1417,6 +1419,7 @@ export type Database = {
           width_mm: number
         }
         Insert: {
+          additional_features?: Json | null
           additional_image_urls?: string[] | null
           availability_status?: string
           category_id?: string | null
@@ -1442,6 +1445,7 @@ export type Database = {
           door_material?: string | null
           door_style?: string | null
           finish_type?: string | null
+          hardware_details?: Json | null
           height_inches?: number | null
           height_mm: number
           hinge_brand?: string | null
@@ -1478,6 +1482,7 @@ export type Database = {
           width_mm: number
         }
         Update: {
+          additional_features?: Json | null
           additional_image_urls?: string[] | null
           availability_status?: string
           category_id?: string | null
@@ -1503,6 +1508,7 @@ export type Database = {
           door_material?: string | null
           door_style?: string | null
           finish_type?: string | null
+          hardware_details?: Json | null
           height_inches?: number | null
           height_mm?: number
           hinge_brand?: string | null
