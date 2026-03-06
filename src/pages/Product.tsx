@@ -39,6 +39,19 @@ const Product = () => {
     enabled: !!id,
   });
 
+  const { data: productOptions = [] } = useQuery({
+    queryKey: ["product-options", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("product_options")
+        .select("*")
+        .eq("product_id", id!)
+        .order("sort_order");
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
   useEffect(() => {
     if (product) {
       const desc = product.short_description || `${product.product_name} — ${product.color} ${product.material} cabinet. $${Number(product.price_discounted_usd).toLocaleString()} (${product.discount_percentage}% off). Available at FitMatch.`;
