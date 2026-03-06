@@ -47,7 +47,7 @@ const availabilityStatuses = ["In Stock", "Low Stock", "Deactivated"];
 // ── types ──
 interface ProductOption {
   option_type: string; option_name: string; inclusion_status: string;
-  price_retail: string; price_discounted: string; description: string;
+  price_retail: string; price_discounted: string; discount_pct: string; description: string;
   specs: { key: string; value: string }[];
 }
 interface CompatAppliance {
