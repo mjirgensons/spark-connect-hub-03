@@ -86,7 +86,7 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-const AdminSidebar = ({ active, onNavigate, productCount }: AdminSidebarProps) => {
+const AdminSidebar = ({ active, onNavigate }: AdminSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
