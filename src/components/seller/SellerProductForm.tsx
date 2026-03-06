@@ -687,15 +687,20 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
         </div>
       )}
       {listingStatus === "rejected" && (
-        <div className="flex items-center gap-3 p-4 rounded-lg border border-red-300 bg-red-500/10">
-          <X className="w-5 h-5 text-red-600 shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-red-800">Product Declined</p>
-            {rejectionReason && <p className="text-xs text-red-700 mt-1">Reason: {rejectionReason}</p>}
+        <div className="p-4 rounded-lg border border-red-300 bg-red-500/10 space-y-2">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-800">This product was declined by admin</p>
+              {rejectionReason && (
+                <div className="mt-2 p-3 rounded bg-red-100 border border-red-200">
+                  <p className="text-xs font-medium text-red-800">Admin's reason:</p>
+                  <p className="text-sm text-red-700 mt-1">{rejectionReason}</p>
+                </div>
+              )}
+              <p className="text-xs text-red-700 mt-2">Fix the issues noted above and click "Resubmit for Review" when ready.</p>
+            </div>
           </div>
-          <Button variant="outline" size="sm" onClick={handleEditResubmit}>
-            Edit & Resubmit
-          </Button>
         </div>
       )}
       {listingStatus === "approved" && (
