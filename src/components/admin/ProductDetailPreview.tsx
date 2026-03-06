@@ -68,7 +68,13 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
   };
 
   const addOnTotal = productOptions
-    .filter((opt: any) => checkedAddOns.has(opt.id))
+    .filter((opt: any) => {
+      if (!checkedAddOns.has(opt.id)) return false;
+      const nameLower = (opt.option_name || "").toLowerCase();
+      const typeLower = (opt.option_type || "").toLowerCase();
+      if (nameLower.includes("delivery") || nameLower.includes("shipping") || typeLower === "delivery" || typeLower === "shipping") return false;
+      return true;
+    })
     .reduce((sum: number, opt: any) => sum + getOptPrice(opt), 0);
 
   const productPrice = Number(product.price_discounted_usd);
@@ -146,7 +152,13 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
   const af = product.additional_features as any[];
   const hasFeatures = af?.length > 0;
 
-  const displayOpts = productOptions.filter((o: any) => o.option_name);
+  const displayOpts = productOptions.filter((o: any) => {
+    if (!o.option_name) return false;
+    const nameLower = o.option_name.toLowerCase();
+    const typeLower = (o.option_type || "").toLowerCase();
+    if (nameLower.includes("delivery") || nameLower.includes("shipping") || typeLower === "delivery" || typeLower === "shipping") return false;
+    return true;
+  });
   const hasCountertop = product.countertop_option && product.countertop_option !== "no";
   const hasAddOns = displayOpts.length > 0 || hasCountertop;
   const hasAppliances = productAppliances.length > 0;
@@ -225,9 +237,9 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
             ) : price > 0 ? (
               <div className="flex items-center gap-1.5">
                 {hasDiscount && (
-                  <span className="text-xs text-muted-foreground line-through">${Number(opt.price_retail).toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground line-through">${Number(opt.price_retail).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 )}
-                <span className="text-sm font-semibold text-foreground">${price.toLocaleString()}</span>
+                <span className="text-sm font-semibold text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             ) : null}
           </div>
@@ -310,12 +322,22 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
                   {displayOpts.map((opt: any) => renderAddOnRow(opt, true))}
                 </div>
                 <Separator />
-                <div className="flex justify-between text-sm pt-1">
-                  <span className="text-muted-foreground">
-                    Product: ${productPrice.toLocaleString()}
-                    {addOnTotal > 0 && ` + Add-ons: $${addOnTotal.toLocaleString()}`}
-                  </span>
-                  <span className="font-bold text-foreground">Total: ${grandTotal.toLocaleString()}</span>
+                <div className="space-y-1 text-sm pt-1">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Product</span>
+                    <span>${productPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  {addOnTotal > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Add-ons</span>
+                      <span>${addOnTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  )}
+                  <Separator />
+                  <div className="flex justify-between font-bold">
+                    <span>Total</span>
+                    <span>${grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
                 </div>
               </div>
             )}

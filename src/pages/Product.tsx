@@ -207,7 +207,13 @@ const Product = () => {
   };
 
   const addOnTotal = productOptions
-    .filter((opt: any) => checkedAddOns.has(opt.id))
+    .filter((opt: any) => {
+      if (!checkedAddOns.has(opt.id)) return false;
+      const nameLower = (opt.option_name || "").toLowerCase();
+      const typeLower = (opt.option_type || "").toLowerCase();
+      if (nameLower.includes("delivery") || nameLower.includes("shipping") || typeLower === "delivery" || typeLower === "shipping") return false;
+      return true;
+    })
     .reduce((sum: number, opt: any) => sum + getOptPrice(opt), 0);
 
   const productPrice = Number(product.price_discounted_usd);
@@ -244,24 +250,28 @@ const Product = () => {
       },
     });
 
-    // Add checked add-ons (non-included ones with price)
+    // Add EACH checked add-on (excluding delivery-type and included-status)
     productOptions
-      .filter((opt: any) => checkedAddOns.has(opt.id) && opt.inclusion_status !== "included")
+      .filter((opt: any) => checkedAddOns.has(opt.id) && opt.option_name)
+      .filter((opt: any) => {
+        const nameLower = opt.option_name.toLowerCase();
+        const typeLower = (opt.option_type || "").toLowerCase();
+        return !nameLower.includes("delivery") && !nameLower.includes("shipping") && typeLower !== "delivery" && typeLower !== "shipping";
+      })
       .forEach((opt: any) => {
-        const price = getOptPrice(opt);
-        if (price > 0) {
-          dispatch({
-            type: "ADD_ITEM",
-            payload: {
-              productId: `${product.id}_option_${opt.id}`,
-              name: `${opt.option_name} (for ${product.product_name})`,
-              image: product.main_image_url || "/placeholder.svg",
-              price,
-              dimensions: "",
-              maxStock: 999,
-            },
-          });
-        }
+        const isIncluded = opt.inclusion_status === "included";
+        const price = isIncluded ? 0 : getOptPrice(opt);
+        dispatch({
+          type: "ADD_ITEM",
+          payload: {
+            productId: `${product.id}_option_${opt.id}`,
+            name: `${opt.option_name} (for ${product.product_name})`,
+            image: product.main_image_url || "/placeholder.svg",
+            price,
+            dimensions: "",
+            maxStock: 1,
+          },
+        });
       });
 
     toast.success(qtyInCart > 0 ? "Cart updated" : "Added to cart", {
@@ -278,7 +288,13 @@ const Product = () => {
   const af = (product as any).additional_features as any[];
   const hasFeatures = af?.length > 0;
 
-  const displayOpts = productOptions.filter((o: any) => o.option_name);
+  const displayOpts = productOptions.filter((o: any) => {
+    if (!o.option_name) return false;
+    const nameLower = o.option_name.toLowerCase();
+    const typeLower = (o.option_type || "").toLowerCase();
+    if (nameLower.includes("delivery") || nameLower.includes("shipping") || typeLower === "delivery" || typeLower === "shipping") return false;
+    return true;
+  });
   const hasCountertop = product.countertop_option && product.countertop_option !== "no";
   const hasAddOns = displayOpts.length > 0 || hasCountertop;
 
@@ -422,9 +438,9 @@ const Product = () => {
             ) : price > 0 ? (
               <div className="flex items-center gap-1.5">
                 {hasDiscount && (
-                  <span className="text-xs text-muted-foreground line-through">${Number(opt.price_retail).toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground line-through">${Number(opt.price_retail).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 )}
-                <span className="text-sm font-semibold text-foreground">${price.toLocaleString()}</span>
+                <span className="text-sm font-semibold text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             ) : null}
           </div>
@@ -524,13 +540,43 @@ const Product = () => {
                       {displayOpts.map((opt: any) => renderAddOnRow(opt, true))}
                     </div>
                     <Separator />
-                    <div className="flex justify-between text-sm pt-1">
-                      <span className="text-muted-foreground">
-                        Product: ${productPrice.toLocaleString()}
-                        {addOnTotal > 0 && ` + Add-ons: $${addOnTotal.toLocaleString()}`}
-                      </span>
-                      <span className="font-bold text-foreground">Total: ${grandTotal.toLocaleString()}</span>
-                    </div>
+                    {(() => {
+                      const dOpt = product.delivery_option || 'pickup_only';
+                      const deliveryPriceNum = (dOpt === 'delivery' || (dOpt === 'both' && deliveryChoice === 'delivery')) ? Number(product.delivery_price || 0) : 0;
+                      const fullTotal = grandTotal + deliveryPriceNum;
+                      const fmt2 = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                      return (
+                        <div className="space-y-1 text-sm pt-1">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Product</span>
+                            <span>${fmt2(productPrice)}</span>
+                          </div>
+                          {addOnTotal > 0 && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Add-ons</span>
+                              <span>${fmt2(addOnTotal)}</span>
+                            </div>
+                          )}
+                          {deliveryPriceNum > 0 && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Delivery</span>
+                              <span>${fmt2(deliveryPriceNum)}</span>
+                            </div>
+                          )}
+                          {deliveryPriceNum === 0 && product.delivery_option && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Pickup</span>
+                              <span>Free</span>
+                            </div>
+                          )}
+                          <Separator />
+                          <div className="flex justify-between font-bold">
+                            <span>Total</span>
+                            <span>${fmt2(fullTotal)}</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
 
