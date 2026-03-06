@@ -49,7 +49,6 @@ export type AdminSection =
 interface AdminSidebarProps {
   active: AdminSection;
   onNavigate: (section: AdminSection) => void;
-  productCount?: number;
 }
 
 interface NavGroup {
