@@ -438,6 +438,7 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
           inclusion_status: o.inclusion_status,
           price_retail: o.inclusion_status === "optional" && o.price_retail ? parseFloat(o.price_retail) : 0,
           price_discounted: o.inclusion_status === "optional" && o.price_discounted ? parseFloat(o.price_discounted) : 0,
+          discount_percentage: o.inclusion_status === "optional" && o.discount_pct ? parseFloat(o.discount_pct) : 0,
           description: o.description || null,
           specifications: o.specs.reduce((acc, s) => (s.key ? { ...acc, [s.key]: s.value } : acc), {} as Record<string, string>),
           sort_order: i,
