@@ -1566,6 +1566,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          auto_approve_products: boolean | null
           banner_url: string | null
           bio: string | null
           business_address: Json | null
@@ -1592,6 +1593,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          auto_approve_products?: boolean | null
           banner_url?: string | null
           bio?: string | null
           business_address?: Json | null
@@ -1618,6 +1620,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          auto_approve_products?: boolean | null
           banner_url?: string | null
           bio?: string | null
           business_address?: Json | null
