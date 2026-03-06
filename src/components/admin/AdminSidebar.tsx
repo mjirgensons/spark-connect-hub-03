@@ -65,7 +65,6 @@ const navGroups: NavGroup[] = [
       { id: "orders", label: "Orders", icon: ShoppingCart },
       { id: "quotes", label: "Quotes", icon: FileText },
       { id: "sellers", label: "Sellers", icon: Store },
-      { id: "products", label: "Products", icon: Package },
       { id: "customers", label: "Customers", icon: Users },
       { id: "reviews", label: "Reviews", icon: MessageSquare },
       { id: "email", label: "Email", icon: Send },
