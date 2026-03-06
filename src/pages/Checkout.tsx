@@ -6,7 +6,6 @@ import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import CheckoutStepper from "@/components/checkout/CheckoutStepper";
 import StepInformation from "@/components/checkout/StepInformation";
-import StepShipping from "@/components/checkout/StepShipping";
 import StepReview from "@/components/checkout/StepReview";
 import { toast } from "sonner";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -41,8 +40,7 @@ const CheckoutContent = () => {
         <CheckoutStepper currentStep={step} />
 
         {step === 1 && <StepInformation />}
-        {step === 2 && <StepShipping />}
-        {step === 3 && <StepReview />}
+        {step === 2 && <StepReview />}
       </main>
       <Footer />
     </div>

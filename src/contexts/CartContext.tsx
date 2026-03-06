@@ -8,6 +8,13 @@ export interface CartItem {
   quantity: number;
   dimensions: string;
   maxStock: number;
+  // Delivery fields (per-product)
+  deliveryChoice?: 'delivery' | 'pickup' | null;
+  deliveryPrice?: number;
+  deliveryPrepDays?: number;
+  pickupAddress?: string;
+  pickupCity?: string;
+  pickupProvince?: string;
 }
 
 interface CartState {

@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 
-const steps = ["Information", "Shipping", "Review & Pay"];
+const steps = ["Information", "Review & Pay"];
 
 interface CheckoutStepperProps {
   currentStep: number;

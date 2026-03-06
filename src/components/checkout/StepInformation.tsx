@@ -184,7 +184,7 @@ const StepInformation = () => {
       )}
 
       <Button type="submit" size="lg" className="w-full shadow-[4px_4px_0px_0px_hsl(var(--foreground))]">
-        Continue to Shipping
+        Continue to Review
       </Button>
     </form>
   );

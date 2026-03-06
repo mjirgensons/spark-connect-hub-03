@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useCheckout } from "@/contexts/CheckoutContext";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,42 +8,42 @@ import { dispatchWebhook } from "@/lib/webhookDispatcher";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Edit2, Loader2, Lock } from "lucide-react";
+import { Edit2, Loader2, Lock, Truck, MapPin } from "lucide-react";
 import { toast } from "sonner";
-
-const shippingLabels: Record<string, string> = {
-  standard: "Standard Delivery (GTA)",
-  express: "Express Delivery (GTA)",
-  pickup: "Customer Pickup (Woodbridge, ON)",
-};
 
 const isUuid = (value: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 
 const StepReview = () => {
-  const { info, shippingMethod, shippingCost, setStep, reset } = useCheckout();
+  const { info, setStep, reset } = useCheckout();
   const { items, subtotal, dispatch: cartDispatch } = useCart();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [placing, setPlacing] = useState(false);
 
-  const tax = (subtotal + shippingCost) * 0.13;
-  const total = subtotal + shippingCost + tax;
+  // Compute delivery total from cart items (only main products, not add-ons)
+  const deliveryTotal = items.reduce((sum, item) => {
+    if (item.deliveryChoice === "delivery" && item.deliveryPrice) {
+      return sum + item.deliveryPrice * item.quantity;
+    }
+    return sum;
+  }, 0);
+
+  const tax = Math.round((subtotal + deliveryTotal) * 0.13 * 100) / 100;
+  const total = Math.round((subtotal + deliveryTotal + tax) * 100) / 100;
 
   const handlePlaceOrder = async () => {
-    if (!info || !shippingMethod) return;
+    if (!info) return;
     setPlacing(true);
 
     try {
-      // 1. Create order + order items via backend function (bypasses guest RLS readback issues)
       const orderPayload = {
         user_id: user?.id ?? null,
         guest_email: user ? null : info.email,
         subtotal,
-        shipping_cost: shippingCost,
+        shipping_cost: deliveryTotal,
         tax_rate: 0.13,
-        tax_amount: Math.round(tax * 100) / 100,
-        total: Math.round(total * 100) / 100,
+        tax_amount: tax,
+        total,
         shipping_name: info.fullName,
         shipping_address_line_1: info.addressLine1,
         shipping_address_line_2: info.addressLine2 || null,
@@ -51,10 +51,10 @@ const StepReview = () => {
         shipping_province: info.province,
         shipping_postal_code: info.postalCode,
         shipping_phone: info.phone || null,
-        shipping_method: shippingMethod,
+        shipping_method: "seller_defined",
         payment_status: "unpaid",
         status: "pending",
-        order_number: "placeholder", // trigger overwrites
+        order_number: "placeholder",
       };
 
       const orderItems = items.map((item) => ({
@@ -88,7 +88,7 @@ const StepReview = () => {
         order_number: createdOrder.order_number as string,
       };
 
-      // 3. Save address if requested
+      // Save address if requested
       if (info.saveAddress && user) {
         await supabase.from("shipping_addresses").insert({
           user_id: user.id,
@@ -103,28 +103,23 @@ const StepReview = () => {
         });
       }
 
-      // 4. Webhook (non-blocking)
+      // Webhook (non-blocking)
       dispatchWebhook({
         eventType: "order.created",
         data: {
           order_id: order.id,
           order_number: order.order_number,
           email: info.email,
-          total: Math.round(total * 100) / 100,
+          total,
           items: items.map((i) => ({
             name: i.name,
             qty: i.quantity,
             price: i.price,
           })),
-          shipping: {
-            method: shippingMethod,
-            cost: shippingCost,
-            address: `${info.addressLine1}, ${info.city}, ${info.province} ${info.postalCode}`,
-          },
         },
       });
 
-      // 5. Call Stripe checkout session Edge Function
+      // Stripe checkout session
       const { data: sessionData, error: sessionErr } = await supabase.functions.invoke(
         "create-checkout-session",
         { body: { order_id: order.id } }
@@ -133,14 +128,10 @@ const StepReview = () => {
       if (sessionErr || !sessionData?.url) {
         const msg = sessionData?.error || "Could not create payment session.";
         toast.error(msg);
-        // Order is created but payment failed to initiate — don't clear cart
         return;
       }
 
-      // 6. Redirect to Stripe first, then clear cart
-      // (clearing before redirect causes a brief flash of empty cart)
       window.location.href = sessionData.url;
-      // These run after redirect starts — browser is already navigating away
       setTimeout(() => {
         cartDispatch({ type: "CLEAR_CART" });
         reset();
@@ -153,6 +144,10 @@ const StepReview = () => {
       setPlacing(false);
     }
   };
+
+  // Separate main products from add-ons for display
+  const mainItems = items.filter((item) => !item.productId.includes("_option_"));
+  const addonItems = items.filter((item) => item.productId.includes("_option_"));
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -175,23 +170,7 @@ const StepReview = () => {
         </CardContent>
       </Card>
 
-      {/* Shipping method */}
-      <Card className="border-2 border-border">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-start mb-1">
-            <h3 className="font-serif font-semibold text-sm">Shipping Method</h3>
-            <button onClick={() => setStep(2)} className="text-muted-foreground hover:text-foreground">
-              <Edit2 className="w-4 h-4" />
-            </button>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {shippingLabels[shippingMethod ?? "standard"]} —{" "}
-            {shippingCost === 0 ? "FREE" : `$${shippingCost}`}
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Order items */}
+      {/* Order items with per-product delivery info */}
       <Card className="border-2 border-border">
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-2">
@@ -200,17 +179,49 @@ const StepReview = () => {
               <Edit2 className="w-4 h-4" />
             </Link>
           </div>
-          <div className="space-y-2">
-            {items.map((item) => (
-              <div key={item.productId} className="flex items-center gap-3 text-sm">
-                <img src={item.image} alt={item.name} className="w-10 h-10 object-cover border border-border" />
-                <div className="flex-1 min-w-0">
-                  <p className="truncate text-foreground">{item.name}</p>
-                  <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+          <div className="space-y-4">
+            {mainItems.map((item) => {
+              const relatedAddons = addonItems.filter((a) =>
+                a.productId.startsWith(item.productId + "_option_")
+              );
+              return (
+                <div key={item.productId} className="space-y-2">
+                  <div className="flex items-center gap-3 text-sm">
+                    <img src={item.image} alt={item.name} className="w-10 h-10 object-cover border border-border" />
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate text-foreground">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                    </div>
+                    <span className="font-mono font-medium">${(item.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  {/* Delivery info for this product */}
+                  {item.deliveryChoice === "delivery" && (
+                    <div className="ml-13 pl-3 border-l-2 border-border">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Truck className="w-3 h-3" />
+                        <span>Delivery to your address — ${item.deliveryPrice?.toFixed(2)} — est. {item.deliveryPrepDays || 5} business days prep</span>
+                      </div>
+                    </div>
+                  )}
+                  {item.deliveryChoice === "pickup" && (
+                    <div className="ml-13 pl-3 border-l-2 border-border space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <MapPin className="w-3 h-3" />
+                        <span>Pickup at {item.pickupAddress}, {item.pickupCity} — est. {item.deliveryPrepDays || 5} business days prep</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground/70 pl-4">You'll be notified when ready. Do not visit before confirmation.</p>
+                    </div>
+                  )}
+                  {/* Related add-ons */}
+                  {relatedAddons.map((addon) => (
+                    <div key={addon.productId} className="ml-13 pl-3 border-l-2 border-border flex items-center gap-3 text-xs">
+                      <span className="truncate text-muted-foreground flex-1">{addon.name} × {addon.quantity}</span>
+                      <span className="font-mono">${(addon.price * addon.quantity).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  ))}
                 </div>
-                <span className="font-mono font-medium">${(item.price * item.quantity).toLocaleString()}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -220,27 +231,35 @@ const StepReview = () => {
         <CardContent className="p-4 space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
-            <span>${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span>${subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Shipping</span>
-            <span>{shippingCost === 0 ? "FREE" : `$${shippingCost}`}</span>
-          </div>
+          {deliveryTotal > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Delivery</span>
+              <span>${deliveryTotal.toFixed(2)}</span>
+            </div>
+          )}
+          {deliveryTotal === 0 && items.some((i) => i.deliveryChoice === "pickup") && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Pickup</span>
+              <span>Free</span>
+            </div>
+          )}
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">HST (13%)</span>
-            <span>${tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span>${tax.toFixed(2)}</span>
           </div>
           <Separator />
           <div className="flex justify-between font-semibold text-lg">
             <span>Total</span>
-            <span>${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span>${total.toFixed(2)}</span>
           </div>
         </CardContent>
       </Card>
 
       {/* Place Order */}
       <div className="flex gap-3">
-        <Button variant="outline" onClick={() => setStep(2)} className="border-2">
+        <Button variant="outline" onClick={() => setStep(1)} className="border-2">
           Back
         </Button>
         <Button
