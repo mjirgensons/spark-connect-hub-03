@@ -459,10 +459,11 @@ const SellerProducts = () => {
                       <TableHead className="py-2 px-2 w-[90px] text-center cursor-pointer select-none" onClick={() => handleSort("availability_status")}>
                         <span className="inline-flex items-center justify-center w-full">Status<SortIcon col="availability_status" /></span>
                       </TableHead>
+                      <TableHead className="py-2 px-2 w-[90px] text-center">Listing</TableHead>
                       <TableHead className="py-2 px-1 w-[40px] text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
                         <span className="inline-flex items-center justify-center w-full"><Star className="w-3 h-3" /><SortIcon col="is_featured" /></span>
                       </TableHead>
-                      <TableHead className="py-2 px-2 w-[120px] text-right">Actions</TableHead>
+                      <TableHead className="py-2 px-2 w-[160px] text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
