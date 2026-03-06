@@ -320,7 +320,35 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
   const setDim = (key: string, val: string) => { if (useInches) { set(key, val ? String(inToMm(Number(val))) : ""); } else { set(key, val); } };
 
   // S5 helpers
-  const addOption = () => setOptions((p) => [...p, { option_type: "", option_name: "", inclusion_status: "not_included", price_retail: "", price_discounted: "", description: "", specs: [] }]);
+  const addOption = () => setOptions((p) => [...p, { option_type: "", option_name: "", inclusion_status: "not_included", price_retail: "", price_discounted: "", discount_pct: "", description: "", specs: [] }]);
+  // Add-on reverse math pricing handlers
+  const handleOptionRetailChange = (i: number, val: string) => {
+    setOptions((p) => p.map((o, idx) => {
+      if (idx !== i) return o;
+      const r = parseFloat(val);
+      const d = parseFloat(o.discount_pct);
+      const newSale = r > 0 && d > 0 && d < 100 ? (r * (1 - d / 100)).toFixed(2) : o.price_discounted;
+      return { ...o, price_retail: val, price_discounted: newSale };
+    }));
+  };
+  const handleOptionSaleChange = (i: number, val: string) => {
+    setOptions((p) => p.map((o, idx) => {
+      if (idx !== i) return o;
+      const r = parseFloat(o.price_retail);
+      const s = parseFloat(val);
+      const newDisc = r > 0 && s > 0 && s <= r ? String(Math.round((1 - s / r) * 100)) : "";
+      return { ...o, price_discounted: val, discount_pct: newDisc };
+    }));
+  };
+  const handleOptionDiscountChange = (i: number, val: string) => {
+    setOptions((p) => p.map((o, idx) => {
+      if (idx !== i) return o;
+      const r = parseFloat(o.price_retail);
+      const d = parseFloat(val);
+      const newSale = r > 0 && d >= 0 && d < 100 ? (r * (1 - d / 100)).toFixed(2) : o.price_discounted;
+      return { ...o, discount_pct: val, price_discounted: newSale };
+    }));
+  };
   const removeOption = (i: number) => setOptions((p) => p.filter((_, idx) => idx !== i));
   const updateOption = (i: number, key: string, val: string) => setOptions((p) => p.map((o, idx) => idx === i ? { ...o, [key]: val } : o));
   const addSpec = (i: number) => setOptions((p) => p.map((o, idx) => idx === i ? { ...o, specs: [...o.specs, { key: "", value: "" }] } : o));
