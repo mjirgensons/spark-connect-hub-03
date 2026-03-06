@@ -401,7 +401,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
   const [sectionErrors, setSectionErrors] = useState<Record<SectionKey, string[]>>({
     basic: [], dimensions: [], hardware: [], features: [],
-    pricing: [], addons: [], appliances: [], images: [], details: [],
+    pricing: [], addons: [], appliances: [], images: [], details: [], delivery: [],
   });
 
   // ── Section save handlers ──
