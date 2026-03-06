@@ -536,13 +536,43 @@ const Product = () => {
                       {displayOpts.map((opt: any) => renderAddOnRow(opt, true))}
                     </div>
                     <Separator />
-                    <div className="flex justify-between text-sm pt-1">
-                      <span className="text-muted-foreground">
-                        Product: ${productPrice.toLocaleString()}
-                        {addOnTotal > 0 && ` + Add-ons: $${addOnTotal.toLocaleString()}`}
-                      </span>
-                      <span className="font-bold text-foreground">Total: ${grandTotal.toLocaleString()}</span>
-                    </div>
+                    {(() => {
+                      const dOpt = product.delivery_option || 'pickup_only';
+                      const deliveryPriceNum = (dOpt === 'delivery' || (dOpt === 'both' && deliveryChoice === 'delivery')) ? Number(product.delivery_price || 0) : 0;
+                      const fullTotal = grandTotal + deliveryPriceNum;
+                      const fmt2 = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                      return (
+                        <div className="space-y-1 text-sm pt-1">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Product</span>
+                            <span>${fmt2(productPrice)}</span>
+                          </div>
+                          {addOnTotal > 0 && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Add-ons</span>
+                              <span>${fmt2(addOnTotal)}</span>
+                            </div>
+                          )}
+                          {deliveryPriceNum > 0 && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Delivery</span>
+                              <span>${fmt2(deliveryPriceNum)}</span>
+                            </div>
+                          )}
+                          {deliveryPriceNum === 0 && product.delivery_option && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Pickup</span>
+                              <span>Free</span>
+                            </div>
+                          )}
+                          <Separator />
+                          <div className="flex justify-between font-bold">
+                            <span>Total</span>
+                            <span>${fmt2(fullTotal)}</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
 
