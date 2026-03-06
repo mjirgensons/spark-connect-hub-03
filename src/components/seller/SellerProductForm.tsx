@@ -560,6 +560,17 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
         listing_status: targetStatus,
       };
 
+      // Handle resubmission: copy rejection reason to previous, increment count
+      if (listingStatus === "rejected" && targetStatus === "pending_review") {
+        (row as any).previous_rejection_reason = rejectionReason || null;
+        (row as any).listing_rejection_reason = null;
+        (row as any).resubmission_count = ((existingProduct as any)?.resubmission_count || 0) + 1;
+      }
+      // When saving as draft from rejected, clear the rejection reason
+      if (listingStatus === "rejected" && targetStatus === "draft") {
+        // Keep the rejection reason visible but change status
+      }
+
       const { error: updateErr } = await supabase.from("products").update(row as any).eq("id", pid);
       if (updateErr) throw new Error(updateErr.message);
 
