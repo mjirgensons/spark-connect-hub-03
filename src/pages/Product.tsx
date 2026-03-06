@@ -250,24 +250,28 @@ const Product = () => {
       },
     });
 
-    // Add checked add-ons (non-included ones with price)
+    // Add EACH checked add-on (excluding delivery-type and included-status)
     productOptions
-      .filter((opt: any) => checkedAddOns.has(opt.id) && opt.inclusion_status !== "included")
+      .filter((opt: any) => checkedAddOns.has(opt.id) && opt.option_name)
+      .filter((opt: any) => {
+        const nameLower = opt.option_name.toLowerCase();
+        const typeLower = (opt.option_type || "").toLowerCase();
+        return !nameLower.includes("delivery") && !nameLower.includes("shipping") && typeLower !== "delivery" && typeLower !== "shipping";
+      })
       .forEach((opt: any) => {
-        const price = getOptPrice(opt);
-        if (price > 0) {
-          dispatch({
-            type: "ADD_ITEM",
-            payload: {
-              productId: `${product.id}_option_${opt.id}`,
-              name: `${opt.option_name} (for ${product.product_name})`,
-              image: product.main_image_url || "/placeholder.svg",
-              price,
-              dimensions: "",
-              maxStock: 999,
-            },
-          });
-        }
+        const isIncluded = opt.inclusion_status === "included";
+        const price = isIncluded ? 0 : getOptPrice(opt);
+        dispatch({
+          type: "ADD_ITEM",
+          payload: {
+            productId: `${product.id}_option_${opt.id}`,
+            name: `${opt.option_name} (for ${product.product_name})`,
+            image: product.main_image_url || "/placeholder.svg",
+            price,
+            dimensions: "",
+            maxStock: 1,
+          },
+        });
       });
 
     toast.success(qtyInCart > 0 ? "Cart updated" : "Added to cart", {
