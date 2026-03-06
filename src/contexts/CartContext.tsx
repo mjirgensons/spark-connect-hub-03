@@ -68,8 +68,16 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     }
     case "CLEAR_CART":
       return recalc([]);
-    case "HYDRATE":
-      return recalc(action.payload);
+    case "HYDRATE": {
+      // Deduplicate by productId — keep first occurrence
+      const seen = new Set<string>();
+      const deduped = action.payload.filter((item) => {
+        if (seen.has(item.productId)) return false;
+        seen.add(item.productId);
+        return true;
+      });
+      return recalc(deduped);
+    }
     default:
       return state;
   }
