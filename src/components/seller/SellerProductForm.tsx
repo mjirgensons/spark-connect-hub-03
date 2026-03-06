@@ -106,11 +106,11 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
   // Track section save states
   const [sectionSaved, setSectionSaved] = useState<Record<SectionKey, boolean>>({
     basic: false, dimensions: false, hardware: false, features: false,
-    pricing: false, addons: false, appliances: false, images: false, details: false,
+    pricing: false, addons: false, appliances: false, images: false, details: false, delivery: false,
   });
   const [sectionDirty, setSectionDirty] = useState<Record<SectionKey, boolean>>({
     basic: false, dimensions: false, hardware: false, features: false,
-    pricing: false, addons: false, appliances: false, images: false, details: false,
+    pricing: false, addons: false, appliances: false, images: false, details: false, delivery: false,
   });
 
   // Track listing status
