@@ -322,12 +322,22 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
                   {displayOpts.map((opt: any) => renderAddOnRow(opt, true))}
                 </div>
                 <Separator />
-                <div className="flex justify-between text-sm pt-1">
-                  <span className="text-muted-foreground">
-                    Product: ${productPrice.toLocaleString()}
-                    {addOnTotal > 0 && ` + Add-ons: $${addOnTotal.toLocaleString()}`}
-                  </span>
-                  <span className="font-bold text-foreground">Total: ${grandTotal.toLocaleString()}</span>
+                <div className="space-y-1 text-sm pt-1">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Product</span>
+                    <span>${productPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  {addOnTotal > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Add-ons</span>
+                      <span>${addOnTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  )}
+                  <Separator />
+                  <div className="flex justify-between font-bold">
+                    <span>Total</span>
+                    <span>${grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
                 </div>
               </div>
             )}
