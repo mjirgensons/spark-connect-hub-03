@@ -296,6 +296,25 @@ const SellerProducts = () => {
     }
   };
 
+  const handleApproveProduct = async (product: Product) => {
+    const { error } = await supabase.from("products").update({ listing_status: "approved" } as any).eq("id", product.id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: `"${product.product_name}" approved` }); fetchProducts(); }
+  };
+
+  const handleRejectProduct = async () => {
+    if (!rejectTarget) return;
+    const { error } = await supabase.from("products").update({
+      listing_status: "rejected",
+      listing_rejection_reason: rejectReason || null,
+    } as any).eq("id", rejectTarget.id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: `"${rejectTarget.product_name}" rejected` }); fetchProducts(); }
+    setRejectDialogOpen(false);
+    setRejectTarget(null);
+    setRejectReason("");
+  };
+
   const handleDuplicate = async (product: Product) => {
     const { id: _id, deleted_at: _da, created_at: _ca, updated_at: _ua, ...rest } = product as any;
     const newName = `${product.product_name} (Copy)`;
