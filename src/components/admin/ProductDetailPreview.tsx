@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -9,8 +9,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Package, Ruler, Palette, Layers, Info, ChevronDown, MessageSquare, Eye } from "lucide-react";
 import ProductGallery from "@/components/ProductGallery";
-import ProductReviews from "@/components/ProductReviews";
-import ProductQA from "@/components/ProductQA";
+
+const ProductReviews = lazy(() => import("@/components/ProductReviews"));
+const ProductQA = lazy(() => import("@/components/ProductQA"));
 
 const MM_TO_INCH = 0.0393701;
 const fmtDim = (mm: number) => {
@@ -530,17 +531,21 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
 
           {/* Q&A */}
           <TabsContent value="qa" className="mt-0">
-            <ProductQA
-              productId={product.id}
-              prefillText={qaPrefill?.text}
-              prefillOptionId={qaPrefill?.optionId}
-              onPrefillConsumed={() => setQaPrefill(null)}
-            />
+            <Suspense fallback={<div className="py-8 text-center text-muted-foreground text-sm">Loading Q&A...</div>}>
+              <ProductQA
+                productId={product.id}
+                prefillText={qaPrefill?.text}
+                prefillOptionId={qaPrefill?.optionId}
+                onPrefillConsumed={() => setQaPrefill(null)}
+              />
+            </Suspense>
           </TabsContent>
 
           {/* REVIEWS */}
           <TabsContent value="reviews" className="mt-0">
-            <ProductReviews productId={product.id} />
+            <Suspense fallback={<div className="py-8 text-center text-muted-foreground text-sm">Loading Reviews...</div>}>
+              <ProductReviews productId={product.id} />
+            </Suspense>
           </TabsContent>
         </div>
       </Tabs>
