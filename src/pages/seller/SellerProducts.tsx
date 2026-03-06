@@ -177,6 +177,13 @@ const SellerProducts = () => {
       .map((c) => ({ ...c, count: countMap.get(c.id)! }));
   }, [products, categories]);
 
+  // Status counts
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { approved: 0, draft: 0, pending_review: 0, rejected: 0 };
+    for (const p of products) { counts[p.listing_status || "draft"] = (counts[p.listing_status || "draft"] || 0) + 1; }
+    return counts;
+  }, [products]);
+
   // ── Sort ──
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
