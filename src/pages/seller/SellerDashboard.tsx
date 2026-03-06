@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, Eye, ShoppingCart, FileText, PlusCircle } from "lucide-react";
+import { Package, Eye, ShoppingCart, FileText, PlusCircle, AlertTriangle, X } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface TopProduct {
@@ -46,6 +46,8 @@ const SellerDashboard = () => {
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [declinedCount, setDeclinedCount] = useState(0);
+  const [dismissedBanner, setDismissedBanner] = useState(false);
 
   useEffect(() => {
     if (!sellerId) return;
@@ -106,6 +108,15 @@ const SellerDashboard = () => {
         setRfqCount(0);
       }
 
+      // Declined products count
+      const { count: dCount } = await supabase
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .eq("seller_id", sellerId)
+        .eq("listing_status", "rejected")
+        .is("deleted_at", null);
+      setDeclinedCount(dCount ?? 0);
+
       // Categories
       const { data: cats } = await supabase.from("categories").select("id, name");
       if (cats) setCategories(cats);
@@ -129,6 +140,26 @@ const SellerDashboard = () => {
   return (
     <div className="space-y-8">
       <Breadcrumbs items={[{ label: "Dashboard" }]} />
+
+      {/* Declined products alert banner */}
+      {declinedCount > 0 && !dismissedBanner && (
+        <div className="flex items-center gap-3 p-4 rounded-lg border border-red-300 bg-red-500/10">
+          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-red-800">
+              ⚠ You have {declinedCount} declined product{declinedCount > 1 ? "s" : ""} that need attention.
+            </p>
+            <p className="text-xs text-red-700">Review and fix them to resubmit.</p>
+          </div>
+          <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-100" asChild>
+            <Link to={adminViewId ? `${productsUrl}&status=rejected` : `${productsUrl}?status=rejected`}>View Declined</Link>
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-red-600" onClick={() => setDismissedBanner(true)}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
+
       <h1 className="font-serif text-2xl md:text-3xl font-bold">
         Welcome back, {profile?.full_name?.split(" ")[0] || "there"}
       </h1>

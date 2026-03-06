@@ -180,9 +180,15 @@ const AdminProductReviewTab = () => {
             </div>
           )}
 
+          {(p as any).previous_rejection_reason && (
+            <div className="p-3 rounded bg-amber-50 border border-amber-200">
+              <p className="text-sm font-medium text-amber-800">Previously declined (resubmission #{(p as any).resubmission_count || 1}):</p>
+              <p className="text-sm text-amber-700">{(p as any).previous_rejection_reason}</p>
+            </div>
+          )}
           {p.listing_rejection_reason && (
             <div className="p-3 rounded bg-red-50 border border-red-200">
-              <p className="text-sm font-medium text-red-800">Previous rejection reason:</p>
+              <p className="text-sm font-medium text-red-800">Current rejection reason:</p>
               <p className="text-sm text-red-700">{p.listing_rejection_reason}</p>
             </div>
           )}
@@ -306,7 +312,16 @@ const AdminProductReviewTab = () => {
                     <TableCell className="text-sm">{(p.categories as any)?.name || "—"}</TableCell>
                     <TableCell className="text-right text-sm">${Number(p.price_retail_usd || 0).toLocaleString()}</TableCell>
                     <TableCell className="text-right text-sm">${Number(p.price_discounted_usd || 0).toLocaleString()}</TableCell>
-                    <TableCell>{statusBadge(p.listing_status)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        {statusBadge(p.listing_status)}
+                        {(p as any).resubmission_count > 0 && p.listing_status === "pending_review" && (
+                          <Badge variant="outline" className="text-[9px] px-1 py-0 border-amber-400 text-amber-700">
+                            Re #{(p as any).resubmission_count}
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {p.updated_at ? format(new Date(p.updated_at), "MMM d, yyyy") : "—"}
                     </TableCell>

@@ -92,6 +92,7 @@ const SellerProducts = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const adminViewId = searchParams.get("adminView");
+  const initialStatus = searchParams.get("status");
   const sellerId = adminViewId || user?.id;
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -104,7 +105,7 @@ const SellerProducts = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(initialStatus || null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectTarget, setRejectTarget] = useState<Product | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -375,6 +376,22 @@ const SellerProducts = () => {
     <div className="space-y-6">
       <Breadcrumbs items={[{ label: "Dashboard", href: adminViewId ? `/seller/dashboard?adminView=${adminViewId}` : "/seller/dashboard" }, { label: "Products" }]} />
 
+      {/* Declined products alert */}
+      {statusCounts.rejected > 0 && (
+        <div className="flex items-center gap-3 p-4 rounded-lg border border-red-300 bg-red-500/10">
+          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-red-800">
+              ⚠ You have {statusCounts.rejected} declined product{statusCounts.rejected > 1 ? "s" : ""} that need attention.
+            </p>
+            <p className="text-xs text-red-700">Review the rejection reasons and fix them to resubmit.</p>
+          </div>
+          <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-100" onClick={() => setSelectedStatus("rejected")}>
+            View Declined
+          </Button>
+        </div>
+      )}
+
       {/* Top bar */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex gap-2">
@@ -549,7 +566,7 @@ const SellerProducts = () => {
                     {filteredAndSorted.map((p) => {
                       const imgSummary = getImageOptSummary(p);
                       return (
-                        <TableRow key={p.id} className="text-xs">
+                        <TableRow key={p.id} className={`text-xs ${p.listing_status === "rejected" ? "bg-destructive/5" : ""}`}>
                           <TableCell className="py-1.5 px-2 font-medium max-w-[180px] truncate">{p.product_name}</TableCell>
                           <TableCell className="py-1.5 px-2 text-muted-foreground max-w-[110px] truncate">{p.product_code}</TableCell>
                           <TableCell className="py-1.5 px-2 max-w-[100px] truncate">{categories.find((c) => c.id === p.category_id)?.name || "—"}</TableCell>
@@ -599,6 +616,11 @@ const SellerProducts = () => {
                                <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => { setDeleteTarget(p); setDeleteDialogOpen(true); }}>
                                 <Trash2 className="w-3.5 h-3.5 text-destructive" />
                               </Button>
+                              {p.listing_status === "rejected" && (
+                                <Button variant="ghost" size="sm" className="h-7 text-xs px-2 text-amber-700" title="Fix & Resubmit" onClick={() => navigate(editUrl(p.id))}>
+                                  <Pencil className="w-3 h-3 mr-1" /> Fix
+                                </Button>
+                              )}
                               {adminViewId && p.listing_status !== "approved" && (
                                 <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600" title="Approve" onClick={() => handleApproveProduct(p)}>
                                   <Check className="w-3.5 h-3.5" />

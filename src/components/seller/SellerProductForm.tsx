@@ -560,6 +560,17 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
         listing_status: targetStatus,
       };
 
+      // Handle resubmission: copy rejection reason to previous, increment count
+      if (listingStatus === "rejected" && targetStatus === "pending_review") {
+        (row as any).previous_rejection_reason = rejectionReason || null;
+        (row as any).listing_rejection_reason = null;
+        (row as any).resubmission_count = ((existingProduct as any)?.resubmission_count || 0) + 1;
+      }
+      // When saving as draft from rejected, clear the rejection reason
+      if (listingStatus === "rejected" && targetStatus === "draft") {
+        // Keep the rejection reason visible but change status
+      }
+
       const { error: updateErr } = await supabase.from("products").update(row as any).eq("id", pid);
       if (updateErr) throw new Error(updateErr.message);
 
@@ -618,13 +629,31 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     toast({ title: "Withdrawn from review", description: "Product is now a draft. You can edit and resubmit." });
   };
 
-  const handleEditResubmit = async () => {
-    if (!liveProductId) return;
-    const { error } = await supabase.from("products").update({ listing_status: "draft", listing_rejection_reason: null } as any).eq("id", liveProductId);
-    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    setListingStatus("draft");
-    setRejectionReason("");
-    toast({ title: "Product unlocked for editing" });
+  const handleResubmit = async () => {
+    // Validate before resubmitting
+    const basicErrs = validateSection("basic");
+    const dimErrs = validateSection("dimensions");
+    const pricingErrs = validateSection("pricing");
+    const addonsErrs = validateSection("addons");
+    const imagesErrs = validateSection("images");
+    const detailsErrs = validateSection("details");
+    setSectionErrors(p => ({
+      ...p, basic: basicErrs, dimensions: dimErrs, pricing: pricingErrs,
+      addons: addonsErrs, images: imagesErrs, details: detailsErrs,
+    }));
+    const failedSections: string[] = [];
+    if (basicErrs.length) failedSections.push("Section 1 · Basic Information");
+    if (dimErrs.length) failedSections.push("Section 2 · Dimensions");
+    if (pricingErrs.length) failedSections.push("Section 5 · Pricing");
+    if (addonsErrs.length) failedSections.push("Section 6 · Add-Ons");
+    if (imagesErrs.length) failedSections.push("Section 8 · Images");
+    if (detailsErrs.length) failedSections.push("Section 9 · Description");
+    if (failedSections.length) {
+      toast({ title: "Cannot resubmit: missing required fields", description: failedSections.join(", "), variant: "destructive" });
+      return;
+    }
+    // Copy current rejection reason to previous, increment resubmission_count, then save
+    await handleFullSave("pending_review");
   };
 
   const handleSaveApproved = async () => {
@@ -636,7 +665,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     }
   };
 
-  // Read-only if pending review
+  // Read-only if pending review (rejected products should be editable)
   const isReadOnly = listingStatus === "pending_review";
 
   // ── Loading / error states for edit mode ──
@@ -687,15 +716,20 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
         </div>
       )}
       {listingStatus === "rejected" && (
-        <div className="flex items-center gap-3 p-4 rounded-lg border border-red-300 bg-red-500/10">
-          <X className="w-5 h-5 text-red-600 shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-red-800">Product Declined</p>
-            {rejectionReason && <p className="text-xs text-red-700 mt-1">Reason: {rejectionReason}</p>}
+        <div className="p-4 rounded-lg border border-red-300 bg-red-500/10 space-y-2">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-800">This product was declined by admin</p>
+              {rejectionReason && (
+                <div className="mt-2 p-3 rounded bg-red-100 border border-red-200">
+                  <p className="text-xs font-medium text-red-800">Admin's reason:</p>
+                  <p className="text-sm text-red-700 mt-1">{rejectionReason}</p>
+                </div>
+              )}
+              <p className="text-xs text-red-700 mt-2">Fix the issues noted above and click "Resubmit for Review" when ready.</p>
+            </div>
           </div>
-          <Button variant="outline" size="sm" onClick={handleEditResubmit}>
-            Edit & Resubmit
-          </Button>
         </div>
       )}
       {listingStatus === "approved" && (
@@ -989,7 +1023,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg">
           <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
             <div className="flex gap-2">
-              {(listingStatus === "draft" || !liveProductId) && (
+              {(listingStatus === "draft" || listingStatus === "rejected" || !liveProductId) && (
                 <Button variant="outline" onClick={() => handleFullSave("draft")} disabled={saving}>
                   {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   Save as Draft
@@ -1014,6 +1048,19 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
                   <Button onClick={() => setSubmitDialogOpen(true)} disabled={saving}>
                     <SendHorizontal className="w-4 h-4 mr-2" />
                     Submit for Review
+                  </Button>
+                )
+              )}
+              {listingStatus === "rejected" && (
+                autoApprove ? (
+                  <Button onClick={() => handleFullSave("approved")} disabled={saving}>
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
+                    Publish to Store
+                  </Button>
+                ) : (
+                  <Button onClick={() => handleResubmit()} disabled={saving}>
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <SendHorizontal className="w-4 h-4 mr-2" />}
+                    Resubmit for Review
                   </Button>
                 )
               )}
