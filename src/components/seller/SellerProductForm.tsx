@@ -994,7 +994,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg">
           <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
             <div className="flex gap-2">
-              {(listingStatus === "draft" || !liveProductId) && (
+              {(listingStatus === "draft" || listingStatus === "rejected" || !liveProductId) && (
                 <Button variant="outline" onClick={() => handleFullSave("draft")} disabled={saving}>
                   {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   Save as Draft
@@ -1019,6 +1019,19 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
                   <Button onClick={() => setSubmitDialogOpen(true)} disabled={saving}>
                     <SendHorizontal className="w-4 h-4 mr-2" />
                     Submit for Review
+                  </Button>
+                )
+              )}
+              {listingStatus === "rejected" && (
+                autoApprove ? (
+                  <Button onClick={() => handleFullSave("approved")} disabled={saving}>
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
+                    Publish to Store
+                  </Button>
+                ) : (
+                  <Button onClick={() => handleResubmit()} disabled={saving}>
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <SendHorizontal className="w-4 h-4 mr-2" />}
+                    Resubmit for Review
                   </Button>
                 )
               )}
