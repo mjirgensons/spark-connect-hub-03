@@ -108,6 +108,15 @@ const SellerDashboard = () => {
         setRfqCount(0);
       }
 
+      // Declined products count
+      const { count: dCount } = await supabase
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .eq("seller_id", sellerId)
+        .eq("listing_status", "rejected")
+        .is("deleted_at", null);
+      setDeclinedCount(dCount ?? 0);
+
       // Categories
       const { data: cats } = await supabase.from("categories").select("id, name");
       if (cats) setCategories(cats);
