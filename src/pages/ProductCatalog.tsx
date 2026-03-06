@@ -223,7 +223,7 @@ const ProductCatalog = () => {
         <div>
           <h3 className="font-sans text-sm font-semibold mb-2">Style</h3>
           <div className="space-y-2">
-            {uniqueStyles.map((s) => (
+            {uniqueStyles.map((s: string) => (
               <label key={s} className="flex items-center gap-2 cursor-pointer">
                 <Checkbox
                   checked={filters.styles.includes(s)}
