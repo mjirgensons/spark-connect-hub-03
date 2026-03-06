@@ -612,8 +612,8 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
       }
 
       setListingStatus(targetStatus);
-      setSectionDirty({ basic: false, dimensions: false, hardware: false, features: false, pricing: false, addons: false, appliances: false, images: false, details: false });
-      setSectionSaved({ basic: true, dimensions: true, hardware: true, features: true, pricing: true, addons: true, appliances: true, images: true, details: true });
+      setSectionDirty({ basic: false, dimensions: false, hardware: false, features: false, pricing: false, addons: false, appliances: false, images: false, details: false, delivery: false });
+      setSectionSaved({ basic: true, dimensions: true, hardware: true, features: true, pricing: true, addons: true, appliances: true, images: true, details: true, delivery: true });
 
       if (targetStatus === "draft") {
         toast({ title: "Saved as draft" });
