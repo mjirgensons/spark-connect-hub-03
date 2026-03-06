@@ -341,10 +341,10 @@ const Product = () => {
   tabs.push({ id: "qa", label: "Q&A" });
   tabs.push({ id: "reviews", label: "Reviews" });
 
-  const handleAskAboutAddOn = useCallback((opt: any) => {
+  const handleAskAboutAddOn = (opt: any) => {
     setQaPrefill({ text: `Question about: ${opt.option_name} — `, optionId: opt.id });
     setActiveTab("qa");
-  }, []);
+  };
 
   // ── Add-on row renderer (shared between hero compact & full tab) ──
   const renderAddOnRow = (opt: any, compact: boolean) => {
