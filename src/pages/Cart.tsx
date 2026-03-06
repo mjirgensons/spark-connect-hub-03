@@ -5,7 +5,7 @@ import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, CornerDownRight } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, CornerDownRight, Pencil } from "lucide-react";
 import TrustBadgeBar from "@/components/TrustBadgeBar";
 import { toast } from "sonner";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -72,6 +72,9 @@ const Cart = () => {
             <div className="flex-1 min-w-0">
               <Link to={`/product/${item.productId}`} className="font-serif font-semibold text-foreground hover:underline line-clamp-1">
                 {item.name}
+              </Link>
+              <Link to={`/product/${item.productId}`} className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5">
+                <Pencil className="w-3 h-3" /> Edit selections
               </Link>
               <p className="text-xs text-muted-foreground mt-0.5">{item.dimensions}</p>
               <p className="text-sm font-semibold text-foreground mt-1">${formatPrice(item.price)}</p>
