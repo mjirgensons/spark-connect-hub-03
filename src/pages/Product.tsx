@@ -219,7 +219,11 @@ const Product = () => {
         name: product.product_name,
         image: product.main_image_url || "/placeholder.svg",
         price: product.price_discounted_usd,
-        dimensions: `${product.width_mm} × ${product.height_mm} × ${product.depth_mm} mm`,
+        dimensions: hasSimpleWidth
+          ? `${product.width_mm} × ${product.height_mm} × ${product.depth_mm} mm`
+          : hasWallA
+          ? `A: ${product.wall_a_length_mm}${hasWallB ? ` × B: ${product.wall_b_length_mm}` : ""} | H: ${product.height_mm} × D: ${product.depth_mm} mm`
+          : `${product.height_mm} × ${product.depth_mm} mm`,
         maxStock: product.stock_level,
       },
     });
