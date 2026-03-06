@@ -944,6 +944,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
             <ImageUpload value={mainImageUrl} onChange={(v) => { setMainImageUrl(v); markDirty("images"); }} label="Main Image (auto-optimized to WebP)" />
             <MultiImageUpload value={galleryUrls.length ? galleryUrls : null} onChange={(v) => { setGalleryUrls(v); markDirty("images"); }} label="Gallery Images (auto-optimized to WebP, max 25)" />
             <FileUpload value={techDrawingUrl} onChange={(v) => { setTechDrawingUrl(v); markDirty("images"); }} label="Technical Drawings (PDF)" accept=".pdf" bucket="product-documents" />
+            {sectionErrors.images.includes("Main image is required") && <p className="text-xs text-destructive mt-1">Required — at least one main image must be uploaded</p>}
             </fieldset>
             {!isReadOnly && <SaveSectionButton onClick={() => saveSectionToDb("images")} saving={savingSection === "images"} saved={sectionSaved.images} dirty={sectionDirty.images} />}
           </AccordionContent>
