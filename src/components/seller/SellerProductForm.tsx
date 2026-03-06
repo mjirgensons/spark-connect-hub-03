@@ -20,7 +20,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Save, Plus, Trash2, Info, X, Eye, Check, AlertTriangle, SendHorizontal, Undo2, Truck, MapPin } from "lucide-react";
+import { Loader2, Save, Plus, Trash2, Info, X, Eye, Check, AlertTriangle, SendHorizontal, Undo2, Truck, MapPin, Globe } from "lucide-react";
 import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
 import { FileUpload } from "@/components/admin/FileUpload";
 import HardwareSection, { emptyHardwareDetails, type HardwareDetails } from "./HardwareSection";
@@ -98,6 +98,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
   const [autoSku, setAutoSku] = useState(true);
   const [editDataLoaded, setEditDataLoaded] = useState(false);
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   // Track the live product ID (may start null for new products, then set on first save)
   const [liveProductId, setLiveProductId] = useState<string | undefined>(initialProductId);
@@ -730,6 +731,21 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     }
   };
 
+  // Cancel with unsaved changes check
+  const hasAnyDirty = Object.values(sectionDirty).some(Boolean);
+  const handleCancel = () => {
+    if (hasAnyDirty) {
+      setCancelDialogOpen(true);
+    } else {
+      navigate("/seller/products");
+    }
+  };
+  const handleSaveAndLeave = async () => {
+    setCancelDialogOpen(false);
+    await handleFullSave("draft");
+    navigate("/seller/products");
+  };
+
   // Read-only if pending review (rejected products should be editable)
   const isReadOnly = listingStatus === "pending_review";
 
@@ -756,14 +772,16 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
   const labelCls = "text-xs font-semibold";
   const inputCls = "mt-1";
 
-  // Section header indicator
+  // Section header indicator — inline right after title text
   const SectionIndicator = ({ section }: { section: SectionKey }) => (
-    <span className="ml-2 inline-flex items-center gap-1">
+    <span className="ml-1.5 inline-flex items-center shrink-0">
       {sectionErrors[section]?.length > 0 && <span className="w-2 h-2 rounded-full bg-destructive inline-block" />}
       {sectionSaved[section] && !sectionDirty[section] && !sectionErrors[section]?.length && <Check className="w-3.5 h-3.5 text-green-600" />}
       {sectionDirty[section] && !sectionErrors[section]?.length && <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" />}
     </span>
   );
+
+
 
   return (
     <div className="space-y-4 max-w-3xl mx-auto pb-24">
@@ -798,13 +816,13 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
         </div>
       )}
       {listingStatus === "approved" && (
-        <div className="flex items-center gap-2 p-3 rounded-lg border border-green-300 bg-green-500/10">
-          <Check className="w-4 h-4 text-green-600 shrink-0" />
-          <p className="text-sm text-green-800 font-medium">This product is live on the store.</p>
+        <div className="flex items-center gap-2 p-4 rounded-lg border border-green-300 bg-green-500/10">
+          <Globe className="w-5 h-5 text-green-700 shrink-0" />
+          <p className="text-base text-green-900 font-bold">This product is live on the store.</p>
         </div>
       )}
 
-      <Accordion type="multiple" defaultValue={["basic", "dimensions", "hardware", "features", "pricing", "addons", "appliances", "images", "details", "delivery"]} className="space-y-3">
+      <Accordion type="multiple" defaultValue={[]} className="space-y-3">
 
         {/* ═══ SECTION 1 — BASIC INFO ═══ */}
         <AccordionItem value="basic" className="border rounded-lg">
@@ -930,10 +948,10 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="grid sm:grid-cols-3 gap-4">
-              <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_retail} onChange={(e) => handleRetailChange(e.target.value)} className="pl-7" /></div>
+              <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">CA$</span><Input type="number" step="0.01" value={f.price_retail} onChange={(e) => handleRetailChange(e.target.value)} className="pl-10" /></div>
                 {sectionErrors.pricing.includes("Retail Price must be greater than 0") && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
               </div>
-              <div><Label className={labelCls}>Sale Price (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_sale} onChange={(e) => handleSaleChange(e.target.value)} className="pl-7" /></div></div>
+              <div><Label className={labelCls}>Sale Price (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">CA$</span><Input type="number" step="0.01" value={f.price_sale} onChange={(e) => handleSaleChange(e.target.value)} className="pl-10" /></div></div>
               <div><Label className={labelCls}>Discount %</Label><div className="relative mt-1"><Input type="number" min="0" max="99" value={f.discount_pct} onChange={(e) => handleDiscountChange(e.target.value)} className="pr-7" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span></div></div>
             </div>
             <div className="flex items-center gap-3"><Checkbox id="custom-order" checked={f.is_custom_order} onCheckedChange={(v) => { set("is_custom_order", !!v); markDirty("pricing"); }} /><Label htmlFor="custom-order" className="text-sm">This is a custom/made-to-order product</Label></div>
@@ -970,9 +988,9 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
                 </div>
                 {opt.inclusion_status === "optional" && (
                   <div className="grid sm:grid-cols-3 gap-3">
-                    <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={opt.price_retail} onChange={(e) => handleOptionRetailChange(i, e.target.value)} className="pl-7" /></div></div>
+                    <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">CA$</span><Input type="number" step="0.01" value={opt.price_retail} onChange={(e) => handleOptionRetailChange(i, e.target.value)} className="pl-10" /></div></div>
                     <div><Label className={labelCls}>Discount %</Label><div className="relative mt-1"><Input type="number" min="0" max="99" value={opt.discount_pct} onChange={(e) => handleOptionDiscountChange(i, e.target.value)} className="pr-7" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span></div></div>
-                    <div><Label className={labelCls}>Sale Price (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={opt.price_discounted} onChange={(e) => handleOptionSaleChange(i, e.target.value)} className="pl-7" /></div></div>
+                    <div><Label className={labelCls}>Sale Price (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">CA$</span><Input type="number" step="0.01" value={opt.price_discounted} onChange={(e) => handleOptionSaleChange(i, e.target.value)} className="pl-10" /></div></div>
                   </div>
                 )}
                 <div><Label className={labelCls}>Description</Label><Input value={opt.description} onChange={(e) => updateOption(i, "description", e.target.value)} className={inputCls} /></div>
@@ -1116,8 +1134,8 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
                   <div>
                     <Label className={labelCls}>Delivery Price (CAD) *</Label>
                     <div className="relative mt-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
-                      <Input type="number" step="0.01" min="0" value={delivery.delivery_price} onChange={(e) => { setDelivery(p => ({ ...p, delivery_price: e.target.value })); markDirty("delivery"); }} className="pl-7" placeholder="e.g. 540" />
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">CA$</span>
+                      <Input type="number" step="0.01" min="0" value={delivery.delivery_price} onChange={(e) => { setDelivery(p => ({ ...p, delivery_price: e.target.value })); markDirty("delivery"); }} className="pl-10" placeholder="e.g. 540" />
                     </div>
                     {sectionErrors.delivery.some(e => e.includes("Delivery Price")) && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
                   </div>
@@ -1193,14 +1211,14 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
                 </Button>
               )}
               {listingStatus === "approved" && (
-                <Button variant="outline" onClick={handleSaveApproved} disabled={saving}>
+                <Button onClick={handleSaveApproved} disabled={saving} className="bg-foreground text-background hover:bg-foreground/90 min-h-[48px] px-8 text-base font-semibold">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   Save Changes
                 </Button>
               )}
             </div>
             <div className="flex gap-2">
-              <Button variant="ghost" onClick={() => navigate("/seller/products")} disabled={saving}>Cancel</Button>
+              <Button variant="ghost" onClick={handleCancel} disabled={saving}>Cancel</Button>
               {(listingStatus === "draft" || !liveProductId) && (
                 autoApprove ? (
                   <Button onClick={() => handleFullSave("approved")} disabled={saving}>
@@ -1246,6 +1264,22 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
             <AlertDialogAction onClick={() => { setSubmitDialogOpen(false); handleFullSave("pending_review"); }}>
               Submit for Review
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Cancel confirmation dialog */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>You have unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              Save before leaving?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => { setCancelDialogOpen(false); navigate("/seller/products"); }}>Discard Changes</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSaveAndLeave}>Save & Leave</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
