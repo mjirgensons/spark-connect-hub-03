@@ -1216,7 +1216,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
               )}
             </div>
             <div className="flex gap-2">
-              <Button variant="ghost" onClick={() => navigate("/seller/products")} disabled={saving}>Cancel</Button>
+              <Button variant="ghost" onClick={handleCancel} disabled={saving}>Cancel</Button>
               {(listingStatus === "draft" || !liveProductId) && (
                 autoApprove ? (
                   <Button onClick={() => handleFullSave("approved")} disabled={saving}>
