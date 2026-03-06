@@ -35,9 +35,10 @@ const SearchResults = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*, categories(name, slug)")
+        .select("*, categories(name, slug), profiles!products_seller_id_fkey(company_name)")
         .is("deleted_at", null)
-        .neq("availability_status", "Deactivated");
+        .in("availability_status", ["In Stock", "Low Stock"])
+        .eq("listing_status" as any, "approved");
       if (error) throw error;
       return data || [];
     },
