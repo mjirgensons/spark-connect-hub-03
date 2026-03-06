@@ -19,8 +19,11 @@ import {
 import {
   PlusCircle, Pencil, Trash2, Copy, Sparkles, AlertTriangle, ImageOff,
   RotateCcw, Trash, ArrowUp, ArrowDown, ArrowUpDown, Star, Layers, Search,
-  Check, X as XIcon,
+  Check, X as XIcon, MoreHorizontal, Wrench,
 } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { getImageOptSummary } from "@/components/admin/ImageUpload";
 
@@ -559,7 +562,7 @@ const SellerProducts = () => {
                       <TableHead className="py-2 px-1 w-[40px] text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
                         <span className="inline-flex items-center justify-center w-full"><Star className="w-3 h-3" /><SortIcon col="is_featured" /></span>
                       </TableHead>
-                      <TableHead className="py-2 px-2 w-[160px] text-right">Actions</TableHead>
+                      <TableHead className="py-2 px-2 w-[100px] text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -603,35 +606,44 @@ const SellerProducts = () => {
                             {p.is_featured ? <Star className="w-3.5 h-3.5 text-primary fill-primary mx-auto" /> : <span className="text-muted-foreground">—</span>}
                           </TableCell>
                           <TableCell className="py-1.5 px-2 text-right">
-                            <div className="flex justify-end gap-0">
-                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Variants" onClick={() => navigate(variantsUrl(p.id))}>
-                                <Layers className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Duplicate" onClick={() => handleDuplicate(p)}>
-                                <Copy className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Edit" onClick={() => navigate(editUrl(p.id))}>
-                                <Pencil className="w-3.5 h-3.5" />
-                              </Button>
-                               <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => { setDeleteTarget(p); setDeleteDialogOpen(true); }}>
-                                <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                              </Button>
-                              {p.listing_status === "rejected" && (
-                                <Button variant="ghost" size="sm" className="h-7 text-xs px-2 text-amber-700" title="Fix & Resubmit" onClick={() => navigate(editUrl(p.id))}>
-                                  <Pencil className="w-3 h-3 mr-1" /> Fix
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7">
+                                  <MoreHorizontal className="w-4 h-4" />
                                 </Button>
-                              )}
-                              {adminViewId && p.listing_status !== "approved" && (
-                                <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600" title="Approve" onClick={() => handleApproveProduct(p)}>
-                                  <Check className="w-3.5 h-3.5" />
-                                </Button>
-                              )}
-                              {adminViewId && p.listing_status !== "rejected" && (
-                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" title="Reject" onClick={() => { setRejectTarget(p); setRejectDialogOpen(true); }}>
-                                  <XIcon className="w-3.5 h-3.5" />
-                                </Button>
-                              )}
-                            </div>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem onClick={() => navigate(editUrl(p.id))}>
+                                  <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => navigate(variantsUrl(p.id))}>
+                                  <Layers className="w-3.5 h-3.5 mr-2" /> Variants
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDuplicate(p)}>
+                                  <Copy className="w-3.5 h-3.5 mr-2" /> Duplicate
+                                </DropdownMenuItem>
+                                {p.listing_status === "rejected" && (
+                                  <DropdownMenuItem onClick={() => navigate(editUrl(p.id))}>
+                                    <Wrench className="w-3.5 h-3.5 mr-2" /> Fix & Resubmit
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator />
+                                {adminViewId && p.listing_status !== "approved" && (
+                                  <DropdownMenuItem className="text-green-600" onClick={() => handleApproveProduct(p)}>
+                                    <Check className="w-3.5 h-3.5 mr-2" /> Approve
+                                  </DropdownMenuItem>
+                                )}
+                                {adminViewId && p.listing_status !== "rejected" && (
+                                  <DropdownMenuItem className="text-destructive" onClick={() => { setRejectTarget(p); setRejectDialogOpen(true); }}>
+                                    <XIcon className="w-3.5 h-3.5 mr-2" /> Reject
+                                  </DropdownMenuItem>
+                                )}
+                                {adminViewId && <DropdownMenuSeparator />}
+                                <DropdownMenuItem className="text-destructive" onClick={() => { setDeleteTarget(p); setDeleteDialogOpen(true); }}>
+                                  <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
                       );

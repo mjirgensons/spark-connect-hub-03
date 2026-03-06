@@ -219,7 +219,11 @@ const Product = () => {
         name: product.product_name,
         image: product.main_image_url || "/placeholder.svg",
         price: product.price_discounted_usd,
-        dimensions: `${product.width_mm} × ${product.height_mm} × ${product.depth_mm} mm`,
+        dimensions: hasSimpleWidth
+          ? `${product.width_mm} × ${product.height_mm} × ${product.depth_mm} mm`
+          : hasWallA
+          ? `A: ${product.wall_a_length_mm}${hasWallB ? ` × B: ${product.wall_b_length_mm}` : ""} | H: ${product.height_mm} × D: ${product.depth_mm} mm`
+          : `${product.height_mm} × ${product.depth_mm} mm`,
         maxStock: product.stock_level,
       },
     });
@@ -265,12 +269,16 @@ const Product = () => {
   const hasAppliances = productAppliances.length > 0;
   const hasDescription = !!product.long_description;
 
-  // Spec items
-  const dimParts: string[] = [];
-  if (product.width_mm && product.width_mm > 0) dimParts.push(`${product.width_mm}`);
-  if (product.height_mm && product.height_mm > 0) dimParts.push(`${product.height_mm}`);
-  if (product.depth_mm && product.depth_mm > 0) dimParts.push(`${product.depth_mm}`);
-  const hasDimensions = dimParts.length > 0;
+  // Spec items — handle multi-wall layouts
+  const hasSimpleWidth = product.width_mm && product.width_mm > 0;
+  const hasWallA = product.wall_a_length_mm && product.wall_a_length_mm > 0;
+  const hasWallB = product.wall_b_length_mm && product.wall_b_length_mm > 0;
+  const hasWallC = product.wall_c_length_mm && product.wall_c_length_mm > 0;
+  const hasMultiWall = hasWallA;
+  const hasAnyWidth = hasSimpleWidth || hasMultiWall;
+  const hasHeight = product.height_mm && product.height_mm > 0;
+  const hasDepth = product.depth_mm && product.depth_mm > 0;
+  const hasDimensions = hasAnyWidth || hasHeight || hasDepth;
 
   const hwSections = hasHw
     ? [
@@ -288,11 +296,26 @@ const Product = () => {
 
   const specItems: { icon: React.ReactNode; label: string; value: string }[] = [];
   if (hasDimensions) {
-    const w = fmtDim(product.width_mm);
-    const h = fmtDim(product.height_mm);
-    const d = fmtDim(product.depth_mm);
-    const parts = [w && `W: ${w}`, h && `H: ${h}`, d && `D: ${d}`].filter(Boolean);
-    specItems.push({ icon: <Ruler className="w-4 h-4 text-muted-foreground" />, label: "Dimensions", value: parts.join("  ·  ") });
+    if (hasMultiWall && !hasSimpleWidth) {
+      // Multi-wall format
+      const wallParts = [
+        hasWallA && `Wall A: ${fmtDim(product.wall_a_length_mm!)}`,
+        hasWallB && `Wall B: ${fmtDim(product.wall_b_length_mm!)}`,
+        hasWallC && `Wall C: ${fmtDim(product.wall_c_length_mm!)}`,
+      ].filter(Boolean);
+      const otherParts = [
+        hasHeight && `H: ${fmtDim(product.height_mm)}`,
+        hasDepth && `D: ${fmtDim(product.depth_mm)}`,
+      ].filter(Boolean);
+      specItems.push({ icon: <Ruler className="w-4 h-4 text-muted-foreground" />, label: "Dimensions", value: [...wallParts, ...otherParts].join("  ·  ") });
+    } else {
+      // Simple W × H × D format
+      const w = fmtDim(product.width_mm);
+      const h = fmtDim(product.height_mm);
+      const d = fmtDim(product.depth_mm);
+      const parts = [w && `W: ${w}`, h && `H: ${h}`, d && `D: ${d}`].filter(Boolean);
+      specItems.push({ icon: <Ruler className="w-4 h-4 text-muted-foreground" />, label: "Dimensions", value: parts.join("  ·  ") });
+    }
   }
   if (product.color) specItems.push({ icon: <Palette className="w-4 h-4 text-muted-foreground" />, label: "Color", value: product.color });
   if (product.material) specItems.push({ icon: <Layers className="w-4 h-4 text-muted-foreground" />, label: "Material", value: product.material });

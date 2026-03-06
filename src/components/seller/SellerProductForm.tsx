@@ -368,7 +368,9 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
       if (!f.category_id) errors.push("Category must be selected");
     }
     if (section === "dimensions") {
-      if (!f.width_mm || Number(f.width_mm) <= 0) errors.push("Width must be greater than 0");
+      const hasWidth = f.width_mm && Number(f.width_mm) > 0;
+      const hasWallA = f.wall_a_length_mm && Number(f.wall_a_length_mm) > 0;
+      if (!hasWidth && !hasWallA) errors.push("Width or Wall A must be greater than 0");
       if (!f.height_mm || Number(f.height_mm) <= 0) errors.push("Height must be greater than 0");
       if (!f.depth_mm || Number(f.depth_mm) <= 0) errors.push("Depth must be greater than 0");
     }
@@ -820,7 +822,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
               <LayoutVisual type={layoutType} dims={{ width_mm: dimVal("width_mm"), wall_a: dimVal("wall_a_length_mm"), wall_b: dimVal("wall_b_length_mm"), wall_c: dimVal("wall_c_length_mm") }} />
               <div className="grid sm:grid-cols-3 gap-4">
                 {(layoutType === "straight" || layoutType === "standard" || !layoutType) && <div><Label className={labelCls}>{layoutType === "straight" ? "Wall Length" : "Width"} ({useInches ? "in" : "mm"}) *</Label><Input type="number" value={dimVal("width_mm")} onChange={(e) => setDim("width_mm", e.target.value)} className={inputCls} />
-                  {sectionErrors.dimensions.includes("Width must be greater than 0") && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
+                  {sectionErrors.dimensions.includes("Width or Wall A must be greater than 0") && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
                 </div>}
                 {(layoutType === "l_shape" || layoutType === "u_shape") && (<><div><Label className={labelCls}>Wall A ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("wall_a_length_mm")} onChange={(e) => setDim("wall_a_length_mm", e.target.value)} className={inputCls} /></div><div><Label className={labelCls}>Wall B ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("wall_b_length_mm")} onChange={(e) => setDim("wall_b_length_mm", e.target.value)} className={inputCls} /></div></>)}
                 {layoutType === "u_shape" && <div><Label className={labelCls}>Wall C ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("wall_c_length_mm")} onChange={(e) => setDim("wall_c_length_mm", e.target.value)} className={inputCls} /></div>}
