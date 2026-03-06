@@ -258,6 +258,7 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
         inclusion_status: o.inclusion_status || "not_included",
         price_retail: o.price_retail ? String(o.price_retail) : "",
         price_discounted: o.price_discounted ? String(o.price_discounted) : "",
+        discount_pct: o.discount_percentage ? String(o.discount_percentage) : "",
         description: o.description || "",
         specs: o.specifications
           ? Object.entries(o.specifications as Record<string, string>).map(([key, value]) => ({ key, value }))
