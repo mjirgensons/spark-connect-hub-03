@@ -731,7 +731,6 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
               <Button variant="outline" onClick={addAppliance}><Plus className="w-4 h-4 mr-2" />Add Compatible Appliance</Button>
             </AccordionContent>
           </AccordionItem>
-        )}
 
         {/* ═══ SECTION 8 — IMAGES & DOCUMENTS ═══ */}
         <AccordionItem value="images" className="border rounded-lg">
