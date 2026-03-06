@@ -307,6 +307,51 @@ const Product = () => {
 
             </div>
 
+            {/* Add-On Options */}
+            {productOptions.length > 0 && (() => {
+              const displayOpts = productOptions.filter((o: any) => o.option_name);
+              if (!displayOpts.length) return null;
+              return (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <h2 className="text-lg font-serif font-semibold text-foreground">Add-Ons & Options</h2>
+                    {displayOpts.map((opt: any) => {
+                      const hasDiscount = Number(opt.discount_percentage) > 0 && Number(opt.price_retail) > Number(opt.price_discounted);
+                      return (
+                        <div key={opt.id} className="border rounded-md p-3 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-semibold text-foreground">{opt.option_name}</p>
+                              <Badge variant="outline" className="text-[10px]">{(opt.option_type || "").replace(/_/g, " ")}</Badge>
+                              <Badge variant={opt.inclusion_status === "included" ? "default" : "secondary"} className="text-[10px]">
+                                {opt.inclusion_status === "included" ? "Included" : opt.inclusion_status === "optional" ? "Optional" : "Not Included"}
+                              </Badge>
+                            </div>
+                            {opt.inclusion_status === "optional" && Number(opt.price_discounted) > 0 && (
+                              <div className="flex items-center gap-2">
+                                {hasDiscount && (
+                                  <>
+                                    <span className="text-xs text-muted-foreground line-through">${Number(opt.price_retail).toLocaleString()}</span>
+                                    <Badge variant="destructive" className="text-[10px]">-{opt.discount_percentage}%</Badge>
+                                  </>
+                                )}
+                                <span className="text-sm font-bold text-foreground">${Number(opt.price_discounted).toLocaleString()}</span>
+                              </div>
+                            )}
+                            {opt.inclusion_status === "optional" && !Number(opt.price_discounted) && Number(opt.price_retail) > 0 && (
+                              <span className="text-sm font-bold text-foreground">${Number(opt.price_retail).toLocaleString()}</span>
+                            )}
+                          </div>
+                          {opt.description && <p className="text-xs text-muted-foreground">{opt.description}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              );
+            })()}
+
             {/* Hardware Details */}
             {(() => {
               const hw = (product as any).hardware_details as any;
