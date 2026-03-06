@@ -103,6 +103,14 @@ const Header = () => {
 
           <div className="flex items-center gap-1">
             <SearchBar />
+            {user && (
+              <Link to="/messages" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+                <MessageSquare className="w-5 h-5" />
+                {buyerUnread > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{buyerUnread}</span>
+                )}
+              </Link>
+            )}
             <Link to="/account/wishlist" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
               <Heart className="w-5 h-5" />
               {wishlistCount > 0 && (
