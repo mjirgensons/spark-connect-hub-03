@@ -481,6 +481,20 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
   // ── FULL SUBMIT ──
   const handleFullSave = async (targetStatus: "draft" | "pending_review" | "approved") => {
     if (!user) { toast({ title: "Not authenticated", variant: "destructive" }); return; }
+
+    // On submit for review / publish, validate all mandatory sections
+    if (targetStatus !== "draft") {
+      const basicErrs = validateSection("basic");
+      const dimErrs = validateSection("dimensions");
+      setSectionErrors(p => ({ ...p, basic: basicErrs, dimensions: dimErrs }));
+      const failedSections: string[] = [];
+      if (basicErrs.length) failedSections.push("Basic Information");
+      if (dimErrs.length) failedSections.push("Dimensions");
+      if (failedSections.length) {
+        toast({ title: "Missing required fields", description: `Fix errors in: ${failedSections.join(", ")}`, variant: "destructive" });
+        return;
+      }
+    }
     setSaving(true);
     try {
       const pid = await ensureProductExists();
