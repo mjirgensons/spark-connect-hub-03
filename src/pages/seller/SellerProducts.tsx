@@ -479,7 +479,9 @@ const SellerProducts = () => {
                           <TableCell className="py-1.5 px-2 text-right font-mono">${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
                           <TableCell className="py-1.5 px-2 text-center">{p.stock_level}</TableCell>
                           <TableCell className="py-1.5 px-2 text-center">
-                            {statusBadge(p.availability_status)}
+                            <button onClick={() => handleToggleActivation(p)} className="cursor-pointer" title="Toggle activation">
+                              {statusBadge(p.availability_status)}
+                            </button>
                           </TableCell>
                           <TableCell className="py-1.5 px-1 text-center">
                             {p.is_featured ? <Star className="w-3.5 h-3.5 text-primary fill-primary mx-auto" /> : <span className="text-muted-foreground">—</span>}
