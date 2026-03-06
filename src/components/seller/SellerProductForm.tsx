@@ -639,7 +639,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 1 — BASIC INFO ═══ */}
         <AccordionItem value="basic" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">1 · Basic Information <SectionIndicator section="basic" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Basic Information <SectionIndicator section="basic" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="grid sm:grid-cols-2 gap-4">
