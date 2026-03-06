@@ -370,6 +370,26 @@ const AdminSellersTab = () => {
                     {selectedSeller.seller_status || "pending"}
                   </Badge>
                 </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-muted-foreground w-28">Auto-approve</span>
+                  <Switch
+                    checked={selectedSeller.auto_approve_products}
+                    onCheckedChange={async (checked) => {
+                      const { error } = await supabase
+                        .from("profiles")
+                        .update({ auto_approve_products: checked } as any)
+                        .eq("id", selectedSeller.id);
+                      if (error) {
+                        toast({ title: "Error", description: error.message, variant: "destructive" });
+                      } else {
+                        toast({ title: checked ? "Seller marked as trusted — products auto-approved" : "Auto-approve disabled" });
+                        setSelectedSeller({ ...selectedSeller, auto_approve_products: checked });
+                        queryClient.invalidateQueries({ queryKey: ["admin-sellers"] });
+                      }
+                    }}
+                  />
+                  <span className="text-xs text-muted-foreground">{selectedSeller.auto_approve_products ? "Trusted seller" : "Requires review"}</span>
+                </div>
               </div>
             </>
           )}
