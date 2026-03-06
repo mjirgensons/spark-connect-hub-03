@@ -45,8 +45,7 @@ const AdminProductReviewTab = () => {
     queryFn: async () => {
       let q = supabase
         .from("products")
-        .select("*, categories(name), profiles!products_seller_id_fkey(full_name, company_name, auto_approve_products, created_at, seller_status)")
-        .is("deleted_at", null)
+        .select("*, categories(name, slug), profiles!products_seller_id_fkey(full_name, company_name, auto_approve_products, created_at, seller_status)")
         .order("updated_at", { ascending: false });
 
       if (filter === "pending_review") q = q.eq("listing_status", "pending_review");
