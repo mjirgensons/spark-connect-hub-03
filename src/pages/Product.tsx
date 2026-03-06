@@ -89,6 +89,27 @@ const Product = () => {
     );
   }
 
+  // Check if product is approved for public viewing
+  const searchParams = new URLSearchParams(window.location.search);
+  const isAdminView = !!searchParams.get("adminView");
+  const isNotApproved = product.listing_status !== "approved" && !isAdminView;
+
+  if (isNotApproved) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-20 text-center">
+          <h1 className="text-2xl font-serif font-bold text-foreground mb-4">Product Not Available</h1>
+          <p className="text-muted-foreground mb-6">This product is not currently available for viewing.</p>
+          <Link to="/browse">
+            <Button variant="outline"><ArrowLeft className="w-4 h-4 mr-2" />Browse Products</Button>
+          </Link>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   const savings = product.price_retail_usd - product.price_discounted_usd;
   const isDeactivated = product.availability_status === "Deactivated";
 

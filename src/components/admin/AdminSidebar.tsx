@@ -24,6 +24,7 @@ import {
   Webhook,
   FlaskConical,
   Store,
+  ClipboardCheck,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -33,6 +34,7 @@ export type AdminSection =
   | "quotes"
   | "customers"
   | "sellers"
+  | "product-review"
   | "reviews"
   | "email"
   | "email-test-console"
@@ -64,6 +66,7 @@ const navGroups: NavGroup[] = [
       { id: "orders", label: "Orders", icon: ShoppingCart },
       { id: "quotes", label: "Quotes", icon: FileText },
       { id: "sellers", label: "Sellers", icon: Store },
+      { id: "product-review", label: "Product Review", icon: ClipboardCheck },
       { id: "customers", label: "Customers", icon: Users },
       { id: "reviews", label: "Reviews", icon: MessageSquare },
       { id: "email", label: "Email", icon: Send },
