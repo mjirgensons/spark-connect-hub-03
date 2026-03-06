@@ -831,7 +831,9 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="grid sm:grid-cols-3 gap-4">
-              <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_retail} onChange={(e) => handleRetailChange(e.target.value)} className="pl-7" /></div></div>
+              <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_retail} onChange={(e) => handleRetailChange(e.target.value)} className="pl-7" /></div>
+                {sectionErrors.pricing.includes("Retail Price must be greater than 0") && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
+              </div>
               <div><Label className={labelCls}>Sale Price (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_sale} onChange={(e) => handleSaleChange(e.target.value)} className="pl-7" /></div></div>
               <div><Label className={labelCls}>Discount %</Label><div className="relative mt-1"><Input type="number" min="0" max="99" value={f.discount_pct} onChange={(e) => handleDiscountChange(e.target.value)} className="pr-7" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span></div></div>
             </div>
