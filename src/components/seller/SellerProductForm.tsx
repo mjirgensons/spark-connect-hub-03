@@ -665,7 +665,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     }
   };
 
-  // Read-only if pending review
+  // Read-only if pending review (rejected products should be editable)
   const isReadOnly = listingStatus === "pending_review";
 
   // ── Loading / error states for edit mode ──

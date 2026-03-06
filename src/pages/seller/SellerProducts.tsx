@@ -375,6 +375,22 @@ const SellerProducts = () => {
     <div className="space-y-6">
       <Breadcrumbs items={[{ label: "Dashboard", href: adminViewId ? `/seller/dashboard?adminView=${adminViewId}` : "/seller/dashboard" }, { label: "Products" }]} />
 
+      {/* Declined products alert */}
+      {statusCounts.rejected > 0 && (
+        <div className="flex items-center gap-3 p-4 rounded-lg border border-red-300 bg-red-500/10">
+          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-red-800">
+              ⚠ You have {statusCounts.rejected} declined product{statusCounts.rejected > 1 ? "s" : ""} that need attention.
+            </p>
+            <p className="text-xs text-red-700">Review the rejection reasons and fix them to resubmit.</p>
+          </div>
+          <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-100" onClick={() => setSelectedStatus("rejected")}>
+            View Declined
+          </Button>
+        </div>
+      )}
+
       {/* Top bar */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex gap-2">
