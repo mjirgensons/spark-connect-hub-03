@@ -30,6 +30,7 @@ import AdminWebhooksTab from "@/components/admin/AdminWebhooksTab";
 import AdminSellersTab from "@/components/admin/AdminSellersTab";
 import EmailTestConsoleTab from "@/components/admin/EmailTestConsoleTab";
 import AdminProductReviewTab from "@/components/admin/AdminProductReviewTab";
+import AdminQATab from "@/components/admin/AdminQATab";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 
