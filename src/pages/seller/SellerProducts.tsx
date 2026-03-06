@@ -67,16 +67,20 @@ const statusBadge = (status: string) => {
   }
 };
 
-const listingStatusBadge = (status: string) => {
+const listingStatusBadge = (status: string, rejectionReason?: string | null) => {
   switch (status) {
     case "approved":
-      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-green-500/15 text-green-700 border-green-300 whitespace-nowrap">Approved</Badge>;
+      return <Badge className="text-[9px] px-1.5 py-0 bg-green-600 text-green-50 hover:bg-green-700 whitespace-nowrap border-0">Live</Badge>;
     case "pending_review":
-      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-yellow-500/15 text-yellow-700 border-yellow-300 whitespace-nowrap">Pending Review</Badge>;
+      return <Badge className="text-[9px] px-1.5 py-0 bg-amber-500 text-amber-50 hover:bg-amber-600 whitespace-nowrap border-0">In Review</Badge>;
     case "rejected":
-      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-red-500/15 text-red-700 border-red-300 whitespace-nowrap">Rejected</Badge>;
+      return (
+        <span title={rejectionReason ? `Reason: ${rejectionReason}` : "No reason provided"} className="cursor-help">
+          <Badge className="text-[9px] px-1.5 py-0 bg-red-600 text-red-50 hover:bg-red-700 whitespace-nowrap border-0">Declined</Badge>
+        </span>
+      );
     case "draft":
-      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-muted text-muted-foreground whitespace-nowrap">Draft</Badge>;
+      return <Badge className="text-[9px] px-1.5 py-0 bg-yellow-400 text-yellow-900 hover:bg-yellow-500 whitespace-nowrap border-0">Draft</Badge>;
     default:
       return <Badge variant="outline" className="text-[9px] px-1.5 py-0 whitespace-nowrap">{status}</Badge>;
   }
