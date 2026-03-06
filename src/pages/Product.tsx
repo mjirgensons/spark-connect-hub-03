@@ -844,6 +844,105 @@ const Product = () => {
                     </TabsContent>
                   )}
 
+                  {/* DELIVERY TAB */}
+                  <TabsContent value="delivery" className="mt-0">
+                    <div className="space-y-6">
+                      {product.delivery_option === 'delivery' && (
+                        <Card className="border-2">
+                          <CardContent className="p-5 space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Truck className="w-5 h-5 text-primary" />
+                              <h3 className="text-lg font-serif font-semibold text-foreground">Delivery Available</h3>
+                            </div>
+                            <p className="text-2xl font-bold text-foreground">${Number(product.delivery_price || 0).toFixed(2)} CAD</p>
+                            {product.delivery_zone && <p className="text-sm text-muted-foreground">Delivery Zone: {product.delivery_zone}</p>}
+                            <p className="text-sm text-muted-foreground">Estimated Preparation Time: {product.delivery_prep_days || 5} business days</p>
+                            <p className="text-xs text-muted-foreground">The seller will prepare your order and deliver it to your address. You will receive a notification when your order is being prepared.</p>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {product.delivery_option === 'pickup_only' && (
+                        <Card className="border-2">
+                          <CardContent className="p-5 space-y-3">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-5 h-5 text-primary" />
+                              <h3 className="text-lg font-serif font-semibold text-foreground">Pickup Only</h3>
+                            </div>
+                            <p className="text-sm text-foreground">{[product.pickup_address, product.pickup_city, product.pickup_province, product.pickup_postal_code].filter(Boolean).join(", ")}</p>
+                            {product.pickup_phone && <p className="text-sm text-muted-foreground">Phone: {product.pickup_phone}</p>}
+                            <p className="text-sm text-muted-foreground">Estimated Preparation Time: {product.pickup_prep_days || 5} business days</p>
+                            <p className="text-xs text-muted-foreground">The seller will prepare your order for pickup at the address above. You will be notified when your order is ready. Please do not visit the pickup location before receiving confirmation.</p>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {product.delivery_option === 'both' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-2">
+                            <CardContent className="p-5 space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Truck className="w-5 h-5 text-primary" />
+                                <h3 className="text-lg font-serif font-semibold text-foreground">Delivery</h3>
+                              </div>
+                              <p className="text-2xl font-bold text-foreground">${Number(product.delivery_price || 0).toFixed(2)} CAD</p>
+                              {product.delivery_zone && <p className="text-sm text-muted-foreground">Delivery Zone: {product.delivery_zone}</p>}
+                              <p className="text-sm text-muted-foreground">Estimated Preparation Time: {product.delivery_prep_days || 5} business days</p>
+                              <p className="text-xs text-muted-foreground">The seller will prepare your order and deliver it to your address. You will receive a notification when your order is being prepared.</p>
+                            </CardContent>
+                          </Card>
+                          <Card className="border-2">
+                            <CardContent className="p-5 space-y-3">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-primary" />
+                                <h3 className="text-lg font-serif font-semibold text-foreground">Pickup (Free)</h3>
+                              </div>
+                              <p className="text-sm text-foreground">{[product.pickup_address, product.pickup_city, product.pickup_province, product.pickup_postal_code].filter(Boolean).join(", ")}</p>
+                              {product.pickup_phone && <p className="text-sm text-muted-foreground">Phone: {product.pickup_phone}</p>}
+                              <p className="text-sm text-muted-foreground">Estimated Preparation Time: {product.pickup_prep_days || 5} business days</p>
+                              <p className="text-xs text-muted-foreground">The seller will prepare your order for pickup at the address above. You will be notified when your order is ready.</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      )}
+
+                      {(!product.delivery_option || !['delivery', 'pickup_only', 'both'].includes(product.delivery_option)) && (
+                        <Card className="border">
+                          <CardContent className="p-5 text-center space-y-3">
+                            <p className="text-sm text-muted-foreground">Delivery and pickup details have not been configured for this product. Please contact the seller for arrangements.</p>
+                            {product.seller_id && (
+                              <ContactSellerButton productId={product.id} sellerId={product.seller_id} productName={product.product_name} />
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {product.delivery_option === 'both' && (
+                        <p className="text-xs text-muted-foreground text-center">You can select your preferred option when adding to cart.</p>
+                      )}
+
+                      {/* Ask about Delivery */}
+                      <Card className="border">
+                        <CardContent className="p-5">
+                          <div className="flex items-center gap-2 mb-2">
+                            <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                            <p className="text-sm text-foreground font-medium">Have questions about delivery or pickup for this product?</p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setQaPrefill({ text: "Question about delivery: ", optionId: "" });
+                              setActiveTab("qa");
+                            }}
+                          >
+                            Ask a Question about Delivery
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+
                   {/* APPLIANCES */}
                   {hasAppliances && (
                     <TabsContent value="appliances" className="mt-0">
