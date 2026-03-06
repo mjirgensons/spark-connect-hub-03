@@ -534,7 +534,7 @@ const Product = () => {
 
         {/* ═══ ZONE 2: DETAIL TABS ═══ */}
         <div className="relative">
-          <Tabs defaultValue="specs">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             {/* Sticky tab bar */}
             <div className="sticky top-0 z-30 bg-background border-b shadow-sm">
               <div className="container mx-auto px-4">
