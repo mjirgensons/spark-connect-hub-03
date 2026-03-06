@@ -357,7 +357,7 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
   const updateSpec = (oi: number, si: number, field: "key" | "value", val: string) => setOptions((p) => p.map((o, idx) => idx === oi ? { ...o, specs: o.specs.map((s, j) => j === si ? { ...s, [field]: val } : s) } : o));
 
   // S6 helpers
-  const showAppliances = options.some((o) => o.option_type === "appliance" && o.inclusion_status === "not_included");
+  
   const addAppliance = () => setAppliances((p) => [...p, { appliance_type: "", brand: "", model_number: "", model_name: "", width_mm: "", height_mm: "", depth_mm: "", notes: "", reference_url: "" }]);
   const removeAppliance = (i: number) => setAppliances((p) => p.filter((_, idx) => idx !== i));
   const updateAppliance = (i: number, key: string, val: string) => setAppliances((p) => p.map((a, idx) => idx === i ? { ...a, [key]: val } : a));
@@ -696,9 +696,8 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
         </AccordionItem>
 
         {/* ═══ SECTION 7 — COMPATIBLE APPLIANCES ═══ */}
-        {showAppliances && (
-          <AccordionItem value="appliances" className="border rounded-lg">
-            <AccordionTrigger className="px-4 font-bold text-base">7 · Compatible Appliances</AccordionTrigger>
+        <AccordionItem value="appliances" className="border rounded-lg">
+          <AccordionTrigger className="px-4 font-bold text-base">7 · Compatible Appliances</AccordionTrigger>
             <AccordionContent className="px-4 pb-4 space-y-4">
               <div className="flex items-start gap-2 p-3 rounded-md bg-muted">
                 <Info className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
@@ -732,7 +731,6 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
               <Button variant="outline" onClick={addAppliance}><Plus className="w-4 h-4 mr-2" />Add Compatible Appliance</Button>
             </AccordionContent>
           </AccordionItem>
-        )}
 
         {/* ═══ SECTION 8 — IMAGES & DOCUMENTS ═══ */}
         <AccordionItem value="images" className="border rounded-lg">
