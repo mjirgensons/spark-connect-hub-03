@@ -65,6 +65,21 @@ const statusBadge = (status: string) => {
   }
 };
 
+const listingStatusBadge = (status: string) => {
+  switch (status) {
+    case "approved":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-green-500/15 text-green-700 border-green-300 whitespace-nowrap">Approved</Badge>;
+    case "pending_review":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-yellow-500/15 text-yellow-700 border-yellow-300 whitespace-nowrap">Pending Review</Badge>;
+    case "rejected":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-red-500/15 text-red-700 border-red-300 whitespace-nowrap">Rejected</Badge>;
+    case "draft":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-muted text-muted-foreground whitespace-nowrap">Draft</Badge>;
+    default:
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 whitespace-nowrap">{status}</Badge>;
+  }
+};
+
 const SellerProducts = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
