@@ -644,9 +644,12 @@ const Product = () => {
                     disabled={isDeactivated || qtyInCart >= product.stock_level}
                     onClick={handleAddToCart}
                   >
-                    <ShoppingCart className="w-4 h-4 mr-2" />
-                    {isDeactivated ? "Currently Unavailable" : qtyInCart > 0 ? `In Cart (${qtyInCart})` : "Add to Cart"}
+                    {qtyInCart > 0 ? <RefreshCw className="w-4 h-4 mr-2" /> : <ShoppingCart className="w-4 h-4 mr-2" />}
+                    {isDeactivated ? "Currently Unavailable" : qtyInCart > 0 ? "Update Cart" : "Add to Cart"}
                   </Button>
+                  {qtyInCart > 0 && (
+                    <p className="text-xs text-muted-foreground text-center mt-1">This will update your current cart selections for this product</p>
+                  )}
                   <div className="flex gap-2">
                     <CompareButton productId={product.id} variant="text" />
                     {product.seller_id && (
