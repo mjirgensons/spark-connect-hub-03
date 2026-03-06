@@ -46,6 +46,8 @@ const SellerDashboard = () => {
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [declinedCount, setDeclinedCount] = useState(0);
+  const [dismissedBanner, setDismissedBanner] = useState(false);
 
   useEffect(() => {
     if (!sellerId) return;
