@@ -736,7 +736,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 4 — ADDITIONAL FEATURES ═══ */}
         <AccordionItem value="features" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">Additional Features <SectionIndicator section="features" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">4 · Additional Features <SectionIndicator section="features" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <fieldset disabled={isReadOnly}>
             <AdditionalFeaturesSection features={additionalFeatures} onChange={(af) => { setAdditionalFeatures(af); markDirty("features"); }} />
