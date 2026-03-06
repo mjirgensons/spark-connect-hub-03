@@ -487,6 +487,21 @@ const SellerProducts = () => {
                   ))}
                 </SelectContent>
               </Select>
+              <Select
+                value={selectedStatus || "all"}
+                onValueChange={(v) => setSelectedStatus(v === "all" ? null : v)}
+              >
+                <SelectTrigger className="w-[140px] h-9 text-sm">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="approved">Live ({statusCounts.approved})</SelectItem>
+                  <SelectItem value="draft">Draft ({statusCounts.draft})</SelectItem>
+                  <SelectItem value="pending_review">In Review ({statusCounts.pending_review})</SelectItem>
+                  <SelectItem value="rejected">Declined ({statusCounts.rejected})</SelectItem>
+                </SelectContent>
+              </Select>
               {isFiltered && (
                 <p className="text-xs text-muted-foreground">
                   Showing {filteredAndSorted.length} of {products.length} products
