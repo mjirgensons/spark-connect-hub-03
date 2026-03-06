@@ -98,6 +98,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
   const [autoSku, setAutoSku] = useState(true);
   const [editDataLoaded, setEditDataLoaded] = useState(false);
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   // Track the live product ID (may start null for new products, then set on first save)
   const [liveProductId, setLiveProductId] = useState<string | undefined>(initialProductId);
