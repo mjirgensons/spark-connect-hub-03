@@ -501,12 +501,23 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     if (targetStatus !== "draft") {
       const basicErrs = validateSection("basic");
       const dimErrs = validateSection("dimensions");
-      setSectionErrors(p => ({ ...p, basic: basicErrs, dimensions: dimErrs }));
+      const pricingErrs = validateSection("pricing");
+      const addonsErrs = validateSection("addons");
+      const imagesErrs = validateSection("images");
+      const detailsErrs = validateSection("details");
+      setSectionErrors(p => ({
+        ...p, basic: basicErrs, dimensions: dimErrs, pricing: pricingErrs,
+        addons: addonsErrs, images: imagesErrs, details: detailsErrs,
+      }));
       const failedSections: string[] = [];
-      if (basicErrs.length) failedSections.push("Basic Information");
-      if (dimErrs.length) failedSections.push("Dimensions");
+      if (basicErrs.length) failedSections.push("Section 1 · Basic Information");
+      if (dimErrs.length) failedSections.push("Section 2 · Dimensions");
+      if (pricingErrs.length) failedSections.push("Section 5 · Pricing");
+      if (addonsErrs.length) failedSections.push("Section 6 · Add-Ons");
+      if (imagesErrs.length) failedSections.push("Section 8 · Images");
+      if (detailsErrs.length) failedSections.push("Section 9 · Description");
       if (failedSections.length) {
-        toast({ title: "Missing required fields", description: `Fix errors in: ${failedSections.join(", ")}`, variant: "destructive" });
+        toast({ title: "Cannot submit: missing required fields", description: failedSections.join(", "), variant: "destructive" });
         return;
       }
     }
