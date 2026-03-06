@@ -146,7 +146,13 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
   const af = product.additional_features as any[];
   const hasFeatures = af?.length > 0;
 
-  const displayOpts = productOptions.filter((o: any) => o.option_name);
+  const displayOpts = productOptions.filter((o: any) => {
+    if (!o.option_name) return false;
+    const nameLower = o.option_name.toLowerCase();
+    const typeLower = (o.option_type || "").toLowerCase();
+    if (nameLower.includes("delivery") || nameLower.includes("shipping") || typeLower === "delivery" || typeLower === "shipping") return false;
+    return true;
+  });
   const hasCountertop = product.countertop_option && product.countertop_option !== "no";
   const hasAddOns = displayOpts.length > 0 || hasCountertop;
   const hasAppliances = productAppliances.length > 0;
