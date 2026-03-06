@@ -47,7 +47,7 @@ const availabilityStatuses = ["In Stock", "Low Stock", "Deactivated"];
 // ── types ──
 interface ProductOption {
   option_type: string; option_name: string; inclusion_status: string;
-  price_retail: string; price_discounted: string; description: string;
+  price_retail: string; price_discounted: string; discount_pct: string; description: string;
   specs: { key: string; value: string }[];
 }
 interface CompatAppliance {
@@ -258,6 +258,7 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
         inclusion_status: o.inclusion_status || "not_included",
         price_retail: o.price_retail ? String(o.price_retail) : "",
         price_discounted: o.price_discounted ? String(o.price_discounted) : "",
+        discount_pct: o.discount_percentage ? String(o.discount_percentage) : "",
         description: o.description || "",
         specs: o.specifications
           ? Object.entries(o.specifications as Record<string, string>).map(([key, value]) => ({ key, value }))
@@ -320,7 +321,35 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
   const setDim = (key: string, val: string) => { if (useInches) { set(key, val ? String(inToMm(Number(val))) : ""); } else { set(key, val); } };
 
   // S5 helpers
-  const addOption = () => setOptions((p) => [...p, { option_type: "", option_name: "", inclusion_status: "not_included", price_retail: "", price_discounted: "", description: "", specs: [] }]);
+  const addOption = () => setOptions((p) => [...p, { option_type: "", option_name: "", inclusion_status: "not_included", price_retail: "", price_discounted: "", discount_pct: "", description: "", specs: [] }]);
+  // Add-on reverse math pricing handlers
+  const handleOptionRetailChange = (i: number, val: string) => {
+    setOptions((p) => p.map((o, idx) => {
+      if (idx !== i) return o;
+      const r = parseFloat(val);
+      const d = parseFloat(o.discount_pct);
+      const newSale = r > 0 && d > 0 && d < 100 ? (r * (1 - d / 100)).toFixed(2) : o.price_discounted;
+      return { ...o, price_retail: val, price_discounted: newSale };
+    }));
+  };
+  const handleOptionSaleChange = (i: number, val: string) => {
+    setOptions((p) => p.map((o, idx) => {
+      if (idx !== i) return o;
+      const r = parseFloat(o.price_retail);
+      const s = parseFloat(val);
+      const newDisc = r > 0 && s > 0 && s <= r ? String(Math.round((1 - s / r) * 100)) : "";
+      return { ...o, price_discounted: val, discount_pct: newDisc };
+    }));
+  };
+  const handleOptionDiscountChange = (i: number, val: string) => {
+    setOptions((p) => p.map((o, idx) => {
+      if (idx !== i) return o;
+      const r = parseFloat(o.price_retail);
+      const d = parseFloat(val);
+      const newSale = r > 0 && d >= 0 && d < 100 ? (r * (1 - d / 100)).toFixed(2) : o.price_discounted;
+      return { ...o, discount_pct: val, price_discounted: newSale };
+    }));
+  };
   const removeOption = (i: number) => setOptions((p) => p.filter((_, idx) => idx !== i));
   const updateOption = (i: number, key: string, val: string) => setOptions((p) => p.map((o, idx) => idx === i ? { ...o, [key]: val } : o));
   const addSpec = (i: number) => setOptions((p) => p.map((o, idx) => idx === i ? { ...o, specs: [...o.specs, { key: "", value: "" }] } : o));
@@ -409,6 +438,7 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
           inclusion_status: o.inclusion_status,
           price_retail: o.inclusion_status === "optional" && o.price_retail ? parseFloat(o.price_retail) : 0,
           price_discounted: o.inclusion_status === "optional" && o.price_discounted ? parseFloat(o.price_discounted) : 0,
+          discount_percentage: o.inclusion_status === "optional" && o.discount_pct ? parseFloat(o.discount_pct) : 0,
           description: o.description || null,
           specifications: o.specs.reduce((acc, s) => (s.key ? { ...acc, [s.key]: s.value } : acc), {} as Record<string, string>),
           sort_order: i,
@@ -632,9 +662,10 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
                   </RadioGroup>
                 </div>
                 {opt.inclusion_status === "optional" && (
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div><Label className={labelCls}>Price Retail (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={opt.price_retail} onChange={(e) => updateOption(i, "price_retail", e.target.value)} className="pl-7" /></div></div>
-                    <div><Label className={labelCls}>Price Discounted (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={opt.price_discounted} onChange={(e) => updateOption(i, "price_discounted", e.target.value)} className="pl-7" /></div></div>
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={opt.price_retail} onChange={(e) => handleOptionRetailChange(i, e.target.value)} className="pl-7" /></div></div>
+                    <div><Label className={labelCls}>Discount %</Label><div className="relative mt-1"><Input type="number" min="0" max="99" value={opt.discount_pct} onChange={(e) => handleOptionDiscountChange(i, e.target.value)} className="pr-7" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span></div></div>
+                    <div><Label className={labelCls}>Sale Price (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={opt.price_discounted} onChange={(e) => handleOptionSaleChange(i, e.target.value)} className="pl-7" /></div></div>
                   </div>
                 )}
                 <div><Label className={labelCls}>Description</Label><Input value={opt.description} onChange={(e) => updateOption(i, "description", e.target.value)} className={inputCls} /></div>

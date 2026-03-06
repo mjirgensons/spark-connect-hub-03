@@ -44,8 +44,15 @@ interface HardwareSubSectionProps {
   uploadPath: string;
 }
 
+const formatBytes = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 const HardwareSubSection = ({ title, item, onChange, fields, uploadPath }: HardwareSubSectionProps) => {
   const [uploading, setUploading] = useState(false);
+  const [optSummary, setOptSummary] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const set = (key: string, val: string) => onChange({ ...item, [key]: val });
@@ -58,15 +65,20 @@ const HardwareSubSection = ({ title, item, onChange, fields, uploadPath }: Hardw
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setOptSummary(null);
     try {
+      const originalSize = file.size;
       const optimized = await optimizeImage(file, { maxWidth: 256, maxHeight: 256, quality: 0.8 });
+      const optimizedSize = optimized.size;
+      const savedPct = originalSize > 0 ? Math.round((1 - optimizedSize / originalSize) * 100) : 0;
+      setOptSummary(`${formatBytes(originalSize)} → ${formatBytes(optimizedSize)} (${savedPct}% saved)`);
       const ext = optimized.name.split(".").pop();
       const fileName = `${uploadPath}.${ext}`;
       await supabase.storage.from("product-images").upload(fileName, optimized, { upsert: true });
       const { data } = supabase.storage.from("product-images").getPublicUrl(fileName);
       onChange({ ...item, image_url: data.publicUrl });
     } catch {
-      // silently fail
+      setOptSummary("Upload failed");
     }
     setUploading(false);
   };
@@ -78,18 +90,23 @@ const HardwareSubSection = ({ title, item, onChange, fields, uploadPath }: Hardw
       <h4 className="text-sm font-bold">{title}</h4>
       <div className="flex gap-4">
         {/* Image uploader */}
-        <div
-          className="w-16 h-16 shrink-0 rounded border-2 border-dashed border-border flex items-center justify-center cursor-pointer overflow-hidden hover:border-primary/50 transition-colors relative"
-          onClick={() => fileRef.current?.click()}
-        >
-          {uploading ? (
-            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-          ) : item.image_url ? (
-            <img src={item.image_url} alt={title} className="w-full h-full object-cover" />
-          ) : (
-            <Camera className="w-5 h-5 text-muted-foreground" />
+        <div className="shrink-0 space-y-1">
+          <div
+            className="w-16 h-16 rounded border-2 border-dashed border-border flex items-center justify-center cursor-pointer overflow-hidden hover:border-primary/50 transition-colors relative"
+            onClick={() => fileRef.current?.click()}
+          >
+            {uploading ? (
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            ) : item.image_url ? (
+              <img src={item.image_url} alt={title} className="w-full h-full object-cover" />
+            ) : (
+              <Camera className="w-5 h-5 text-muted-foreground" />
+            )}
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+          </div>
+          {optSummary && (
+            <p className="text-[10px] text-muted-foreground leading-tight max-w-[80px]">{optSummary}</p>
           )}
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
         </div>
 
         {/* Fields */}
