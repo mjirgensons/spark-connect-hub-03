@@ -130,7 +130,7 @@ const Cart = () => {
                 <CardContent className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium text-foreground">${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span className="font-medium text-foreground">${formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Shipping</span>
@@ -138,12 +138,12 @@ const Cart = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Estimated HST (13%)</span>
-                    <span className="font-medium text-foreground">${tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span className="font-medium text-foreground">${formatPrice(tax)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Estimated Total</span>
-                    <span>${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span>${formatPrice(total)}</span>
                   </div>
 
                   <TrustBadgeBar />
