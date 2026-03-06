@@ -88,6 +88,22 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
   const adminViewSellerId = searchParams.get("adminView");
   const items = navConfig[role];
 
+  // Fetch seller unread message count
+  const { data: sellerUnread } = useQuery({
+    queryKey: ["seller-unread-count", role === "seller" ? (adminViewSellerId || profile?.id) : null],
+    queryFn: async () => {
+      const sellerId = adminViewSellerId || profile?.id;
+      const { data } = await supabase
+        .from("conversations")
+        .select("seller_unread_count")
+        .eq("seller_id", sellerId!)
+        .gt("seller_unread_count", 0);
+      return data?.reduce((sum: number, c: any) => sum + (c.seller_unread_count || 0), 0) || 0;
+    },
+    enabled: role === "seller" && !!(adminViewSellerId || profile?.id),
+    refetchInterval: 30000,
+  });
+
   // Fetch the seller's company name when in admin view mode
   const { data: adminViewSeller } = useQuery({
     queryKey: ["admin-view-seller", adminViewSellerId],
