@@ -214,7 +214,13 @@ const Product = () => {
 
   // ── Cart handler ──
   const handleAddToCart = () => {
-    // Add main product
+    // Determine delivery info for main product
+    const dOpt = product.delivery_option || 'pickup_only';
+    const effectiveChoice: 'delivery' | 'pickup' | null =
+      dOpt === 'delivery' ? 'delivery'
+      : dOpt === 'pickup_only' ? 'pickup'
+      : deliveryChoice; // 'both' — user selected
+
     dispatch({
       type: "ADD_ITEM",
       payload: {
@@ -228,6 +234,12 @@ const Product = () => {
           ? `A: ${product.wall_a_length_mm}${hasWallB ? ` × B: ${product.wall_b_length_mm}` : ""} | H: ${product.height_mm} × D: ${product.depth_mm} mm`
           : `${product.height_mm} × ${product.depth_mm} mm`,
         maxStock: product.stock_level,
+        deliveryChoice: effectiveChoice,
+        deliveryPrice: effectiveChoice === 'delivery' ? Number(product.delivery_price) || 0 : 0,
+        deliveryPrepDays: effectiveChoice === 'delivery' ? (product.delivery_prep_days || 5) : (product.pickup_prep_days || 5),
+        pickupAddress: product.pickup_address || '',
+        pickupCity: product.pickup_city || '',
+        pickupProvince: product.pickup_province || 'Ontario',
       },
     });
 
