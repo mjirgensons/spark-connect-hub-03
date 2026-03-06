@@ -31,7 +31,6 @@ export type AdminSection =
   | "dashboard"
   | "orders"
   | "quotes"
-  | "products"
   | "customers"
   | "sellers"
   | "reviews"
