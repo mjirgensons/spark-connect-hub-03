@@ -101,7 +101,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
   // Track the live product ID (may start null for new products, then set on first save)
   const [liveProductId, setLiveProductId] = useState<string | undefined>(initialProductId);
-  const isEditMode = !!liveProductId;
+  
 
   // Track section save states
   const [sectionSaved, setSectionSaved] = useState<Record<SectionKey, boolean>>({
