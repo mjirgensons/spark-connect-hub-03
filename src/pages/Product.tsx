@@ -23,6 +23,7 @@ import WishlistButton from "@/components/WishlistButton";
 import { toast } from "sonner";
 import CompareButton from "@/components/CompareButton";
 import ContactSellerButton from "@/components/ContactSellerButton";
+import ProductQA from "@/components/ProductQA";
 
 const MM_TO_INCH = 0.0393701;
 const fmtDim = (mm: number) => {
