@@ -686,7 +686,9 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="grid sm:grid-cols-2 gap-4">
-              <div><Label className={labelCls}>Product Name *</Label><Input value={f.product_name} onChange={(e) => handleNameChange(e.target.value)} className={inputCls} /></div>
+              <div><Label className={labelCls}>Product Name *</Label><Input value={f.product_name} onChange={(e) => handleNameChange(e.target.value)} className={inputCls} />
+                {sectionErrors.basic.includes("Product Name is required") && <p className="text-xs text-destructive mt-1">Required — must not be empty</p>}
+              </div>
               <div>
                 <div className="flex items-center justify-between">
                   <Label className={labelCls}>Product Code (SKU) *</Label>
