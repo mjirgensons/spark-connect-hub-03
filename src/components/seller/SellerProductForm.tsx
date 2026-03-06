@@ -65,7 +65,7 @@ interface SellerProductFormProps {
 }
 
 // ── section save state tracking ──
-type SectionKey = "basic" | "dimensions" | "hardware" | "features" | "pricing" | "addons" | "appliances" | "images" | "details";
+type SectionKey = "basic" | "dimensions" | "hardware" | "features" | "pricing" | "addons" | "appliances" | "images" | "details" | "delivery";
 
 // ── layout visual ──
 const LayoutVisual = ({ type, dims }: { type: string; dims: Record<string, string> }) => {
