@@ -32,6 +32,21 @@ const Header = () => {
   const isHome = location.pathname === "/";
   const { itemCount } = useCart();
   const { wishlistCount } = useWishlist();
+  const { user } = useAuth();
+
+  const { data: buyerUnread = 0 } = useQuery({
+    queryKey: ["buyer-unread-count", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("conversations")
+        .select("buyer_unread_count")
+        .eq("buyer_id", user!.id)
+        .gt("buyer_unread_count", 0);
+      return data?.reduce((sum: number, c: any) => sum + (c.buyer_unread_count || 0), 0) || 0;
+    },
+    enabled: !!user,
+    refetchInterval: 30000,
+  });
 
   const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (!isHome) {
