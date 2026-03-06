@@ -756,14 +756,30 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
   const labelCls = "text-xs font-semibold";
   const inputCls = "mt-1";
 
-  // Section header indicator
+  // Section header indicator — inline right after title text
   const SectionIndicator = ({ section }: { section: SectionKey }) => (
-    <span className="ml-2 inline-flex items-center gap-1">
+    <span className="ml-1.5 inline-flex items-center shrink-0">
       {sectionErrors[section]?.length > 0 && <span className="w-2 h-2 rounded-full bg-destructive inline-block" />}
       {sectionSaved[section] && !sectionDirty[section] && !sectionErrors[section]?.length && <Check className="w-3.5 h-3.5 text-green-600" />}
       {sectionDirty[section] && !sectionErrors[section]?.length && <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" />}
     </span>
   );
+
+  // Cancel with unsaved changes check
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const hasAnyDirty = Object.values(sectionDirty).some(Boolean);
+  const handleCancel = () => {
+    if (hasAnyDirty) {
+      setCancelDialogOpen(true);
+    } else {
+      navigate("/seller/products");
+    }
+  };
+  const handleSaveAndLeave = async () => {
+    setCancelDialogOpen(false);
+    await handleFullSave("draft");
+    navigate("/seller/products");
+  };
 
   return (
     <div className="space-y-4 max-w-3xl mx-auto pb-24">
