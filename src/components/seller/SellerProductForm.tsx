@@ -1132,8 +1132,8 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
                   <div>
                     <Label className={labelCls}>Delivery Price (CAD) *</Label>
                     <div className="relative mt-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
-                      <Input type="number" step="0.01" min="0" value={delivery.delivery_price} onChange={(e) => { setDelivery(p => ({ ...p, delivery_price: e.target.value })); markDirty("delivery"); }} className="pl-7" placeholder="e.g. 540" />
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">CA$</span>
+                      <Input type="number" step="0.01" min="0" value={delivery.delivery_price} onChange={(e) => { setDelivery(p => ({ ...p, delivery_price: e.target.value })); markDirty("delivery"); }} className="pl-10" placeholder="e.g. 540" />
                     </div>
                     {sectionErrors.delivery.some(e => e.includes("Delivery Price")) && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
                   </div>
