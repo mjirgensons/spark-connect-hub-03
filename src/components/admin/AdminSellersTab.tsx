@@ -6,38 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
+  Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Loader2, Store, ExternalLink } from "lucide-react";
+import { Search, Loader2, Store, MoreVertical, ExternalLink, Package, ShoppingCart, Mail, ShieldCheck, ShieldX, ShieldOff, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
 
 type SellerStatus = "pending" | "approved" | "suspended" | "rejected";
@@ -77,7 +63,6 @@ const AdminSellersTab = () => {
     companyName: string;
   } | null>(null);
 
-  // Fetch sellers
   const { data: sellers = [], isLoading } = useQuery({
     queryKey: ["admin-sellers", statusFilter],
     queryFn: async () => {
@@ -94,7 +79,6 @@ const AdminSellersTab = () => {
       const { data, error } = await query;
       if (error) throw error;
 
-      // Fetch product counts
       const sellerIds = (data || []).map((s) => s.id);
       let productCounts: Record<string, number> = {};
 
@@ -121,7 +105,6 @@ const AdminSellersTab = () => {
     },
   });
 
-  // Update seller status mutation
   const updateStatus = useMutation({
     mutationFn: async ({ sellerId, status }: { sellerId: string; status: SellerStatus }) => {
       const { error } = await supabase
@@ -142,7 +125,6 @@ const AdminSellersTab = () => {
       setSelectedSeller(null);
       setConfirmAction(null);
 
-      // Fire-and-forget: notify n8n on approval
       if (variables.status === "approved") {
         try {
           supabase
@@ -176,7 +158,6 @@ const AdminSellersTab = () => {
     },
   });
 
-  // Filter by search
   const filtered = sellers.filter((s) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -187,12 +168,8 @@ const AdminSellersTab = () => {
     );
   });
 
-  const handleAction = (sellerId: string, action: SellerStatus, companyName: string, needsConfirm: boolean) => {
-    if (needsConfirm) {
-      setConfirmAction({ sellerId, action, companyName });
-    } else {
-      updateStatus.mutate({ sellerId, status: action });
-    }
+  const handleAction = (sellerId: string, action: SellerStatus, companyName: string) => {
+    setConfirmAction({ sellerId, action, companyName });
   };
 
   const formatAddress = (addr: Record<string, string> | null) => {
@@ -201,52 +178,8 @@ const AdminSellersTab = () => {
     return parts.length > 0 ? parts.join(", ") : "Not provided";
   };
 
-  const renderActions = (seller: SellerProfile) => {
-    const status = seller.seller_status as SellerStatus;
-    const name = seller.company_name || seller.full_name;
-
-    switch (status) {
-      case "pending":
-        return (
-          <div className="flex gap-1.5">
-            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-7 text-xs" onClick={() => handleAction(seller.id, "approved", name, false)}>
-              Approve
-            </Button>
-            <Button size="sm" variant="outline" className="border-destructive text-destructive hover:bg-destructive/10 h-7 text-xs" onClick={() => handleAction(seller.id, "rejected", name, true)}>
-              Reject
-            </Button>
-          </div>
-        );
-      case "approved":
-        return (
-          <div className="flex gap-1.5">
-            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white h-7 text-xs" onClick={() => handleAction(seller.id, "suspended", name, true)}>
-              Suspend
-            </Button>
-            <Button size="sm" variant="outline" className="border-primary text-primary hover:bg-primary/10 h-7 text-xs" asChild>
-              <a href={`/seller/dashboard?adminView=${seller.id}`}>
-                <ExternalLink className="w-3 h-3 mr-1" /> Portal
-              </a>
-            </Button>
-          </div>
-        );
-      case "suspended":
-        return (
-          <div className="flex gap-1.5">
-            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-7 text-xs" onClick={() => handleAction(seller.id, "approved", name, false)}>
-              Reactivate
-            </Button>
-            <Button size="sm" variant="outline" className="border-destructive text-destructive hover:bg-destructive/10 h-7 text-xs" onClick={() => handleAction(seller.id, "rejected", name, true)}>
-              Reject
-            </Button>
-          </div>
-        );
-      default:
-        return <span className="text-xs text-muted-foreground">—</span>;
-    }
-  };
-
   const confirmLabels: Record<string, { title: string; desc: string }> = {
+    approved: { title: "Approve Seller", desc: "Are you sure you want to approve this seller? They will gain access to the seller portal." },
     rejected: { title: "Reject Seller", desc: "Are you sure you want to reject this seller? They will lose access to the seller portal." },
     suspended: { title: "Suspend Seller", desc: "Are you sure you want to suspend this seller? Their products will remain but they won't be able to manage them." },
   };
@@ -258,6 +191,7 @@ const AdminSellersTab = () => {
           <CardTitle className="flex items-center gap-2 text-lg">
             <Store className="w-5 h-5" />
             Seller Management
+            <Badge variant="secondary" className="ml-2 text-xs">{filtered.length}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -300,40 +234,101 @@ const AdminSellersTab = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="border-b-2 border-foreground bg-muted/50">
-                    <TableHead className="font-bold">Company</TableHead>
-                    <TableHead className="font-bold">Owner</TableHead>
-                    <TableHead className="font-bold">Email</TableHead>
-                    <TableHead className="font-bold">Registered</TableHead>
-                    <TableHead className="font-bold">Status</TableHead>
-                    <TableHead className="font-bold text-center">Products</TableHead>
-                    <TableHead className="font-bold text-right">Actions</TableHead>
+                    <TableHead className="font-bold w-[18%]">Company</TableHead>
+                    <TableHead className="font-bold w-[15%]">Owner</TableHead>
+                    <TableHead className="font-bold w-[22%]">Email</TableHead>
+                    <TableHead className="font-bold w-[12%]">Registered</TableHead>
+                    <TableHead className="font-bold w-[10%] text-center">Status</TableHead>
+                    <TableHead className="font-bold w-[8%] text-center">Products</TableHead>
+                    <TableHead className="font-bold w-[5%] text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((seller) => (
-                    <TableRow key={seller.id} className="border-b border-border">
-                      <TableCell>
-                        <button
-                          className="text-sm font-medium text-primary hover:underline text-left"
-                          onClick={() => setSelectedSeller(seller)}
-                        >
-                          {seller.company_name || "—"}
-                        </button>
-                      </TableCell>
-                      <TableCell className="text-sm">{seller.full_name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{seller.email}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {format(new Date(seller.created_at), "MMM d, yyyy")}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[seller.seller_status || "pending"]}`}>
-                          {seller.seller_status || "pending"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center text-sm">{seller.product_count}</TableCell>
-                      <TableCell className="text-right">{renderActions(seller)}</TableCell>
-                    </TableRow>
-                  ))}
+                  {filtered.map((seller) => {
+                    const status = seller.seller_status as SellerStatus;
+                    const name = seller.company_name || seller.full_name;
+                    return (
+                      <TableRow key={seller.id} className="border-b border-border">
+                        <TableCell>
+                          <button
+                            className="text-sm font-medium text-primary hover:underline text-left"
+                            onClick={() => setSelectedSeller(seller)}
+                          >
+                            {seller.company_name || "—"}
+                          </button>
+                        </TableCell>
+                        <TableCell className="text-sm">{seller.full_name}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{seller.email}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {format(new Date(seller.created_at), "MMM d, yyyy")}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[seller.seller_status || "pending"]}`}>
+                            {seller.seller_status || "pending"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center text-sm">{seller.product_count}</TableCell>
+                        <TableCell className="text-center">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem asChild>
+                                <a href={`/seller/dashboard?adminView=${seller.id}`}>
+                                  <ExternalLink className="w-4 h-4 mr-2" /> Enter Portal
+                                </a>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <a href={`/seller/products?adminView=${seller.id}`}>
+                                  <Package className="w-4 h-4 mr-2" /> View Products
+                                </a>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <a href={`/seller/orders?adminView=${seller.id}`}>
+                                  <ShoppingCart className="w-4 h-4 mr-2" /> View Orders
+                                </a>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <a href={`mailto:${seller.email}`} target="_blank" rel="noopener noreferrer">
+                                  <Mail className="w-4 h-4 mr-2" /> Email Seller
+                                </a>
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              {(status === "pending" || status === "rejected") && (
+                                <DropdownMenuItem onClick={() => handleAction(seller.id, "approved", name)}>
+                                  <ShieldCheck className="w-4 h-4 mr-2" /> Approve Seller
+                                </DropdownMenuItem>
+                              )}
+                              {status === "approved" && (
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => handleAction(seller.id, "suspended", name)}
+                                >
+                                  <ShieldOff className="w-4 h-4 mr-2" /> Suspend Seller
+                                </DropdownMenuItem>
+                              )}
+                              {status === "suspended" && (
+                                <DropdownMenuItem onClick={() => handleAction(seller.id, "approved", name)}>
+                                  <RotateCcw className="w-4 h-4 mr-2" /> Reactivate Seller
+                                </DropdownMenuItem>
+                              )}
+                              {status === "pending" && (
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => handleAction(seller.id, "rejected", name)}
+                                >
+                                  <ShieldX className="w-4 h-4 mr-2" /> Reject Seller
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -367,10 +362,6 @@ const AdminSellersTab = () => {
                   <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[selectedSeller.seller_status || "pending"]}`}>
                     {selectedSeller.seller_status || "pending"}
                   </Badge>
-                </div>
-
-                <div className="pt-4 border-t border-border">
-                  {renderActions(selectedSeller)}
                 </div>
               </div>
             </>
