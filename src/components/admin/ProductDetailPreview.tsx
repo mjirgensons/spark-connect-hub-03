@@ -157,6 +157,7 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
   if (hasHardware) tabs.push({ id: "hardware", label: "Hardware" });
   if (hasFeatures) tabs.push({ id: "features", label: "Features" });
   if (hasAddOns) tabs.push({ id: "addons", label: "Add-Ons" });
+  tabs.push({ id: "delivery", label: "Delivery" });
   if (hasAppliances) tabs.push({ id: "appliances", label: "Appliances" });
   if (hasDescription) tabs.push({ id: "description", label: "Description" });
   tabs.push({ id: "qa", label: "Q&A" });
@@ -550,6 +551,66 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
               </div>
             </TabsContent>
           )}
+
+          {/* DELIVERY TAB */}
+          <TabsContent value="delivery" className="mt-0">
+            <div className="space-y-6">
+              {product.delivery_option === 'delivery' && (
+                <div className="border-2 rounded-lg p-5 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-serif font-semibold text-foreground">Delivery Available</h3>
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">${Number(product.delivery_price || 0).toFixed(2)} CAD</p>
+                  {product.delivery_zone && <p className="text-sm text-muted-foreground">Delivery Zone: {product.delivery_zone}</p>}
+                  <p className="text-sm text-muted-foreground">Estimated Preparation Time: {product.delivery_prep_days || 5} business days</p>
+                  <p className="text-xs text-muted-foreground">The seller will prepare your order and deliver it to your address.</p>
+                </div>
+              )}
+
+              {product.delivery_option === 'pickup_only' && (
+                <div className="border-2 rounded-lg p-5 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-serif font-semibold text-foreground">Pickup Only</h3>
+                  </div>
+                  <p className="text-sm text-foreground">{[product.pickup_address, product.pickup_city, product.pickup_province, product.pickup_postal_code].filter(Boolean).join(", ")}</p>
+                  {product.pickup_phone && <p className="text-sm text-muted-foreground">Phone: {product.pickup_phone}</p>}
+                  <p className="text-sm text-muted-foreground">Estimated Preparation Time: {product.pickup_prep_days || 5} business days</p>
+                  <p className="text-xs text-muted-foreground">Buyer will be notified when order is ready. Do not visit before confirmation.</p>
+                </div>
+              )}
+
+              {product.delivery_option === 'both' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="border-2 rounded-lg p-5 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Truck className="w-5 h-5 text-primary" />
+                      <h3 className="text-lg font-serif font-semibold text-foreground">Delivery</h3>
+                    </div>
+                    <p className="text-2xl font-bold text-foreground">${Number(product.delivery_price || 0).toFixed(2)} CAD</p>
+                    {product.delivery_zone && <p className="text-sm text-muted-foreground">Delivery Zone: {product.delivery_zone}</p>}
+                    <p className="text-sm text-muted-foreground">Estimated Preparation Time: {product.delivery_prep_days || 5} business days</p>
+                  </div>
+                  <div className="border-2 rounded-lg p-5 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-primary" />
+                      <h3 className="text-lg font-serif font-semibold text-foreground">Pickup (Free)</h3>
+                    </div>
+                    <p className="text-sm text-foreground">{[product.pickup_address, product.pickup_city, product.pickup_province, product.pickup_postal_code].filter(Boolean).join(", ")}</p>
+                    {product.pickup_phone && <p className="text-sm text-muted-foreground">Phone: {product.pickup_phone}</p>}
+                    <p className="text-sm text-muted-foreground">Estimated Preparation Time: {product.pickup_prep_days || 5} business days</p>
+                  </div>
+                </div>
+              )}
+
+              {(!product.delivery_option || !['delivery', 'pickup_only', 'both'].includes(product.delivery_option)) && (
+                <div className="border rounded-lg p-5 text-center">
+                  <p className="text-sm text-muted-foreground">Delivery and pickup details have not been configured for this product.</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
 
           {/* APPLIANCES */}
           {hasAppliances && (
