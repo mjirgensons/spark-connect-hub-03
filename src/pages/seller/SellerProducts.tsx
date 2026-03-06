@@ -369,7 +369,7 @@ const SellerProducts = () => {
   const editUrl = (id: string) => adminViewId ? `/seller/products/${id}?adminView=${adminViewId}` : `/seller/products/${id}`;
   const variantsUrl = (id: string) => adminViewId ? `/seller/products/${id}/variants?adminView=${adminViewId}` : `/seller/products/${id}/variants`;
 
-  const isFiltered = !!selectedCategoryId || !!searchQuery.trim();
+  const isFiltered = !!selectedCategoryId || !!searchQuery.trim() || !!selectedStatus;
 
   return (
     <div className="space-y-6">
