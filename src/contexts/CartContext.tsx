@@ -36,32 +36,25 @@ const recalc = (items: CartItem[]): CartState => ({
   subtotal: items.reduce((s, i) => s + i.price * i.quantity, 0),
 });
 
-const isDeliveryItem = (name: string, productId: string) =>
-  /delivery|shipping/i.test(name) || (productId.includes("_option_") && /delivery|shipping/i.test(name));
-
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case "ADD_ITEM": {
       const pid = action.payload.productId;
-      const maxQty = isDeliveryItem(action.payload.name, pid) ? 1 : action.payload.maxStock;
       const isAddon = pid.includes("_option_");
 
-      if (isAddon) {
-        // Add-on: replace if exists, otherwise add
-        const existing = state.items.find((i) => i.productId === pid);
-        if (existing) return state;
-        return recalc([...state.items, { ...action.payload, quantity: 1, maxStock: maxQty }]);
-      }
-
-      // Main product: remove old main + all its add-ons, then add fresh
-      const existing = state.items.find((i) => i.productId === pid);
-      if (existing) {
+      if (!isAddon) {
+        // MAIN PRODUCT: remove old main + ALL its old add-ons, then add fresh
         const cleaned = state.items.filter(
           (i) => i.productId !== pid && !i.productId.startsWith(pid + "_option_")
         );
-        return recalc([...cleaned, { ...action.payload, quantity: 1, maxStock: maxQty }]);
+        return recalc([...cleaned, { ...action.payload, quantity: 1 }]);
       }
-      return recalc([...state.items, { ...action.payload, quantity: 1, maxStock: maxQty }]);
+
+      // ADD-ON: never remove anything. Just check for duplicate — skip if exists, append if new.
+      if (state.items.some((i) => i.productId === pid)) {
+        return state; // already exists, skip
+      }
+      return recalc([...state.items, { ...action.payload, quantity: 1 }]);
     }
     case "REMOVE_ITEM":
       return recalc(state.items.filter((i) => i.productId !== action.payload));
@@ -70,15 +63,13 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       if (quantity < 1) return state;
       const items = state.items.map((i) => {
         if (i.productId !== productId) return i;
-        const max = isDeliveryItem(i.name, i.productId) ? 1 : i.maxStock;
-        return { ...i, quantity: Math.min(quantity, max) };
+        return { ...i, quantity: Math.min(quantity, i.maxStock) };
       });
       return recalc(items);
     }
     case "CLEAR_CART":
       return recalc([]);
     case "HYDRATE": {
-      // Deduplicate by productId — keep first occurrence
       const seen = new Set<string>();
       const deduped = action.payload.filter((item) => {
         if (seen.has(item.productId)) return false;
@@ -102,7 +93,6 @@ const CartContext = createContext<CartContextValue | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(cartReducer, { items: [], itemCount: 0, subtotal: 0 });
 
-  // Hydrate from localStorage on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem("fm_cart");
@@ -115,7 +105,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     } catch {}
   }, []);
 
-  // Persist to localStorage on change
   useEffect(() => {
     localStorage.setItem("fm_cart", JSON.stringify(state.items));
   }, [state.items]);
