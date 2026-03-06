@@ -351,6 +351,7 @@ const Product = () => {
   if (hasHardware) tabs.push({ id: "hardware", label: "Hardware" });
   if (hasFeatures) tabs.push({ id: "features", label: "Features" });
   if (hasAddOns) tabs.push({ id: "addons", label: "Add-Ons" });
+  tabs.push({ id: "delivery", label: "Delivery" });
   if (hasAppliances) tabs.push({ id: "appliances", label: "Appliances" });
   if (hasDescription) tabs.push({ id: "description", label: "Description" });
   tabs.push({ id: "qa", label: "Q&A" });
