@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart, Wrench } from "lucide-react";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import ProductGallery from "@/components/ProductGallery";
