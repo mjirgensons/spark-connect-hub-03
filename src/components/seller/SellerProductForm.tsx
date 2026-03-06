@@ -609,6 +609,18 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
         additional_image_urls: galleryUrls.length ? galleryUrls : [],
         technical_drawings_url: techDrawingUrl || null,
         listing_status: targetStatus,
+        // Delivery & Pickup
+        delivery_option: delivery.delivery_option,
+        delivery_price: delivery.delivery_price ? parseFloat(delivery.delivery_price) : 0,
+        delivery_zone: delivery.delivery_zone || "",
+        delivery_prep_days: delivery.delivery_prep_days ? Number(delivery.delivery_prep_days) : 5,
+        pickup_available: delivery.delivery_option === "pickup_only" || delivery.delivery_option === "both",
+        pickup_address: delivery.pickup_address || "",
+        pickup_city: delivery.pickup_city || "",
+        pickup_province: delivery.pickup_province || "Ontario",
+        pickup_postal_code: delivery.pickup_postal_code || "",
+        pickup_phone: delivery.pickup_phone || "",
+        pickup_prep_days: delivery.pickup_prep_days ? Number(delivery.pickup_prep_days) : 5,
       };
 
       // Handle resubmission: copy rejection reason to previous, increment count
