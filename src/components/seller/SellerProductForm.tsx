@@ -201,6 +201,7 @@ const SellerProductForm = () => {
         is_featured: isFeatured,
         compatible_kitchen_layouts: kitchenLayouts.length ? kitchenLayouts : [],
         seller_id: user.id, availability_status: s8.availability_status,
+        listing_status: 'pending_review',
         stock_level: Number(s8.stock_level) || 0,
         short_description: s8.short_description || null, long_description: s8.long_description || null,
         tag: visibility,

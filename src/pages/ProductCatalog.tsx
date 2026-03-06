@@ -379,9 +379,14 @@ const ProductCatalog = () => {
                         {/* Info */}
                         <div className="p-4 space-y-2">
                           <div className="flex items-start justify-between gap-2">
-                            <h3 className="font-sans font-bold text-sm leading-tight line-clamp-2">
-                              {product.product_name}
-                            </h3>
+                            <div>
+                              <h3 className="font-sans font-bold text-sm leading-tight line-clamp-2">
+                                {product.product_name}
+                              </h3>
+                              <p className="text-[10px] text-muted-foreground">
+                                by {(product as any).profiles?.company_name || "FitMatch"}
+                              </p>
+                            </div>
                             <Badge variant="outline" className="text-[10px] shrink-0 border-foreground">
                               {categoryName}
                             </Badge>

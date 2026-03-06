@@ -44,6 +44,8 @@ const OtherProducts = () => {
         .select("*")
         .neq("category_id", kitchenCategory!.id)
         .is("deleted_at", null)
+        .in("availability_status", ["In Stock", "Low Stock"])
+        .eq("listing_status" as any, "approved")
         .order("created_at", { ascending: false })
         .limit(10);
       if (error) throw error;
