@@ -33,6 +33,7 @@ export type AdminSection =
   | "quotes"
   | "customers"
   | "sellers"
+  | "product-review"
   | "reviews"
   | "email"
   | "email-test-console"

@@ -869,7 +869,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 9 — DESCRIPTION & VISIBILITY ═══ */}
         <AccordionItem value="details" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">Description & Visibility <SectionIndicator section="details" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">9 · Description & Visibility <SectionIndicator section="details" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div>
