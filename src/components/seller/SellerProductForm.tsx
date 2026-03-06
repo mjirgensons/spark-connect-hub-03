@@ -359,8 +359,37 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     return data.id;
   };
 
+  // ── Validation helpers ──
+  const validateSection = (section: SectionKey): string[] => {
+    const errors: string[] = [];
+    if (section === "basic") {
+      if (!f.product_name.trim()) errors.push("Product Name is required");
+      if (!f.product_code.trim()) errors.push("Product Code (SKU) is required");
+      if (!f.category_id) errors.push("Category must be selected");
+    }
+    if (section === "dimensions") {
+      if (!f.width_mm || Number(f.width_mm) <= 0) errors.push("Width must be greater than 0");
+      if (!f.height_mm || Number(f.height_mm) <= 0) errors.push("Height must be greater than 0");
+      if (!f.depth_mm || Number(f.depth_mm) <= 0) errors.push("Depth must be greater than 0");
+    }
+    return errors;
+  };
+
+  const [sectionErrors, setSectionErrors] = useState<Record<SectionKey, string[]>>({
+    basic: [], dimensions: [], hardware: [], features: [],
+    pricing: [], addons: [], appliances: [], images: [], details: [],
+  });
+
   // ── Section save handlers ──
   const saveSectionToDb = async (section: SectionKey) => {
+    // Validate before saving
+    const errors = validateSection(section);
+    setSectionErrors(p => ({ ...p, [section]: errors }));
+    if (errors.length > 0) {
+      toast({ title: "Validation error", description: errors.join(". "), variant: "destructive" });
+      return;
+    }
+
     setSavingSection(section);
     try {
       const pid = await ensureProductExists();
@@ -452,6 +481,20 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
   // ── FULL SUBMIT ──
   const handleFullSave = async (targetStatus: "draft" | "pending_review" | "approved") => {
     if (!user) { toast({ title: "Not authenticated", variant: "destructive" }); return; }
+
+    // On submit for review / publish, validate all mandatory sections
+    if (targetStatus !== "draft") {
+      const basicErrs = validateSection("basic");
+      const dimErrs = validateSection("dimensions");
+      setSectionErrors(p => ({ ...p, basic: basicErrs, dimensions: dimErrs }));
+      const failedSections: string[] = [];
+      if (basicErrs.length) failedSections.push("Basic Information");
+      if (dimErrs.length) failedSections.push("Dimensions");
+      if (failedSections.length) {
+        toast({ title: "Missing required fields", description: `Fix errors in: ${failedSections.join(", ")}`, variant: "destructive" });
+        return;
+      }
+    }
     setSaving(true);
     try {
       const pid = await ensureProductExists();
@@ -643,7 +686,9 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="grid sm:grid-cols-2 gap-4">
-              <div><Label className={labelCls}>Product Name *</Label><Input value={f.product_name} onChange={(e) => handleNameChange(e.target.value)} className={inputCls} /></div>
+              <div><Label className={labelCls}>Product Name *</Label><Input value={f.product_name} onChange={(e) => handleNameChange(e.target.value)} className={inputCls} />
+                {sectionErrors.basic.includes("Product Name is required") && <p className="text-xs text-destructive mt-1">Required — must not be empty</p>}
+              </div>
               <div>
                 <div className="flex items-center justify-between">
                   <Label className={labelCls}>Product Code (SKU) *</Label>
@@ -656,12 +701,14 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
                 </div>
                 <Input value={f.product_code} onChange={(e) => setWithDirty("basic", "product_code", e.target.value)} className={inputCls} placeholder={autoSku && !liveProductId ? "Auto-generated" : "Enter SKU manually"} readOnly={autoSku && !liveProductId} />
                 {autoSku && !liveProductId && <p className="text-[10px] text-muted-foreground mt-1">Auto: Category-Style-Color-Width-Seq (avoids O/I)</p>}
+                {sectionErrors.basic.includes("Product Code (SKU) is required") && <p className="text-xs text-destructive mt-1">Required — must not be empty</p>}
               </div>
               <div><Label className={labelCls}>Category *</Label>
                 <Select value={f.category_id} onValueChange={(v) => { set("category_id", v); markDirty("basic"); }}>
                   <SelectTrigger className={inputCls}><SelectValue placeholder="Select category" /></SelectTrigger>
                   <SelectContent>{categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
+                {sectionErrors.basic.includes("Category must be selected") && <p className="text-xs text-destructive mt-1">Required — must be selected</p>}
               </div>
               <div><Label className={labelCls}>Manufacturer</Label><Input value={f.manufacturer} onChange={(e) => setWithDirty("basic", "manufacturer", e.target.value)} className={inputCls} /></div>
             </div>
@@ -711,11 +758,17 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
             {f.category_id && (<>
               <LayoutVisual type={layoutType} dims={{ width_mm: dimVal("width_mm"), wall_a: dimVal("wall_a_length_mm"), wall_b: dimVal("wall_b_length_mm"), wall_c: dimVal("wall_c_length_mm") }} />
               <div className="grid sm:grid-cols-3 gap-4">
-                {(layoutType === "straight" || layoutType === "standard" || !layoutType) && <div><Label className={labelCls}>{layoutType === "straight" ? "Wall Length" : "Width"} ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("width_mm")} onChange={(e) => setDim("width_mm", e.target.value)} className={inputCls} /></div>}
+                {(layoutType === "straight" || layoutType === "standard" || !layoutType) && <div><Label className={labelCls}>{layoutType === "straight" ? "Wall Length" : "Width"} ({useInches ? "in" : "mm"}) *</Label><Input type="number" value={dimVal("width_mm")} onChange={(e) => setDim("width_mm", e.target.value)} className={inputCls} />
+                  {sectionErrors.dimensions.includes("Width must be greater than 0") && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
+                </div>}
                 {(layoutType === "l_shape" || layoutType === "u_shape") && (<><div><Label className={labelCls}>Wall A ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("wall_a_length_mm")} onChange={(e) => setDim("wall_a_length_mm", e.target.value)} className={inputCls} /></div><div><Label className={labelCls}>Wall B ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("wall_b_length_mm")} onChange={(e) => setDim("wall_b_length_mm", e.target.value)} className={inputCls} /></div></>)}
                 {layoutType === "u_shape" && <div><Label className={labelCls}>Wall C ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("wall_c_length_mm")} onChange={(e) => setDim("wall_c_length_mm", e.target.value)} className={inputCls} /></div>}
-                <div><Label className={labelCls}>Height ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("height_mm")} onChange={(e) => setDim("height_mm", e.target.value)} className={inputCls} /></div>
-                <div><Label className={labelCls}>Depth ({useInches ? "in" : "mm"})</Label><Input type="number" value={dimVal("depth_mm")} onChange={(e) => setDim("depth_mm", e.target.value)} className={inputCls} /></div>
+                <div><Label className={labelCls}>Height ({useInches ? "in" : "mm"}) *</Label><Input type="number" value={dimVal("height_mm")} onChange={(e) => setDim("height_mm", e.target.value)} className={inputCls} />
+                  {sectionErrors.dimensions.includes("Height must be greater than 0") && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
+                </div>
+                <div><Label className={labelCls}>Depth ({useInches ? "in" : "mm"}) *</Label><Input type="number" value={dimVal("depth_mm")} onChange={(e) => setDim("depth_mm", e.target.value)} className={inputCls} />
+                  {sectionErrors.dimensions.includes("Depth must be greater than 0") && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
+                </div>
               </div>
             </>)}
             </fieldset>

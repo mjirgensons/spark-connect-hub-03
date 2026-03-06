@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useQuery } from "@tanstack/react-query";
@@ -6,7 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart, Wrench } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart } from "lucide-react";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import ProductGallery from "@/components/ProductGallery";
@@ -19,6 +21,12 @@ import WishlistButton from "@/components/WishlistButton";
 import { toast } from "sonner";
 import CompareButton from "@/components/CompareButton";
 import ContactSellerButton from "@/components/ContactSellerButton";
+
+const MM_TO_INCH = 0.0393701;
+const fmtDim = (mm: number) => {
+  if (!mm || mm <= 0) return null;
+  return `${mm}mm / ${(mm * MM_TO_INCH).toFixed(1)}″`;
+};
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
@@ -52,6 +60,19 @@ const Product = () => {
     enabled: !!id,
   });
 
+  const { data: productAppliances = [] } = useQuery({
+    queryKey: ["product-appliances", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("product_compatible_appliances")
+        .select("*")
+        .eq("product_id", id!)
+        .order("sort_order");
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
   useEffect(() => {
     if (product) {
       const desc = product.short_description || `${product.product_name} — ${product.color} ${product.material} cabinet. $${Number(product.price_discounted_usd).toLocaleString()} (${product.discount_percentage}% off). Available at FitMatch.`;
@@ -63,6 +84,7 @@ const Product = () => {
 
   const { dispatch, getItemQuantity } = useCart();
   const qtyInCart = product ? getItemQuantity(product.id) : 0;
+  const [hwImageOpen, setHwImageOpen] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -113,7 +135,6 @@ const Product = () => {
   const savings = product.price_retail_usd - product.price_discounted_usd;
   const isDeactivated = product.availability_status === "Deactivated";
 
-
   const handleAddToCart = () => {
     dispatch({
       type: "ADD_ITEM",
@@ -131,6 +152,75 @@ const Product = () => {
     });
   };
 
+  // ── Compute tab data availability ──
+  const hw = (product as any).hardware_details as any;
+  const hasHw = hw && typeof hw === "object" && (hw.hinges?.brand || hw.drawer_slides?.brand || hw.handles?.type);
+  const hasFlat = !hasHw && (product.hinge_brand || product.slide_brand);
+  const hasHardware = hasHw || hasFlat;
+
+  const af = (product as any).additional_features as any[];
+  const hasFeatures = af?.length > 0;
+
+  const displayOpts = productOptions.filter((o: any) => o.option_name);
+  const hasCountertop = product.countertop_option && product.countertop_option !== "no";
+  const hasAddOns = displayOpts.length > 0 || hasCountertop;
+
+  const hasAppliances = productAppliances.length > 0;
+  const hasDescription = !!product.long_description;
+
+  // Dimensions display helper
+  const dimParts: string[] = [];
+  if (product.width_mm && product.width_mm > 0) dimParts.push(`${product.width_mm}`);
+  if (product.height_mm && product.height_mm > 0) dimParts.push(`${product.height_mm}`);
+  if (product.depth_mm && product.depth_mm > 0) dimParts.push(`${product.depth_mm}`);
+  const hasDimensions = dimParts.length > 0;
+
+  // Hardware sections
+  const hwSections = hasHw ? [
+    { label: "Hinges", data: hw.hinges, fields: [["Brand", hw.hinges?.brand], ["Model", hw.hinges?.model]] as [string, string][] },
+    { label: "Drawer Slides", data: hw.drawer_slides, fields: [["Brand", hw.drawer_slides?.brand], ["Model", hw.drawer_slides?.model]] as [string, string][] },
+    { label: "Handles", data: hw.handles, fields: [["Type", hw.handles?.type], ["Finish", hw.handles?.finish]] as [string, string][] },
+  ] : hasFlat ? [
+    { label: "Hinges", data: null, fields: [["Brand", product.hinge_brand], ["Model", product.hinge_model]] as [string, string][] },
+    { label: "Drawer Slides", data: null, fields: [["Brand", product.slide_brand], ["Model", product.slide_model]] as [string, string][] },
+  ] : [];
+  const activeHwSections = hwSections.filter(s => s.fields.some(([, v]) => v));
+
+  // Spec items
+  const specItems: { icon: React.ReactNode; label: string; value: string }[] = [];
+  if (hasDimensions) {
+    const w = fmtDim(product.width_mm);
+    const h = fmtDim(product.height_mm);
+    const d = fmtDim(product.depth_mm);
+    const parts = [w && `W: ${w}`, h && `H: ${h}`, d && `D: ${d}`].filter(Boolean);
+    specItems.push({ icon: <Ruler className="w-4 h-4 text-muted-foreground" />, label: "Dimensions", value: parts.join("  ·  ") });
+  }
+  if (product.color) specItems.push({ icon: <Palette className="w-4 h-4 text-muted-foreground" />, label: "Color", value: product.color });
+  if (product.material) specItems.push({ icon: <Layers className="w-4 h-4 text-muted-foreground" />, label: "Material", value: product.material });
+  if (product.style) specItems.push({ icon: <Info className="w-4 h-4 text-muted-foreground" />, label: "Style", value: product.style });
+  if (product.door_style) specItems.push({ icon: <Info className="w-4 h-4 text-muted-foreground" />, label: "Door Style", value: (product.door_style || "").replace(/_/g, " ") });
+  if (product.door_material) specItems.push({ icon: <Layers className="w-4 h-4 text-muted-foreground" />, label: "Door Material", value: (product.door_material || "").replace(/_/g, " ") });
+  if (product.finish_type) specItems.push({ icon: <Info className="w-4 h-4 text-muted-foreground" />, label: "Finish Type", value: product.finish_type });
+  if (product.construction_type) specItems.push({ icon: <Info className="w-4 h-4 text-muted-foreground" />, label: "Construction", value: product.construction_type });
+  if (product.condition) {
+    let condVal = product.condition;
+    if (product.condition_notes) condVal += ` — ${product.condition_notes}`;
+    specItems.push({ icon: <Info className="w-4 h-4 text-muted-foreground" />, label: "Condition", value: condVal });
+  }
+  if (product.manufacturer) specItems.push({ icon: <Info className="w-4 h-4 text-muted-foreground" />, label: "Manufacturer", value: product.manufacturer });
+  if (product.stock_level > 0) specItems.push({ icon: <Package className="w-4 h-4 text-muted-foreground" />, label: "Units in Stock", value: String(product.stock_level) });
+
+  // Available tabs
+  const tabs: { id: string; label: string }[] = [
+    { id: "specs", label: "Specifications" },
+  ];
+  if (hasHardware) tabs.push({ id: "hardware", label: "Hardware" });
+  if (hasFeatures) tabs.push({ id: "features", label: "Features" });
+  if (hasAddOns) tabs.push({ id: "addons", label: "Add-Ons" });
+  if (hasAppliances) tabs.push({ id: "appliances", label: "Appliances" });
+  if (hasDescription) tabs.push({ id: "description", label: "Description" });
+  tabs.push({ id: "reviews", label: "Reviews" });
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -145,14 +235,14 @@ const Product = () => {
             { label: product.product_name },
           ]}
         />
-        {/* Back link */}
         <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to all products
         </Link>
 
+        {/* ═══ HERO SECTION ═══ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Images */}
+          {/* LEFT: Gallery */}
           <div className="relative">
             <ProductGallery
               mainImage={product.main_image_url || "/placeholder.svg"}
@@ -169,7 +259,7 @@ const Product = () => {
             )}
           </div>
 
-          {/* Details */}
+          {/* RIGHT: Product info */}
           <div className="space-y-6">
             <div>
               {product.categories?.name && (
@@ -210,267 +300,6 @@ const Product = () => {
 
             <Separator />
 
-            {/* Specs */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-serif font-semibold text-foreground">Specifications</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <Ruler className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Dimensions (W×H×D)</p>
-                    <p className="text-sm font-medium text-foreground">
-                      {product.width_mm} × {product.height_mm} × {product.depth_mm} mm
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Color</p>
-                    <p className="text-sm font-medium text-foreground">{product.color}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Material</p>
-                    <p className="text-sm font-medium text-foreground">{product.material}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Info className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Style</p>
-                    <p className="text-sm font-medium text-foreground">{product.style}</p>
-                  </div>
-                </div>
-                {product.stock_level > 0 && (
-                  <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Units in Stock</p>
-                      <p className="text-sm font-medium text-foreground">{product.stock_level}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              {product.compatible_kitchen_layouts && product.compatible_kitchen_layouts.length > 0 && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Compatible Layouts</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {product.compatible_kitchen_layouts.map((layout: string) => (
-                      <Badge key={layout} variant="secondary" className="text-xs">{layout}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Countertop Info */}
-              {product.countertop_option && product.countertop_option !== "no" && (
-                <Separator />
-              )}
-              {product.countertop_option === "yes" && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-foreground">Countertop</h3>
-                  <Badge variant={product.countertop_included ? "default" : "secondary"}>
-                    {product.countertop_included ? "Included with product" : "Available separately"}
-                  </Badge>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                    {product.countertop_stock != null && product.countertop_stock > 0 && (
-                      <div><p className="text-xs text-muted-foreground">Units in Stock</p><p className="font-medium text-foreground">{product.countertop_stock}</p></div>
-                    )}
-                    {product.countertop_material && (
-                      <div><p className="text-xs text-muted-foreground">Material</p><p className="font-medium text-foreground">{product.countertop_material}</p></div>
-                    )}
-                    {product.countertop_thickness && (
-                      <div><p className="text-xs text-muted-foreground">Thickness</p><p className="font-medium text-foreground">{product.countertop_thickness}</p></div>
-                    )}
-                    {product.countertop_finish && (
-                      <div><p className="text-xs text-muted-foreground">Finish</p><p className="font-medium text-foreground">{product.countertop_finish}</p></div>
-                    )}
-                  </div>
-                </div>
-              )}
-              {product.countertop_option === "optional" && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-foreground">Countertop (Optional Add-on)</h3>
-                  <div className="border p-3 space-y-2">
-                    <div className="flex items-end gap-3">
-                      <span className="text-xl font-bold text-foreground">
-                        CA${Number(product.countertop_price_discounted).toLocaleString()}
-                      </span>
-                      {Number(product.countertop_price_retail) > Number(product.countertop_price_discounted) && (
-                        <span className="text-sm text-muted-foreground line-through">
-                          CA${Number(product.countertop_price_retail).toLocaleString()}
-                        </span>
-                      )}
-                      {Number(product.countertop_discount_percentage) > 0 && (
-                        <Badge variant="destructive" className="text-xs">{product.countertop_discount_percentage}% OFF</Badge>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                      {product.countertop_stock != null && product.countertop_stock > 0 && (
-                        <div><p className="text-xs text-muted-foreground">Units in Stock</p><p className="font-medium text-foreground">{product.countertop_stock}</p></div>
-                      )}
-                      {product.countertop_material && (
-                        <div><p className="text-xs text-muted-foreground">Material</p><p className="font-medium text-foreground">{product.countertop_material}</p></div>
-                      )}
-                      {product.countertop_thickness && (
-                        <div><p className="text-xs text-muted-foreground">Thickness</p><p className="font-medium text-foreground">{product.countertop_thickness}</p></div>
-                      )}
-                      {product.countertop_finish && (
-                        <div><p className="text-xs text-muted-foreground">Finish</p><p className="font-medium text-foreground">{product.countertop_finish}</p></div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-            </div>
-
-            {/* Add-On Options */}
-            {productOptions.length > 0 && (() => {
-              const displayOpts = productOptions.filter((o: any) => o.option_name);
-              if (!displayOpts.length) return null;
-              return (
-                <>
-                  <Separator />
-                  <div className="space-y-3">
-                    <h2 className="text-lg font-serif font-semibold text-foreground">Add-Ons & Options</h2>
-                    {displayOpts.map((opt: any) => {
-                      const hasDiscount = Number(opt.discount_percentage) > 0 && Number(opt.price_retail) > Number(opt.price_discounted);
-                      return (
-                        <div key={opt.id} className="border rounded-md p-3 space-y-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm font-semibold text-foreground">{opt.option_name}</p>
-                              <Badge variant="outline" className="text-[10px]">{(opt.option_type || "").replace(/_/g, " ")}</Badge>
-                              <Badge variant={opt.inclusion_status === "included" ? "default" : "secondary"} className="text-[10px]">
-                                {opt.inclusion_status === "included" ? "Included" : opt.inclusion_status === "optional" ? "Optional" : "Not Included"}
-                              </Badge>
-                            </div>
-                            {opt.inclusion_status === "optional" && Number(opt.price_discounted) > 0 && (
-                              <div className="flex items-center gap-2">
-                                {hasDiscount && (
-                                  <>
-                                    <span className="text-xs text-muted-foreground line-through">${Number(opt.price_retail).toLocaleString()}</span>
-                                    <Badge variant="destructive" className="text-[10px]">-{opt.discount_percentage}%</Badge>
-                                  </>
-                                )}
-                                <span className="text-sm font-bold text-foreground">${Number(opt.price_discounted).toLocaleString()}</span>
-                              </div>
-                            )}
-                            {opt.inclusion_status === "optional" && !Number(opt.price_discounted) && Number(opt.price_retail) > 0 && (
-                              <span className="text-sm font-bold text-foreground">${Number(opt.price_retail).toLocaleString()}</span>
-                            )}
-                          </div>
-                          {opt.description && <p className="text-xs text-muted-foreground">{opt.description}</p>}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              );
-            })()}
-
-            {/* Hardware Details */}
-            {(() => {
-              const hw = (product as any).hardware_details as any;
-              const hasHw = hw && typeof hw === "object" && (hw.hinges?.brand || hw.drawer_slides?.brand || hw.handles?.type);
-              // Fallback to flat columns
-              const hasFlat = !hasHw && (product.hinge_brand || product.slide_brand);
-              if (!hasHw && !hasFlat) return null;
-
-              const sections = hasHw ? [
-                { label: "Hinges", data: hw.hinges, fields: [["Brand", hw.hinges?.brand], ["Model", hw.hinges?.model]] },
-                { label: "Drawer Slides", data: hw.drawer_slides, fields: [["Brand", hw.drawer_slides?.brand], ["Model", hw.drawer_slides?.model]] },
-                { label: "Handles", data: hw.handles, fields: [["Type", hw.handles?.type], ["Finish", hw.handles?.finish]] },
-              ] : [
-                { label: "Hinges", data: null, fields: [["Brand", product.hinge_brand], ["Model", product.hinge_model]] },
-                { label: "Drawer Slides", data: null, fields: [["Brand", product.slide_brand], ["Model", product.slide_model]] },
-              ];
-
-              const activeSections = sections.filter(s => s.fields.some(([, v]) => v));
-              if (!activeSections.length) return null;
-
-              return (
-                <>
-                  <Separator />
-                  <div className="space-y-3">
-                    <h2 className="text-lg font-serif font-semibold text-foreground flex items-center gap-2">
-                      <Wrench className="w-4 h-4" /> Hardware
-                    </h2>
-                    {activeSections.map((sec) => (
-                      <div key={sec.label} className="flex items-start gap-3 border p-3 rounded-md">
-                        {sec.data?.image_url && (
-                          <img src={sec.data.image_url} alt={sec.label} className="w-12 h-12 rounded object-cover border border-border shrink-0" />
-                        )}
-                        <div className="flex-1 space-y-1">
-                          <p className="text-sm font-semibold text-foreground">{sec.label}</p>
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm">
-                            {sec.fields.map(([label, val]) => val ? (
-                              <div key={label as string}>
-                                <span className="text-muted-foreground text-xs">{label}: </span>
-                                <span className="text-foreground">{val as string}</span>
-                              </div>
-                            ) : null)}
-                          </div>
-                          {sec.data?.specs?.length > 0 && (
-                            <div className="pt-1 space-y-0.5">
-                              {sec.data.specs.map((sp: any, i: number) => (
-                                <p key={i} className="text-xs text-muted-foreground">
-                                  {sp.key}: <span className="text-foreground">{sp.value}</span>
-                                </p>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              );
-            })()}
-
-            {/* Additional Features */}
-            {(() => {
-              const af = (product as any).additional_features as any[];
-              if (!af?.length) return null;
-              return (
-                <>
-                  <Separator />
-                  <div className="space-y-2">
-                    <h2 className="text-lg font-serif font-semibold text-foreground">Features</h2>
-                    <div className="border rounded-md divide-y">
-                      {af.map((feat: any, i: number) => (
-                        <div key={i} className="flex justify-between px-3 py-2 text-sm">
-                          <span className="text-muted-foreground">{feat.key}</span>
-                          <span className="text-foreground font-medium">{feat.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              );
-            })()}
-
-            {/* Long description */}
-            {product.long_description && (
-              <>
-                <Separator />
-                <div>
-                  <h2 className="text-lg font-serif font-semibold text-foreground mb-2">Description</h2>
-                  <div className="max-h-48 overflow-y-auto border p-3">
-                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                      {product.long_description}
-                    </p>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <Separator />
-
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
@@ -503,11 +332,269 @@ const Product = () => {
             <TrustBadgeBar />
           </div>
         </div>
-        {/* Reviews */}
-        <div className="mt-16">
-          <ProductReviews productId={product.id} />
+
+        {/* ═══ TABBED SECTION ═══ */}
+        <div className="mt-12">
+          <Tabs defaultValue="specs">
+            <div className="sticky top-0 z-30 bg-background border-b">
+              <TabsList className="bg-transparent h-auto p-0 gap-0 overflow-x-auto flex w-full justify-start rounded-none">
+                {tabs.map((tab) => (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm font-medium text-muted-foreground data-[state=active]:text-foreground whitespace-nowrap"
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+
+            <div className="max-w-4xl mx-auto py-8">
+              {/* SPECIFICATIONS TAB */}
+              <TabsContent value="specs" className="mt-0">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {specItems.map((item, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 border rounded-md">
+                        <div className="mt-0.5">{item.icon}</div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">{item.label}</p>
+                          <p className="text-sm font-medium text-foreground">{item.value}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Compatible Layouts */}
+                  {product.compatible_kitchen_layouts && product.compatible_kitchen_layouts.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-foreground">Compatible Kitchen Layouts</h3>
+                      <p className="text-xs text-muted-foreground">This cabinet set fits the following kitchen configurations</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {product.compatible_kitchen_layouts.map((layout: string) => (
+                          <Badge key={layout} variant="secondary" className="text-xs">{layout}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              {/* HARDWARE TAB */}
+              {hasHardware && (
+                <TabsContent value="hardware" className="mt-0">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {activeHwSections.map((sec) => (
+                      <div key={sec.label} className="border rounded-lg p-4 space-y-3">
+                        {sec.data?.image_url && (
+                          <button
+                            onClick={() => setHwImageOpen(sec.data.image_url)}
+                            className="w-16 h-16 rounded overflow-hidden border border-border cursor-pointer hover:opacity-80 transition-opacity"
+                          >
+                            <img src={sec.data.image_url} alt={sec.label} className="w-full h-full object-cover" />
+                          </button>
+                        )}
+                        <p className="text-sm font-semibold text-foreground">{sec.label}</p>
+                        <div className="space-y-1">
+                          {sec.fields.map(([label, val]) => val ? (
+                            <div key={label}>
+                              <span className="text-muted-foreground text-xs">{label}: </span>
+                              <span className="text-foreground text-sm">{val}</span>
+                            </div>
+                          ) : null)}
+                        </div>
+                        {sec.data?.specs?.length > 0 && (
+                          <div className="pt-1 border-t space-y-0.5">
+                            {sec.data.specs.map((sp: any, i: number) => (
+                              <p key={i} className="text-xs text-muted-foreground">
+                                {sp.key}: <span className="text-foreground">{sp.value}</span>
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+              )}
+
+              {/* FEATURES TAB */}
+              {hasFeatures && (
+                <TabsContent value="features" className="mt-0">
+                  <div className="border rounded-md divide-y">
+                    {af.map((feat: any, i: number) => (
+                      <div key={i} className="flex justify-between px-4 py-3 text-sm">
+                        <span className="text-muted-foreground">{feat.key}</span>
+                        <span className="text-foreground font-medium">{feat.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+              )}
+
+              {/* ADD-ONS TAB */}
+              {hasAddOns && (
+                <TabsContent value="addons" className="mt-0">
+                  <div className="space-y-4">
+                    {/* Countertop */}
+                    {product.countertop_option === "yes" && (
+                      <div className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-foreground">Countertop</p>
+                            <Badge variant={product.countertop_included ? "default" : "secondary"} className="text-[10px]">
+                              {product.countertop_included ? "Included" : "Available separately"}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                          {product.countertop_stock != null && product.countertop_stock > 0 && (
+                            <div><p className="text-xs text-muted-foreground">Units in Stock</p><p className="font-medium text-foreground">{product.countertop_stock}</p></div>
+                          )}
+                          {product.countertop_material && (
+                            <div><p className="text-xs text-muted-foreground">Material</p><p className="font-medium text-foreground">{product.countertop_material}</p></div>
+                          )}
+                          {product.countertop_thickness && (
+                            <div><p className="text-xs text-muted-foreground">Thickness</p><p className="font-medium text-foreground">{product.countertop_thickness}</p></div>
+                          )}
+                          {product.countertop_finish && (
+                            <div><p className="text-xs text-muted-foreground">Finish</p><p className="font-medium text-foreground">{product.countertop_finish}</p></div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {product.countertop_option === "optional" && (
+                      <div className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-foreground">Countertop (Optional Add-on)</p>
+                          <Badge variant="outline" className="text-[10px]">Optional</Badge>
+                        </div>
+                        <div className="flex items-end gap-3">
+                          <span className="text-xl font-bold text-foreground">
+                            CA${Number(product.countertop_price_discounted).toLocaleString()}
+                          </span>
+                          {Number(product.countertop_price_retail) > Number(product.countertop_price_discounted) && (
+                            <span className="text-sm text-muted-foreground line-through">
+                              CA${Number(product.countertop_price_retail).toLocaleString()}
+                            </span>
+                          )}
+                          {Number(product.countertop_discount_percentage) > 0 && (
+                            <Badge variant="destructive" className="text-xs">{product.countertop_discount_percentage}% OFF</Badge>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                          {product.countertop_stock != null && product.countertop_stock > 0 && (
+                            <div><p className="text-xs text-muted-foreground">Units in Stock</p><p className="font-medium text-foreground">{product.countertop_stock}</p></div>
+                          )}
+                          {product.countertop_material && (
+                            <div><p className="text-xs text-muted-foreground">Material</p><p className="font-medium text-foreground">{product.countertop_material}</p></div>
+                          )}
+                          {product.countertop_thickness && (
+                            <div><p className="text-xs text-muted-foreground">Thickness</p><p className="font-medium text-foreground">{product.countertop_thickness}</p></div>
+                          )}
+                          {product.countertop_finish && (
+                            <div><p className="text-xs text-muted-foreground">Finish</p><p className="font-medium text-foreground">{product.countertop_finish}</p></div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Product Options */}
+                    {displayOpts.map((opt: any) => {
+                      const hasDiscount = Number(opt.discount_percentage) > 0 && Number(opt.price_retail) > Number(opt.price_discounted);
+                      return (
+                        <div key={opt.id} className="border rounded-lg p-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-semibold text-foreground">{opt.option_name}</p>
+                              <Badge variant="outline" className="text-[10px]">{(opt.option_type || "").replace(/_/g, " ")}</Badge>
+                              <Badge variant={opt.inclusion_status === "included" ? "default" : "secondary"} className="text-[10px]">
+                                {opt.inclusion_status === "included" ? "Included" : opt.inclusion_status === "optional" ? "Optional" : "Not Included"}
+                              </Badge>
+                            </div>
+                            {opt.inclusion_status === "optional" && Number(opt.price_discounted) > 0 && (
+                              <div className="flex items-center gap-2">
+                                {hasDiscount && (
+                                  <>
+                                    <span className="text-xs text-muted-foreground line-through">${Number(opt.price_retail).toLocaleString()}</span>
+                                    <Badge variant="destructive" className="text-[10px]">-{opt.discount_percentage}%</Badge>
+                                  </>
+                                )}
+                                <span className="text-sm font-bold text-foreground">${Number(opt.price_discounted).toLocaleString()}</span>
+                              </div>
+                            )}
+                            {opt.inclusion_status === "optional" && !Number(opt.price_discounted) && Number(opt.price_retail) > 0 && (
+                              <span className="text-sm font-bold text-foreground">${Number(opt.price_retail).toLocaleString()}</span>
+                            )}
+                          </div>
+                          {opt.description && <p className="text-xs text-muted-foreground">{opt.description}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </TabsContent>
+              )}
+
+              {/* APPLIANCES TAB */}
+              {hasAppliances && (
+                <TabsContent value="appliances" className="mt-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {productAppliances.map((app: any) => {
+                      const dims = (app.dimensions as any) || {};
+                      return (
+                        <div key={app.id} className="border rounded-lg p-4 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">{(app.appliance_type || "").replace(/_/g, " ")}</Badge>
+                            {app.brand && <span className="text-sm font-semibold text-foreground">{app.brand}</span>}
+                          </div>
+                          {(app.model_name || app.model_number) && (
+                            <p className="text-sm text-foreground">
+                              {app.model_name}{app.model_name && app.model_number && " · "}{app.model_number}
+                            </p>
+                          )}
+                          {(dims.width_mm > 0 || dims.height_mm > 0 || dims.depth_mm > 0) && (
+                            <p className="text-xs text-muted-foreground font-mono">
+                              {[dims.width_mm > 0 && `W: ${dims.width_mm}mm`, dims.height_mm > 0 && `H: ${dims.height_mm}mm`, dims.depth_mm > 0 && `D: ${dims.depth_mm}mm`].filter(Boolean).join(" · ")}
+                            </p>
+                          )}
+                          {app.notes && <p className="text-xs text-muted-foreground">{app.notes}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </TabsContent>
+              )}
+
+              {/* DESCRIPTION TAB */}
+              {hasDescription && (
+                <TabsContent value="description" className="mt-0">
+                  <div className="prose max-w-none">
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {product.long_description}
+                    </p>
+                  </div>
+                </TabsContent>
+              )}
+
+              {/* REVIEWS TAB */}
+              <TabsContent value="reviews" className="mt-0">
+                <ProductReviews productId={product.id} />
+              </TabsContent>
+            </div>
+          </Tabs>
         </div>
       </main>
+
+      {/* Hardware image lightbox */}
+      <Dialog open={!!hwImageOpen} onOpenChange={() => setHwImageOpen(null)}>
+        <DialogContent className="max-w-lg p-2">
+          {hwImageOpen && (
+            <img src={hwImageOpen} alt="Hardware detail" className="w-full h-auto rounded" />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
