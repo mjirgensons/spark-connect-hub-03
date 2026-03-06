@@ -1081,6 +1081,104 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
             {!isReadOnly && <SaveSectionButton onClick={() => saveSectionToDb("details")} saving={savingSection === "details"} saved={sectionSaved.details} dirty={sectionDirty.details} />}
           </AccordionContent>
         </AccordionItem>
+
+        {/* ═══ SECTION 10 — DELIVERY & PICKUP ═══ */}
+        <AccordionItem value="delivery" className="border rounded-lg">
+          <AccordionTrigger className="px-4 font-bold text-base">10 · Delivery & Pickup <SectionIndicator section="delivery" /></AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 space-y-4">
+            <fieldset disabled={isReadOnly}>
+            <div>
+              <Label className={labelCls}>Delivery Option *</Label>
+              <RadioGroup value={delivery.delivery_option} onValueChange={(v) => { setDelivery(p => ({ ...p, delivery_option: v })); markDirty("delivery"); }} className="mt-2 space-y-2">
+                <div className="flex items-start gap-2">
+                  <RadioGroupItem value="delivery" id="do-delivery" className="mt-0.5" />
+                  <Label htmlFor="do-delivery" className="text-sm font-normal leading-tight">Delivery Available — I deliver to the buyer's address</Label>
+                </div>
+                <div className="flex items-start gap-2">
+                  <RadioGroupItem value="pickup_only" id="do-pickup" className="mt-0.5" />
+                  <Label htmlFor="do-pickup" className="text-sm font-normal leading-tight">Pickup Only — Buyer picks up from my location</Label>
+                </div>
+                <div className="flex items-start gap-2">
+                  <RadioGroupItem value="both" id="do-both" className="mt-0.5" />
+                  <Label htmlFor="do-both" className="text-sm font-normal leading-tight">Both — Buyer can choose delivery or pickup</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* Delivery fields */}
+            {(delivery.delivery_option === "delivery" || delivery.delivery_option === "both") && (
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Truck className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold">Delivery Details</span>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className={labelCls}>Delivery Price (CAD) *</Label>
+                    <div className="relative mt-1">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                      <Input type="number" step="0.01" min="0" value={delivery.delivery_price} onChange={(e) => { setDelivery(p => ({ ...p, delivery_price: e.target.value })); markDirty("delivery"); }} className="pl-7" placeholder="e.g. 540" />
+                    </div>
+                    {sectionErrors.delivery.some(e => e.includes("Delivery Price")) && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
+                  </div>
+                  <div>
+                    <Label className={labelCls}>Preparation Time (business days) *</Label>
+                    <Input type="number" min="1" max="60" value={delivery.delivery_prep_days} onChange={(e) => { setDelivery(p => ({ ...p, delivery_prep_days: e.target.value })); markDirty("delivery"); }} className={inputCls} placeholder="e.g. 5" />
+                    {sectionErrors.delivery.some(e => e.includes("Delivery Preparation")) && <p className="text-xs text-destructive mt-1">Required — must be at least 1</p>}
+                  </div>
+                </div>
+                <div>
+                  <Label className={labelCls}>Delivery Zone</Label>
+                  <Input value={delivery.delivery_zone} onChange={(e) => { setDelivery(p => ({ ...p, delivery_zone: e.target.value })); markDirty("delivery"); }} className={inputCls} placeholder="e.g. GTA and surrounding areas within 100km" />
+                </div>
+              </div>
+            )}
+
+            {/* Pickup fields */}
+            {(delivery.delivery_option === "pickup_only" || delivery.delivery_option === "both") && (
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold">Pickup Location</span>
+                </div>
+                <div>
+                  <Label className={labelCls}>Pickup Address (Street) *</Label>
+                  <Input value={delivery.pickup_address} onChange={(e) => { setDelivery(p => ({ ...p, pickup_address: e.target.value })); markDirty("delivery"); }} className={inputCls} placeholder="e.g. 123 Industrial Blvd, Unit 5" />
+                  {sectionErrors.delivery.some(e => e.includes("Pickup Address")) && <p className="text-xs text-destructive mt-1">Required</p>}
+                </div>
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div>
+                    <Label className={labelCls}>City *</Label>
+                    <Input value={delivery.pickup_city} onChange={(e) => { setDelivery(p => ({ ...p, pickup_city: e.target.value })); markDirty("delivery"); }} className={inputCls} placeholder="e.g. Woodbridge" />
+                    {sectionErrors.delivery.some(e => e.includes("Pickup City")) && <p className="text-xs text-destructive mt-1">Required</p>}
+                  </div>
+                  <div>
+                    <Label className={labelCls}>Province</Label>
+                    <Input value={delivery.pickup_province} onChange={(e) => { setDelivery(p => ({ ...p, pickup_province: e.target.value })); markDirty("delivery"); }} className={inputCls} />
+                  </div>
+                  <div>
+                    <Label className={labelCls}>Postal Code</Label>
+                    <Input value={delivery.pickup_postal_code} onChange={(e) => { setDelivery(p => ({ ...p, pickup_postal_code: e.target.value })); markDirty("delivery"); }} className={inputCls} placeholder="e.g. L4L 1A5" />
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className={labelCls}>Contact Phone for Pickup *</Label>
+                    <Input value={delivery.pickup_phone} onChange={(e) => { setDelivery(p => ({ ...p, pickup_phone: e.target.value })); markDirty("delivery"); }} className={inputCls} placeholder="e.g. (416) 555-1234" />
+                    {sectionErrors.delivery.some(e => e.includes("Pickup Phone")) && <p className="text-xs text-destructive mt-1">Required</p>}
+                  </div>
+                  <div>
+                    <Label className={labelCls}>Preparation Time for Pickup (business days) *</Label>
+                    <Input type="number" min="1" max="60" value={delivery.pickup_prep_days} onChange={(e) => { setDelivery(p => ({ ...p, pickup_prep_days: e.target.value })); markDirty("delivery"); }} className={inputCls} placeholder="e.g. 5" />
+                    {sectionErrors.delivery.some(e => e.includes("Pickup Preparation")) && <p className="text-xs text-destructive mt-1">Required — must be at least 1</p>}
+                  </div>
+                </div>
+              </div>
+            )}
+            </fieldset>
+            {!isReadOnly && <SaveSectionButton onClick={() => saveSectionToDb("delivery")} saving={savingSection === "delivery"} saved={sectionSaved.delivery} dirty={sectionDirty.delivery} />}
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
 
       {/* ── Sticky bottom action bar ── */}
