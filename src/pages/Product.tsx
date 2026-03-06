@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart, Download, ChevronDown, MessageSquare, Truck, MapPin } from "lucide-react";
+import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart, Download, ChevronDown, MessageSquare, Truck, MapPin, RefreshCw } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import Header from "@/components/landing/Header";
