@@ -1,9 +1,8 @@
-import { Lock, RotateCcw, Truck } from "lucide-react";
+import { Lock, RotateCcw } from "lucide-react";
 
 const badges = [
   { icon: Lock, label: "Secure Checkout" },
   { icon: RotateCcw, label: "30-Day Returns" },
-  { icon: Truck, label: "GTA Delivery" },
 ];
 
 const TrustBadgeBar = () => (

@@ -45,6 +45,8 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       const existing = state.items.find((i) => i.productId === action.payload.productId);
       const maxQty = isDeliveryItem(action.payload.name, action.payload.productId) ? 1 : action.payload.maxStock;
       if (existing) {
+        // Already in cart — update quantity (but not for duplicates of add-ons)
+        if (existing.productId.includes("_option_")) return state;
         const items = state.items.map((i) =>
           i.productId === action.payload.productId
             ? { ...i, quantity: Math.min(i.quantity + 1, maxQty) }
