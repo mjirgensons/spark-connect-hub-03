@@ -107,6 +107,8 @@ const Admin = () => {
         return <AdminSellersTab />;
       case "product-review":
         return <AdminProductReviewTab />;
+      case "qa-overview":
+        return <AdminQATab />;
       case "reviews":
         return <AdminReviewsTab />;
       case "email":
