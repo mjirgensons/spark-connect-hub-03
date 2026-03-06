@@ -43,7 +43,7 @@ interface SellerProfile {
   website: string | null;
   bio: string | null;
   product_count: number;
-}
+  auto_approve_products: boolean;
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
