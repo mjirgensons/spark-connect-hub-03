@@ -19,7 +19,9 @@ import {
 import {
   PlusCircle, Pencil, Trash2, Copy, Sparkles, AlertTriangle, ImageOff,
   RotateCcw, Trash, ArrowUp, ArrowDown, ArrowUpDown, Star, Layers, Search,
+  Check, X as XIcon,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { getImageOptSummary } from "@/components/admin/ImageUpload";
 
 // ── Types ──
@@ -35,6 +37,7 @@ interface Product {
   discount_percentage: number;
   stock_level: number;
   availability_status: string;
+  listing_status: string;
   is_featured: boolean;
   main_image_url: string | null;
   additional_image_urls: string[] | null;
@@ -64,6 +67,21 @@ const statusBadge = (status: string) => {
   }
 };
 
+const listingStatusBadge = (status: string) => {
+  switch (status) {
+    case "approved":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-green-500/15 text-green-700 border-green-300 whitespace-nowrap">Approved</Badge>;
+    case "pending_review":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-yellow-500/15 text-yellow-700 border-yellow-300 whitespace-nowrap">Pending Review</Badge>;
+    case "rejected":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-red-500/15 text-red-700 border-red-300 whitespace-nowrap">Rejected</Badge>;
+    case "draft":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-muted text-muted-foreground whitespace-nowrap">Draft</Badge>;
+    default:
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 whitespace-nowrap">{status}</Badge>;
+  }
+};
+
 const SellerProducts = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -82,6 +100,9 @@ const SellerProducts = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<Product | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
@@ -272,6 +293,25 @@ const SellerProducts = () => {
     }
   };
 
+  const handleApproveProduct = async (product: Product) => {
+    const { error } = await supabase.from("products").update({ listing_status: "approved" } as any).eq("id", product.id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: `"${product.product_name}" approved` }); fetchProducts(); }
+  };
+
+  const handleRejectProduct = async () => {
+    if (!rejectTarget) return;
+    const { error } = await supabase.from("products").update({
+      listing_status: "rejected",
+      listing_rejection_reason: rejectReason || null,
+    } as any).eq("id", rejectTarget.id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: `"${rejectTarget.product_name}" rejected` }); fetchProducts(); }
+    setRejectDialogOpen(false);
+    setRejectTarget(null);
+    setRejectReason("");
+  };
+
   const handleDuplicate = async (product: Product) => {
     const { id: _id, deleted_at: _da, created_at: _ca, updated_at: _ua, ...rest } = product as any;
     const newName = `${product.product_name} (Copy)`;
@@ -443,10 +483,11 @@ const SellerProducts = () => {
                       <TableHead className="py-2 px-2 w-[90px] text-center cursor-pointer select-none" onClick={() => handleSort("availability_status")}>
                         <span className="inline-flex items-center justify-center w-full">Status<SortIcon col="availability_status" /></span>
                       </TableHead>
+                      <TableHead className="py-2 px-2 w-[90px] text-center">Listing</TableHead>
                       <TableHead className="py-2 px-1 w-[40px] text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
                         <span className="inline-flex items-center justify-center w-full"><Star className="w-3 h-3" /><SortIcon col="is_featured" /></span>
                       </TableHead>
-                      <TableHead className="py-2 px-2 w-[120px] text-right">Actions</TableHead>
+                      <TableHead className="py-2 px-2 w-[160px] text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -483,6 +524,9 @@ const SellerProducts = () => {
                               {statusBadge(p.availability_status)}
                             </button>
                           </TableCell>
+                          <TableCell className="py-1.5 px-2 text-center">
+                            {listingStatusBadge(p.listing_status || 'pending_review')}
+                          </TableCell>
                           <TableCell className="py-1.5 px-1 text-center">
                             {p.is_featured ? <Star className="w-3.5 h-3.5 text-primary fill-primary mx-auto" /> : <span className="text-muted-foreground">—</span>}
                           </TableCell>
@@ -497,9 +541,19 @@ const SellerProducts = () => {
                               <Button variant="ghost" size="icon" className="h-7 w-7" title="Edit" onClick={() => navigate(editUrl(p.id))}>
                                 <Pencil className="w-3.5 h-3.5" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => { setDeleteTarget(p); setDeleteDialogOpen(true); }}>
+                               <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => { setDeleteTarget(p); setDeleteDialogOpen(true); }}>
                                 <Trash2 className="w-3.5 h-3.5 text-destructive" />
                               </Button>
+                              {adminViewId && p.listing_status !== "approved" && (
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600" title="Approve" onClick={() => handleApproveProduct(p)}>
+                                  <Check className="w-3.5 h-3.5" />
+                                </Button>
+                              )}
+                              {adminViewId && p.listing_status !== "rejected" && (
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" title="Reject" onClick={() => { setRejectTarget(p); setRejectDialogOpen(true); }}>
+                                  <XIcon className="w-3.5 h-3.5" />
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -507,7 +561,7 @@ const SellerProducts = () => {
                     })}
                     {filteredAndSorted.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
+                        <TableCell colSpan={12} className="text-center py-12 text-muted-foreground">
                           <div className="space-y-2">
                             {products.length === 0 ? (
                               <>
@@ -641,6 +695,30 @@ const SellerProducts = () => {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleEmptyBin} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Empty Bin
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ── Reject Product Dialog ── */}
+      <AlertDialog open={rejectDialogOpen} onOpenChange={(open) => { setRejectDialogOpen(open); if (!open) { setRejectTarget(null); setRejectReason(""); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reject product listing?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Provide a reason for rejecting "{rejectTarget?.product_name}". The seller will see this reason.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            placeholder="Rejection reason (optional)…"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            className="mt-2"
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRejectProduct} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Reject
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

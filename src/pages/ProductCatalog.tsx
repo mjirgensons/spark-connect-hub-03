@@ -61,11 +61,13 @@ const ProductCatalog = () => {
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ["catalog-products"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const q = supabase
         .from("products")
-        .select("*, categories(name, slug)")
-        .is("deleted_at", null)
-        .neq("availability_status", "Deactivated");
+        .select("*, categories(name, slug), profiles!products_seller_id_fkey(company_name)")
+        .is("deleted_at", null);
+      const { data, error } = await (q as any)
+        .in("availability_status", ["In Stock", "Low Stock"])
+        .eq("listing_status", "approved");
       if (error) throw error;
       return data || [];
     },
@@ -83,7 +85,7 @@ const ProductCatalog = () => {
 
   // Extract unique styles
   const uniqueStyles = useMemo(
-    () => [...new Set(products.map((p: any) => p.style).filter(Boolean))].sort(),
+    () => [...new Set(products.map((p: any) => p.style as string).filter(Boolean))].sort(),
     [products]
   );
 
@@ -221,7 +223,7 @@ const ProductCatalog = () => {
         <div>
           <h3 className="font-sans text-sm font-semibold mb-2">Style</h3>
           <div className="space-y-2">
-            {uniqueStyles.map((s) => (
+            {uniqueStyles.map((s: string) => (
               <label key={s} className="flex items-center gap-2 cursor-pointer">
                 <Checkbox
                   checked={filters.styles.includes(s)}
@@ -378,9 +380,14 @@ const ProductCatalog = () => {
                         {/* Info */}
                         <div className="p-4 space-y-2">
                           <div className="flex items-start justify-between gap-2">
-                            <h3 className="font-sans font-bold text-sm leading-tight line-clamp-2">
-                              {product.product_name}
-                            </h3>
+                            <div>
+                              <h3 className="font-sans font-bold text-sm leading-tight line-clamp-2">
+                                {product.product_name}
+                              </h3>
+                              <p className="text-[10px] text-muted-foreground">
+                                by {(product as any).profiles?.company_name || "FitMatch"}
+                              </p>
+                            </div>
                             <Badge variant="outline" className="text-[10px] shrink-0 border-foreground">
                               {categoryName}
                             </Badge>

@@ -33,11 +33,13 @@ const SearchResults = () => {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["search-products"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const q = supabase
         .from("products")
-        .select("*, categories(name, slug)")
-        .is("deleted_at", null)
-        .neq("availability_status", "Deactivated");
+        .select("*, categories(name, slug), profiles!products_seller_id_fkey(company_name)")
+        .is("deleted_at", null);
+      const { data, error } = await (q as any)
+        .in("availability_status", ["In Stock", "Low Stock"])
+        .eq("listing_status", "approved");
       if (error) throw error;
       return data || [];
     },
@@ -180,7 +182,12 @@ const SearchResults = () => {
                     </div>
                     <div className="p-4 space-y-2">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-bold text-sm leading-tight line-clamp-2">{product.product_name}</h3>
+                        <div>
+                          <h3 className="font-bold text-sm leading-tight line-clamp-2">{product.product_name}</h3>
+                          <p className="text-[10px] text-muted-foreground">
+                            by {(product as any).profiles?.company_name || "FitMatch"}
+                          </p>
+                        </div>
                         <Badge variant="outline" className="text-[10px] shrink-0 border-foreground">{categoryName}</Badge>
                       </div>
                       <p className="font-mono text-xs text-muted-foreground">
