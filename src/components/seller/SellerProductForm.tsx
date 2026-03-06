@@ -816,7 +816,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 7 — COMPATIBLE APPLIANCES ═══ */}
         <AccordionItem value="appliances" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">Compatible Appliances <SectionIndicator section="appliances" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">7 · Compatible Appliances <SectionIndicator section="appliances" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="flex items-start gap-2 p-3 rounded-md bg-muted">
