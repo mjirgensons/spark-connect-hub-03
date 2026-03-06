@@ -725,7 +725,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 3 — HARDWARE DETAILS ═══ */}
         <AccordionItem value="hardware" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">3 · Hardware Details <SectionIndicator section="hardware" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Hardware Details <SectionIndicator section="hardware" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <fieldset disabled={isReadOnly}>
             <HardwareSection hardware={hardware} onChange={(h) => { setHardware(h); markDirty("hardware"); }} sellerId={user?.id} productId={liveProductId} />
