@@ -1266,6 +1266,22 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Cancel confirmation dialog */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>You have unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              Save before leaving?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => { setCancelDialogOpen(false); navigate("/seller/products"); }}>Discard Changes</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSaveAndLeave}>Save & Leave</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {uploadProgress && <p className="text-sm text-muted-foreground animate-pulse">{uploadProgress}</p>}
     </div>
   );
