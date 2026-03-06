@@ -856,7 +856,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 8 — IMAGES & DOCUMENTS ═══ */}
         <AccordionItem value="images" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">Images & Documents <SectionIndicator section="images" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">8 · Images & Documents <SectionIndicator section="images" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <ImageUpload value={mainImageUrl} onChange={(v) => { setMainImageUrl(v); markDirty("images"); }} label="Main Image (auto-optimized to WebP)" />
