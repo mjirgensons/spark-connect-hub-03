@@ -260,7 +260,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     const af = (p as any).additional_features as any;
     if (Array.isArray(af)) setAdditionalFeatures(af);
     // Mark all sections as saved initially for edit mode
-    setSectionSaved({ basic: true, dimensions: true, hardware: true, features: true, pricing: true, addons: true, appliances: true, images: true, details: true });
+    setSectionSaved({ basic: true, dimensions: true, hardware: true, features: true, pricing: true, addons: true, appliances: true, images: true, details: true, delivery: true });
     setEditDataLoaded(true);
   }, [liveProductId, existingProduct, editDataLoaded]);
 
