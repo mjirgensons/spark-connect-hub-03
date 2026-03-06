@@ -90,18 +90,23 @@ const HardwareSubSection = ({ title, item, onChange, fields, uploadPath }: Hardw
       <h4 className="text-sm font-bold">{title}</h4>
       <div className="flex gap-4">
         {/* Image uploader */}
-        <div
-          className="w-16 h-16 shrink-0 rounded border-2 border-dashed border-border flex items-center justify-center cursor-pointer overflow-hidden hover:border-primary/50 transition-colors relative"
-          onClick={() => fileRef.current?.click()}
-        >
-          {uploading ? (
-            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-          ) : item.image_url ? (
-            <img src={item.image_url} alt={title} className="w-full h-full object-cover" />
-          ) : (
-            <Camera className="w-5 h-5 text-muted-foreground" />
+        <div className="shrink-0 space-y-1">
+          <div
+            className="w-16 h-16 rounded border-2 border-dashed border-border flex items-center justify-center cursor-pointer overflow-hidden hover:border-primary/50 transition-colors relative"
+            onClick={() => fileRef.current?.click()}
+          >
+            {uploading ? (
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            ) : item.image_url ? (
+              <img src={item.image_url} alt={title} className="w-full h-full object-cover" />
+            ) : (
+              <Camera className="w-5 h-5 text-muted-foreground" />
+            )}
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+          </div>
+          {optSummary && (
+            <p className="text-[10px] text-muted-foreground leading-tight max-w-[80px]">{optSummary}</p>
           )}
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
         </div>
 
         {/* Fields */}

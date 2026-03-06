@@ -662,9 +662,10 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
                   </RadioGroup>
                 </div>
                 {opt.inclusion_status === "optional" && (
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div><Label className={labelCls}>Price Retail (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={opt.price_retail} onChange={(e) => updateOption(i, "price_retail", e.target.value)} className="pl-7" /></div></div>
-                    <div><Label className={labelCls}>Price Discounted (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={opt.price_discounted} onChange={(e) => updateOption(i, "price_discounted", e.target.value)} className="pl-7" /></div></div>
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={opt.price_retail} onChange={(e) => handleOptionRetailChange(i, e.target.value)} className="pl-7" /></div></div>
+                    <div><Label className={labelCls}>Discount %</Label><div className="relative mt-1"><Input type="number" min="0" max="99" value={opt.discount_pct} onChange={(e) => handleOptionDiscountChange(i, e.target.value)} className="pr-7" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span></div></div>
+                    <div><Label className={labelCls}>Sale Price (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={opt.price_discounted} onChange={(e) => handleOptionSaleChange(i, e.target.value)} className="pl-7" /></div></div>
                   </div>
                 )}
                 <div><Label className={labelCls}>Description</Label><Input value={opt.description} onChange={(e) => updateOption(i, "description", e.target.value)} className={inputCls} /></div>
