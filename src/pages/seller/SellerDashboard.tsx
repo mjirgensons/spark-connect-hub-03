@@ -152,7 +152,7 @@ const SellerDashboard = () => {
             <p className="text-xs text-red-700">Review and fix them to resubmit.</p>
           </div>
           <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-100" asChild>
-            <Link to={`${productsUrl}&status=rejected`}>View Declined</Link>
+            <Link to={adminViewId ? `${productsUrl}&status=rejected` : `${productsUrl}?status=rejected`}>View Declined</Link>
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7 text-red-600" onClick={() => setDismissedBanner(true)}>
             <X className="w-4 h-4" />
