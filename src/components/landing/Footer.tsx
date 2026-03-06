@@ -64,7 +64,7 @@ const Footer = () => {
       {/* ROW 1 — Brand + Social */}
       <div className="container mx-auto px-4 pt-16 pb-10">
         <div className="flex flex-col md:flex-row justify-between items-start gap-8">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-1.5">
             <div className="w-10 h-10 bg-background flex items-center justify-center shrink-0">
               <span className="font-serif font-bold text-xl text-foreground">F</span>
             </div>
