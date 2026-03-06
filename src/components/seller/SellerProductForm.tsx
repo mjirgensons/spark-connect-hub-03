@@ -764,7 +764,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 6 — ADD-ONS ═══ */}
         <AccordionItem value="addons" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">Add-Ons & Inclusions <SectionIndicator section="addons" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">6 · Add-Ons & Inclusions <SectionIndicator section="addons" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             {options.length === 0 && <p className="text-sm text-muted-foreground">No add-ons yet. Click "Add Option" to include countertops, sinks, or other add-ons.</p>}
