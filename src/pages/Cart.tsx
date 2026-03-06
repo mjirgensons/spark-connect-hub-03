@@ -5,7 +5,7 @@ import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, CornerDownRight, Pencil } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, CornerDownRight, Pencil, Truck, MapPin } from "lucide-react";
 import TrustBadgeBar from "@/components/TrustBadgeBar";
 import { toast } from "sonner";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -15,24 +15,35 @@ const formatPrice = (n: number) =>
 
 const Cart = () => {
   usePageMeta("Your Cart");
-  const { items, itemCount, subtotal, dispatch } = useCart();
-
-  const taxRate = 0.13;
-  const tax = Math.round(subtotal * taxRate * 100) / 100;
-  const total = Math.round((subtotal + tax) * 100) / 100;
+  const { items, dispatch } = useCart();
 
   const isAddon = (productId: string) => productId.includes("_option_");
-  const isDeliveryItem = (name: string, productId: string) =>
-    /delivery|shipping/i.test(name) || (productId.includes("_option_") && /delivery|shipping/i.test(name));
+
+  const mainItems = items.filter((i) => !isAddon(i.productId));
+  const addonItems = items.filter((i) => isAddon(i.productId));
+  const mainProductCount = mainItems.reduce((s, i) => s + i.quantity, 0);
+
+  // Subtotal = products + add-ons (no delivery)
+  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
+
+  // Delivery total from main items only
+  const deliveryTotal = mainItems.reduce((s, i) => {
+    if (i.deliveryChoice === "delivery" && (i.deliveryPrice || 0) > 0) {
+      return s + (i.deliveryPrice || 0);
+    }
+    return s;
+  }, 0);
+
+  const allPickup = mainItems.length > 0 && mainItems.every((i) => i.deliveryChoice !== "delivery");
+
+  const taxRate = 0.13;
+  const tax = Math.round((subtotal + deliveryTotal) * taxRate * 100) / 100;
+  const total = Math.round((subtotal + deliveryTotal + tax) * 100) / 100;
 
   const handleRemove = (productId: string, name: string) => {
     dispatch({ type: "REMOVE_ITEM", payload: productId });
     toast.success(`${name} removed from cart`);
   };
-
-  // Group items: main products and their add-ons
-  const mainItems = items.filter((i) => !isAddon(i.productId));
-  const addonItems = items.filter((i) => isAddon(i.productId));
 
   if (items.length === 0) {
     return (
@@ -55,7 +66,6 @@ const Cart = () => {
     const relatedAddons = addonItems.filter((a) =>
       a.productId.startsWith(item.productId + "_option_")
     );
-    const locked = isDeliveryItem(item.name, item.productId);
 
     return (
       <Card key={item.productId} className="border-2 border-border shadow-[4px_4px_0px_0px_hsl(var(--foreground))]">
@@ -80,29 +90,25 @@ const Cart = () => {
               <p className="text-sm font-semibold text-foreground mt-1">${formatPrice(item.price)}</p>
 
               <div className="flex items-center justify-between mt-3">
-                {locked ? (
-                  <span className="px-3 py-2 text-sm font-mono font-medium text-muted-foreground">× 1</span>
-                ) : (
-                  <div className="flex items-center border-2 border-border">
-                    <button
-                      className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
-                      onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity - 1 } })}
-                      disabled={item.quantity <= 1}
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
-                    <span className="px-3 text-sm font-mono font-medium min-w-[2rem] text-center">{item.quantity}</span>
-                    <button
-                      className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
-                      onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity + 1 } })}
-                      disabled={item.quantity >= item.maxStock}
-                      aria-label="Increase quantity"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center border-2 border-border">
+                  <button
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
+                    onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity - 1 } })}
+                    disabled={item.quantity <= 1}
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="px-3 text-sm font-mono font-medium min-w-[2rem] text-center">{item.quantity}</span>
+                  <button
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
+                    onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity + 1 } })}
+                    disabled={item.quantity >= item.maxStock}
+                    aria-label="Increase quantity"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
                 <div className="flex items-center gap-4">
                   <span className="font-semibold text-foreground">${formatPrice(item.price * item.quantity)}</span>
@@ -118,8 +124,8 @@ const Cart = () => {
             </div>
           </div>
 
-          {/* Related add-ons rendered indented below */}
-          {relatedAddons.length > 0 && (
+          {/* Related add-ons + delivery indented below */}
+          {(relatedAddons.length > 0 || item.deliveryChoice) && (
             <div className="mt-3 ml-6 md:ml-10 space-y-2 border-l-2 border-border pl-4">
               {relatedAddons.map((addon) => (
                 <div key={addon.productId} className="flex items-center justify-between gap-3 py-1.5">
@@ -128,7 +134,9 @@ const Cart = () => {
                     <span className="text-sm text-muted-foreground truncate">{addon.name}</span>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-sm font-mono font-medium text-foreground">${formatPrice(addon.price)}</span>
+                    <span className="text-sm font-mono font-medium text-foreground">
+                      {addon.price > 0 ? `$${formatPrice(addon.price)}` : "Included"}
+                    </span>
                     <button
                       className="p-1 text-muted-foreground hover:text-destructive transition-colors"
                       onClick={() => handleRemove(addon.productId, addon.name)}
@@ -139,6 +147,42 @@ const Cart = () => {
                   </div>
                 </div>
               ))}
+
+              {/* Delivery / Pickup line */}
+              {item.deliveryChoice === "delivery" && (item.deliveryPrice || 0) > 0 && (
+                <div className="flex items-start justify-between gap-3 py-1.5">
+                  <div className="flex items-start gap-2 min-w-0 flex-1">
+                    <Truck className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <span className="text-sm text-muted-foreground">Delivery</span>
+                      {item.deliveryPrepDays && (
+                        <p className="text-xs text-muted-foreground/70">
+                          ~{item.deliveryPrepDays} business days prep
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-sm font-mono font-medium text-foreground shrink-0">
+                    ${formatPrice(item.deliveryPrice || 0)}
+                  </span>
+                </div>
+              )}
+              {item.deliveryChoice === "pickup" && (
+                <div className="flex items-start justify-between gap-3 py-1.5">
+                  <div className="flex items-start gap-2 min-w-0 flex-1">
+                    <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <span className="text-sm text-muted-foreground">Pickup</span>
+                      {(item.pickupAddress || item.pickupCity) && (
+                        <p className="text-xs text-muted-foreground/70 truncate">
+                          {[item.pickupAddress, item.pickupCity, item.pickupProvince].filter(Boolean).join(", ")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-sm font-mono font-medium text-muted-foreground shrink-0">Free</span>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
@@ -161,13 +205,12 @@ const Cart = () => {
           Continue Shopping
         </Link>
 
-        <h1 className="text-3xl font-serif font-bold text-foreground mb-8">Shopping Cart ({itemCount})</h1>
+        <h1 className="text-3xl font-serif font-bold text-foreground mb-8">Shopping Cart ({mainProductCount})</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {mainItems.map(renderMainItem)}
-            {/* Orphan add-ons shown as standalone items */}
             {orphanAddons.map((addon) => (
               <Card key={addon.productId} className="border-2 border-border">
                 <CardContent className="p-4">
@@ -203,6 +246,12 @@ const Cart = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-medium text-foreground">${formatPrice(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Delivery</span>
+                    <span className="font-medium text-foreground">
+                      {allPickup ? "Free (Pickup)" : deliveryTotal > 0 ? `$${formatPrice(deliveryTotal)}` : "Free"}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Estimated HST (13%)</span>
