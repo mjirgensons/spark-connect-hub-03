@@ -118,106 +118,75 @@ const AdminProductReviewTab = () => {
   if (selectedProduct) {
     const p = selectedProduct;
     const seller = p.profiles || {};
-    const fmtPrice = (n: number) => `$${Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+
+    const actionBar = (
+      <div className="flex items-center gap-3 p-4 border rounded-lg bg-muted/30">
+        <Button
+          className="bg-green-600 hover:bg-green-700 text-white"
+          onClick={() => handleApprove(p.id)}
+          disabled={actionLoading}
+        >
+          {actionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Check className="w-4 h-4 mr-1" />}
+          Approve
+        </Button>
+        <Button
+          variant="destructive"
+          onClick={() => { setDeclineDialogOpen(true); setDeclineReason(""); }}
+          disabled={actionLoading}
+        >
+          <X className="w-4 h-4 mr-1" /> Decline
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => window.open(`/seller/products/${p.id}?adminView=${p.seller_id}`, "_blank")}
+        >
+          <ExternalLink className="w-4 h-4 mr-1" /> Edit in Seller Portal
+        </Button>
+      </div>
+    );
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Button variant="ghost" size="sm" onClick={() => setSelectedProduct(null)}>
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to list
         </Button>
 
-        {/* Seller info */}
+        {/* Seller info + status */}
         <div className="p-4 rounded-lg border bg-muted/50 space-y-1">
           <p className="text-sm font-semibold">{seller.company_name || seller.full_name || "Unknown Seller"}</p>
           <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-            <span>Status: {seller.seller_status || "N/A"}</span>
+            <span>Status: {statusBadge(p.listing_status)}</span>
             <span>Trust: {seller.auto_approve_products ? "✅ Trusted" : "Standard"}</span>
             {seller.created_at && <span>Joined: {format(new Date(seller.created_at), "MMM d, yyyy")}</span>}
-          </div>
-        </div>
-
-        {/* Product preview */}
-        <div className="border rounded-lg p-6 space-y-4">
-          <div className="flex items-start gap-4">
-            {p.main_image_url && (
-              <img src={p.main_image_url} alt={p.product_name} className="w-32 h-32 object-cover rounded-lg border" />
+            {(p as any).resubmission_count > 0 && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-400 text-amber-700">
+                Resubmission #{(p as any).resubmission_count}
+              </Badge>
             )}
-            <div className="flex-1 space-y-2">
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold">{p.product_name}</h3>
-                {statusBadge(p.listing_status)}
-              </div>
-              <p className="text-sm text-muted-foreground">SKU: {p.product_code}</p>
-              <p className="text-sm text-muted-foreground">Category: {(p.categories as any)?.name || "N/A"}</p>
-              <div className="flex gap-3">
-                <span className="text-sm">Retail: {fmtPrice(p.price_retail_usd)}</span>
-                <span className="text-sm font-semibold">Sale: {fmtPrice(p.price_discounted_usd)}</span>
-                {p.discount_percentage > 0 && <Badge variant="secondary">{p.discount_percentage}% off</Badge>}
-              </div>
-            </div>
           </div>
-
-          {p.short_description && <p className="text-sm">{p.short_description}</p>}
-          {p.long_description && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{p.long_description}</p>}
-
-          <div className="grid sm:grid-cols-3 gap-4 text-sm">
-            <div><span className="font-medium">Dimensions:</span> {p.width_mm}×{p.height_mm}×{p.depth_mm} mm</div>
-            <div><span className="font-medium">Style:</span> {p.style}</div>
-            <div><span className="font-medium">Color:</span> {p.color}</div>
-            <div><span className="font-medium">Material:</span> {p.material}</div>
-            <div><span className="font-medium">Condition:</span> {p.condition}</div>
-            <div><span className="font-medium">Stock:</span> {p.stock_level}</div>
-          </div>
-
-          {p.additional_image_urls?.length > 0 && (
-            <div>
-              <p className="text-sm font-medium mb-2">Gallery ({p.additional_image_urls.length} images)</p>
-              <div className="flex gap-2 flex-wrap">
-                {p.additional_image_urls.map((url: string, i: number) => (
-                  <img key={i} src={url} alt={`Gallery ${i+1}`} className="w-20 h-20 object-cover rounded border" />
-                ))}
-              </div>
-            </div>
-          )}
-
           {(p as any).previous_rejection_reason && (
-            <div className="p-3 rounded bg-amber-50 border border-amber-200">
-              <p className="text-sm font-medium text-amber-800">Previously declined (resubmission #{(p as any).resubmission_count || 1}):</p>
-              <p className="text-sm text-amber-700">{(p as any).previous_rejection_reason}</p>
-            </div>
-          )}
-          {p.listing_rejection_reason && (
-            <div className="p-3 rounded bg-red-50 border border-red-200">
-              <p className="text-sm font-medium text-red-800">Current rejection reason:</p>
-              <p className="text-sm text-red-700">{p.listing_rejection_reason}</p>
+            <div className="mt-2 p-2 rounded bg-amber-50 border border-amber-200">
+              <p className="text-xs font-medium text-amber-800">Previously declined:</p>
+              <p className="text-xs text-amber-700">{(p as any).previous_rejection_reason}</p>
             </div>
           )}
         </div>
 
-        {/* Action bar */}
-        <div className="flex items-center gap-3 p-4 border rounded-lg bg-muted/30">
-          <Button
-            className="bg-green-600 hover:bg-green-700 text-white"
-            onClick={() => handleApprove(p.id)}
-            disabled={actionLoading}
-          >
-            {actionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Check className="w-4 h-4 mr-1" />}
-            Approve
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => { setDeclineDialogOpen(true); setDeclineReason(""); }}
-            disabled={actionLoading}
-          >
-            <X className="w-4 h-4 mr-1" /> Decline
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => window.open(`/seller/products/${p.id}?adminView=${p.seller_id}`, "_blank")}
-          >
-            <ExternalLink className="w-4 h-4 mr-1" /> Edit in Seller Portal
-          </Button>
+        {/* Top action bar */}
+        {actionBar}
+
+        {/* Full product page preview via iframe */}
+        <div className="border rounded-lg overflow-hidden">
+          <iframe
+            src={`/products/${p.id}?adminView=${p.seller_id}`}
+            title={`Preview: ${p.product_name}`}
+            className="w-full border-0"
+            style={{ height: "80vh", minHeight: "600px" }}
+          />
         </div>
+
+        {/* Bottom action bar */}
+        {actionBar}
 
         {/* Decline dialog */}
         <Dialog open={declineDialogOpen} onOpenChange={setDeclineDialogOpen}>
