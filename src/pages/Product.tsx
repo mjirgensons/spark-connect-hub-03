@@ -18,6 +18,7 @@ import ProductReviews from "@/components/ProductReviews";
 import WishlistButton from "@/components/WishlistButton";
 import { toast } from "sonner";
 import CompareButton from "@/components/CompareButton";
+import ContactSellerButton from "@/components/ContactSellerButton";
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
