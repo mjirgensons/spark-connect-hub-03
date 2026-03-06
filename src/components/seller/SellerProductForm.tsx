@@ -701,12 +701,14 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
                 </div>
                 <Input value={f.product_code} onChange={(e) => setWithDirty("basic", "product_code", e.target.value)} className={inputCls} placeholder={autoSku && !liveProductId ? "Auto-generated" : "Enter SKU manually"} readOnly={autoSku && !liveProductId} />
                 {autoSku && !liveProductId && <p className="text-[10px] text-muted-foreground mt-1">Auto: Category-Style-Color-Width-Seq (avoids O/I)</p>}
+                {sectionErrors.basic.includes("Product Code (SKU) is required") && <p className="text-xs text-destructive mt-1">Required — must not be empty</p>}
               </div>
               <div><Label className={labelCls}>Category *</Label>
                 <Select value={f.category_id} onValueChange={(v) => { set("category_id", v); markDirty("basic"); }}>
                   <SelectTrigger className={inputCls}><SelectValue placeholder="Select category" /></SelectTrigger>
                   <SelectContent>{categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
+                {sectionErrors.basic.includes("Category must be selected") && <p className="text-xs text-destructive mt-1">Required — must be selected</p>}
               </div>
               <div><Label className={labelCls}>Manufacturer</Label><Input value={f.manufacturer} onChange={(e) => setWithDirty("basic", "manufacturer", e.target.value)} className={inputCls} /></div>
             </div>
