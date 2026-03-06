@@ -264,7 +264,7 @@ const Product = () => {
         }
       });
 
-    toast.success("Added to cart", {
+    toast.success(qtyInCart > 0 ? "Cart updated" : "Added to cart", {
       action: { label: "View Cart", onClick: () => (window.location.href = "/cart") },
     });
   };
