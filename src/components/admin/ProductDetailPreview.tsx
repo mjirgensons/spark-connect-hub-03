@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -9,8 +9,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Package, Ruler, Palette, Layers, Info, ChevronDown, MessageSquare, Eye } from "lucide-react";
 import ProductGallery from "@/components/ProductGallery";
-import ProductReviews from "@/components/ProductReviews";
-import ProductQA from "@/components/ProductQA";
+
+const ProductReviews = lazy(() => import("@/components/ProductReviews"));
+const ProductQA = lazy(() => import("@/components/ProductQA"));
 
 const MM_TO_INCH = 0.0393701;
 const fmtDim = (mm: number) => {
