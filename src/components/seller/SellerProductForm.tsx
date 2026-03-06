@@ -618,13 +618,31 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     toast({ title: "Withdrawn from review", description: "Product is now a draft. You can edit and resubmit." });
   };
 
-  const handleEditResubmit = async () => {
-    if (!liveProductId) return;
-    const { error } = await supabase.from("products").update({ listing_status: "draft", listing_rejection_reason: null } as any).eq("id", liveProductId);
-    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    setListingStatus("draft");
-    setRejectionReason("");
-    toast({ title: "Product unlocked for editing" });
+  const handleResubmit = async () => {
+    // Validate before resubmitting
+    const basicErrs = validateSection("basic");
+    const dimErrs = validateSection("dimensions");
+    const pricingErrs = validateSection("pricing");
+    const addonsErrs = validateSection("addons");
+    const imagesErrs = validateSection("images");
+    const detailsErrs = validateSection("details");
+    setSectionErrors(p => ({
+      ...p, basic: basicErrs, dimensions: dimErrs, pricing: pricingErrs,
+      addons: addonsErrs, images: imagesErrs, details: detailsErrs,
+    }));
+    const failedSections: string[] = [];
+    if (basicErrs.length) failedSections.push("Section 1 · Basic Information");
+    if (dimErrs.length) failedSections.push("Section 2 · Dimensions");
+    if (pricingErrs.length) failedSections.push("Section 5 · Pricing");
+    if (addonsErrs.length) failedSections.push("Section 6 · Add-Ons");
+    if (imagesErrs.length) failedSections.push("Section 8 · Images");
+    if (detailsErrs.length) failedSections.push("Section 9 · Description");
+    if (failedSections.length) {
+      toast({ title: "Cannot resubmit: missing required fields", description: failedSections.join(", "), variant: "destructive" });
+      return;
+    }
+    // Copy current rejection reason to previous, increment resubmission_count, then save
+    await handleFullSave("pending_review");
   };
 
   const handleSaveApproved = async () => {
