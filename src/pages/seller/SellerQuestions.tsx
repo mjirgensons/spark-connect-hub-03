@@ -34,9 +34,9 @@ const SellerQuestions = () => {
       const { data } = await supabase
         .from("product_questions")
         .select("*, products(product_name, id), product_options(option_name)")
+        .eq("seller_id", sellerId!)
         .order("created_at", { ascending: true });
-      // Filter to seller's products client-side since we join
-      return (data || []).filter((q: any) => q.products);
+      return data || [];
     },
     enabled: !!sellerId,
   });

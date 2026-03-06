@@ -1253,9 +1253,12 @@ export type Database = {
           id: string
           is_public: boolean | null
           option_id: string | null
+          pinecone_synced: boolean
+          pinecone_synced_at: string | null
           product_id: string
           question_text: string
           response_date: string | null
+          seller_id: string | null
           seller_response: string | null
           status: string
           updated_at: string | null
@@ -1267,9 +1270,12 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           option_id?: string | null
+          pinecone_synced?: boolean
+          pinecone_synced_at?: string | null
           product_id: string
           question_text: string
           response_date?: string | null
+          seller_id?: string | null
           seller_response?: string | null
           status?: string
           updated_at?: string | null
@@ -1281,9 +1287,12 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           option_id?: string | null
+          pinecone_synced?: boolean
+          pinecone_synced_at?: string | null
           product_id?: string
           question_text?: string
           response_date?: string | null
+          seller_id?: string | null
           seller_response?: string | null
           status?: string
           updated_at?: string | null
@@ -1301,6 +1310,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_questions_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
