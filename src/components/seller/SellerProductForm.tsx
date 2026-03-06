@@ -372,6 +372,21 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
       if (!f.height_mm || Number(f.height_mm) <= 0) errors.push("Height must be greater than 0");
       if (!f.depth_mm || Number(f.depth_mm) <= 0) errors.push("Depth must be greater than 0");
     }
+    if (section === "pricing") {
+      if (!f.price_retail || Number(f.price_retail) <= 0) errors.push("Retail Price must be greater than 0");
+    }
+    if (section === "addons") {
+      for (let i = 0; i < options.length; i++) {
+        if (!options[i].option_name.trim()) errors.push(`Add-on #${i + 1}: Option Name is required`);
+        if (!options[i].option_type) errors.push(`Add-on #${i + 1}: Option Type is required`);
+      }
+    }
+    if (section === "images") {
+      if (!mainImageUrl) errors.push("Main image is required");
+    }
+    if (section === "details") {
+      if (!s8.short_description.trim()) errors.push("Short Description is required");
+    }
     return errors;
   };
 
@@ -486,12 +501,23 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     if (targetStatus !== "draft") {
       const basicErrs = validateSection("basic");
       const dimErrs = validateSection("dimensions");
-      setSectionErrors(p => ({ ...p, basic: basicErrs, dimensions: dimErrs }));
+      const pricingErrs = validateSection("pricing");
+      const addonsErrs = validateSection("addons");
+      const imagesErrs = validateSection("images");
+      const detailsErrs = validateSection("details");
+      setSectionErrors(p => ({
+        ...p, basic: basicErrs, dimensions: dimErrs, pricing: pricingErrs,
+        addons: addonsErrs, images: imagesErrs, details: detailsErrs,
+      }));
       const failedSections: string[] = [];
-      if (basicErrs.length) failedSections.push("Basic Information");
-      if (dimErrs.length) failedSections.push("Dimensions");
+      if (basicErrs.length) failedSections.push("Section 1 · Basic Information");
+      if (dimErrs.length) failedSections.push("Section 2 · Dimensions");
+      if (pricingErrs.length) failedSections.push("Section 5 · Pricing");
+      if (addonsErrs.length) failedSections.push("Section 6 · Add-Ons");
+      if (imagesErrs.length) failedSections.push("Section 8 · Images");
+      if (detailsErrs.length) failedSections.push("Section 9 · Description");
       if (failedSections.length) {
-        toast({ title: "Missing required fields", description: `Fix errors in: ${failedSections.join(", ")}`, variant: "destructive" });
+        toast({ title: "Cannot submit: missing required fields", description: failedSections.join(", "), variant: "destructive" });
         return;
       }
     }
@@ -638,9 +664,10 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
   // Section header indicator
   const SectionIndicator = ({ section }: { section: SectionKey }) => (
-    <span className="ml-2 inline-flex items-center">
-      {sectionSaved[section] && !sectionDirty[section] && <Check className="w-3.5 h-3.5 text-green-600" />}
-      {sectionDirty[section] && <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" />}
+    <span className="ml-2 inline-flex items-center gap-1">
+      {sectionErrors[section]?.length > 0 && <span className="w-2 h-2 rounded-full bg-destructive inline-block" />}
+      {sectionSaved[section] && !sectionDirty[section] && !sectionErrors[section]?.length && <Check className="w-3.5 h-3.5 text-green-600" />}
+      {sectionDirty[section] && !sectionErrors[section]?.length && <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" />}
     </span>
   );
 
@@ -804,7 +831,9 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="grid sm:grid-cols-3 gap-4">
-              <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_retail} onChange={(e) => handleRetailChange(e.target.value)} className="pl-7" /></div></div>
+              <div><Label className={labelCls}>Retail Price (CAD) *</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_retail} onChange={(e) => handleRetailChange(e.target.value)} className="pl-7" /></div>
+                {sectionErrors.pricing.includes("Retail Price must be greater than 0") && <p className="text-xs text-destructive mt-1">Required — must be greater than 0</p>}
+              </div>
               <div><Label className={labelCls}>Sale Price (CAD)</Label><div className="relative mt-1"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span><Input type="number" step="0.01" value={f.price_sale} onChange={(e) => handleSaleChange(e.target.value)} className="pl-7" /></div></div>
               <div><Label className={labelCls}>Discount %</Label><div className="relative mt-1"><Input type="number" min="0" max="99" value={f.discount_pct} onChange={(e) => handleDiscountChange(e.target.value)} className="pr-7" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span></div></div>
             </div>
@@ -915,6 +944,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
             <ImageUpload value={mainImageUrl} onChange={(v) => { setMainImageUrl(v); markDirty("images"); }} label="Main Image (auto-optimized to WebP)" />
             <MultiImageUpload value={galleryUrls.length ? galleryUrls : null} onChange={(v) => { setGalleryUrls(v); markDirty("images"); }} label="Gallery Images (auto-optimized to WebP, max 25)" />
             <FileUpload value={techDrawingUrl} onChange={(v) => { setTechDrawingUrl(v); markDirty("images"); }} label="Technical Drawings (PDF)" accept=".pdf" bucket="product-documents" />
+            {sectionErrors.images.includes("Main image is required") && <p className="text-xs text-destructive mt-1">Required — at least one main image must be uploaded</p>}
             </fieldset>
             {!isReadOnly && <SaveSectionButton onClick={() => saveSectionToDb("images")} saving={savingSection === "images"} saved={sectionSaved.images} dirty={sectionDirty.images} />}
           </AccordionContent>
@@ -926,9 +956,10 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div>
-              <Label className={labelCls}>Short Description</Label>
+              <Label className={labelCls}>Short Description *</Label>
               <Textarea value={s8.short_description} onChange={(e) => setS8ValDirty("short_description", e.target.value.slice(0, 200))} className="mt-1 resize-none" rows={2} maxLength={200} />
               <p className="text-xs text-muted-foreground mt-1">{s8.short_description.length}/200</p>
+              {sectionErrors.details.includes("Short Description is required") && <p className="text-xs text-destructive mt-1">Required — must not be empty</p>}
             </div>
             <div>
               <Label className={labelCls}>Long Description</Label>

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard,
   ShoppingCart,
   FileText,
-  
   Users,
   Plug,
   FileEdit,
@@ -94,6 +95,20 @@ const AdminSidebar = ({ active, onNavigate }: AdminSidebarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
 
+  const { data: pendingCount = 0 } = useQuery({
+    queryKey: ["admin-pending-review-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .eq("listing_status", "pending_review")
+        .is("deleted_at", null);
+      if (error) return 0;
+      return count || 0;
+    },
+    refetchInterval: 30000,
+  });
+
   const handleNav = (id: AdminSection) => {
     onNavigate(id);
     if (isMobile) setMobileOpen(false);
@@ -114,6 +129,7 @@ const AdminSidebar = ({ active, onNavigate }: AdminSidebarProps) => {
           {group.items.map((item) => {
             const Icon = item.icon;
             const isActive = active === item.id;
+            const showBadge = item.id === "product-review" && pendingCount > 0;
             return (
               <button
                 key={item.id}
@@ -129,9 +145,20 @@ const AdminSidebar = ({ active, onNavigate }: AdminSidebarProps) => {
               >
                 <Icon className="w-4 h-4 shrink-0" />
                 {(!collapsed || isMobile) && (
-                  <span className="truncate">
+                  <span className="truncate flex-1 text-left">
                     {item.label}
                   </span>
+                )}
+                {showBadge && (!collapsed || isMobile) && (
+                  <span className={cn(
+                    "ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center",
+                    isActive ? "bg-background text-foreground" : "bg-destructive text-destructive-foreground"
+                  )}>
+                    {pendingCount}
+                  </span>
+                )}
+                {showBadge && collapsed && !isMobile && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-destructive" />
                 )}
               </button>
             );
