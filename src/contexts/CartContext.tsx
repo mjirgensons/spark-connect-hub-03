@@ -45,6 +45,8 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       const existing = state.items.find((i) => i.productId === action.payload.productId);
       const maxQty = isDeliveryItem(action.payload.name, action.payload.productId) ? 1 : action.payload.maxStock;
       if (existing) {
+        // Already in cart — update quantity (but not for duplicates of add-ons)
+        if (existing.productId.includes("_option_")) return state;
         const items = state.items.map((i) =>
           i.productId === action.payload.productId
             ? { ...i, quantity: Math.min(i.quantity + 1, maxQty) }
@@ -68,8 +70,16 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     }
     case "CLEAR_CART":
       return recalc([]);
-    case "HYDRATE":
-      return recalc(action.payload);
+    case "HYDRATE": {
+      // Deduplicate by productId — keep first occurrence
+      const seen = new Set<string>();
+      const deduped = action.payload.filter((item) => {
+        if (seen.has(item.productId)) return false;
+        seen.add(item.productId);
+        return true;
+      });
+      return recalc(deduped);
+    }
     default:
       return state;
   }
