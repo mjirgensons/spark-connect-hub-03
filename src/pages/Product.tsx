@@ -323,6 +323,9 @@ const Product = () => {
                 {isDeactivated ? "Currently Unavailable" : qtyInCart > 0 ? `In Cart (${qtyInCart})` : "Add to Cart"}
               </Button>
               <CompareButton productId={product.id} variant="text" />
+              {product.seller_id && (
+                <ContactSellerButton productId={product.id} sellerId={product.seller_id} productName={product.product_name} />
+              )}
               {product.installation_instructions_url && (
                 <a
                   href={isDeactivated ? undefined : product.installation_instructions_url}

@@ -204,6 +204,7 @@ const App = () => (
             <Route path="orders" element={<SellerOrders />} />
             <Route path="analytics" element={<SellerAnalytics />} />
             <Route path="messages" element={<SellerMessages />} />
+            <Route path="messages/:conversationId" element={<SellerMessages />} />
             <Route path="store-profile" element={<SellerStoreProfile />} />
           </Route>
 
