@@ -559,7 +559,7 @@ const SellerProducts = () => {
                       <TableHead className="py-2 px-1 w-[40px] text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
                         <span className="inline-flex items-center justify-center w-full"><Star className="w-3 h-3" /><SortIcon col="is_featured" /></span>
                       </TableHead>
-                      <TableHead className="py-2 px-2 w-[160px] text-right">Actions</TableHead>
+                      <TableHead className="py-2 px-2 w-[100px] text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

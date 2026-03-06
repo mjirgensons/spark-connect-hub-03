@@ -368,7 +368,9 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
       if (!f.category_id) errors.push("Category must be selected");
     }
     if (section === "dimensions") {
-      if (!f.width_mm || Number(f.width_mm) <= 0) errors.push("Width must be greater than 0");
+      const hasWidth = f.width_mm && Number(f.width_mm) > 0;
+      const hasWallA = f.wall_a_length_mm && Number(f.wall_a_length_mm) > 0;
+      if (!hasWidth && !hasWallA) errors.push("Width or Wall A must be greater than 0");
       if (!f.height_mm || Number(f.height_mm) <= 0) errors.push("Height must be greater than 0");
       if (!f.depth_mm || Number(f.depth_mm) <= 0) errors.push("Depth must be greater than 0");
     }
