@@ -102,6 +102,7 @@ const AdminSellersTab = () => {
         ...s,
         product_count: productCounts[s.id] || 0,
         business_address: s.business_address as Record<string, string> | null,
+        auto_approve_products: (s as any).auto_approve_products ?? false,
       })) as SellerProfile[];
     },
   });
