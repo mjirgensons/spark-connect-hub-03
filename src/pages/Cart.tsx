@@ -75,31 +75,35 @@ const Cart = () => {
                         {item.name}
                       </Link>
                       <p className="text-xs text-muted-foreground mt-0.5">{item.dimensions}</p>
-                      <p className="text-sm font-semibold text-foreground mt-1">${item.price.toLocaleString()}</p>
+                      <p className="text-sm font-semibold text-foreground mt-1">${formatPrice(item.price)}</p>
 
                       <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center border-2 border-border">
-                          <button
-                            className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
-                            onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity - 1 } })}
-                            disabled={item.quantity <= 1}
-                            aria-label="Decrease quantity"
-                          >
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="px-3 text-sm font-mono font-medium min-w-[2rem] text-center">{item.quantity}</span>
-                          <button
-                            className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
-                            onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity + 1 } })}
-                            disabled={item.quantity >= item.maxStock}
-                            aria-label="Increase quantity"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                        {isDeliveryItem(item.name, item.productId) ? (
+                          <span className="px-3 py-2 text-sm font-mono font-medium text-muted-foreground">× 1</span>
+                        ) : (
+                          <div className="flex items-center border-2 border-border">
+                            <button
+                              className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
+                              onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity - 1 } })}
+                              disabled={item.quantity <= 1}
+                              aria-label="Decrease quantity"
+                            >
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="px-3 text-sm font-mono font-medium min-w-[2rem] text-center">{item.quantity}</span>
+                            <button
+                              className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
+                              onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity + 1 } })}
+                              disabled={item.quantity >= item.maxStock}
+                              aria-label="Increase quantity"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
 
                         <div className="flex items-center gap-4">
-                          <span className="font-semibold text-foreground">${(item.price * item.quantity).toLocaleString()}</span>
+                          <span className="font-semibold text-foreground">${formatPrice(item.price * item.quantity)}</span>
                           <button
                             className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
                             onClick={() => handleRemove(item.productId, item.name)}
