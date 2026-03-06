@@ -372,6 +372,21 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
       if (!f.height_mm || Number(f.height_mm) <= 0) errors.push("Height must be greater than 0");
       if (!f.depth_mm || Number(f.depth_mm) <= 0) errors.push("Depth must be greater than 0");
     }
+    if (section === "pricing") {
+      if (!f.price_retail || Number(f.price_retail) <= 0) errors.push("Retail Price must be greater than 0");
+    }
+    if (section === "addons") {
+      for (let i = 0; i < options.length; i++) {
+        if (!options[i].option_name.trim()) errors.push(`Add-on #${i + 1}: Option Name is required`);
+        if (!options[i].option_type) errors.push(`Add-on #${i + 1}: Option Type is required`);
+      }
+    }
+    if (section === "images") {
+      if (!mainImageUrl) errors.push("Main image is required");
+    }
+    if (section === "details") {
+      if (!s8.short_description.trim()) errors.push("Short Description is required");
+    }
     return errors;
   };
 
