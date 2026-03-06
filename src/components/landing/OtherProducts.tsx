@@ -39,13 +39,14 @@ const OtherProducts = () => {
   const { data: dbProducts = [] } = useQuery({
     queryKey: ["non-kitchen-products", kitchenCategory?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const q = supabase
         .from("products")
         .select("*")
         .neq("category_id", kitchenCategory!.id)
-        .is("deleted_at", null)
+        .is("deleted_at", null);
+      const { data, error } = await (q as any)
         .in("availability_status", ["In Stock", "Low Stock"])
-        .eq("listing_status" as any, "approved")
+        .eq("listing_status", "approved")
         .order("created_at", { ascending: false })
         .limit(10);
       if (error) throw error;

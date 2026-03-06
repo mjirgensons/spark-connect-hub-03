@@ -61,12 +61,13 @@ const ProductCatalog = () => {
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ["catalog-products"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const q = supabase
         .from("products")
         .select("*, categories(name, slug), profiles!products_seller_id_fkey(company_name)")
-        .is("deleted_at", null)
+        .is("deleted_at", null);
+      const { data, error } = await (q as any)
         .in("availability_status", ["In Stock", "Low Stock"])
-        .eq("listing_status" as any, "approved");
+        .eq("listing_status", "approved");
       if (error) throw error;
       return data || [];
     },
