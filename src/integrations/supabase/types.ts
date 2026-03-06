@@ -1245,6 +1245,66 @@ export type Database = {
           },
         ]
       }
+      product_questions: {
+        Row: {
+          buyer_id: string
+          buyer_name: string | null
+          created_at: string | null
+          id: string
+          is_public: boolean | null
+          option_id: string | null
+          product_id: string
+          question_text: string
+          response_date: string | null
+          seller_response: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          buyer_id: string
+          buyer_name?: string | null
+          created_at?: string | null
+          id?: string
+          is_public?: boolean | null
+          option_id?: string | null
+          product_id: string
+          question_text: string
+          response_date?: string | null
+          seller_response?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          buyer_id?: string
+          buyer_name?: string | null
+          created_at?: string | null
+          id?: string
+          is_public?: boolean | null
+          option_id?: string | null
+          product_id?: string
+          question_text?: string
+          response_date?: string | null
+          seller_response?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_questions_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "product_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_questions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_reviews: {
         Row: {
           admin_note: string | null

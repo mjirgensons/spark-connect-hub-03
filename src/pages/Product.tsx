@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart, Download } from "lucide-react";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { ArrowLeft, Package, Ruler, Palette, Layers, Info, ShoppingCart, Download, ChevronDown, MessageSquare } from "lucide-react";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import ProductGallery from "@/components/ProductGallery";
@@ -22,6 +23,7 @@ import WishlistButton from "@/components/WishlistButton";
 import { toast } from "sonner";
 import CompareButton from "@/components/CompareButton";
 import ContactSellerButton from "@/components/ContactSellerButton";
+import ProductQA from "@/components/ProductQA";
 
 const MM_TO_INCH = 0.0393701;
 const fmtDim = (mm: number) => {
@@ -103,6 +105,8 @@ const Product = () => {
   const { dispatch, getItemQuantity } = useCart();
   const qtyInCart = product ? getItemQuantity(product.id) : 0;
   const [hwImageOpen, setHwImageOpen] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("specs");
+  const [qaPrefill, setQaPrefill] = useState<{ text: string; optionId: string } | null>(null);
 
   // ── Add-on checkbox state (shared between hero & tab) ──
   const [checkedAddOns, setCheckedAddOns] = useState<Set<string>>(new Set());
@@ -314,47 +318,76 @@ const Product = () => {
   tabs.push({ id: "qa", label: "Q&A" });
   tabs.push({ id: "reviews", label: "Reviews" });
 
+  const handleAskAboutAddOn = useCallback((opt: any) => {
+    setQaPrefill({ text: `Question about: ${opt.option_name} — `, optionId: opt.id });
+    setActiveTab("qa");
+  }, []);
+
   // ── Add-on row renderer (shared between hero compact & full tab) ──
   const renderAddOnRow = (opt: any, compact: boolean) => {
     const isIncluded = opt.inclusion_status === "included";
     const price = getOptPrice(opt);
     const hasDiscount = Number(opt.discount_percentage) > 0 && Number(opt.price_retail) > Number(opt.price_discounted);
+    const hasExtraDetails = !!opt.description;
 
     return (
-      <div key={opt.id} className={`flex items-start gap-3 ${compact ? "py-2" : "border rounded-lg p-4"}`}>
-        <Checkbox
-          checked={checkedAddOns.has(opt.id)}
-          disabled={isIncluded}
-          onCheckedChange={() => toggleAddOn(opt.id)}
-          className="mt-0.5"
-        />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-sm font-medium text-foreground ${compact ? "" : "text-base"}`}>{opt.option_name}</span>
+      <div key={opt.id} className={`${compact ? "py-2" : "border rounded-lg p-4"}`}>
+        <div className="flex items-start gap-3">
+          <Checkbox
+            checked={checkedAddOns.has(opt.id)}
+            disabled={isIncluded}
+            onCheckedChange={() => toggleAddOn(opt.id)}
+            className="mt-0.5"
+          />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-sm font-medium text-foreground ${compact ? "" : "text-base"}`}>{opt.option_name}</span>
+              {!compact && (
+                <>
+                  <Badge variant="outline" className="text-[10px]">{(opt.option_type || "").replace(/_/g, " ")}</Badge>
+                  <Badge variant={isIncluded ? "default" : "secondary"} className="text-[10px]">
+                    {isIncluded ? "Included" : opt.inclusion_status === "optional" ? "Optional" : "Not Included"}
+                  </Badge>
+                </>
+              )}
+            </div>
+            {!compact && opt.description && (
+              <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
+            )}
+            {/* Enhanced: collapsible details + ask link (full mode only) */}
             {!compact && (
-              <>
-                <Badge variant="outline" className="text-[10px]">{(opt.option_type || "").replace(/_/g, " ")}</Badge>
-                <Badge variant={isIncluded ? "default" : "secondary"} className="text-[10px]">
-                  {isIncluded ? "Included" : opt.inclusion_status === "optional" ? "Optional" : "Not Included"}
-                </Badge>
-              </>
+              <div className="flex items-center gap-4 mt-2">
+                {hasExtraDetails && (
+                  <Collapsible>
+                    <CollapsibleTrigger className="text-xs text-primary hover:underline flex items-center gap-1">
+                      <ChevronDown className="w-3 h-3" /> More Details
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2 text-xs text-muted-foreground bg-muted/30 rounded p-3">
+                      {opt.description}
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+                <button
+                  onClick={() => handleAskAboutAddOn(opt)}
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  <MessageSquare className="w-3 h-3" /> Ask about this
+                </button>
+              </div>
             )}
           </div>
-          {!compact && opt.description && (
-            <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
-          )}
-        </div>
-        <div className="text-right shrink-0">
-          {isIncluded ? (
-            <span className="text-xs text-muted-foreground">Included</span>
-          ) : price > 0 ? (
-            <div className="flex items-center gap-1.5">
-              {hasDiscount && (
-                <span className="text-xs text-muted-foreground line-through">${Number(opt.price_retail).toLocaleString()}</span>
-              )}
-              <span className="text-sm font-semibold text-foreground">${price.toLocaleString()}</span>
-            </div>
-          ) : null}
+          <div className="text-right shrink-0">
+            {isIncluded ? (
+              <span className="text-xs text-muted-foreground">Included</span>
+            ) : price > 0 ? (
+              <div className="flex items-center gap-1.5">
+                {hasDiscount && (
+                  <span className="text-xs text-muted-foreground line-through">${Number(opt.price_retail).toLocaleString()}</span>
+                )}
+                <span className="text-sm font-semibold text-foreground">${price.toLocaleString()}</span>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     );
@@ -501,7 +534,7 @@ const Product = () => {
 
         {/* ═══ ZONE 2: DETAIL TABS ═══ */}
         <div className="relative">
-          <Tabs defaultValue="specs">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             {/* Sticky tab bar */}
             <div className="sticky top-0 z-30 bg-background border-b shadow-sm">
               <div className="container mx-auto px-4">
@@ -711,15 +744,14 @@ const Product = () => {
                     </TabsContent>
                   )}
 
-                  {/* Q&A (placeholder) */}
+                  {/* Q&A */}
                   <TabsContent value="qa" className="mt-0">
-                    <div className="text-center py-12 space-y-4">
-                      <h3 className="text-lg font-serif font-semibold text-foreground">Questions & Answers</h3>
-                      <p className="text-muted-foreground text-sm">Have a question about this product? Sign in to ask the seller.</p>
-                      <Link to="/login">
-                        <Button variant="outline">Sign In to Ask</Button>
-                      </Link>
-                    </div>
+                    <ProductQA
+                      productId={product.id}
+                      prefillText={qaPrefill?.text}
+                      prefillOptionId={qaPrefill?.optionId}
+                      onPrefillConsumed={() => setQaPrefill(null)}
+                    />
                   </TabsContent>
 
                   {/* REVIEWS */}

@@ -30,6 +30,7 @@ import AdminWebhooksTab from "@/components/admin/AdminWebhooksTab";
 import AdminSellersTab from "@/components/admin/AdminSellersTab";
 import EmailTestConsoleTab from "@/components/admin/EmailTestConsoleTab";
 import AdminProductReviewTab from "@/components/admin/AdminProductReviewTab";
+import AdminQATab from "@/components/admin/AdminQATab";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 
@@ -39,6 +40,7 @@ const SECTION_TITLES: Record<AdminSection, string> = {
   quotes: "Quotes",
   sellers: "Sellers",
   "product-review": "Product Review",
+  "qa-overview": "Q&A Overview",
   customers: "Customers",
   reviews: "Reviews",
   email: "Email Communication",
@@ -105,6 +107,8 @@ const Admin = () => {
         return <AdminSellersTab />;
       case "product-review":
         return <AdminProductReviewTab />;
+      case "qa-overview":
+        return <AdminQATab />;
       case "reviews":
         return <AdminReviewsTab />;
       case "email":
