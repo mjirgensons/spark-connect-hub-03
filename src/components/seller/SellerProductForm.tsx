@@ -814,9 +814,9 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
         </div>
       )}
       {listingStatus === "approved" && (
-        <div className="flex items-center gap-2 p-3 rounded-lg border border-green-300 bg-green-500/10">
-          <Check className="w-4 h-4 text-green-600 shrink-0" />
-          <p className="text-sm text-green-800 font-medium">This product is live on the store.</p>
+        <div className="flex items-center gap-2 p-4 rounded-lg border border-green-300 bg-green-500/10">
+          <Globe className="w-5 h-5 text-green-700 shrink-0" />
+          <p className="text-base text-green-900 font-bold">This product is live on the store.</p>
         </div>
       )}
 
