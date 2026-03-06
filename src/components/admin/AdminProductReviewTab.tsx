@@ -15,8 +15,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { Check, X, Eye, Search, ArrowLeft, ExternalLink, Loader2 } from "lucide-react";
+import { Check, X, Eye, Search, ArrowLeft, ExternalLink, Loader2, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
+import ProductDetailPreview from "./ProductDetailPreview";
 
 type StatusFilter = "pending_review" | "all" | "approved" | "rejected";
 
