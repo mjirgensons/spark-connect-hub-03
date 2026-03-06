@@ -35,6 +35,7 @@ interface Product {
   discount_percentage: number;
   stock_level: number;
   availability_status: string;
+  listing_status: string;
   is_featured: boolean;
   main_image_url: string | null;
   additional_image_urls: string[] | null;
