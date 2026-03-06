@@ -1275,6 +1275,8 @@ export type Database = {
           is_custom_order: boolean | null
           is_featured: boolean
           lead_time_days: number | null
+          listing_rejection_reason: string | null
+          listing_status: string
           long_description: string | null
           main_image_url: string | null
           manufacturer: string | null
@@ -1334,6 +1336,8 @@ export type Database = {
           is_custom_order?: boolean | null
           is_featured?: boolean
           lead_time_days?: number | null
+          listing_rejection_reason?: string | null
+          listing_status?: string
           long_description?: string | null
           main_image_url?: string | null
           manufacturer?: string | null
@@ -1393,6 +1397,8 @@ export type Database = {
           is_custom_order?: boolean | null
           is_featured?: boolean
           lead_time_days?: number | null
+          listing_rejection_reason?: string | null
+          listing_status?: string
           long_description?: string | null
           main_image_url?: string | null
           manufacturer?: string | null
