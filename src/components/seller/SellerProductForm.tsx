@@ -696,9 +696,8 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
         </AccordionItem>
 
         {/* ═══ SECTION 7 — COMPATIBLE APPLIANCES ═══ */}
-        {showAppliances && (
-          <AccordionItem value="appliances" className="border rounded-lg">
-            <AccordionTrigger className="px-4 font-bold text-base">7 · Compatible Appliances</AccordionTrigger>
+        <AccordionItem value="appliances" className="border rounded-lg">
+          <AccordionTrigger className="px-4 font-bold text-base">7 · Compatible Appliances</AccordionTrigger>
             <AccordionContent className="px-4 pb-4 space-y-4">
               <div className="flex items-start gap-2 p-3 rounded-md bg-muted">
                 <Info className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
