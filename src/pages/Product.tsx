@@ -1018,8 +1018,8 @@ const Product = () => {
                 disabled={isDeactivated || qtyInCart >= product.stock_level}
                 onClick={handleAddToCart}
               >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                {qtyInCart > 0 ? `In Cart (${qtyInCart})` : "Add to Cart"}
+                {qtyInCart > 0 ? <RefreshCw className="w-4 h-4 mr-2" /> : <ShoppingCart className="w-4 h-4 mr-2" />}
+                {qtyInCart > 0 ? "Update Cart" : "Add to Cart"}
               </Button>
             </div>
           )}

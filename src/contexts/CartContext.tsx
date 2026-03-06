@@ -42,17 +42,24 @@ const isDeliveryItem = (name: string, productId: string) =>
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case "ADD_ITEM": {
-      const existing = state.items.find((i) => i.productId === action.payload.productId);
-      const maxQty = isDeliveryItem(action.payload.name, action.payload.productId) ? 1 : action.payload.maxStock;
+      const pid = action.payload.productId;
+      const maxQty = isDeliveryItem(action.payload.name, pid) ? 1 : action.payload.maxStock;
+      const isAddon = pid.includes("_option_");
+
+      if (isAddon) {
+        // Add-on: replace if exists, otherwise add
+        const existing = state.items.find((i) => i.productId === pid);
+        if (existing) return state;
+        return recalc([...state.items, { ...action.payload, quantity: 1, maxStock: maxQty }]);
+      }
+
+      // Main product: remove old main + all its add-ons, then add fresh
+      const existing = state.items.find((i) => i.productId === pid);
       if (existing) {
-        // Already in cart — update quantity (but not for duplicates of add-ons)
-        if (existing.productId.includes("_option_")) return state;
-        const items = state.items.map((i) =>
-          i.productId === action.payload.productId
-            ? { ...i, quantity: Math.min(i.quantity + 1, maxQty) }
-            : i
+        const cleaned = state.items.filter(
+          (i) => i.productId !== pid && !i.productId.startsWith(pid + "_option_")
         );
-        return recalc(items);
+        return recalc([...cleaned, { ...action.payload, quantity: 1, maxStock: maxQty }]);
       }
       return recalc([...state.items, { ...action.payload, quantity: 1, maxStock: maxQty }]);
     }

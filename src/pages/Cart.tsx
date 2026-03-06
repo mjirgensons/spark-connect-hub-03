@@ -73,6 +73,9 @@ const Cart = () => {
               <Link to={`/product/${item.productId}`} className="font-serif font-semibold text-foreground hover:underline line-clamp-1">
                 {item.name}
               </Link>
+              <Link to={`/product/${item.productId}`} className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5">
+                <Pencil className="w-3 h-3" /> Edit selections
+              </Link>
               <p className="text-xs text-muted-foreground mt-0.5">{item.dimensions}</p>
               <p className="text-sm font-semibold text-foreground mt-1">${formatPrice(item.price)}</p>
 
