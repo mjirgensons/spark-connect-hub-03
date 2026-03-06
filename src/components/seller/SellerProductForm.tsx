@@ -820,7 +820,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
         </div>
       )}
 
-      <Accordion type="multiple" defaultValue={["basic", "dimensions", "hardware", "features", "pricing", "addons", "appliances", "images", "details", "delivery"]} className="space-y-3">
+      <Accordion type="multiple" defaultValue={[]} className="space-y-3">
 
         {/* ═══ SECTION 1 — BASIC INFO ═══ */}
         <AccordionItem value="basic" className="border rounded-lg">
