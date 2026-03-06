@@ -703,7 +703,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 2 — DIMENSIONS ═══ */}
         <AccordionItem value="dimensions" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">2 · Dimensions <SectionIndicator section="dimensions" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Dimensions <SectionIndicator section="dimensions" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="flex items-center gap-2"><Label className="text-xs">mm</Label><Switch checked={useInches} onCheckedChange={setUseInches} /><Label className="text-xs">inches</Label></div>
