@@ -419,6 +419,109 @@ export type Database = {
           },
         ]
       }
+      conversation_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          buyer_id: string
+          buyer_unread_count: number | null
+          created_at: string | null
+          id: string
+          last_message_at: string | null
+          product_id: string | null
+          seller_id: string
+          seller_unread_count: number | null
+          status: string | null
+          subject: string | null
+        }
+        Insert: {
+          buyer_id: string
+          buyer_unread_count?: number | null
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          product_id?: string | null
+          seller_id: string
+          seller_unread_count?: number | null
+          status?: string | null
+          subject?: string | null
+        }
+        Update: {
+          buyer_id?: string
+          buyer_unread_count?: number | null
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          product_id?: string | null
+          seller_id?: string
+          seller_unread_count?: number | null
+          status?: string | null
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cookie_categories: {
         Row: {
           created_at: string

@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingCart, Heart } from "lucide-react";
+import { Menu, X, ShoppingCart, Heart, MessageSquare } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import SearchBar from "@/components/SearchBar";
 
 type NavItem =
@@ -29,6 +32,21 @@ const Header = () => {
   const isHome = location.pathname === "/";
   const { itemCount } = useCart();
   const { wishlistCount } = useWishlist();
+  const { user } = useAuth();
+
+  const { data: buyerUnread = 0 } = useQuery({
+    queryKey: ["buyer-unread-count", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("conversations")
+        .select("buyer_unread_count")
+        .eq("buyer_id", user!.id)
+        .gt("buyer_unread_count", 0);
+      return data?.reduce((sum: number, c: any) => sum + (c.buyer_unread_count || 0), 0) || 0;
+    },
+    enabled: !!user,
+    refetchInterval: 30000,
+  });
 
   const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (!isHome) {
@@ -85,6 +103,14 @@ const Header = () => {
 
           <div className="flex items-center gap-1">
             <SearchBar />
+            {user && (
+              <Link to="/messages" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+                <MessageSquare className="w-5 h-5" />
+                {buyerUnread > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{buyerUnread}</span>
+                )}
+              </Link>
+            )}
             <Link to="/account/wishlist" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
               <Heart className="w-5 h-5" />
               {wishlistCount > 0 && (

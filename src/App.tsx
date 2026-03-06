@@ -70,6 +70,9 @@ const SellerQuoteDetail = lazy(() => import("./pages/seller/SellerQuoteDetail"))
 const SellerOrders = lazy(() => import("./pages/seller/SellerOrders"));
 const SellerAnalytics = lazy(() => import("./pages/seller/SellerAnalytics"));
 const SellerMessages = lazy(() => import("./pages/seller/SellerMessages"));
+
+// Lazy-loaded: Messaging
+const Messages = lazy(() => import("./pages/Messages"));
 const SellerStoreProfile = lazy(() => import("./pages/seller/SellerStoreProfile"));
 const SellerProductVariants = lazy(() => import("./pages/seller/SellerProductVariants"));
 
@@ -157,6 +160,8 @@ const App = () => (
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/messages/:conversationId" element={<Messages />} />
 
           {/* Client routes */}
           <Route path="/client" element={<RoleGuard allowedRoles={['client']}><DashboardLayout role="client" /></RoleGuard>}>
@@ -199,6 +204,7 @@ const App = () => (
             <Route path="orders" element={<SellerOrders />} />
             <Route path="analytics" element={<SellerAnalytics />} />
             <Route path="messages" element={<SellerMessages />} />
+            <Route path="messages/:conversationId" element={<SellerMessages />} />
             <Route path="store-profile" element={<SellerStoreProfile />} />
           </Route>
 
