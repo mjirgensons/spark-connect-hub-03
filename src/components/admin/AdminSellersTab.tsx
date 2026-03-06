@@ -268,6 +268,11 @@ const AdminSellersTab = () => {
                           <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[seller.seller_status || "pending"]}`}>
                             {seller.seller_status || "pending"}
                           </Badge>
+                          {seller.auto_approve_products && (
+                            <Badge variant="secondary" className="ml-1 text-[10px]">
+                              <Sparkles className="w-3 h-3 mr-0.5" /> Trusted
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell className="text-center text-sm">{seller.product_count}</TableCell>
                         <TableCell className="text-center">
