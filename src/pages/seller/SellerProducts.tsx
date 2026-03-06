@@ -19,8 +19,11 @@ import {
 import {
   PlusCircle, Pencil, Trash2, Copy, Sparkles, AlertTriangle, ImageOff,
   RotateCcw, Trash, ArrowUp, ArrowDown, ArrowUpDown, Star, Layers, Search,
-  Check, X as XIcon,
+  Check, X as XIcon, MoreHorizontal, Wrench,
 } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { getImageOptSummary } from "@/components/admin/ImageUpload";
 
