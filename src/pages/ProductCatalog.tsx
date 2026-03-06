@@ -85,7 +85,7 @@ const ProductCatalog = () => {
 
   // Extract unique styles
   const uniqueStyles = useMemo(
-    () => [...new Set(products.map((p: any) => p.style).filter(Boolean))].sort(),
+    () => [...new Set(products.map((p: any) => p.style as string).filter(Boolean))].sort(),
     [products]
   );
 

@@ -500,6 +500,9 @@ const SellerProducts = () => {
                               {statusBadge(p.availability_status)}
                             </button>
                           </TableCell>
+                          <TableCell className="py-1.5 px-2 text-center">
+                            {listingStatusBadge(p.listing_status || 'pending_review')}
+                          </TableCell>
                           <TableCell className="py-1.5 px-1 text-center">
                             {p.is_featured ? <Star className="w-3.5 h-3.5 text-primary fill-primary mx-auto" /> : <span className="text-muted-foreground">—</span>}
                           </TableCell>
