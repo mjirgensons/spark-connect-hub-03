@@ -664,9 +664,10 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
   // Section header indicator
   const SectionIndicator = ({ section }: { section: SectionKey }) => (
-    <span className="ml-2 inline-flex items-center">
-      {sectionSaved[section] && !sectionDirty[section] && <Check className="w-3.5 h-3.5 text-green-600" />}
-      {sectionDirty[section] && <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" />}
+    <span className="ml-2 inline-flex items-center gap-1">
+      {sectionErrors[section]?.length > 0 && <span className="w-2 h-2 rounded-full bg-destructive inline-block" />}
+      {sectionSaved[section] && !sectionDirty[section] && !sectionErrors[section]?.length && <Check className="w-3.5 h-3.5 text-green-600" />}
+      {sectionDirty[section] && !sectionErrors[section]?.length && <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" />}
     </span>
   );
 
