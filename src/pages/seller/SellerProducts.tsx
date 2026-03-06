@@ -349,7 +349,7 @@ const SellerProducts = () => {
   };
 
   const addProductUrl = adminViewId ? `/seller/products/new?adminView=${adminViewId}` : "/seller/products/new";
-  const editUrl = (id: string) => adminViewId ? `/seller/products/edit/${id}?adminView=${adminViewId}` : `/seller/products/edit/${id}`;
+  const editUrl = (id: string) => adminViewId ? `/seller/products/${id}?adminView=${adminViewId}` : `/seller/products/${id}`;
   const variantsUrl = (id: string) => adminViewId ? `/seller/products/${id}/variants?adminView=${adminViewId}` : `/seller/products/${id}/variants`;
 
   const isFiltered = !!selectedCategoryId || !!searchQuery.trim();
