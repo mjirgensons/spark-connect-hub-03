@@ -599,6 +599,11 @@ const SellerProducts = () => {
                                <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => { setDeleteTarget(p); setDeleteDialogOpen(true); }}>
                                 <Trash2 className="w-3.5 h-3.5 text-destructive" />
                               </Button>
+                              {p.listing_status === "rejected" && (
+                                <Button variant="ghost" size="sm" className="h-7 text-xs px-2 text-amber-700" title="Fix & Resubmit" onClick={() => navigate(editUrl(p.id))}>
+                                  <Pencil className="w-3 h-3 mr-1" /> Fix
+                                </Button>
+                              )}
                               {adminViewId && p.listing_status !== "approved" && (
                                 <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600" title="Approve" onClick={() => handleApproveProduct(p)}>
                                   <Check className="w-3.5 h-3.5" />
