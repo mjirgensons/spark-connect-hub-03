@@ -1455,6 +1455,10 @@ export type Database = {
           countertop_thickness: string | null
           created_at: string
           deleted_at: string | null
+          delivery_option: string | null
+          delivery_prep_days: number | null
+          delivery_price: number | null
+          delivery_zone: string | null
           depth_inches: number | null
           depth_mm: number
           discount_percentage: number
@@ -1478,6 +1482,13 @@ export type Database = {
           manufacturer: string | null
           material: string
           measurement_standard: string | null
+          pickup_address: string | null
+          pickup_available: boolean | null
+          pickup_city: string | null
+          pickup_phone: string | null
+          pickup_postal_code: string | null
+          pickup_prep_days: number | null
+          pickup_province: string | null
           previous_rejection_reason: string | null
           price_discounted_usd: number
           price_retail_usd: number
@@ -1520,6 +1531,10 @@ export type Database = {
           countertop_thickness?: string | null
           created_at?: string
           deleted_at?: string | null
+          delivery_option?: string | null
+          delivery_prep_days?: number | null
+          delivery_price?: number | null
+          delivery_zone?: string | null
           depth_inches?: number | null
           depth_mm: number
           discount_percentage?: number
@@ -1543,6 +1558,13 @@ export type Database = {
           manufacturer?: string | null
           material: string
           measurement_standard?: string | null
+          pickup_address?: string | null
+          pickup_available?: boolean | null
+          pickup_city?: string | null
+          pickup_phone?: string | null
+          pickup_postal_code?: string | null
+          pickup_prep_days?: number | null
+          pickup_province?: string | null
           previous_rejection_reason?: string | null
           price_discounted_usd: number
           price_retail_usd: number
@@ -1585,6 +1607,10 @@ export type Database = {
           countertop_thickness?: string | null
           created_at?: string
           deleted_at?: string | null
+          delivery_option?: string | null
+          delivery_prep_days?: number | null
+          delivery_price?: number | null
+          delivery_zone?: string | null
           depth_inches?: number | null
           depth_mm?: number
           discount_percentage?: number
@@ -1608,6 +1634,13 @@ export type Database = {
           manufacturer?: string | null
           material?: string
           measurement_standard?: string | null
+          pickup_address?: string | null
+          pickup_available?: boolean | null
+          pickup_city?: string | null
+          pickup_phone?: string | null
+          pickup_postal_code?: string | null
+          pickup_prep_days?: number | null
+          pickup_province?: string | null
           previous_rejection_reason?: string | null
           price_discounted_usd?: number
           price_retail_usd?: number
