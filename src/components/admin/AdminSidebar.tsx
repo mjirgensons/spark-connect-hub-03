@@ -129,7 +129,6 @@ const AdminSidebar = ({ active, onNavigate, productCount }: AdminSidebarProps) =
                 {(!collapsed || isMobile) && (
                   <span className="truncate">
                     {item.label}
-                    {item.id === "products" && productCount !== undefined ? ` (${productCount})` : ""}
                   </span>
                 )}
               </button>
