@@ -956,9 +956,10 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div>
-              <Label className={labelCls}>Short Description</Label>
+              <Label className={labelCls}>Short Description *</Label>
               <Textarea value={s8.short_description} onChange={(e) => setS8ValDirty("short_description", e.target.value.slice(0, 200))} className="mt-1 resize-none" rows={2} maxLength={200} />
               <p className="text-xs text-muted-foreground mt-1">{s8.short_description.length}/200</p>
+              {sectionErrors.details.includes("Short Description is required") && <p className="text-xs text-destructive mt-1">Required — must not be empty</p>}
             </div>
             <div>
               <Label className={labelCls}>Long Description</Label>
