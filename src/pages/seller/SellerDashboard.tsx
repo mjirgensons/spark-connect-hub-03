@@ -173,7 +173,7 @@ const SellerDashboard = () => {
             {topProducts.map((p) => (
               <Link
                 key={p.id}
-                to={editUrl(p.id)}
+                to={productsUrl}
                 className="flex items-center justify-between p-3 border border-border rounded hover:bg-muted/50 transition-colors"
               >
                 <div className="flex-1 min-w-0">
