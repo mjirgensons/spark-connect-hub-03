@@ -20,7 +20,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Save, Plus, Trash2, Info, X, Eye, Check, AlertTriangle, SendHorizontal, Undo2 } from "lucide-react";
+import { Loader2, Save, Plus, Trash2, Info, X, Eye, Check, AlertTriangle, SendHorizontal, Undo2, Truck, MapPin } from "lucide-react";
 import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
 import { FileUpload } from "@/components/admin/FileUpload";
 import HardwareSection, { emptyHardwareDetails, type HardwareDetails } from "./HardwareSection";
