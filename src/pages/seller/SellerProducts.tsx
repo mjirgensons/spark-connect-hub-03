@@ -406,9 +406,9 @@ const SellerProducts = () => {
             <Card className="sticky top-4">
               <CardContent className="p-3 space-y-1">
                 <button
-                  onClick={() => setSelectedCategoryId(null)}
+                  onClick={() => { setSelectedCategoryId(null); setSelectedStatus(null); }}
                   className={`w-full text-left text-sm px-3 py-2 rounded-md transition-colors ${
-                    !selectedCategoryId
+                    !selectedCategoryId && !selectedStatus
                       ? "bg-primary/10 text-primary font-semibold border-l-2 border-primary"
                       : "text-foreground hover:bg-muted"
                   }`}
@@ -435,6 +435,27 @@ const SellerProducts = () => {
                     ))}
                   </>
                 )}
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-3 pt-3 pb-1">
+                  Status
+                </p>
+                {([
+                  { key: "approved", label: "Live" },
+                  { key: "draft", label: "Draft" },
+                  { key: "pending_review", label: "In Review" },
+                  { key: "rejected", label: "Declined" },
+                ] as const).map((s) => statusCounts[s.key] > 0 && (
+                  <button
+                    key={s.key}
+                    onClick={() => setSelectedStatus(selectedStatus === s.key ? null : s.key)}
+                    className={`w-full text-left text-sm px-3 py-2 rounded-md transition-colors ${
+                      selectedStatus === s.key
+                        ? "bg-primary/10 text-primary font-semibold border-l-2 border-primary"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {s.label} ({statusCounts[s.key]})
+                  </button>
+                ))}
               </CardContent>
             </Card>
           </div>
