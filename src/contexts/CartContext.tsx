@@ -36,28 +36,34 @@ const recalc = (items: CartItem[]): CartState => ({
   subtotal: items.reduce((s, i) => s + i.price * i.quantity, 0),
 });
 
+const isDeliveryItem = (name: string, productId: string) =>
+  /delivery|shipping/i.test(name) || (productId.includes("_option_") && /delivery|shipping/i.test(name));
+
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case "ADD_ITEM": {
       const existing = state.items.find((i) => i.productId === action.payload.productId);
+      const maxQty = isDeliveryItem(action.payload.name, action.payload.productId) ? 1 : action.payload.maxStock;
       if (existing) {
         const items = state.items.map((i) =>
           i.productId === action.payload.productId
-            ? { ...i, quantity: Math.min(i.quantity + 1, i.maxStock) }
+            ? { ...i, quantity: Math.min(i.quantity + 1, maxQty) }
             : i
         );
         return recalc(items);
       }
-      return recalc([...state.items, { ...action.payload, quantity: 1 }]);
+      return recalc([...state.items, { ...action.payload, quantity: 1, maxStock: maxQty }]);
     }
     case "REMOVE_ITEM":
       return recalc(state.items.filter((i) => i.productId !== action.payload));
     case "UPDATE_QUANTITY": {
       const { productId, quantity } = action.payload;
       if (quantity < 1) return state;
-      const items = state.items.map((i) =>
-        i.productId === productId ? { ...i, quantity: Math.min(quantity, i.maxStock) } : i
-      );
+      const items = state.items.map((i) => {
+        if (i.productId !== productId) return i;
+        const max = isDeliveryItem(i.name, i.productId) ? 1 : i.maxStock;
+        return { ...i, quantity: Math.min(quantity, max) };
+      });
       return recalc(items);
     }
     case "CLEAR_CART":

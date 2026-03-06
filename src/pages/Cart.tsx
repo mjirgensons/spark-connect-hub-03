@@ -15,8 +15,13 @@ const Cart = () => {
   const { items, itemCount, subtotal, dispatch } = useCart();
 
   const taxRate = 0.13;
-  const tax = subtotal * taxRate;
-  const total = subtotal + tax;
+  const tax = Math.round(subtotal * taxRate * 100) / 100;
+  const total = Math.round((subtotal + tax) * 100) / 100;
+
+  const isDeliveryItem = (name: string, productId: string) =>
+    /delivery|shipping/i.test(name) || (productId.includes("_option_") && /delivery|shipping/i.test(name));
+
+  const formatPrice = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const handleRemove = (productId: string, name: string) => {
     dispatch({ type: "REMOVE_ITEM", payload: productId });
