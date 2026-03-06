@@ -357,7 +357,7 @@ const SellerProductForm = ({ productId }: SellerProductFormProps) => {
   const updateSpec = (oi: number, si: number, field: "key" | "value", val: string) => setOptions((p) => p.map((o, idx) => idx === oi ? { ...o, specs: o.specs.map((s, j) => j === si ? { ...s, [field]: val } : s) } : o));
 
   // S6 helpers
-  const showAppliances = options.some((o) => o.option_type === "appliance" && o.inclusion_status === "not_included");
+  
   const addAppliance = () => setAppliances((p) => [...p, { appliance_type: "", brand: "", model_number: "", model_name: "", width_mm: "", height_mm: "", depth_mm: "", notes: "", reference_url: "" }]);
   const removeAppliance = (i: number) => setAppliances((p) => p.filter((_, idx) => idx !== i));
   const updateAppliance = (i: number, key: string, val: string) => setAppliances((p) => p.map((a, idx) => idx === i ? { ...a, [key]: val } : a));
