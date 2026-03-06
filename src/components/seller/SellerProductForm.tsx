@@ -517,6 +517,20 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
           stock_level: Number(s8.stock_level) || 0, availability_status: s8.availability_status,
           is_featured: isFeatured,
         } as any).eq("id", pid);
+       } else if (section === "delivery") {
+        await supabase.from("products").update({
+          delivery_option: delivery.delivery_option,
+          delivery_price: delivery.delivery_price ? parseFloat(delivery.delivery_price) : 0,
+          delivery_zone: delivery.delivery_zone || "",
+          delivery_prep_days: delivery.delivery_prep_days ? Number(delivery.delivery_prep_days) : 5,
+          pickup_available: delivery.delivery_option === "pickup_only" || delivery.delivery_option === "both",
+          pickup_address: delivery.pickup_address || "",
+          pickup_city: delivery.pickup_city || "",
+          pickup_province: delivery.pickup_province || "Ontario",
+          pickup_postal_code: delivery.pickup_postal_code || "",
+          pickup_phone: delivery.pickup_phone || "",
+          pickup_prep_days: delivery.pickup_prep_days ? Number(delivery.pickup_prep_days) : 5,
+        } as any).eq("id", pid);
       }
       setSectionSaved(p => ({ ...p, [section]: true }));
       setSectionDirty(p => ({ ...p, [section]: false }));
