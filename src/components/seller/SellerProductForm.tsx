@@ -147,6 +147,13 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     short_description: "", long_description: "", stock_level: "0",
     availability_status: "In Stock", visibility: "draft",
   });
+  const [delivery, setDelivery] = useState({
+    delivery_option: "pickup_only",
+    delivery_price: "", delivery_zone: "", delivery_prep_days: "5",
+    pickup_address: "", pickup_city: "", pickup_province: "Ontario",
+    pickup_postal_code: "", pickup_phone: "", pickup_prep_days: "5",
+  });
+  const setDeliveryVal = (key: string, val: string) => { setDelivery(p => ({ ...p, [key]: val })); markDirty("delivery"); };
 
   const set = (key: string, val: string | boolean) => setF((p) => ({ ...p, [key]: val }));
   const setS8Val = (key: string, val: string) => setS8((p) => ({ ...p, [key]: val }));
