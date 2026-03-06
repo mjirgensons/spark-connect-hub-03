@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { Package, Ruler, Palette, Layers, Info, ChevronDown, MessageSquare, Eye } from "lucide-react";
+import { Package, Ruler, Palette, Layers, Info, ChevronDown, MessageSquare, Eye, Truck, MapPin } from "lucide-react";
 import ProductGallery from "@/components/ProductGallery";
 
 const ProductReviews = lazy(() => import("@/components/ProductReviews"));
