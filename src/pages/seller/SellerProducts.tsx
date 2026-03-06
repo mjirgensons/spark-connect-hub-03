@@ -49,7 +49,7 @@ interface Product {
 }
 
 // ── Sorting ──
-type SortKey = "product_name" | "product_code" | "category" | "price_retail_usd" | "price_discounted_usd" | "stock_level" | "availability_status" | "is_featured";
+type SortKey = "product_name" | "product_code" | "category" | "price_retail_usd" | "price_discounted_usd" | "stock_level" | "availability_status" | "is_featured" | "listing_status";
 
 const statusBadge = (status: string) => {
   switch (status) {
