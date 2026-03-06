@@ -544,9 +544,19 @@ const SellerProducts = () => {
                               <Button variant="ghost" size="icon" className="h-7 w-7" title="Edit" onClick={() => navigate(editUrl(p.id))}>
                                 <Pencil className="w-3.5 h-3.5" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => { setDeleteTarget(p); setDeleteDialogOpen(true); }}>
+                               <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => { setDeleteTarget(p); setDeleteDialogOpen(true); }}>
                                 <Trash2 className="w-3.5 h-3.5 text-destructive" />
                               </Button>
+                              {adminViewId && p.listing_status !== "approved" && (
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600" title="Approve" onClick={() => handleApproveProduct(p)}>
+                                  <Check className="w-3.5 h-3.5" />
+                                </Button>
+                              )}
+                              {adminViewId && p.listing_status !== "rejected" && (
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" title="Reject" onClick={() => { setRejectTarget(p); setRejectDialogOpen(true); }}>
+                                  <XIcon className="w-3.5 h-3.5" />
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>
