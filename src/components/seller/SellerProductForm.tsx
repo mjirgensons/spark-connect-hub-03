@@ -1209,7 +1209,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
                 </Button>
               )}
               {listingStatus === "approved" && (
-                <Button variant="outline" onClick={handleSaveApproved} disabled={saving}>
+                <Button onClick={handleSaveApproved} disabled={saving} className="bg-foreground text-background hover:bg-foreground/90 min-h-[48px] px-8 text-base font-semibold">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   Save Changes
                 </Button>
