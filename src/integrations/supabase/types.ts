@@ -1478,10 +1478,12 @@ export type Database = {
           manufacturer: string | null
           material: string
           measurement_standard: string | null
+          previous_rejection_reason: string | null
           price_discounted_usd: number
           price_retail_usd: number
           product_code: string
           product_name: string
+          resubmission_count: number
           seller_id: string | null
           short_description: string | null
           slide_brand: string | null
@@ -1541,10 +1543,12 @@ export type Database = {
           manufacturer?: string | null
           material: string
           measurement_standard?: string | null
+          previous_rejection_reason?: string | null
           price_discounted_usd: number
           price_retail_usd: number
           product_code: string
           product_name: string
+          resubmission_count?: number
           seller_id?: string | null
           short_description?: string | null
           slide_brand?: string | null
@@ -1604,10 +1608,12 @@ export type Database = {
           manufacturer?: string | null
           material?: string
           measurement_standard?: string | null
+          previous_rejection_reason?: string | null
           price_discounted_usd?: number
           price_retail_usd?: number
           product_code?: string
           product_name?: string
+          resubmission_count?: number
           seller_id?: string | null
           short_description?: string | null
           slide_brand?: string | null
