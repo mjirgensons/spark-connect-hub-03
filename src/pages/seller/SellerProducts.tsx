@@ -702,6 +702,30 @@ const SellerProducts = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ── Reject Product Dialog ── */}
+      <AlertDialog open={rejectDialogOpen} onOpenChange={(open) => { setRejectDialogOpen(open); if (!open) { setRejectTarget(null); setRejectReason(""); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reject product listing?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Provide a reason for rejecting "{rejectTarget?.product_name}". The seller will see this reason.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            placeholder="Rejection reason (optional)…"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            className="mt-2"
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRejectProduct} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Reject
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
