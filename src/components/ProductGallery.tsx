@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -11,9 +11,11 @@ interface ProductGalleryProps {
 }
 
 const ProductGallery = ({ mainImage, additionalImages, productName, discountPercentage }: ProductGalleryProps) => {
-  const allImages = [mainImage, ...additionalImages];
+  const allImages = [mainImage, ...additionalImages].filter(Boolean);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const thumbRef = useRef<HTMLDivElement>(null);
+  const showArrows = allImages.length > 5;
 
   const currentImage = allImages[selectedIndex];
 
@@ -21,12 +23,35 @@ const ProductGallery = ({ mainImage, additionalImages, productName, discountPerc
     setSelectedIndex((prev) => (prev + dir + allImages.length) % allImages.length);
   };
 
+  // Scroll active thumbnail into view
+  useEffect(() => {
+    if (thumbRef.current) {
+      const active = thumbRef.current.children[selectedIndex] as HTMLElement;
+      active?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [selectedIndex]);
+
+  // Keyboard nav in lightbox
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") goTo(-1);
+      if (e.key === "ArrowRight") goTo(1);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [lightboxOpen, allImages.length]);
+
+  const scrollThumbs = (dir: -1 | 1) => {
+    thumbRef.current?.scrollBy({ left: dir * 200, behavior: "smooth" });
+  };
+
   return (
     <>
-      <div className="space-y-4">
-        {/* Main display */}
+      <div className="space-y-3">
+        {/* Main image */}
         <div
-          className="relative aspect-square overflow-hidden border bg-secondary/30 cursor-zoom-in"
+          className="relative aspect-[4/3] overflow-hidden rounded-md border bg-secondary/30 cursor-zoom-in"
           onClick={() => setLightboxOpen(true)}
         >
           <img
@@ -41,24 +66,53 @@ const ProductGallery = ({ mainImage, additionalImages, productName, discountPerc
           )}
         </div>
 
-        {/* Thumbnails */}
+        {/* Thumbnail row */}
         {allImages.length > 1 && (
-          <div className="grid grid-cols-5 gap-2">
-            {allImages.map((url, i) => (
-              <div
-                key={i}
-                className={`aspect-square overflow-hidden border bg-secondary/30 cursor-pointer transition-all duration-200 ${
-                  i === selectedIndex ? "ring-2 ring-primary" : "opacity-70 hover:opacity-100"
-                }`}
-                onClick={() => setSelectedIndex(i)}
+          <div className="relative flex items-center gap-1">
+            {showArrows && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-8 shrink-0"
+                onClick={() => scrollThumbs(-1)}
               >
-                <img
-                  src={url}
-                  alt={`${productName} view ${i + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+            )}
+            <div
+              ref={thumbRef}
+              className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth"
+              style={{ scrollSnapType: "x mandatory" }}
+            >
+              {allImages.map((url, i) => (
+                <div
+                  key={i}
+                  className={`shrink-0 w-16 h-16 overflow-hidden rounded border cursor-pointer transition-all duration-200 ${
+                    i === selectedIndex
+                      ? "ring-2 ring-primary border-primary"
+                      : "opacity-70 hover:opacity-100 border-border"
+                  }`}
+                  style={{ scrollSnapAlign: "center" }}
+                  onClick={() => setSelectedIndex(i)}
+                >
+                  <img
+                    src={url}
+                    alt={`${productName} view ${i + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+            {showArrows && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-8 shrink-0"
+                onClick={() => scrollThumbs(1)}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         )}
       </div>
