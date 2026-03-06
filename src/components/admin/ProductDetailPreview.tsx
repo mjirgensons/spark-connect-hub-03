@@ -68,7 +68,13 @@ const ProductDetailPreview = ({ product, productOptions }: ProductDetailPreviewP
   };
 
   const addOnTotal = productOptions
-    .filter((opt: any) => checkedAddOns.has(opt.id))
+    .filter((opt: any) => {
+      if (!checkedAddOns.has(opt.id)) return false;
+      const nameLower = (opt.option_name || "").toLowerCase();
+      const typeLower = (opt.option_type || "").toLowerCase();
+      if (nameLower.includes("delivery") || nameLower.includes("shipping") || typeLower === "delivery" || typeLower === "shipping") return false;
+      return true;
+    })
     .reduce((sum: number, opt: any) => sum + getOptPrice(opt), 0);
 
   const productPrice = Number(product.price_discounted_usd);
