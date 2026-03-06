@@ -109,6 +109,7 @@ const Product = () => {
   const [hwImageOpen, setHwImageOpen] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("specs");
   const [qaPrefill, setQaPrefill] = useState<{ text: string; optionId: string } | null>(null);
+  const [deliveryChoice, setDeliveryChoice] = useState<'delivery' | 'pickup'>('delivery');
 
   // ── Add-on checkbox state (shared between hero & tab) ──
   const [checkedAddOns, setCheckedAddOns] = useState<Set<string>>(new Set());
