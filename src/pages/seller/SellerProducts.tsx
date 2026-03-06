@@ -204,6 +204,11 @@ const SellerProducts = () => {
       list = list.filter((p) => p.category_id === selectedCategoryId);
     }
 
+    // Status filter
+    if (selectedStatus) {
+      list = list.filter((p) => (p.listing_status || "draft") === selectedStatus);
+    }
+
     // Search filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
