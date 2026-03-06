@@ -747,7 +747,7 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
 
         {/* ═══ SECTION 5 — PRICING ═══ */}
         <AccordionItem value="pricing" className="border rounded-lg">
-          <AccordionTrigger className="px-4 font-bold text-base">5 · Pricing <SectionIndicator section="pricing" /></AccordionTrigger>
+          <AccordionTrigger className="px-4 font-bold text-base">Pricing <SectionIndicator section="pricing" /></AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
             <fieldset disabled={isReadOnly}>
             <div className="grid sm:grid-cols-3 gap-4">
