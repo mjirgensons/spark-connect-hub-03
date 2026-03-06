@@ -409,6 +409,19 @@ const SellerProductForm = ({ productId: initialProductId }: SellerProductFormPro
     if (section === "details") {
       if (!s8.short_description.trim()) errors.push("Short Description is required");
     }
+    if (section === "delivery") {
+      const opt = delivery.delivery_option;
+      if (opt === "delivery" || opt === "both") {
+        if (!delivery.delivery_price || Number(delivery.delivery_price) <= 0) errors.push("Delivery Price must be greater than 0");
+        if (!delivery.delivery_prep_days || Number(delivery.delivery_prep_days) < 1) errors.push("Delivery Preparation Time must be at least 1 day");
+      }
+      if (opt === "pickup_only" || opt === "both") {
+        if (!delivery.pickup_address.trim()) errors.push("Pickup Address is required");
+        if (!delivery.pickup_city.trim()) errors.push("Pickup City is required");
+        if (!delivery.pickup_phone.trim()) errors.push("Pickup Phone is required");
+        if (!delivery.pickup_prep_days || Number(delivery.pickup_prep_days) < 1) errors.push("Pickup Preparation Time must be at least 1 day");
+      }
+    }
     return errors;
   };
 
