@@ -123,7 +123,7 @@ const SellerDashboard = () => {
   ];
 
   const addProductUrl = adminViewId ? `/seller/products/new?adminView=${adminViewId}` : "/seller/products/new";
-  const editUrl = (id: string) => adminViewId ? `/seller/products/edit/${id}?adminView=${adminViewId}` : `/seller/products/edit/${id}`;
+  const productsUrl = adminViewId ? `/seller/products?adminView=${adminViewId}` : "/seller/products";
   const getCategoryName = (id: string | null) => categories.find((c) => c.id === id)?.name || "—";
 
   return (
