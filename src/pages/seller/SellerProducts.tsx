@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,14 +7,18 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
   PlusCircle, Pencil, Trash2, Copy, Sparkles, AlertTriangle, ImageOff,
-  RotateCcw, Trash, Power, PowerOff, ArrowUp, ArrowDown, ArrowUpDown, Star, Layers,
+  RotateCcw, Trash, ArrowUp, ArrowDown, ArrowUpDown, Star, Layers, Search,
 } from "lucide-react";
 import { getImageOptSummary } from "@/components/admin/ImageUpload";
 
@@ -44,6 +48,22 @@ interface Product {
 // ── Sorting ──
 type SortKey = "product_name" | "product_code" | "category" | "price_retail_usd" | "price_discounted_usd" | "stock_level" | "availability_status" | "is_featured";
 
+const statusBadge = (status: string) => {
+  switch (status) {
+    case "In Stock":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-green-500/15 text-green-700 border-green-300 whitespace-nowrap">{status}</Badge>;
+    case "Low Stock":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-yellow-500/15 text-yellow-700 border-yellow-300 whitespace-nowrap">{status}</Badge>;
+    case "Out of Stock":
+    case "Deactivated":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-red-500/15 text-red-700 border-red-300 whitespace-nowrap">{status}</Badge>;
+    case "Preorder":
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-blue-500/15 text-blue-700 border-blue-300 whitespace-nowrap">{status}</Badge>;
+    default:
+      return <Badge variant="outline" className="text-[9px] px-1.5 py-0 whitespace-nowrap">{status}</Badge>;
+  }
+};
+
 const SellerProducts = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -59,6 +79,9 @@ const SellerProducts = () => {
 
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
@@ -115,6 +138,19 @@ const SellerProducts = () => {
     autoCleanupBin();
   }, [fetchProducts, fetchCategories, autoCleanupBin]);
 
+  // ── Category sidebar data ──
+  const sellerCategories = useMemo(() => {
+    const countMap = new Map<string, number>();
+    for (const p of products) {
+      if (p.category_id) {
+        countMap.set(p.category_id, (countMap.get(p.category_id) || 0) + 1);
+      }
+    }
+    return categories
+      .filter((c) => countMap.has(c.id))
+      .map((c) => ({ ...c, count: countMap.get(c.id)! }));
+  }, [products, categories]);
+
   // ── Sort ──
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -126,20 +162,44 @@ const SellerProducts = () => {
     return sortDir === "asc" ? <ArrowUp className="w-3 h-3 ml-1" /> : <ArrowDown className="w-3 h-3 ml-1" />;
   };
 
-  const sortedProducts = [...products].sort((a, b) => {
-    if (!sortKey) return 0;
-    const dir = sortDir === "asc" ? 1 : -1;
-    if (sortKey === "category") {
-      const catA = categories.find((c) => c.id === a.category_id)?.name || "";
-      const catB = categories.find((c) => c.id === b.category_id)?.name || "";
-      return catA.localeCompare(catB) * dir;
+  // ── Filtering + Sorting ──
+  const filteredAndSorted = useMemo(() => {
+    let list = [...products];
+
+    // Category filter
+    if (selectedCategoryId) {
+      list = list.filter((p) => p.category_id === selectedCategoryId);
     }
-    if (sortKey === "is_featured") return ((a.is_featured ? 1 : 0) - (b.is_featured ? 1 : 0)) * dir;
-    const valA = a[sortKey];
-    const valB = b[sortKey];
-    if (typeof valA === "number" && typeof valB === "number") return (valA - valB) * dir;
-    return String(valA || "").localeCompare(String(valB || "")) * dir;
-  });
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.product_name.toLowerCase().includes(q) ||
+          p.product_code.toLowerCase().includes(q)
+      );
+    }
+
+    // Sort
+    if (sortKey) {
+      const dir = sortDir === "asc" ? 1 : -1;
+      list.sort((a, b) => {
+        if (sortKey === "category") {
+          const catA = categories.find((c) => c.id === a.category_id)?.name || "";
+          const catB = categories.find((c) => c.id === b.category_id)?.name || "";
+          return catA.localeCompare(catB) * dir;
+        }
+        if (sortKey === "is_featured") return ((a.is_featured ? 1 : 0) - (b.is_featured ? 1 : 0)) * dir;
+        const valA = a[sortKey];
+        const valB = b[sortKey];
+        if (typeof valA === "number" && typeof valB === "number") return (valA - valB) * dir;
+        return String(valA || "").localeCompare(String(valB || "")) * dir;
+      });
+    }
+
+    return list;
+  }, [products, selectedCategoryId, searchQuery, sortKey, sortDir, categories]);
 
   // ── Storage helpers ──
   const deleteStorageFile = async (url: string, bucket: string) => {
@@ -225,7 +285,6 @@ const SellerProducts = () => {
       toast({ title: "Duplicate failed", description: error?.message, variant: "destructive" });
       return;
     }
-    // Duplicate product_options
     const { data: opts } = await supabase.from("product_options").select("*").eq("product_id", product.id);
     if (opts?.length) {
       const newOpts = opts.map(({ id: _id, product_id: _pid, created_at: _ca, ...o }: any) => ({
@@ -233,7 +292,6 @@ const SellerProducts = () => {
       }));
       await supabase.from("product_options").insert(newOpts as any);
     }
-    // Duplicate compatible appliances
     const { data: apps } = await supabase.from("product_compatible_appliances").select("*").eq("product_id", product.id);
     if (apps?.length) {
       const newApps = apps.map(({ id: _id, product_id: _pid, created_at: _ca, ...a }: any) => ({
@@ -254,12 +312,14 @@ const SellerProducts = () => {
   const editUrl = (id: string) => adminViewId ? `/seller/products/edit/${id}?adminView=${adminViewId}` : `/seller/products/edit/${id}`;
   const variantsUrl = (id: string) => adminViewId ? `/seller/products/${id}/variants?adminView=${adminViewId}` : `/seller/products/${id}/variants`;
 
+  const isFiltered = !!selectedCategoryId || !!searchQuery.trim();
+
   return (
     <div className="space-y-6">
       <Breadcrumbs items={[{ label: "Dashboard", href: adminViewId ? `/seller/dashboard?adminView=${adminViewId}` : "/seller/dashboard" }, { label: "Products" }]} />
 
       {/* Top bar */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex gap-2">
           <Button
             variant={tab === "active" ? "default" : "outline"}
@@ -281,115 +341,195 @@ const SellerProducts = () => {
         </Button>
       </div>
 
-      {/* ── Active Products Table ── */}
+      {/* ── Active Products with Sidebar ── */}
       {tab === "active" && (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="text-xs">
-                  <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("product_name")}>
-                    <span className="inline-flex items-center">Name<SortIcon col="product_name" /></span>
-                  </TableHead>
-                  <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("product_code")}>
-                    <span className="inline-flex items-center">SKU<SortIcon col="product_code" /></span>
-                  </TableHead>
-                  <TableHead className="py-2 px-2 cursor-pointer select-none" onClick={() => handleSort("category")}>
-                    <span className="inline-flex items-center">Category<SortIcon col="category" /></span>
-                  </TableHead>
-                  <TableHead className="py-2 px-1 text-center">Img</TableHead>
-                  <TableHead className="py-2 px-2 text-right cursor-pointer select-none" onClick={() => handleSort("price_retail_usd")}>
-                    <span className="inline-flex items-center justify-end">Retail<SortIcon col="price_retail_usd" /></span>
-                  </TableHead>
-                  <TableHead className="py-2 px-2 text-right cursor-pointer select-none" onClick={() => handleSort("price_discounted_usd")}>
-                    <span className="inline-flex items-center justify-end">Sale<SortIcon col="price_discounted_usd" /></span>
-                  </TableHead>
-                  <TableHead className="py-2 px-2 text-center cursor-pointer select-none" onClick={() => handleSort("stock_level")}>
-                    <span className="inline-flex items-center">Stock<SortIcon col="stock_level" /></span>
-                  </TableHead>
-                  <TableHead className="py-2 px-2 text-center cursor-pointer select-none" onClick={() => handleSort("availability_status")}>
-                    <span className="inline-flex items-center">Status<SortIcon col="availability_status" /></span>
-                  </TableHead>
-                  <TableHead className="py-2 px-1 text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
-                    <span className="inline-flex items-center"><Star className="w-3 h-3" /><SortIcon col="is_featured" /></span>
-                  </TableHead>
-                  <TableHead className="py-2 px-2 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedProducts.map((p) => {
-                  const imgSummary = getImageOptSummary(p);
-                  return (
-                    <TableRow key={p.id} className="text-xs">
-                      <TableCell className="py-1.5 px-2 font-medium max-w-[160px] truncate">{p.product_name}</TableCell>
-                      <TableCell className="py-1.5 px-2 text-muted-foreground max-w-[110px] truncate">{p.product_code}</TableCell>
-                      <TableCell className="py-1.5 px-2 max-w-[90px] truncate">{categories.find((c) => c.id === p.category_id)?.name || "—"}</TableCell>
-                      <TableCell className="py-1.5 px-1 text-center">
-                        {imgSummary.label === "no-images" && <span className="text-muted-foreground">—</span>}
-                        {imgSummary.label === "all-optimized" && (
-                          <Badge variant="default" className="text-[9px] px-1 py-0 gap-0.5">
-                            <Sparkles className="w-2.5 h-2.5" /> {imgSummary.optimizedCount}/{imgSummary.totalCount}
-                          </Badge>
-                        )}
-                        {imgSummary.label === "partial" && (
-                          <Badge variant="secondary" className="text-[9px] px-1 py-0 gap-0.5">
-                            <AlertTriangle className="w-2.5 h-2.5" /> {imgSummary.optimizedCount}/{imgSummary.totalCount}
-                          </Badge>
-                        )}
-                        {imgSummary.label === "none" && (
-                          <Badge variant="destructive" className="text-[9px] px-1 py-0 gap-0.5">
-                            <ImageOff className="w-2.5 h-2.5" /> 0/{imgSummary.totalCount}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="py-1.5 px-2 text-right">${Number(p.price_retail_usd).toLocaleString()}</TableCell>
-                      <TableCell className="py-1.5 px-2 text-right">${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
-                      <TableCell className="py-1.5 px-2 text-center">{p.stock_level}</TableCell>
-                      <TableCell className="py-1.5 px-2 text-center">
-                        <button onClick={() => handleToggleActivation(p)} className="cursor-pointer">
-                          {p.availability_status === "Deactivated" ? (
-                            <Badge variant="destructive" className="text-[9px] px-1 py-0"><PowerOff className="w-2.5 h-2.5 mr-0.5" />Off</Badge>
-                          ) : (
-                            <Badge variant="default" className="text-[9px] px-1 py-0"><Power className="w-2.5 h-2.5 mr-0.5" />On</Badge>
-                          )}
-                        </button>
-                      </TableCell>
-                      <TableCell className="py-1.5 px-1 text-center">
-                        {p.is_featured ? <Star className="w-3.5 h-3.5 text-primary fill-primary mx-auto" /> : <span className="text-muted-foreground">—</span>}
-                      </TableCell>
-                      <TableCell className="py-1.5 px-2 text-right">
-                        <div className="flex justify-end gap-0">
-                          <Button variant="ghost" size="icon" className="h-7 w-7" title="Variants" onClick={() => navigate(variantsUrl(p.id))}>
-                            <Layers className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" title="Duplicate" onClick={() => handleDuplicate(p)}>
-                            <Copy className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" title="Edit" onClick={() => navigate(editUrl(p.id))}>
-                            <Pencil className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => { setDeleteTarget(p); setDeleteDialogOpen(true); }}>
-                            <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {products.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
-                      <div className="space-y-2">
-                        <p className="font-medium">No products yet</p>
-                        <p className="text-xs">Click "Add Product" to list your first product.</p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+        <div className="flex gap-6">
+          {/* Category Sidebar */}
+          <div className="hidden md:block w-[220px] shrink-0">
+            <Card className="sticky top-4">
+              <CardContent className="p-3 space-y-1">
+                <button
+                  onClick={() => setSelectedCategoryId(null)}
+                  className={`w-full text-left text-sm px-3 py-2 rounded-md transition-colors ${
+                    !selectedCategoryId
+                      ? "bg-primary/10 text-primary font-semibold border-l-2 border-primary"
+                      : "text-foreground hover:bg-muted"
+                  }`}
+                >
+                  All Products ({products.length})
+                </button>
+                {sellerCategories.length > 0 && (
+                  <>
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-3 pt-3 pb-1">
+                      Categories
+                    </p>
+                    {sellerCategories.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => setSelectedCategoryId(c.id === selectedCategoryId ? null : c.id)}
+                        className={`w-full text-left text-sm px-3 py-2 rounded-md transition-colors ${
+                          selectedCategoryId === c.id
+                            ? "bg-primary/10 text-primary font-semibold border-l-2 border-primary"
+                            : "text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        {c.name} ({c.count})
+                      </button>
+                    ))}
+                  </>
                 )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 min-w-0 space-y-3">
+            {/* Search + Category Filter */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="relative flex-1 min-w-[200px] max-w-sm">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name or SKU…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-9 text-sm"
+                />
+              </div>
+              <Select
+                value={selectedCategoryId || "all"}
+                onValueChange={(v) => setSelectedCategoryId(v === "all" ? null : v)}
+              >
+                <SelectTrigger className="w-[180px] h-9 text-sm">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {sellerCategories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name} ({c.count})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {isFiltered && (
+                <p className="text-xs text-muted-foreground">
+                  Showing {filteredAndSorted.length} of {products.length} products
+                </p>
+              )}
+            </div>
+
+            <Card>
+              <CardContent className="p-0 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="text-xs">
+                      <TableHead className="py-2 px-2 w-[180px] cursor-pointer select-none" onClick={() => handleSort("product_name")}>
+                        <span className="inline-flex items-center">Name<SortIcon col="product_name" /></span>
+                      </TableHead>
+                      <TableHead className="py-2 px-2 w-[110px] cursor-pointer select-none" onClick={() => handleSort("product_code")}>
+                        <span className="inline-flex items-center">SKU<SortIcon col="product_code" /></span>
+                      </TableHead>
+                      <TableHead className="py-2 px-2 w-[100px] cursor-pointer select-none" onClick={() => handleSort("category")}>
+                        <span className="inline-flex items-center">Category<SortIcon col="category" /></span>
+                      </TableHead>
+                      <TableHead className="py-2 px-1 w-[60px] text-center">Img</TableHead>
+                      <TableHead className="py-2 px-2 w-[80px] text-right cursor-pointer select-none" onClick={() => handleSort("price_retail_usd")}>
+                        <span className="inline-flex items-center justify-end w-full">Retail<SortIcon col="price_retail_usd" /></span>
+                      </TableHead>
+                      <TableHead className="py-2 px-2 w-[80px] text-right cursor-pointer select-none" onClick={() => handleSort("price_discounted_usd")}>
+                        <span className="inline-flex items-center justify-end w-full">Sale<SortIcon col="price_discounted_usd" /></span>
+                      </TableHead>
+                      <TableHead className="py-2 px-2 w-[55px] text-center cursor-pointer select-none" onClick={() => handleSort("stock_level")}>
+                        <span className="inline-flex items-center justify-center w-full">Stock<SortIcon col="stock_level" /></span>
+                      </TableHead>
+                      <TableHead className="py-2 px-2 w-[90px] text-center cursor-pointer select-none" onClick={() => handleSort("availability_status")}>
+                        <span className="inline-flex items-center justify-center w-full">Status<SortIcon col="availability_status" /></span>
+                      </TableHead>
+                      <TableHead className="py-2 px-1 w-[40px] text-center cursor-pointer select-none" onClick={() => handleSort("is_featured")}>
+                        <span className="inline-flex items-center justify-center w-full"><Star className="w-3 h-3" /><SortIcon col="is_featured" /></span>
+                      </TableHead>
+                      <TableHead className="py-2 px-2 w-[120px] text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAndSorted.map((p) => {
+                      const imgSummary = getImageOptSummary(p);
+                      return (
+                        <TableRow key={p.id} className="text-xs">
+                          <TableCell className="py-1.5 px-2 font-medium max-w-[180px] truncate">{p.product_name}</TableCell>
+                          <TableCell className="py-1.5 px-2 text-muted-foreground max-w-[110px] truncate">{p.product_code}</TableCell>
+                          <TableCell className="py-1.5 px-2 max-w-[100px] truncate">{categories.find((c) => c.id === p.category_id)?.name || "—"}</TableCell>
+                          <TableCell className="py-1.5 px-1 text-center">
+                            {imgSummary.label === "no-images" && <span className="text-muted-foreground">—</span>}
+                            {imgSummary.label === "all-optimized" && (
+                              <Badge variant="default" className="text-[9px] px-1 py-0 gap-0.5">
+                                <Sparkles className="w-2.5 h-2.5" /> {imgSummary.optimizedCount}/{imgSummary.totalCount}
+                              </Badge>
+                            )}
+                            {imgSummary.label === "partial" && (
+                              <Badge variant="secondary" className="text-[9px] px-1 py-0 gap-0.5">
+                                <AlertTriangle className="w-2.5 h-2.5" /> {imgSummary.optimizedCount}/{imgSummary.totalCount}
+                              </Badge>
+                            )}
+                            {imgSummary.label === "none" && (
+                              <Badge variant="destructive" className="text-[9px] px-1 py-0 gap-0.5">
+                                <ImageOff className="w-2.5 h-2.5" /> 0/{imgSummary.totalCount}
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="py-1.5 px-2 text-right font-mono">${Number(p.price_retail_usd).toLocaleString()}</TableCell>
+                          <TableCell className="py-1.5 px-2 text-right font-mono">${Number(p.price_discounted_usd).toLocaleString()}</TableCell>
+                          <TableCell className="py-1.5 px-2 text-center">{p.stock_level}</TableCell>
+                          <TableCell className="py-1.5 px-2 text-center">
+                            <button onClick={() => handleToggleActivation(p)} className="cursor-pointer" title="Toggle activation">
+                              {statusBadge(p.availability_status)}
+                            </button>
+                          </TableCell>
+                          <TableCell className="py-1.5 px-1 text-center">
+                            {p.is_featured ? <Star className="w-3.5 h-3.5 text-primary fill-primary mx-auto" /> : <span className="text-muted-foreground">—</span>}
+                          </TableCell>
+                          <TableCell className="py-1.5 px-2 text-right">
+                            <div className="flex justify-end gap-0">
+                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Variants" onClick={() => navigate(variantsUrl(p.id))}>
+                                <Layers className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Duplicate" onClick={() => handleDuplicate(p)}>
+                                <Copy className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Edit" onClick={() => navigate(editUrl(p.id))}>
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => { setDeleteTarget(p); setDeleteDialogOpen(true); }}>
+                                <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    {filteredAndSorted.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
+                          <div className="space-y-2">
+                            {products.length === 0 ? (
+                              <>
+                                <p className="font-medium">No products yet</p>
+                                <p className="text-xs">Click "Add Product" to list your first product.</p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="font-medium">No products match your filters</p>
+                                <p className="text-xs">Try adjusting your search or category filter.</p>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       )}
 
       {/* ── Recycle Bin ── */}
