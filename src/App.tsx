@@ -210,6 +210,7 @@ const App = () => (
             <Route path="questions" element={<SellerQuestions />} />
             <Route path="messages" element={<SellerMessages />} />
             <Route path="messages/:conversationId" element={<SellerMessages />} />
+            <Route path="knowledge-base" element={<SellerKnowledgeBase />} />
             <Route path="store-profile" element={<SellerStoreProfile />} />
           </Route>
 
