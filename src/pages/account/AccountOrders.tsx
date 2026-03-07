@@ -257,6 +257,14 @@ const AccountOrders = () => {
                         </div>
                       )}
 
+                      {/* Report Issue */}
+                      {canReportIssue(order.status, order.id) && (
+                        <ReportIssueDialog
+                          orderId={order.id}
+                          onReported={() => refetchDisputes()}
+                        />
+                      )}
+
                       {/* Price breakdown */}
                       <div>
                         <p className="text-xs font-bold text-muted-foreground uppercase mb-1">Price Breakdown</p>
