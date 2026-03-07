@@ -18,9 +18,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import {
-  ShoppingCart, ChevronDown, ChevronUp, ArrowUpDown, Package, Truck, CheckCircle2, XCircle, Clock, AlertTriangle,
+  ShoppingCart, ChevronDown, ChevronUp, ArrowUpDown, Package, Truck, CheckCircle2, XCircle, Clock, AlertTriangle, MessageCircle,
 } from "lucide-react";
 import { format } from "date-fns";
+
+interface Dispute {
+  id: string;
+  order_id: string;
+  dispute_type: string;
+  description: string | null;
+  status: string;
+  seller_response: string | null;
+  created_at: string;
+}
 
 interface OrderItem {
   id: string;
