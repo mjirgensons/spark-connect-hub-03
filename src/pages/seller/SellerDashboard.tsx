@@ -140,7 +140,7 @@ const SellerDashboard = () => {
 
   const stats = [
     { label: "Products Listed", value: String(productCount), icon: Package },
-    { label: "Total Views", value: "—", icon: Eye },
+    { label: "Total Revenue", value: `$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: DollarSign },
     { label: "Active Orders", value: String(orderCount), icon: ShoppingCart },
     { label: "Pending RFQs", value: String(rfqCount), icon: FileText },
   ];
