@@ -159,6 +159,12 @@ const SellerOrders = () => {
   const [readyPickupDialog, setReadyPickupDialog] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
 
+  // Dispute state
+  const [disputes, setDisputes] = useState<Dispute[]>([]);
+  const [disputeViewId, setDisputeViewId] = useState<string | null>(null);
+  const [disputeResponse, setDisputeResponse] = useState("");
+  const [respondingDispute, setRespondingDispute] = useState(false);
+
   const fetchOrders = useCallback(async () => {
     if (!effectiveId) return;
     setLoading(true);
