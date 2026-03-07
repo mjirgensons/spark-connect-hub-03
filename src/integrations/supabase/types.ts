@@ -1006,8 +1006,11 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           currency: string
+          deadline_notifications_sent: Json
           delivered_at: string | null
+          delivery_check_sent_at: string | null
           delivery_confirmed_at: string | null
+          delivery_expected_by: string | null
           estimated_delivery: string | null
           funds_released_at: string | null
           guest_email: string | null
@@ -1054,8 +1057,11 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           currency?: string
+          deadline_notifications_sent?: Json
           delivered_at?: string | null
+          delivery_check_sent_at?: string | null
           delivery_confirmed_at?: string | null
+          delivery_expected_by?: string | null
           estimated_delivery?: string | null
           funds_released_at?: string | null
           guest_email?: string | null
@@ -1102,8 +1108,11 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           currency?: string
+          deadline_notifications_sent?: Json
           delivered_at?: string | null
+          delivery_check_sent_at?: string | null
           delivery_confirmed_at?: string | null
+          delivery_expected_by?: string | null
           estimated_delivery?: string | null
           funds_released_at?: string | null
           guest_email?: string | null
