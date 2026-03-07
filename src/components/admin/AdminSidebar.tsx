@@ -26,6 +26,7 @@ import {
   FlaskConical,
   Store,
   ClipboardCheck,
+  HeartPulse,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
