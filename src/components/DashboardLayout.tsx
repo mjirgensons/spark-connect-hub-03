@@ -21,6 +21,7 @@ import {
   X,
   LogOut,
   Store,
+  BookOpen,
 } from "lucide-react";
 
 type Role = "client" | "contractor" | "seller" | "builder";
