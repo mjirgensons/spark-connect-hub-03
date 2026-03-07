@@ -1,0 +1,1 @@
+INSERT INTO public.site_settings (key, value, description) VALUES ('order_status_webhook_url', '', 'n8n WF-15 webhook URL for order status change notifications') ON CONFLICT (key) DO NOTHING;

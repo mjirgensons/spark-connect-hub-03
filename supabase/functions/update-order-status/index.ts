@@ -224,6 +224,36 @@ Deno.serve(async (req) => {
     );
   }
 
+  // Fire-and-forget n8n webhook for order status change notifications
+  try {
+    const { data: webhookSetting } = await supabaseAdmin
+      .from("site_settings")
+      .select("value")
+      .eq("key", "order_status_webhook_url")
+      .single();
+
+    const webhookUrl = webhookSetting?.value;
+    if (webhookUrl) {
+      const webhookSecret = Deno.env.get("N8N_WEBHOOK_SECRET") || "";
+      fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-secret": webhookSecret,
+        },
+        body: JSON.stringify({
+          order_id,
+          old_status: currentStatus,
+          new_status: status,
+          tracking_number: body.tracking_number || null,
+          tracking_url: body.tracking_url || null,
+        }),
+      }).catch((err) => console.error("Webhook fire-and-forget error:", err));
+    }
+  } catch (err) {
+    console.error("Failed to read webhook URL from site_settings:", err);
+  }
+
   return new Response(
     JSON.stringify({ success: true, order_id }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
