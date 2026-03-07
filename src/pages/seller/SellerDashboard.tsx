@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DollarSign } from "lucide-react";
+import { DollarSign, CreditCard, ExternalLink, Loader2, CheckCircle2 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Package, ShoppingCart, FileText, PlusCircle, AlertTriangle, X } from "lucide-react";
+import { toast } from "sonner";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface TopProduct {
@@ -50,6 +51,79 @@ const SellerDashboard = () => {
   const [declinedCount, setDeclinedCount] = useState(0);
   const [dismissedBanner, setDismissedBanner] = useState(false);
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
+
+  // Stripe Connect state
+  const [stripeStatus, setStripeStatus] = useState<{
+    connected: boolean;
+    charges_enabled: boolean;
+    payouts_enabled: boolean;
+    onboarding_status: string;
+  } | null>(null);
+  const [stripeLoading, setStripeLoading] = useState(true);
+  const [connectingStripe, setConnectingStripe] = useState(false);
+
+  useEffect(() => {
+    const checkStripeStatus = async () => {
+      try {
+        const session = await supabase.auth.getSession();
+        const token = session.data.session?.access_token;
+        if (!token) return;
+
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-connect-status`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+            body: JSON.stringify({}),
+          }
+        );
+        const data = await res.json();
+        if (res.ok) setStripeStatus(data);
+      } catch (err) {
+        console.error("Failed to check Stripe status:", err);
+      } finally {
+        setStripeLoading(false);
+      }
+    };
+    checkStripeStatus();
+  }, []);
+
+  const handleConnectStripe = async () => {
+    setConnectingStripe(true);
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      if (!token) {
+        toast.error("Please sign in first.");
+        return;
+      }
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-connect-account`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({}),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to start Stripe setup");
+
+      window.location.href = data.url;
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong");
+    } finally {
+      setConnectingStripe(false);
+    }
+  };
 
   useEffect(() => {
     if (!sellerId) return;
@@ -94,8 +168,7 @@ const SellerDashboard = () => {
       );
       setTotalRevenue(calcRevenue);
 
-      // Pending RFQs — quote_requests doesn't have product_id directly,
-      // so we count quotes where status = 'new' linked to seller's products via quote_request_items
+      // Pending RFQs
       const { data: sellerProductIds } = await supabase
         .from("products")
         .select("id")
@@ -154,6 +227,74 @@ const SellerDashboard = () => {
   return (
     <div className="space-y-8">
       <Breadcrumbs items={[{ label: "Dashboard" }]} />
+
+      {/* Stripe Connect Status */}
+      {!stripeLoading && stripeStatus && (
+        <>
+          {stripeStatus.onboarding_status === "complete" && stripeStatus.charges_enabled && stripeStatus.payouts_enabled ? (
+            <Card className="border-2 border-green-300 bg-green-500/10 p-5" style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>
+              <div className="flex items-center gap-4">
+                <CheckCircle2 className="w-8 h-8 text-green-600 shrink-0" />
+                <div>
+                  <p className="font-bold text-green-800 dark:text-green-300">Stripe Connected</p>
+                  <p className="text-sm text-green-700 dark:text-green-400">Your account is set up to receive payouts from sales.</p>
+                </div>
+              </div>
+            </Card>
+          ) : stripeStatus.onboarding_status === "under_review" ? (
+            <Card className="border-2 border-amber-300 bg-amber-500/10 p-5" style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <Loader2 className="w-8 h-8 text-amber-600 shrink-0 animate-spin" />
+                  <div>
+                    <p className="font-bold text-amber-800 dark:text-amber-300">Stripe Under Review</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-400">Your account details have been submitted and are being reviewed by Stripe.</p>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" className="border-amber-300 shrink-0" onClick={handleConnectStripe}>
+                  <ExternalLink className="w-4 h-4 mr-1" /> Update Info
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <Card className="border-2 border-foreground p-6" style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-primary" />
+                  <p className="font-bold text-lg">Set Up Payouts</p>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Connect your bank account through Stripe to receive payouts when customers purchase your products. This takes about 5 minutes.
+                </p>
+                {stripeStatus.connected && !stripeStatus.charges_enabled && (
+                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span className="text-sm">You started setup but haven't completed it yet.</span>
+                  </div>
+                )}
+                <Button onClick={handleConnectStripe} disabled={connectingStripe}>
+                  {connectingStripe ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : stripeStatus.connected ? (
+                    <>
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Complete Stripe Setup
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Connect with Stripe
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Card>
+          )}
+        </>
+      )}
 
       {/* Declined products alert banner */}
       {declinedCount > 0 && !dismissedBanner && (
