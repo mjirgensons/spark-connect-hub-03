@@ -724,6 +724,71 @@ const SellerOrders = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Dispute View/Respond Dialog */}
+      <Dialog open={!!disputeViewId} onOpenChange={(o) => { if (!o) setDisputeViewId(null); }}>
+        <DialogContent>
+          {(() => {
+            const dispute = disputeViewId ? getAnyDisputeForOrder(disputeViewId) : null;
+            if (!dispute) return null;
+            const typeLabels: Record<string, string> = {
+              not_received: "Not received",
+              wrong_item: "Wrong item",
+              damaged: "Damaged",
+              other: "Other",
+            };
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle>Buyer Dispute</DialogTitle>
+                  <DialogDescription>
+                    Reported on {format(new Date(dispute.created_at), "MMM d, yyyy h:mm a")}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs font-bold text-muted-foreground uppercase">Issue Type</p>
+                    <p className="text-sm font-medium">{typeLabels[dispute.dispute_type] || dispute.dispute_type}</p>
+                  </div>
+                  {dispute.description && (
+                    <div>
+                      <p className="text-xs font-bold text-muted-foreground uppercase">Description</p>
+                      <p className="text-sm">{dispute.description}</p>
+                    </div>
+                  )}
+                  {dispute.seller_response ? (
+                    <div>
+                      <p className="text-xs font-bold text-muted-foreground uppercase">Your Response</p>
+                      <p className="text-sm">{dispute.seller_response}</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <Label>Your Response</Label>
+                      <Textarea
+                        value={disputeResponse}
+                        onChange={(e) => setDisputeResponse(e.target.value)}
+                        placeholder="Respond to the buyer's issue..."
+                        rows={3}
+                      />
+                    </div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setDisputeViewId(null)}>Close</Button>
+                  {!dispute.seller_response && (
+                    <Button
+                      disabled={respondingDispute || !disputeResponse.trim()}
+                      onClick={handleDisputeRespond}
+                    >
+                      Submit Response
+                    </Button>
+                  )}
+                </DialogFooter>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
