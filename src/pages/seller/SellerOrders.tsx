@@ -211,6 +211,49 @@ const SellerOrders = () => {
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
+  // Fetch disputes for seller's orders
+  const fetchDisputes = useCallback(async () => {
+    if (!effectiveId) return;
+    const { data } = await supabase
+      .from("order_disputes")
+      .select("id, order_id, dispute_type, description, status, seller_response, created_at")
+      .in("status", ["open", "seller_responded", "admin_reviewing"]);
+    if (data) setDisputes(data as Dispute[]);
+  }, [effectiveId]);
+
+  useEffect(() => { fetchDisputes(); }, [fetchDisputes]);
+
+  const getDisputeForOrder = (orderId: string) =>
+    disputes.find((d) => d.order_id === orderId && d.status === "open");
+
+  const getAnyDisputeForOrder = (orderId: string) =>
+    disputes.find((d) => d.order_id === orderId);
+
+  const handleDisputeRespond = async () => {
+    const dispute = disputeViewId ? getAnyDisputeForOrder(disputeViewId) : null;
+    if (!dispute || !disputeResponse.trim()) return;
+    setRespondingDispute(true);
+    try {
+      const { error } = await supabase
+        .from("order_disputes")
+        .update({
+          seller_response: disputeResponse.trim(),
+          seller_responded_at: new Date().toISOString(),
+          status: "seller_responded",
+        })
+        .eq("id", dispute.id);
+      if (error) throw error;
+      toast({ title: "Response submitted" });
+      setDisputeViewId(null);
+      setDisputeResponse("");
+      fetchDisputes();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setRespondingDispute(false);
+    }
+  };
+
   const filtered = useMemo(() => {
     let list = grouped;
     if (tab !== "all") list = list.filter((g) => g.order.status === tab);
