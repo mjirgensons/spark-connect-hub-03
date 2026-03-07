@@ -96,6 +96,9 @@ Deno.serve(async (req) => {
       unit_price: item.unit_price,
       total_price: item.total_price,
       product_id: item.product_id,
+      delivery_option: (item as any).products?.delivery_option ?? null,
+      delivery_prep_days: (item as any).products?.delivery_prep_days ?? null,
+      pickup_prep_days: (item as any).products?.pickup_prep_days ?? null,
     });
   }
 

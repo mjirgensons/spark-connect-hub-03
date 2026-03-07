@@ -372,13 +372,41 @@ const SellerOrders = () => {
                                       <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">{item.product_name}</p>
                                         {item.product_sku && <p className="text-xs text-muted-foreground">SKU: {item.product_sku}</p>}
-                                        {item.delivery_option && (
-                                          <p className="text-xs text-muted-foreground">
-                                            {item.delivery_option === "delivery" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)}) — prep ${item.delivery_prep_days ?? "—"} days`}
-                                            {item.delivery_option === "pickup_only" && `Pickup only${item.pickup_city ? ` — ${item.pickup_city}, ${item.pickup_province}` : ""} — prep ${item.pickup_prep_days ?? "—"} days`}
-                                            {item.delivery_option === "both" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)}) or Pickup${item.pickup_city ? ` (${item.pickup_city})` : ""}`}
-                                          </p>
-                                        )}
+                                        {item.delivery_option && (() => {
+                                          const prepDays = item.delivery_option === "pickup_only"
+                                            ? item.pickup_prep_days
+                                            : item.delivery_prep_days;
+                                          const countdown = getPrepCountdown(g.order.created_at, prepDays);
+                                          const isUrgent = countdown && countdown.daysLeft <= 1;
+                                          const isWarning = countdown && countdown.daysLeft <= 3 && countdown.daysLeft > 1;
+
+                                          return (
+                                            <div className="text-xs text-muted-foreground space-y-1">
+                                              <p>
+                                                {item.delivery_option === "delivery" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)})`}
+                                                {item.delivery_option === "pickup_only" && `Pickup only${item.pickup_city ? ` — ${item.pickup_city}, ${item.pickup_province}` : ""}`}
+                                                {item.delivery_option === "both" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)}) or Pickup${item.pickup_city ? ` (${item.pickup_city})` : ""}`}
+                                              </p>
+                                              {countdown && (g.order.status === "confirmed" || g.order.status === "pending") && (
+                                                <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+                                                  isUrgent
+                                                    ? "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
+                                                    : isWarning
+                                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                                    : "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                                                }`}>
+                                                  {isUrgent && <AlertTriangle className="h-3 w-3" />}
+                                                  {countdown.daysLeft <= 0
+                                                    ? "Prep overdue!"
+                                                    : `${countdown.daysLeft} day${countdown.daysLeft !== 1 ? "s" : ""} left to prepare`}
+                                                  <span className="text-[10px] opacity-70 ml-1">
+                                                    (by {format(countdown.deadline, "MMM d")})
+                                                  </span>
+                                                </div>
+                                              )}
+                                            </div>
+                                          );
+                                        })()}
                                       </div>
                                       <div className="text-right text-sm">
                                         <p>{item.quantity} × ${item.unit_price.toFixed(2)}</p>
