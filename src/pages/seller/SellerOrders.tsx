@@ -211,6 +211,17 @@ const SellerOrders = () => {
     }
   };
 
+  const getPrepCountdown = (orderCreatedAt: string, prepDays: number | null) => {
+    if (!prepDays) return null;
+    const orderDate = new Date(orderCreatedAt);
+    const deadlineDate = new Date(orderDate);
+    deadlineDate.setDate(deadlineDate.getDate() + prepDays);
+    const now = new Date();
+    const msLeft = deadlineDate.getTime() - now.getTime();
+    const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+    return { daysLeft, deadline: deadlineDate };
+  };
+
   const SortHeader = ({ label, sk, className }: { label: string; sk: SortKey; className?: string }) => (
     <TableHead className={className}>
       <button className="flex items-center gap-1 font-medium" onClick={() => toggleSort(sk)}>
