@@ -44,6 +44,7 @@ const AccountWishlist = () => {
         price: product.price_discounted_usd,
         dimensions: `${product.width_mm} × ${product.height_mm} × ${product.depth_mm} mm`,
         maxStock: product.stock_level,
+        sellerId: product.seller_id || undefined,
       },
     });
     toast.success("Added to cart");
