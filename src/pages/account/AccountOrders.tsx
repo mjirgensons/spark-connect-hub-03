@@ -11,6 +11,7 @@ import { ChevronDown, ChevronUp, ExternalLink, Loader2, PackageCheck, ShoppingBa
 import { OrderCardSkeleton } from "@/components/ui/order-card-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import ReportIssueDialog from "@/components/ReportIssueDialog";
 import { format } from "date-fns";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "sonner";
