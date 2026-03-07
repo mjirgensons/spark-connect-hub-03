@@ -32,7 +32,7 @@ type CartAction =
 
 const recalc = (items: CartItem[]): CartState => ({
   items,
-  itemCount: items.reduce((s, i) => s + i.quantity, 0),
+  itemCount: items.filter((i) => i.itemType === 'main' || (!i.itemType && !i.productId.includes("_option_"))).length,
   subtotal: items.reduce((s, i) => s + i.price * i.quantity, 0),
 });
 
