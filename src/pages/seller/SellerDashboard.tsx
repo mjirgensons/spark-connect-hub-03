@@ -340,6 +340,11 @@ const SellerDashboard = () => {
         <Button variant="outline" className="border-2 border-foreground" asChild>
           <Link to={adminViewId ? `/seller/quotes?adminView=${adminViewId}` : "/seller/quotes"}>View Quotes</Link>
         </Button>
+        <Button variant="outline" className="border-2 border-foreground" asChild>
+          <Link to={adminViewId ? `/seller/payouts?adminView=${adminViewId}` : "/seller/payouts"}>
+            <DollarSign size={16} className="mr-2" /> View Payouts
+          </Link>
+        </Button>
       </div>
 
       <Card className="border-2 border-foreground p-8" style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>
