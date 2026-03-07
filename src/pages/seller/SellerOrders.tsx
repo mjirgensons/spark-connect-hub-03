@@ -310,7 +310,17 @@ const SellerOrders = () => {
                                   {g.order.shipping_phone && <p>Phone: {g.order.shipping_phone}</p>}
                                 </div>
 
-                                {g.order.notes && (
+                                <div className="mt-3">
+                                  <h4 className="font-semibold text-sm flex items-center gap-1">
+                                    <Truck className="h-4 w-4" /> Fulfillment
+                                  </h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    {g.items.some(i => i.delivery_option === 'pickup_only')
+                                      ? 'Customer will pick up this order'
+                                      : 'Delivery to shipping address above'}
+                                  </p>
+                                </div>
+
                                   <div className="mt-3">
                                     <h4 className="font-semibold text-sm">Notes</h4>
                                     <p className="text-sm text-muted-foreground">{g.order.notes}</p>
