@@ -1,0 +1,132 @@
+{
+  "generated": "2026-03-07",
+  "project": "FitMatch.ca",
+  "base_url": "https://uiflubaywbpkcgwnedzp.supabase.co/functions/v1",
+  "edge_functions": [
+    {
+      "name": "check-consent",
+      "method": "POST",
+      "purpose": "Check user email consent status for CASL compliance",
+      "auth": "anon key"
+    },
+    {
+      "name": "create-checkout-session",
+      "method": "POST",
+      "purpose": "Create Stripe Checkout session for cart items",
+      "auth": "anon key",
+      "secrets": ["STRIPE_SECRET_KEY"]
+    },
+    {
+      "name": "create-order",
+      "method": "POST",
+      "purpose": "Create order record in database",
+      "auth": "anon key"
+    },
+    {
+      "name": "get-order-confirmation",
+      "method": "POST",
+      "purpose": "Fetch order details for confirmation page (with polling for Stripe webhook)",
+      "auth": "anon key"
+    },
+    {
+      "name": "get-wf9-order",
+      "method": "POST",
+      "purpose": "Fetch order data for WF-9 Stripe→email workflow (n8n)",
+      "auth": "service role"
+    },
+    {
+      "name": "get-wf9-order-items",
+      "method": "POST",
+      "purpose": "Fetch order items for WF-9 email workflow",
+      "auth": "service role"
+    },
+    {
+      "name": "log-communication",
+      "method": "POST",
+      "purpose": "Log outbound/inbound email to communication_logs table",
+      "auth": "service role"
+    },
+    {
+      "name": "log-email-consent",
+      "method": "POST",
+      "purpose": "Record email consent per CASL to email_consent_log",
+      "auth": "anon key"
+    },
+    {
+      "name": "n8n-proxy",
+      "method": "POST",
+      "purpose": "Proxy requests to n8n webhooks (avoids CORS, hides n8n URL)",
+      "auth": "anon key",
+      "secrets": ["N8N_WEBHOOK_URL", "N8N_WEBHOOK_SECRET"]
+    },
+    {
+      "name": "notify-seller-approval",
+      "method": "POST",
+      "purpose": "Notify n8n when seller is approved (triggers approval email)",
+      "auth": "anon key",
+      "external_endpoint": "https://sundeco.app.n8n.cloud/webhook/seller-approval"
+    },
+    {
+      "name": "notify-seller-registration",
+      "method": "POST",
+      "purpose": "Notify n8n when new seller registers (triggers welcome email)",
+      "auth": "anon key",
+      "external_endpoint": "https://sundeco.app.n8n.cloud/webhook/seller-registration"
+    },
+    {
+      "name": "stripe-webhook",
+      "method": "POST",
+      "purpose": "Handle Stripe webhook events (checkout.session.completed, etc.)",
+      "auth": "none (Stripe signature verification)",
+      "secrets": ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"]
+    },
+    {
+      "name": "stripe-webhook-test",
+      "method": "POST",
+      "purpose": "Test Stripe webhook processing with mock payloads",
+      "auth": "anon key"
+    },
+    {
+      "name": "submit-cabinet-match",
+      "method": "POST",
+      "purpose": "Submit cabinet dimension match request (client→product matching)",
+      "auth": "anon key"
+    },
+    {
+      "name": "test-integration",
+      "method": "POST",
+      "purpose": "Test third-party integration connectivity (health check)",
+      "auth": "anon key"
+    },
+    {
+      "name": "update-communication-status",
+      "method": "POST",
+      "purpose": "Update email delivery status from Mailgun events (WF-11)",
+      "auth": "service role"
+    },
+    {
+      "name": "simulate-inbound-email",
+      "method": "POST",
+      "purpose": "Simulate Mailgun inbound email for WF-10 testing",
+      "auth": "anon key"
+    },
+    {
+      "name": "create-wf10-test-user",
+      "method": "POST",
+      "purpose": "Create test user for WF-10 email reply testing",
+      "auth": "anon key"
+    },
+    {
+      "name": "seed-wf10-test-data",
+      "method": "POST",
+      "purpose": "Seed test data for WF-10 inbound email testing",
+      "auth": "anon key"
+    }
+  ],
+  "email_workflows": {
+    "WF-8": "Email Dispatcher — sends outbound emails via Mailgun, logs to communication_logs",
+    "WF-9": "Stripe Email Router — Stripe webhook events → email notifications",
+    "WF-10": "Inbound Email Handler — processes inbound customer replies via Mailgun",
+    "WF-11": "Mailgun Event Receiver — processes delivery/bounce/open/click events"
+  }
+}
