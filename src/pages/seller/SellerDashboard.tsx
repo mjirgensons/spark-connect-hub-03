@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DollarSign, CreditCard, ExternalLink, Loader2, CheckCircle2, Bot, CheckCircle } from "lucide-react";
+import { DollarSign, CreditCard, ExternalLink, Loader2, CheckCircle2 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,10 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { Package, ShoppingCart, FileText, PlusCircle, AlertTriangle, X } from "lucide-react";
 import SellerHealthCard from "@/components/seller/SellerHealthCard";
+import SellerAIChatbotCard from "@/components/seller/SellerAIChatbotCard";
 import { toast } from "sonner";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
