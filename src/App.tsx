@@ -71,6 +71,7 @@ const SellerOrders = lazy(() => import("./pages/seller/SellerOrders"));
 const SellerAnalytics = lazy(() => import("./pages/seller/SellerAnalytics"));
 const SellerQuestions = lazy(() => import("./pages/seller/SellerQuestions"));
 const SellerMessages = lazy(() => import("./pages/seller/SellerMessages"));
+const SellerPayouts = lazy(() => import("./pages/seller/SellerPayouts"));
 
 // Lazy-loaded: Messaging
 const Messages = lazy(() => import("./pages/Messages"));
