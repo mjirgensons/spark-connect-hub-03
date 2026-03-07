@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
   // Get order items joined with products to get seller_id
   const { data: items, error: itemsError } = await supabase
     .from("order_items")
-    .select("product_name, quantity, unit_price, total_price, product_id, products(seller_id)")
+    .select("product_name, quantity, unit_price, total_price, product_id, products(seller_id, delivery_option, delivery_prep_days, pickup_prep_days)")
     .eq("order_id", order_id);
 
   if (itemsError) {
