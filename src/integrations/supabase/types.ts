@@ -1606,6 +1606,7 @@ export type Database = {
           pickup_postal_code: string | null
           pickup_prep_days: number | null
           pickup_province: string | null
+          pinecone_synced: boolean | null
           previous_rejection_reason: string | null
           price_discounted_usd: number
           price_retail_usd: number
@@ -1682,6 +1683,7 @@ export type Database = {
           pickup_postal_code?: string | null
           pickup_prep_days?: number | null
           pickup_province?: string | null
+          pinecone_synced?: boolean | null
           previous_rejection_reason?: string | null
           price_discounted_usd: number
           price_retail_usd: number
@@ -1758,6 +1760,7 @@ export type Database = {
           pickup_postal_code?: string | null
           pickup_prep_days?: number | null
           pickup_province?: string | null
+          pinecone_synced?: boolean | null
           previous_rejection_reason?: string | null
           price_discounted_usd?: number
           price_retail_usd?: number
