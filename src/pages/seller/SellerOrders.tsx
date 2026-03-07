@@ -30,6 +30,13 @@ interface OrderItem {
   quantity: number;
   unit_price: number;
   total_price: number;
+  delivery_option: string | null;
+  delivery_price: number | null;
+  delivery_prep_days: number | null;
+  pickup_available: boolean | null;
+  pickup_prep_days: number | null;
+  pickup_city: string | null;
+  pickup_province: string | null;
 }
 
 interface Order {
@@ -107,7 +114,7 @@ const SellerOrders = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("order_items")
-      .select("id, product_name, product_sku, product_image, quantity, unit_price, total_price, order_id, orders!inner(id, order_number, created_at, status, payment_status, shipping_name, shipping_address_line_1, shipping_address_line_2, shipping_city, shipping_province, shipping_postal_code, shipping_country, shipping_phone, tracking_number, tracking_url, notes, shipped_at, delivered_at, cancelled_at, cancellation_reason), products!inner(seller_id)")
+      .select("id, product_name, product_sku, product_image, quantity, unit_price, total_price, order_id, orders!inner(id, order_number, created_at, status, payment_status, shipping_name, shipping_address_line_1, shipping_address_line_2, shipping_city, shipping_province, shipping_postal_code, shipping_country, shipping_phone, tracking_number, tracking_url, notes, shipped_at, delivered_at, cancelled_at, cancellation_reason), products!inner(seller_id, delivery_option, delivery_price, delivery_prep_days, pickup_available, pickup_prep_days, pickup_city, pickup_province)")
       .eq("products.seller_id", effectiveId);
 
     if (error) {
@@ -123,6 +130,7 @@ const SellerOrders = () => {
         map.set(o.id, { order: o, items: [], sellerTotal: 0 });
       }
       const g = map.get(o.id)!;
+      const prod = (row as any).products || {};
       g.items.push({
         id: row.id,
         product_name: row.product_name,
@@ -131,6 +139,13 @@ const SellerOrders = () => {
         quantity: row.quantity,
         unit_price: row.unit_price,
         total_price: row.total_price,
+        delivery_option: prod.delivery_option ?? null,
+        delivery_price: prod.delivery_price ?? null,
+        delivery_prep_days: prod.delivery_prep_days ?? null,
+        pickup_available: prod.pickup_available ?? null,
+        pickup_prep_days: prod.pickup_prep_days ?? null,
+        pickup_city: prod.pickup_city ?? null,
+        pickup_province: prod.pickup_province ?? null,
       });
       g.sellerTotal += row.unit_price * row.quantity;
     }
@@ -169,15 +184,24 @@ const SellerOrders = () => {
 
   const updateStatus = async (orderId: string, updates: Record<string, any>) => {
     setUpdating(true);
-    const { error } = await supabase.from("orders").update(updates).eq("id", orderId);
-    setUpdating(false);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      const res = await supabase.functions.invoke("update-order-status", {
+        body: { order_id: orderId, ...updates },
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || "Update failed");
+      }
       toast({ title: "Order updated" });
       setShipDialog(null); setDeliverDialog(null); setCancelDialog(null);
       setTrackNum(""); setTrackUrl(""); setCancelReason("");
       await fetchOrders();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -320,6 +344,13 @@ const SellerOrders = () => {
                                       <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">{item.product_name}</p>
                                         {item.product_sku && <p className="text-xs text-muted-foreground">SKU: {item.product_sku}</p>}
+                                        {item.delivery_option && (
+                                          <p className="text-xs text-muted-foreground">
+                                            {item.delivery_option === "delivery" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)}) — prep ${item.delivery_prep_days ?? "—"} days`}
+                                            {item.delivery_option === "pickup_only" && `Pickup only${item.pickup_city ? ` — ${item.pickup_city}, ${item.pickup_province}` : ""} — prep ${item.pickup_prep_days ?? "—"} days`}
+                                            {item.delivery_option === "both" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)}) or Pickup${item.pickup_city ? ` (${item.pickup_city})` : ""}`}
+                                          </p>
+                                        )}
                                       </div>
                                       <div className="text-right text-sm">
                                         <p>{item.quantity} × ${item.unit_price.toFixed(2)}</p>

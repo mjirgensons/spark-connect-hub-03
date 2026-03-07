@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DollarSign } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, Eye, ShoppingCart, FileText, PlusCircle, AlertTriangle, X } from "lucide-react";
+import { Package, ShoppingCart, FileText, PlusCircle, AlertTriangle, X } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface TopProduct {
@@ -48,6 +49,7 @@ const SellerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [declinedCount, setDeclinedCount] = useState(0);
   const [dismissedBanner, setDismissedBanner] = useState(false);
+  const [totalRevenue, setTotalRevenue] = useState<number>(0);
 
   useEffect(() => {
     if (!sellerId) return;
@@ -72,13 +74,23 @@ const SellerDashboard = () => {
         .is("deleted_at", null);
       setProductCount(pCount ?? 0);
 
-      // Active orders
-      const { count: oCount } = await supabase
-        .from("orders")
-        .select("id", { count: "exact", head: true })
-        .eq("seller_id", sellerId)
-        .in("status", ["pending", "confirmed"]);
-      setOrderCount(oCount ?? 0);
+      // Active orders — join through order_items → products to find seller's orders
+      const { data: sellerOrderItems } = await supabase
+        .from("order_items")
+        .select("order_id, unit_price, quantity, orders!inner(id, status), products!inner(seller_id)")
+        .eq("products.seller_id", sellerId);
+
+      const activeOrderIds = new Set<string>();
+      let revenue = 0;
+      for (const row of sellerOrderItems || []) {
+        const order = (row as any).orders;
+        if (order && ["pending", "confirmed"].includes(order.status)) {
+          activeOrderIds.add(row.order_id);
+        }
+        revenue += (row.unit_price ?? 0) * (row.quantity ?? 0);
+      }
+      setOrderCount(activeOrderIds.size);
+      setTotalRevenue(revenue);
 
       // Pending RFQs — quote_requests doesn't have product_id directly,
       // so we count quotes where status = 'new' linked to seller's products via quote_request_items
@@ -128,7 +140,7 @@ const SellerDashboard = () => {
 
   const stats = [
     { label: "Products Listed", value: String(productCount), icon: Package },
-    { label: "Total Views", value: "—", icon: Eye },
+    { label: "Total Revenue", value: `$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: DollarSign },
     { label: "Active Orders", value: String(orderCount), icon: ShoppingCart },
     { label: "Pending RFQs", value: String(rfqCount), icon: FileText },
   ];
