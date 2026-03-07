@@ -137,8 +137,10 @@ Deno.serve(async (req) => {
     // ── Handle events ──
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      const orderId = session.metadata?.order_id;
-      if (orderId) {
+      const orderIdsStr = session.metadata?.order_ids || session.metadata?.order_id || '';
+      const allOrderIds = orderIdsStr.split(',').filter(Boolean);
+
+      for (const oid of allOrderIds) {
         await supabase
           .from("orders")
           .update({
@@ -146,20 +148,43 @@ Deno.serve(async (req) => {
             stripe_checkout_session_id: session.id,
             stripe_payment_intent_id: (session.payment_intent as string) || null,
             paid_at: new Date().toISOString(),
-            status: "confirmed",
+            status: "paid",
           })
-          .eq("id", orderId);
+          .eq("id", oid);
+
+        // Compute deadline timestamps based on max delivery_prep_days
+        const { data: items } = await supabase
+          .from("order_items")
+          .select("id, products(delivery_prep_days)")
+          .eq("order_id", oid);
+
+        const maxPrep = Math.max(
+          ...(items || []).map((i: any) => i.products?.delivery_prep_days || 7),
+          7
+        );
+        const now = new Date();
+        const ackBy = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+        const shipBy = new Date(now.getTime() + maxPrep * 24 * 60 * 60 * 1000).toISOString();
+
+        await supabase
+          .from("orders")
+          .update({ must_acknowledge_by: ackBy, must_ship_by: shipBy })
+          .eq("id", oid);
       }
+
       await forwardToWf9("checkout.session.completed");
     } else if (event.type === "checkout.session.expired") {
       const session = event.data.object as Stripe.Checkout.Session;
-      const orderId = session.metadata?.order_id;
-      if (orderId) {
+      const orderIdsStr = session.metadata?.order_ids || session.metadata?.order_id || '';
+      const allOrderIds = orderIdsStr.split(',').filter(Boolean);
+
+      for (const oid of allOrderIds) {
         await supabase
           .from("orders")
           .update({ payment_status: "failed" })
-          .eq("id", orderId);
+          .eq("id", oid);
       }
+
       await forwardToWf9("checkout.session.expired");
     } else if (event.type === "charge.refunded") {
       const charge = event.data.object as Stripe.Charge;

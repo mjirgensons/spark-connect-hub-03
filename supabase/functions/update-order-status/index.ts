@@ -162,6 +162,29 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Fetch current order status for transition validation
+  const { data: currentOrder, error: currentOrderErr } = await supabaseAdmin
+    .from("orders")
+    .select("status")
+    .eq("id", order_id)
+    .single();
+
+  if (currentOrderErr || !currentOrder) {
+    return new Response(
+      JSON.stringify({ error: "Order not found" }),
+      { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  const currentStatus = currentOrder.status;
+  const allowed = TRANSITIONS[currentStatus] || [];
+  if (!allowed.includes(status)) {
+    return new Response(
+      JSON.stringify({ error: `Invalid transition from ${currentStatus} to ${status}` }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   // Build update payload
   const updatePayload: Record<string, any> = { status };
   if (body.tracking_number) updatePayload.tracking_number = body.tracking_number;
@@ -170,6 +193,18 @@ Deno.serve(async (req) => {
   if (body.shipped_at) updatePayload.shipped_at = body.shipped_at;
   if (body.delivered_at) updatePayload.delivered_at = body.delivered_at;
   if (body.cancelled_at) updatePayload.cancelled_at = body.cancelled_at;
+
+  // Preparing: set acknowledged_at + preparing_at
+  if (status === "preparing") {
+    updatePayload.acknowledged_at = new Date().toISOString();
+    updatePayload.preparing_at = new Date().toISOString();
+  }
+
+  // Shipped: default shipped_at
+  if (status === "shipped" && !body.shipped_at) {
+    updatePayload.shipped_at = new Date().toISOString();
+  }
+
   if (status === "delivered" && !body.delivered_at) {
     updatePayload.delivered_at = new Date().toISOString();
   }
