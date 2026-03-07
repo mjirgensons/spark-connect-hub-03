@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Package, ShoppingCart, FileText, PlusCircle, AlertTriangle, X } from "lucide-react";
+import SellerHealthCard from "@/components/seller/SellerHealthCard";
 import { toast } from "sonner";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
@@ -332,6 +333,8 @@ const SellerDashboard = () => {
           </Card>
         ))}
       </div>
+
+      {sellerId && <SellerHealthCard sellerId={sellerId} />}
 
       <div className="flex flex-wrap gap-3">
         <Button asChild>
