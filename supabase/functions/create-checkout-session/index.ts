@@ -103,10 +103,14 @@ Deno.serve(async (req) => {
     const primaryOrder = orders[0];
     const customerEmail = primaryOrder.guest_email || undefined;
 
+    // Generate transfer group for Connect transfers
+    const transferGroup = `txg_${primaryOrder.id.slice(0, 8)}_${Date.now()}`;
+
     const orderMeta = {
       order_ids: order_ids.join(","),
       order_count: String(order_ids.length),
       primary_order_id: primaryOrder.id,
+      transfer_group: transferGroup,
     };
 
     const session = await stripe.checkout.sessions.create({
@@ -117,17 +121,21 @@ Deno.serve(async (req) => {
       metadata: orderMeta,
       payment_intent_data: {
         metadata: orderMeta,
+        transfer_group: transferGroup,
       },
       automatic_tax: { enabled: false },
       success_url: `${siteUrl}/order-confirmation/${primaryOrder.id}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/checkout?cancelled=true`,
     });
 
-    // Update all orders with the shared Stripe session ID
+    // Update all orders with the shared Stripe session ID and transfer group
     for (const oid of order_ids) {
       await supabase
         .from("orders")
-        .update({ stripe_checkout_session_id: session.id })
+        .update({
+          stripe_checkout_session_id: session.id,
+          stripe_transfer_group: transferGroup,
+        })
         .eq("id", oid);
     }
 
