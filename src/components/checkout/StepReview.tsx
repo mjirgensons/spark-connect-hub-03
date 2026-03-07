@@ -36,57 +36,94 @@ const StepReview = () => {
     setPlacing(true);
 
     try {
-      const orderPayload = {
-        user_id: user?.id ?? null,
-        guest_email: user ? null : info.email,
-        subtotal,
-        shipping_cost: deliveryTotal,
-        tax_rate: 0.13,
-        tax_amount: tax,
-        total,
-        shipping_name: info.fullName,
-        shipping_address_line_1: info.addressLine1,
-        shipping_address_line_2: info.addressLine2 || null,
-        shipping_city: info.city,
-        shipping_province: info.province,
-        shipping_postal_code: info.postalCode,
-        shipping_phone: info.phone || null,
-        shipping_method: "seller_defined",
-        payment_status: "unpaid",
-        status: "pending",
-        order_number: "placeholder",
-      };
+      // --- Group items by seller ---
+      const sellerGroups = new Map<string, typeof items>();
+      for (const item of items) {
+        let sellerId: string;
+        if (item.productId.includes("_option_")) {
+          const parentId = item.productId.split("_option_")[0];
+          const parent = items.find((i) => i.productId === parentId);
+          sellerId = parent?.sellerId || "no_seller";
+        } else {
+          sellerId = item.sellerId || "no_seller";
+        }
+        if (!sellerGroups.has(sellerId)) sellerGroups.set(sellerId, []);
+        sellerGroups.get(sellerId)!.push(item);
+      }
 
-      const orderItems = items.map((item) => ({
-        product_id: isUuid(item.productId) ? item.productId : null,
-        product_name: item.name,
-        product_sku: null as string | null,
-        product_image: item.image,
-        quantity: item.quantity,
-        unit_price: item.price,
-        total_price: item.price * item.quantity,
-      }));
+      // --- Build per-seller order payloads ---
+      const ordersPayload = Array.from(sellerGroups.entries()).map(
+        ([sellerId, groupItems]) => {
+          const groupSubtotal = groupItems.reduce(
+            (sum, i) => sum + i.price * i.quantity,
+            0
+          );
+          const groupDelivery = groupItems.reduce((sum, i) => {
+            if (i.deliveryChoice === "delivery" && i.deliveryPrice) {
+              return sum + i.deliveryPrice * i.quantity;
+            }
+            return sum;
+          }, 0);
+          const groupTax =
+            Math.round((groupSubtotal + groupDelivery) * 0.13 * 100) / 100;
+          const groupTotal =
+            Math.round((groupSubtotal + groupDelivery + groupTax) * 100) / 100;
 
-      const { data: createdOrder, error: createOrderErr } = await supabase.functions.invoke(
-        "create-order",
-        {
-          body: {
-            order: orderPayload,
-            items: orderItems,
-          },
+          const orderPayload = {
+            user_id: user?.id ?? null,
+            guest_email: user ? null : info.email,
+            subtotal: groupSubtotal,
+            shipping_cost: groupDelivery,
+            tax_rate: 0.13,
+            tax_amount: groupTax,
+            total: groupTotal,
+            shipping_name: info.fullName,
+            shipping_address_line_1: info.addressLine1,
+            shipping_address_line_2: info.addressLine2 || null,
+            shipping_city: info.city,
+            shipping_province: info.province,
+            shipping_postal_code: info.postalCode,
+            shipping_phone: info.phone || null,
+            shipping_method: "seller_defined",
+            payment_status: "unpaid",
+            status: "pending",
+            order_number: "placeholder",
+            seller_id: sellerId === "no_seller" ? null : sellerId,
+          };
+
+          const orderItems = groupItems.map((item) => ({
+            product_id: isUuid(item.productId) ? item.productId : null,
+            product_name: item.name,
+            product_sku: null as string | null,
+            product_image: item.image,
+            quantity: item.quantity,
+            unit_price: item.price,
+            total_price: item.price * item.quantity,
+          }));
+
+          return { order: orderPayload, items: orderItems };
         }
       );
 
-      if (createOrderErr || !createdOrder?.order_id) {
-        const createErrMsg =
-          createdOrder?.error || createOrderErr?.message || "Failed to create order";
-        throw new Error(createErrMsg);
+      // --- Create all orders in one call ---
+      const { data: createResult, error: createOrderErr } =
+        await supabase.functions.invoke("create-order", {
+          body: { orders: ordersPayload },
+        });
+
+      if (createOrderErr || !createResult?.orders?.length) {
+        const msg =
+          createResult?.error ||
+          createOrderErr?.message ||
+          "Failed to create orders";
+        throw new Error(msg);
       }
 
-      const order = {
-        id: createdOrder.order_id as string,
-        order_number: createdOrder.order_number as string,
-      };
+      const createdOrders = createResult.orders as Array<{
+        order_id: string;
+        order_number: string;
+        seller_id: string | null;
+      }>;
 
       // Save address if requested
       if (info.saveAddress && user) {
@@ -103,12 +140,12 @@ const StepReview = () => {
         });
       }
 
-      // Webhook (non-blocking)
+      // Webhook (non-blocking) — send all order IDs
       dispatchWebhook({
         eventType: "order.created",
         data: {
-          order_id: order.id,
-          order_number: order.order_number,
+          order_ids: createdOrders.map((o) => o.order_id),
+          order_numbers: createdOrders.map((o) => o.order_number),
           email: info.email,
           total,
           items: items.map((i) => ({
@@ -119,11 +156,12 @@ const StepReview = () => {
         },
       });
 
-      // Stripe checkout session
-      const { data: sessionData, error: sessionErr } = await supabase.functions.invoke(
-        "create-checkout-session",
-        { body: { order_id: order.id } }
-      );
+      // --- Single Stripe session for all orders ---
+      const orderIds = createdOrders.map((o) => o.order_id);
+      const { data: sessionData, error: sessionErr } =
+        await supabase.functions.invoke("create-checkout-session", {
+          body: { order_ids: orderIds },
+        });
 
       if (sessionErr || !sessionData?.url) {
         const msg = sessionData?.error || "Could not create payment session.";

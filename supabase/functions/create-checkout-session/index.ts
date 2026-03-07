@@ -13,8 +13,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { order_id } = await req.json();
-    if (!order_id) throw new Error("order_id is required");
+    const { order_ids } = await req.json();
+    if (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0) {
+      throw new Error("order_ids array is required");
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -43,27 +45,26 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch order
-    const { data: order, error: orderErr } = await supabase
+    // Fetch all orders
+    const { data: orders, error: ordersErr } = await supabase
       .from("orders")
       .select("*")
-      .eq("id", order_id)
-      .single();
+      .in("id", order_ids);
 
-    if (orderErr || !order) {
+    if (ordersErr || !orders?.length) {
       return new Response(
-        JSON.stringify({ error: "Order not found" }),
+        JSON.stringify({ error: "Orders not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Fetch order items
-    const { data: items, error: itemsErr } = await supabase
+    // Fetch all order items across all orders
+    const { data: allItems, error: itemsErr } = await supabase
       .from("order_items")
       .select("*")
-      .eq("order_id", order_id);
+      .in("order_id", order_ids);
 
-    if (itemsErr || !items?.length) {
+    if (itemsErr || !allItems?.length) {
       return new Response(
         JSON.stringify({ error: "No order items found" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -73,7 +74,7 @@ Deno.serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
     // Build line items
-    const lineItems = items.map((item: any) => ({
+    const lineItems = allItems.map((item: any) => ({
       price_data: {
         currency: "cad",
         product_data: {
@@ -85,23 +86,27 @@ Deno.serve(async (req) => {
       quantity: item.quantity,
     }));
 
-    // Add shipping as a line item if > 0
-    if (order.shipping_cost > 0) {
+    // Add shipping from each order that has shipping_cost > 0
+    const totalShipping = orders.reduce((sum: number, o: any) => sum + (Number(o.shipping_cost) || 0), 0);
+    if (totalShipping > 0) {
       lineItems.push({
         price_data: {
           currency: "cad",
-          product_data: { name: `Shipping (${order.shipping_method || "standard"})` },
-          unit_amount: Math.round(order.shipping_cost * 100),
+          product_data: { name: "Shipping" },
+          unit_amount: Math.round(totalShipping * 100),
         },
         quantity: 1,
       });
     }
 
-    const customerEmail = order.guest_email || undefined;
+    // Use first order for customer email and success redirect
+    const primaryOrder = orders[0];
+    const customerEmail = primaryOrder.guest_email || undefined;
 
     const orderMeta = {
-      order_id: order.id,
-      order_number: order.order_number,
+      order_ids: order_ids.join(","),
+      order_count: String(order_ids.length),
+      primary_order_id: primaryOrder.id,
     };
 
     const session = await stripe.checkout.sessions.create({
@@ -114,15 +119,17 @@ Deno.serve(async (req) => {
         metadata: orderMeta,
       },
       automatic_tax: { enabled: false },
-      success_url: `${siteUrl}/order-confirmation/${order.id}?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${siteUrl}/order-confirmation/${primaryOrder.id}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/checkout?cancelled=true`,
     });
 
-    // Update order with Stripe session ID
-    await supabase
-      .from("orders")
-      .update({ stripe_checkout_session_id: session.id })
-      .eq("id", order_id);
+    // Update all orders with the shared Stripe session ID
+    for (const oid of order_ids) {
+      await supabase
+        .from("orders")
+        .update({ stripe_checkout_session_id: session.id })
+        .eq("id", oid);
+    }
 
     return new Response(
       JSON.stringify({ url: session.url }),
