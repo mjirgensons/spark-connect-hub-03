@@ -54,7 +54,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       if (state.items.some((i) => i.productId === pid)) {
         return state; // already exists, skip
       }
-      return recalc([...state.items, { ...action.payload, quantity: 1 }]);
+      return recalc([...state.items, { ...action.payload, itemType: 'addon' as const, quantity: 1 }]);
     }
     case "REMOVE_ITEM":
       return recalc(state.items.filter((i) => i.productId !== action.payload));
