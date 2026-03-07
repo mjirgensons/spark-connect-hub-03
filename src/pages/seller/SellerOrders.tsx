@@ -184,15 +184,24 @@ const SellerOrders = () => {
 
   const updateStatus = async (orderId: string, updates: Record<string, any>) => {
     setUpdating(true);
-    const { error } = await supabase.from("orders").update(updates).eq("id", orderId);
-    setUpdating(false);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      const res = await supabase.functions.invoke("update-order-status", {
+        body: { order_id: orderId, ...updates },
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || "Update failed");
+      }
       toast({ title: "Order updated" });
       setShipDialog(null); setDeliverDialog(null); setCancelDialog(null);
       setTrackNum(""); setTrackUrl(""); setCancelReason("");
       await fetchOrders();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setUpdating(false);
     }
   };
 
