@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Package, ShoppingCart, FileText, PlusCircle, AlertTriangle, X } from "lucide-react";
 import SellerHealthCard from "@/components/seller/SellerHealthCard";
+import SellerAIChatbotCard from "@/components/seller/SellerAIChatbotCard";
 import { toast } from "sonner";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
@@ -333,6 +334,8 @@ const SellerDashboard = () => {
           </Card>
         ))}
       </div>
+
+      {sellerId && <SellerAIChatbotCard sellerId={sellerId} />}
 
       {sellerId && <SellerHealthCard sellerId={sellerId} />}
 
