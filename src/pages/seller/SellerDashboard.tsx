@@ -334,6 +334,8 @@ const SellerDashboard = () => {
         ))}
       </div>
 
+      {sellerId && <SellerHealthCard sellerId={sellerId} />}
+
       <div className="flex flex-wrap gap-3">
         <Button asChild>
           <Link to={addProductUrl}><PlusCircle size={16} className="mr-2" /> Add New Product</Link>
