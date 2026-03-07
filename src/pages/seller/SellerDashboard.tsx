@@ -49,8 +49,6 @@ const SellerDashboard = () => {
   const [declinedCount, setDeclinedCount] = useState(0);
   const [dismissedBanner, setDismissedBanner] = useState(false);
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
-  const [declinedCount, setDeclinedCount] = useState(0);
-  const [dismissedBanner, setDismissedBanner] = useState(false);
 
   useEffect(() => {
     if (!sellerId) return;
