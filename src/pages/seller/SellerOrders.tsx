@@ -344,6 +344,13 @@ const SellerOrders = () => {
                                       <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">{item.product_name}</p>
                                         {item.product_sku && <p className="text-xs text-muted-foreground">SKU: {item.product_sku}</p>}
+                                        {item.delivery_option && (
+                                          <p className="text-xs text-muted-foreground">
+                                            {item.delivery_option === "delivery" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)}) — prep ${item.delivery_prep_days ?? "—"} days`}
+                                            {item.delivery_option === "pickup_only" && `Pickup only${item.pickup_city ? ` — ${item.pickup_city}, ${item.pickup_province}` : ""} — prep ${item.pickup_prep_days ?? "—"} days`}
+                                            {item.delivery_option === "both" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)}) or Pickup${item.pickup_city ? ` (${item.pickup_city})` : ""}`}
+                                          </p>
+                                        )}
                                       </div>
                                       <div className="text-right text-sm">
                                         <p>{item.quantity} × ${item.unit_price.toFixed(2)}</p>
