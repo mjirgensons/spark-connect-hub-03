@@ -21,6 +21,7 @@ import {
   X,
   LogOut,
   Store,
+  BookOpen,
 } from "lucide-react";
 
 type Role = "client" | "contractor" | "seller" | "builder";
@@ -57,6 +58,7 @@ const navConfig: Record<Role, NavItem[]> = {
     { label: "Questions", to: "/seller/questions", icon: <Search size={18} /> },
     { label: "Analytics", to: "/seller/analytics", icon: <BarChart3 size={18} /> },
     { label: "Messages", to: "/seller/messages", icon: <MessageSquare size={18} /> },
+    { label: "Knowledge Base", to: "/seller/knowledge-base", icon: <BookOpen size={18} /> },
     { label: "Store Profile", to: "/seller/store-profile", icon: <Store size={18} /> },
   ],
   builder: [
