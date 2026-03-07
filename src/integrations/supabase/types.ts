@@ -1001,6 +1001,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          acknowledged_at: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           created_at: string
@@ -1011,11 +1012,14 @@ export type Database = {
           funds_released_at: string | null
           guest_email: string | null
           id: string
+          must_acknowledge_by: string | null
+          must_ship_by: string | null
           notes: string | null
           order_number: string
           paid_at: string | null
           payment_status: string
           platform_fee_cents: number | null
+          preparing_at: string | null
           seller_id: string | null
           seller_payout_cents: number | null
           shipped_at: string | null
@@ -1045,6 +1049,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          acknowledged_at?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           created_at?: string
@@ -1055,11 +1060,14 @@ export type Database = {
           funds_released_at?: string | null
           guest_email?: string | null
           id?: string
+          must_acknowledge_by?: string | null
+          must_ship_by?: string | null
           notes?: string | null
           order_number: string
           paid_at?: string | null
           payment_status?: string
           platform_fee_cents?: number | null
+          preparing_at?: string | null
           seller_id?: string | null
           seller_payout_cents?: number | null
           shipped_at?: string | null
@@ -1089,6 +1097,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          acknowledged_at?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           created_at?: string
@@ -1099,11 +1108,14 @@ export type Database = {
           funds_released_at?: string | null
           guest_email?: string | null
           id?: string
+          must_acknowledge_by?: string | null
+          must_ship_by?: string | null
           notes?: string | null
           order_number?: string
           paid_at?: string | null
           payment_status?: string
           platform_fee_cents?: number | null
+          preparing_at?: string | null
           seller_id?: string | null
           seller_payout_cents?: number | null
           shipped_at?: string | null
