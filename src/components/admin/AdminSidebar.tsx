@@ -36,6 +36,7 @@ export type AdminSection =
   | "quotes"
   | "customers"
   | "sellers"
+  | "seller-health"
   | "product-review"
   | "qa-overview"
   | "reviews"
