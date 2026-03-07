@@ -26,6 +26,7 @@ import {
   FlaskConical,
   Store,
   ClipboardCheck,
+  HeartPulse,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -35,6 +36,7 @@ export type AdminSection =
   | "quotes"
   | "customers"
   | "sellers"
+  | "seller-health"
   | "product-review"
   | "qa-overview"
   | "reviews"
@@ -68,6 +70,7 @@ const navGroups: NavGroup[] = [
       { id: "orders", label: "Orders", icon: ShoppingCart },
       { id: "quotes", label: "Quotes", icon: FileText },
       { id: "sellers", label: "Sellers", icon: Store },
+      { id: "seller-health", label: "Seller Health", icon: HeartPulse },
       { id: "product-review", label: "Product Review", icon: ClipboardCheck },
       { id: "qa-overview", label: "Q&A Overview", icon: MessageSquare },
       { id: "customers", label: "Customers", icon: Users },

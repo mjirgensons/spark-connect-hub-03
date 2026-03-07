@@ -1718,6 +1718,9 @@ export type Database = {
           logo_url: string | null
           phone: string | null
           seller_branding_visible: boolean | null
+          seller_restricted_at: string | null
+          seller_restriction_reason: string | null
+          seller_restriction_status: string | null
           seller_status: string | null
           seller_tier: string | null
           stripe_account_id: string | null
@@ -1745,6 +1748,9 @@ export type Database = {
           logo_url?: string | null
           phone?: string | null
           seller_branding_visible?: boolean | null
+          seller_restricted_at?: string | null
+          seller_restriction_reason?: string | null
+          seller_restriction_status?: string | null
           seller_status?: string | null
           seller_tier?: string | null
           stripe_account_id?: string | null
@@ -1772,6 +1778,9 @@ export type Database = {
           logo_url?: string | null
           phone?: string | null
           seller_branding_visible?: boolean | null
+          seller_restricted_at?: string | null
+          seller_restriction_reason?: string | null
+          seller_restriction_status?: string | null
           seller_status?: string | null
           seller_tier?: string | null
           stripe_account_id?: string | null
