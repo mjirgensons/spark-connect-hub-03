@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,12 +7,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ChevronDown, ChevronUp, ExternalLink, ShoppingBag } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink, Loader2, PackageCheck, ShoppingBag } from "lucide-react";
 import { OrderCardSkeleton } from "@/components/ui/order-card-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { format } from "date-fns";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { toast } from "sonner";
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive"> = {
   pending: "secondary",
@@ -28,6 +29,8 @@ const AccountOrders = () => {
   usePageMeta("My Orders");
   const { user } = useAuth();
   const [expanded, setExpanded] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["account-orders-full", user?.id],
@@ -43,6 +46,46 @@ const AccountOrders = () => {
     enabled: !!user,
     refetchOnWindowFocus: true,
   });
+
+  const handleConfirmDelivery = async (orderId: string) => {
+    setConfirmingId(orderId);
+    try {
+      const { data: userData } = await supabase.auth.getSession();
+      const token = userData?.session?.access_token;
+      if (!token) {
+        toast.error("Please sign in to confirm delivery.");
+        return;
+      }
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-order-status`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            order_id: orderId,
+            status: "delivered",
+          }),
+        }
+      );
+
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.error || "Failed to confirm delivery");
+      }
+
+      toast.success("Delivery confirmed! Thank you.");
+      queryClient.invalidateQueries({ queryKey: ["account-orders-full"] });
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong");
+    } finally {
+      setConfirmingId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -152,6 +195,44 @@ const AccountOrders = () => {
                           </div>
                         )}
                       </div>
+
+                      {/* Delivery Confirmation */}
+                      {order.status === "shipped" && (
+                        <div className="rounded-md border-2 border-amber-400 bg-amber-50 p-4 space-y-3 dark:bg-amber-950/20">
+                          <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                            Your order has been shipped!
+                          </p>
+                          <p className="text-xs text-amber-700 dark:text-amber-400">
+                            Once you receive your items, please confirm delivery below. This helps the seller and ensures smooth processing.
+                          </p>
+                          <Button
+                            size="sm"
+                            onClick={() => handleConfirmDelivery(order.id)}
+                            disabled={confirmingId === order.id}
+                            className="shadow-[2px_2px_0px_0px_hsl(var(--foreground))]"
+                          >
+                            {confirmingId === order.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Confirming...
+                              </>
+                            ) : (
+                              <>
+                                <PackageCheck className="h-4 w-4" />
+                                Confirm Delivery Received
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Delivery confirmed badge */}
+                      {order.status === "delivered" && (order as any).delivery_confirmed_at && (
+                        <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                          <PackageCheck className="h-4 w-4" />
+                          Delivery confirmed on {format(new Date((order as any).delivery_confirmed_at), "MMM d, yyyy")}
+                        </div>
+                      )}
 
                       {/* Price breakdown */}
                       <div>

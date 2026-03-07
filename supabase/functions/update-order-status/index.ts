@@ -88,28 +88,65 @@ Deno.serve(async (req) => {
     );
   }
 
-  // If JWT auth, verify the user is a seller for at least one item in this order
+  // If JWT auth, verify permission based on requested status
   if (!isServiceAuth && authedSellerId) {
-    const { data: sellerItems, error: sellerErr } = await supabaseAdmin
-      .from("order_items")
-      .select("id, products(seller_id)")
-      .eq("order_id", order_id);
+    if (status === "delivered") {
+      // Buyer confirming delivery: must be the order owner
+      const { data: orderRow, error: orderErr } = await supabaseAdmin
+        .from("orders")
+        .select("user_id")
+        .eq("id", order_id)
+        .single();
 
-    if (sellerErr) {
-      return new Response(
-        JSON.stringify({ error: "Failed to verify seller ownership", details: sellerErr.message }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      if (orderErr || !orderRow) {
+        return new Response(
+          JSON.stringify({ error: "Order not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Allow if user is the buyer OR a seller for this order
+      const isBuyer = orderRow.user_id === authedSellerId;
+      if (!isBuyer) {
+        // Fall back to seller check
+        const { data: sellerItems } = await supabaseAdmin
+          .from("order_items")
+          .select("id, products(seller_id)")
+          .eq("order_id", order_id);
+
+        const isSeller = (sellerItems || []).some(
+          (item: any) => item.products?.seller_id === authedSellerId
+        );
+        if (!isSeller) {
+          return new Response(
+            JSON.stringify({ error: "Forbidden: you are not authorized for this order" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+    } else {
+      // All other statuses: seller ownership check
+      const { data: sellerItems, error: sellerErr } = await supabaseAdmin
+        .from("order_items")
+        .select("id, products(seller_id)")
+        .eq("order_id", order_id);
+
+      if (sellerErr) {
+        return new Response(
+          JSON.stringify({ error: "Failed to verify seller ownership", details: sellerErr.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const isSeller = (sellerItems || []).some(
+        (item: any) => item.products?.seller_id === authedSellerId
       );
-    }
-
-    const isSeller = (sellerItems || []).some(
-      (item: any) => item.products?.seller_id === authedSellerId
-    );
-    if (!isSeller) {
-      return new Response(JSON.stringify({ error: "Forbidden: you are not a seller for this order" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      if (!isSeller) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden: you are not a seller for this order" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
   }
 
@@ -121,6 +158,12 @@ Deno.serve(async (req) => {
   if (body.shipped_at) updatePayload.shipped_at = body.shipped_at;
   if (body.delivered_at) updatePayload.delivered_at = body.delivered_at;
   if (body.cancelled_at) updatePayload.cancelled_at = body.cancelled_at;
+  if (status === "delivered" && !body.delivered_at) {
+    updatePayload.delivered_at = new Date().toISOString();
+  }
+  if (status === "delivered") {
+    updatePayload.delivery_confirmed_at = new Date().toISOString();
+  }
 
   const { error: updateError } = await supabaseAdmin
     .from("orders")
