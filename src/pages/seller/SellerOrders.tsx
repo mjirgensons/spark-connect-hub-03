@@ -30,6 +30,13 @@ interface OrderItem {
   quantity: number;
   unit_price: number;
   total_price: number;
+  delivery_option: string | null;
+  delivery_price: number | null;
+  delivery_prep_days: number | null;
+  pickup_available: boolean | null;
+  pickup_prep_days: number | null;
+  pickup_city: string | null;
+  pickup_province: string | null;
 }
 
 interface Order {
