@@ -114,7 +114,7 @@ const SellerOrders = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("order_items")
-      .select("id, product_name, product_sku, product_image, quantity, unit_price, total_price, order_id, orders!inner(id, order_number, created_at, status, payment_status, shipping_name, shipping_address_line_1, shipping_address_line_2, shipping_city, shipping_province, shipping_postal_code, shipping_country, shipping_phone, tracking_number, tracking_url, notes, shipped_at, delivered_at, cancelled_at, cancellation_reason), products!inner(seller_id)")
+      .select("id, product_name, product_sku, product_image, quantity, unit_price, total_price, order_id, orders!inner(id, order_number, created_at, status, payment_status, shipping_name, shipping_address_line_1, shipping_address_line_2, shipping_city, shipping_province, shipping_postal_code, shipping_country, shipping_phone, tracking_number, tracking_url, notes, shipped_at, delivered_at, cancelled_at, cancellation_reason), products!inner(seller_id, delivery_option, delivery_price, delivery_prep_days, pickup_available, pickup_prep_days, pickup_city, pickup_province)")
       .eq("products.seller_id", effectiveId);
 
     if (error) {
