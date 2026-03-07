@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
   // Group items by seller_id
   const sellerMap: Record<string, {
     seller_id: string;
-    items: { product_name: string; quantity: number; unit_price: number; total_price: number; product_id: string | null }[];
+    items: { product_name: string; quantity: number; unit_price: number; total_price: number; product_id: string | null; delivery_option: string | null; delivery_prep_days: number | null; pickup_prep_days: number | null }[];
   }> = {};
 
   for (const item of items || []) {
