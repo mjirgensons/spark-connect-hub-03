@@ -250,6 +250,139 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          confidence_score: number | null
+          content: string
+          created_at: string | null
+          id: number
+          latency_ms: number | null
+          message_type: string
+          retrieved_doc_ids: string[] | null
+          session_id: string
+          token_count: number | null
+          was_cached: boolean | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          content: string
+          created_at?: string | null
+          id?: number
+          latency_ms?: number | null
+          message_type: string
+          retrieved_doc_ids?: string[] | null
+          session_id: string
+          token_count?: number | null
+          was_cached?: boolean | null
+        }
+        Update: {
+          confidence_score?: number | null
+          content?: string
+          created_at?: string | null
+          id?: number
+          latency_ms?: number | null
+          message_type?: string
+          retrieved_doc_ids?: string[] | null
+          session_id?: string
+          token_count?: number | null
+          was_cached?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "chat_sessions"
+            referencedColumns: ["session_id"]
+          },
+        ]
+      }
+      chat_sessions: {
+        Row: {
+          buyer_email: string | null
+          buyer_id: string | null
+          chatbot_mode: string
+          consent_at: string | null
+          consent_given: boolean | null
+          escalated_at: string | null
+          escalation_reason: string | null
+          id: string
+          last_active_at: string | null
+          metadata: Json | null
+          seller_id: string | null
+          session_id: string
+          started_at: string | null
+          status: string | null
+          user_role: string | null
+        }
+        Insert: {
+          buyer_email?: string | null
+          buyer_id?: string | null
+          chatbot_mode: string
+          consent_at?: string | null
+          consent_given?: boolean | null
+          escalated_at?: string | null
+          escalation_reason?: string | null
+          id?: string
+          last_active_at?: string | null
+          metadata?: Json | null
+          seller_id?: string | null
+          session_id: string
+          started_at?: string | null
+          status?: string | null
+          user_role?: string | null
+        }
+        Update: {
+          buyer_email?: string | null
+          buyer_id?: string | null
+          chatbot_mode?: string
+          consent_at?: string | null
+          consent_given?: boolean | null
+          escalated_at?: string | null
+          escalation_reason?: string | null
+          id?: string
+          last_active_at?: string | null
+          metadata?: Json | null
+          seller_id?: string | null
+          session_id?: string
+          started_at?: string | null
+          status?: string | null
+          user_role?: string | null
+        }
+        Relationships: []
+      }
+      chat_summaries: {
+        Row: {
+          created_at: string | null
+          id: number
+          messages_covered: number | null
+          session_id: string
+          summary_text: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          messages_covered?: number | null
+          session_id: string
+          summary_text: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          messages_covered?: number | null
+          session_id?: string
+          summary_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_summaries_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "chat_sessions"
+            referencedColumns: ["session_id"]
+          },
+        ]
+      }
       communication_logs: {
         Row: {
           clicked_at: string | null
