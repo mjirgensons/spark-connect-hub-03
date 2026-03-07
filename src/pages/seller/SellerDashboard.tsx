@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, Eye, ShoppingCart, FileText, PlusCircle, AlertTriangle, X } from "lucide-react";
+import { Package, ShoppingCart, FileText, PlusCircle, AlertTriangle, X } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface TopProduct {
