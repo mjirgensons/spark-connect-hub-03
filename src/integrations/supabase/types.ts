@@ -841,6 +841,39 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_consents: {
+        Row: {
+          casl_proof: Json | null
+          consent_at: string | null
+          consent_source: string | null
+          consent_type: string
+          email: string
+          express_withdrawn_at: string | null
+          id: string
+          implied_expires_at: string | null
+        }
+        Insert: {
+          casl_proof?: Json | null
+          consent_at?: string | null
+          consent_source?: string | null
+          consent_type: string
+          email: string
+          express_withdrawn_at?: string | null
+          id?: string
+          implied_expires_at?: string | null
+        }
+        Update: {
+          casl_proof?: Json | null
+          consent_at?: string | null
+          consent_source?: string | null
+          consent_type?: string
+          email?: string
+          express_withdrawn_at?: string | null
+          id?: string
+          implied_expires_at?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           conversation_id: string
@@ -1765,6 +1798,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_chatbot_enabled: boolean | null
           auto_approve_products: boolean | null
           banner_url: string | null
           bio: string | null
@@ -1795,6 +1829,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          ai_chatbot_enabled?: boolean | null
           auto_approve_products?: boolean | null
           banner_url?: string | null
           bio?: string | null
@@ -1825,6 +1860,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          ai_chatbot_enabled?: boolean | null
           auto_approve_products?: boolean | null
           banner_url?: string | null
           bio?: string | null
@@ -2094,6 +2130,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      seller_knowledge_base: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          kb_type: string
+          pinecone_synced: boolean | null
+          seller_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          kb_type: string
+          pinecone_synced?: boolean | null
+          seller_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          kb_type?: string
+          pinecone_synced?: boolean | null
+          seller_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       seller_payouts: {
         Row: {
