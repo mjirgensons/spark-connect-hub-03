@@ -335,6 +335,8 @@ const SellerDashboard = () => {
         ))}
       </div>
 
+      {sellerId && <SellerAIChatbotCard sellerId={sellerId} />}
+
       {sellerId && <SellerHealthCard sellerId={sellerId} />}
 
       <div className="flex flex-wrap gap-3">

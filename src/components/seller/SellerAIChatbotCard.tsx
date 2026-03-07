@@ -35,7 +35,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
       setLoading(true);
       const [profileRes, kbRes, prodRes] = await Promise.all([
         supabase.from("profiles").select("ai_chatbot_enabled").eq("id", sellerId).single(),
-        supabase.from("seller_knowledge_base").select("id", { count: "exact", head: true }).eq("seller_id", sellerId),
+        (supabase as any).from("seller_knowledge_base").select("id", { count: "exact", head: true }).eq("seller_id", sellerId),
         supabase.from("products").select("id", { count: "exact", head: true }).eq("seller_id", sellerId).eq("pinecone_synced", true),
       ]);
       const enabled = !!(profileRes.data as any)?.ai_chatbot_enabled;
