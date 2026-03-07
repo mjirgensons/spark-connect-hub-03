@@ -8,6 +8,7 @@ export interface CartItem {
   quantity: number;
   dimensions: string;
   maxStock: number;
+  itemType?: 'main' | 'addon' | 'delivery';
   // Delivery fields (per-product)
   deliveryChoice?: 'delivery' | 'pickup' | null;
   deliveryPrice?: number;
