@@ -1,0 +1,106 @@
+{
+  "generated": "2026-03-07",
+  "project": "FitMatch.ca",
+  "description": "Marketplace for discounted premium European cabinetry in GTA, Canada",
+  "urls": {
+    "preview": "https://id-preview--cec14b91-2f01-4e48-b2bd-28147586de35.lovable.app",
+    "published": "https://spark-connect-hub-03.lovable.app",
+    "production": "https://fitmatch.ca"
+  },
+  "tech_stack": {
+    "framework": "React 18 + TypeScript",
+    "build": "Vite 5",
+    "styling": "Tailwind CSS 3 + shadcn/ui",
+    "routing": "React Router v6",
+    "data_fetching": "@tanstack/react-query v5",
+    "backend": "Supabase (Lovable Cloud)",
+    "auth": "Supabase Auth (email/password + Google OAuth for admin)",
+    "payments": "Stripe (via Edge Functions)",
+    "email": "Mailgun (via n8n workflows)",
+    "voice_chat": "ElevenLabs ConvAI widget",
+    "state": "React Context (Cart, Wishlist, Compare, Checkout)",
+    "forms": "react-hook-form + zod",
+    "charts": "Recharts"
+  },
+  "user_roles": [
+    { "role": "client", "prefix": "/client/*", "description": "Homeowners, landlords, flippers, DIYers" },
+    { "role": "contractor", "prefix": "/contractor/*", "description": "Trades (GC, plumber, electrician, etc.)" },
+    { "role": "seller", "prefix": "/seller/*", "description": "Cabinet makers, resellers, suppliers" },
+    { "role": "builder", "prefix": "/builder/*", "description": "Property developers, architects, designers" },
+    { "role": "admin", "prefix": "/admin", "description": "Internal admin (verified via admin_emails table)" }
+  ],
+  "design_system": {
+    "font_sans": "Space Grotesk",
+    "font_serif": "Lora",
+    "font_mono": "Space Mono",
+    "theme": "Monochrome black/white with hard shadows",
+    "border_radius": "0px",
+    "shadows": "Hard offset (3-24px, pure black)"
+  },
+  "database": {
+    "table_count": 45,
+    "tables": [
+      "admin_emails", "analytics_events", "analytics_sessions", "blog_posts",
+      "categories", "communication_logs", "consent_logs", "contractor_details",
+      "conversation_messages", "conversations", "cookie_categories", "cookie_definitions",
+      "email_consent_log", "email_templates", "faq_items", "footer_pages",
+      "integrations", "messages", "newsletter_subscribers", "order_items", "orders",
+      "product_compatible_appliances", "product_options", "product_questions",
+      "product_reviews", "product_variants", "products", "profiles",
+      "project_contractors", "projects", "quote_request_items", "quote_requests",
+      "seller_agreements", "seller_payouts", "shipping_addresses", "site_settings",
+      "stripe_events", "trust_signals", "webhook_logs", "wishlists"
+    ],
+    "key_functions": [
+      "is_admin()", "handle_new_user()", "get_full_schema_dump()",
+      "generate_order_number()", "generate_quote_number()"
+    ],
+    "validation_triggers": 15
+  },
+  "edge_functions": {
+    "count": 19,
+    "functions": [
+      "check-consent", "create-checkout-session", "create-order",
+      "create-wf10-test-user", "get-order-confirmation", "get-wf9-order",
+      "get-wf9-order-items", "log-communication", "log-email-consent",
+      "n8n-proxy", "notify-seller-approval", "notify-seller-registration",
+      "seed-wf10-test-data", "simulate-inbound-email", "stripe-webhook",
+      "stripe-webhook-test", "submit-cabinet-match", "test-integration",
+      "update-communication-status"
+    ]
+  },
+  "route_count": {
+    "public": 23,
+    "client": 7,
+    "contractor": 7,
+    "seller": 16,
+    "builder": 6,
+    "account": 5,
+    "admin": 3,
+    "total": 67
+  },
+  "component_count": {
+    "ui": 50,
+    "admin": 35,
+    "landing": 10,
+    "checkout": 3,
+    "seller": 3,
+    "shared": 20,
+    "total": 121
+  },
+  "storage_buckets": [
+    { "name": "product-images", "public": true },
+    { "name": "product-documents", "public": true }
+  ],
+  "external_integrations": [
+    { "service": "Stripe", "purpose": "Payments", "connection": "Edge Functions" },
+    { "service": "Mailgun", "purpose": "Email delivery", "connection": "n8n workflows" },
+    { "service": "n8n", "purpose": "Workflow automation", "connection": "Webhooks" },
+    { "service": "ElevenLabs", "purpose": "Voice AI chat", "connection": "Embedded widget" }
+  ],
+  "detailed_exports": {
+    "database_schema": "/exports/database-schema.json",
+    "codebase_structure": "/exports/codebase-structure.json",
+    "edge_functions_map": "/exports/edge-functions-map.json"
+  }
+}

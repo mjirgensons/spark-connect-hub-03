@@ -1,0 +1,160 @@
+{
+  "generated": "2026-03-07",
+  "project": "FitMatch.ca",
+  "framework": "React 18 + TypeScript + Vite 5",
+  "styling": "Tailwind CSS 3 + shadcn/ui",
+  "routing": "React Router v6",
+  "routes": {
+    "public": [
+      { "path": "/", "page": "Index.tsx", "description": "Landing page" },
+      { "path": "/browse", "page": "ProductCatalog.tsx", "description": "Product catalog with filters" },
+      { "path": "/product/:id", "page": "Product.tsx", "description": "Product detail page" },
+      { "path": "/cart", "page": "Cart.tsx", "description": "Shopping cart" },
+      { "path": "/checkout", "page": "Checkout.tsx", "description": "2-step checkout flow", "lazy": true },
+      { "path": "/order-confirmation/:orderId", "page": "OrderConfirmation.tsx", "lazy": true },
+      { "path": "/search", "page": "SearchResults.tsx" },
+      { "path": "/quote-request", "page": "QuoteRequest.tsx", "lazy": true },
+      { "path": "/quote-success", "page": "QuoteSuccess.tsx" },
+      { "path": "/how-it-works", "page": "HowItWorksPage.tsx" },
+      { "path": "/for-contractors", "page": "ForContractorsPage.tsx" },
+      { "path": "/for-sellers", "page": "ForSellersPage.tsx" },
+      { "path": "/about", "page": "AboutPage.tsx" },
+      { "path": "/faq", "page": "FAQPage.tsx", "lazy": true },
+      { "path": "/blog", "page": "BlogPage.tsx", "lazy": true },
+      { "path": "/blog/:slug", "page": "BlogPostPage.tsx", "lazy": true },
+      { "path": "/compare", "page": "ComparePage.tsx", "lazy": true },
+      { "path": "/login", "page": "Login.tsx" },
+      { "path": "/register", "page": "Register.tsx" },
+      { "path": "/messages", "page": "Messages.tsx", "lazy": true },
+      { "path": "/messages/:conversationId", "page": "Messages.tsx", "lazy": true },
+      { "path": "/page/:slug", "page": "FooterPage.tsx", "description": "Dynamic legal/footer pages" },
+      { "path": "/coming-soon", "page": "UnderConstruction.tsx" }
+    ],
+    "admin": [
+      { "path": "/admin/login", "page": "AdminLogin.tsx", "lazy": true },
+      { "path": "/admin", "page": "Admin.tsx", "lazy": true, "description": "Admin panel with sidebar tabs" },
+      { "path": "/admin/webhooks/:provider/:endpointKey", "page": "admin/WebhookDetail.tsx", "lazy": true }
+    ],
+    "client": {
+      "guard": "RoleGuard(['client'])",
+      "layout": "DashboardLayout(role='client')",
+      "routes": [
+        { "path": "/client/dashboard", "page": "client/ClientDashboard.tsx" },
+        { "path": "/client/matches", "page": "client/ClientMatches.tsx" },
+        { "path": "/client/match/new", "page": "client/ClientNewMatch.tsx" },
+        { "path": "/client/projects", "page": "client/ClientProjects.tsx" },
+        { "path": "/client/projects/:projectId", "page": "client/ClientProjectDetail.tsx" },
+        { "path": "/client/messages", "page": "client/ClientMessages.tsx" },
+        { "path": "/client/profile", "page": "client/ClientProfile.tsx" }
+      ]
+    },
+    "contractor": {
+      "guard": "RoleGuard(['contractor'])",
+      "layout": "DashboardLayout(role='contractor')",
+      "routes": [
+        { "path": "/contractor/dashboard", "page": "contractor/ContractorDashboard.tsx" },
+        { "path": "/contractor/jobs", "page": "contractor/ContractorJobs.tsx" },
+        { "path": "/contractor/jobs/:jobId", "page": "contractor/ContractorJobDetail.tsx" },
+        { "path": "/contractor/projects", "page": "contractor/ContractorProjects.tsx" },
+        { "path": "/contractor/projects/:projectId", "page": "contractor/ContractorProjectDetail.tsx" },
+        { "path": "/contractor/messages", "page": "contractor/ContractorMessages.tsx" },
+        { "path": "/contractor/profile", "page": "contractor/ContractorProfile.tsx" }
+      ]
+    },
+    "seller": {
+      "guard": "SellerGuard (approved sellers only)",
+      "layout": "DashboardLayout(role='seller')",
+      "routes": [
+        { "path": "/seller/pending", "page": "seller/SellerPending.tsx", "description": "Pre-approval holding page" },
+        { "path": "/seller/dashboard", "page": "seller/SellerDashboard.tsx" },
+        { "path": "/seller/products", "page": "seller/SellerProducts.tsx" },
+        { "path": "/seller/products/new", "page": "seller/SellerNewProduct.tsx" },
+        { "path": "/seller/products/:productId", "page": "seller/SellerEditProduct.tsx" },
+        { "path": "/seller/products/:id/variants", "page": "seller/SellerProductVariants.tsx" },
+        { "path": "/seller/documents", "page": "seller/SellerDocuments.tsx" },
+        { "path": "/seller/quotes", "page": "seller/SellerQuotes.tsx" },
+        { "path": "/seller/quotes/:quoteId", "page": "seller/SellerQuoteDetail.tsx" },
+        { "path": "/seller/orders", "page": "seller/SellerOrders.tsx" },
+        { "path": "/seller/analytics", "page": "seller/SellerAnalytics.tsx" },
+        { "path": "/seller/questions", "page": "seller/SellerQuestions.tsx" },
+        { "path": "/seller/messages", "page": "seller/SellerMessages.tsx" },
+        { "path": "/seller/messages/:conversationId", "page": "seller/SellerMessages.tsx" },
+        { "path": "/seller/store-profile", "page": "seller/SellerStoreProfile.tsx" }
+      ]
+    },
+    "builder": {
+      "guard": "RoleGuard(['builder'])",
+      "layout": "DashboardLayout(role='builder')",
+      "routes": [
+        { "path": "/builder/dashboard", "page": "builder/BuilderDashboard.tsx" },
+        { "path": "/builder/projects", "page": "builder/BuilderProjects.tsx" },
+        { "path": "/builder/projects/new", "page": "builder/BuilderNewProject.tsx" },
+        { "path": "/builder/matches", "page": "builder/BuilderMatches.tsx" },
+        { "path": "/builder/messages", "page": "builder/BuilderMessages.tsx" },
+        { "path": "/builder/profile", "page": "builder/BuilderProfile.tsx" }
+      ]
+    },
+    "account": {
+      "layout": "AccountLayout (any authenticated user)",
+      "routes": [
+        { "path": "/account", "page": "account/AccountOverview.tsx" },
+        { "path": "/account/orders", "page": "account/AccountOrders.tsx" },
+        { "path": "/account/wishlist", "page": "account/AccountWishlist.tsx" },
+        { "path": "/account/addresses", "page": "account/AccountAddresses.tsx" },
+        { "path": "/account/settings", "page": "account/AccountSettings.tsx" }
+      ]
+    }
+  },
+  "components": {
+    "ui": "50+ shadcn/ui components (button, card, dialog, form, table, tabs, etc.)",
+    "landing": [
+      "Header.tsx", "Hero.tsx", "ProductShowcase.tsx", "Benefits.tsx",
+      "HowItWorks.tsx", "OtherProducts.tsx", "ForContractors.tsx",
+      "TrustSignals.tsx", "CTA.tsx", "Footer.tsx"
+    ],
+    "admin": [
+      "AdminSidebar.tsx", "AdminDashboardTab.tsx", "AdminOrdersTab.tsx",
+      "AdminQuotesTab.tsx", "AdminProductsTab.tsx", "AdminCustomersTab.tsx",
+      "AdminReviewsTab.tsx", "AdminProductReviewTab.tsx", "AdminQATab.tsx",
+      "AdminSellersTab.tsx", "AdminEmailTemplatesTab.tsx", "AdminNewsletterTab.tsx",
+      "AdminBlogTab.tsx", "AdminFAQTab.tsx", "AdminTrustSignalsTab.tsx",
+      "AdminIntegrationsTab.tsx", "AdminWebhooksTab.tsx", "AdminDbInspectorTab.tsx",
+      "AnalyticsDashboard.tsx", "SiteSettingsAdmin.tsx", "FooterPagesAdmin.tsx",
+      "LegalPagesAdmin.tsx", "CookieCategoriesAdmin.tsx", "CookieRegistryAdmin.tsx",
+      "ConsentLogsAdmin.tsx", "BannerSettingsAdmin.tsx", "ProductDetailPreview.tsx",
+      "ImageUpload.tsx", "FileUpload.tsx",
+      "EmailSettingsTab.tsx", "EmailCommLogTab.tsx", "EmailConsentTab.tsx",
+      "EmailTestConsoleTab.tsx", "EmailWF8TestTab.tsx", "EmailWF9StripeTab.tsx"
+    ],
+    "checkout": ["CheckoutStepper.tsx", "StepInformation.tsx", "StepReview.tsx"],
+    "seller": ["SellerProductForm.tsx", "HardwareSection.tsx", "AdditionalFeaturesSection.tsx"],
+    "shared": [
+      "AuthGateModal.tsx", "Breadcrumbs.tsx", "CompareBar.tsx", "CompareButton.tsx",
+      "ContactSellerButton.tsx", "CookieConsent.tsx", "DashboardLayout.tsx",
+      "DimensionMatcher.tsx", "HideChatOnAdmin.tsx", "NavLink.tsx",
+      "NewsletterSignup.tsx", "ProductGallery.tsx", "ProductQA.tsx",
+      "ProductReviews.tsx", "RoleGuard.tsx", "ScrollToTop.tsx",
+      "SearchBar.tsx", "SellerGuard.tsx", "TrustBadgeBar.tsx", "WishlistButton.tsx"
+    ]
+  },
+  "contexts": [
+    { "name": "CartContext", "file": "contexts/CartContext.tsx", "purpose": "Shopping cart state (add, remove, update, delivery tracking)" },
+    { "name": "WishlistContext", "file": "contexts/WishlistContext.tsx", "purpose": "Product wishlist (Supabase-persisted for auth users)" },
+    { "name": "CompareContext", "file": "contexts/CompareContext.tsx", "purpose": "Product comparison (side-by-side)" },
+    { "name": "CheckoutContext", "file": "contexts/CheckoutContext.tsx", "purpose": "Multi-step checkout flow state" }
+  ],
+  "hooks": [
+    { "name": "useAuth", "file": "hooks/useAuth.tsx", "purpose": "Auth state and session management" },
+    { "name": "useProfile", "file": "hooks/useProfile.tsx", "purpose": "User profile data fetching" },
+    { "name": "useAnalytics", "file": "hooks/useAnalytics.ts", "purpose": "Page view and event tracking" },
+    { "name": "usePageMeta", "file": "hooks/usePageMeta.ts", "purpose": "Dynamic page title/meta" },
+    { "name": "use-mobile", "file": "hooks/use-mobile.tsx", "purpose": "Mobile breakpoint detection" },
+    { "name": "use-toast", "file": "hooks/use-toast.ts", "purpose": "Toast notification hook" }
+  ],
+  "lib": [
+    { "file": "lib/utils.ts", "purpose": "cn() class merge utility" },
+    { "file": "lib/analytics.ts", "purpose": "Analytics event tracking to Supabase" },
+    { "file": "lib/optimizeImage.ts", "purpose": "Image URL optimization" },
+    { "file": "lib/webhookDispatcher.ts", "purpose": "Webhook event dispatch to integrations" }
+  ]
+}
