@@ -2334,6 +2334,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_seller_health_score: {
+        Args: { p_seller_id: string }
+        Returns: Json
+      }
       get_full_schema_dump: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
     }
