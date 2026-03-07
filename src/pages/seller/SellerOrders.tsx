@@ -487,7 +487,18 @@ const SellerOrders = () => {
                         <TableCell className="text-center">{g.items.length}</TableCell>
                         <TableCell className="text-right font-medium">${g.sellerTotal.toFixed(2)}</TableCell>
                         <TableCell className="text-center">
-                          <Badge variant="outline" className={statusColors[g.order.status] || ""}>{renderStatusLabel(g.order.status)}</Badge>
+                          <div className="flex items-center justify-center gap-1.5">
+                            <Badge variant="outline" className={statusColors[g.order.status] || ""}>{renderStatusLabel(g.order.status)}</Badge>
+                            {getAnyDisputeForOrder(g.order.id) && (
+                              <Badge
+                                variant="outline"
+                                className="bg-red-500/15 text-red-700 border-red-300 text-[10px] cursor-pointer"
+                                onClick={(e) => { e.stopPropagation(); setDisputeViewId(g.order.id); setDisputeResponse(""); }}
+                              >
+                                Dispute
+                              </Badge>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="outline" className={paymentColors[g.order.payment_status] || ""}>{g.order.payment_status}</Badge>
