@@ -60,6 +60,10 @@ interface Order {
   delivered_at: string | null;
   cancelled_at: string | null;
   cancellation_reason: string | null;
+  must_acknowledge_by: string | null;
+  must_ship_by: string | null;
+  acknowledged_at: string | null;
+  preparing_at: string | null;
 }
 
 interface GroupedOrder {
@@ -71,10 +75,13 @@ interface GroupedOrder {
 type SortKey = "order_number" | "created_at" | "sellerTotal" | "status";
 
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-500/15 text-yellow-700 border-yellow-300",
-  confirmed: "bg-blue-500/15 text-blue-700 border-blue-300",
+  paid: "bg-green-500/15 text-green-700 border-green-300",
+  preparing: "bg-blue-500/15 text-blue-700 border-blue-300",
   shipped: "bg-indigo-500/15 text-indigo-700 border-indigo-300",
-  delivered: "bg-green-500/15 text-green-700 border-green-300",
+  ready_for_pickup: "bg-purple-500/15 text-purple-700 border-purple-300",
+  in_transit: "bg-cyan-500/15 text-cyan-700 border-cyan-300",
+  delivered: "bg-emerald-500/15 text-emerald-700 border-emerald-300",
+  completed: "bg-green-700/15 text-green-800 border-green-400",
   cancelled: "bg-red-500/15 text-red-700 border-red-300",
   refunded: "bg-red-500/15 text-red-700 border-red-300",
 };
@@ -84,6 +91,37 @@ const paymentColors: Record<string, string> = {
   paid: "bg-green-500/15 text-green-700 border-green-300",
   refunded: "bg-red-500/15 text-red-700 border-red-300",
   failed: "bg-red-500/15 text-red-700 border-red-300",
+};
+
+const getDeadlineBadge = (deadline: string | null, labels: { ok: string; warn: string; urgent: string }, thresholds: { greenMs: number; amberMs: number }) => {
+  if (!deadline) return null;
+  const msLeft = new Date(deadline).getTime() - Date.now();
+  const hoursLeft = msLeft / (1000 * 60 * 60);
+  const daysLeft = msLeft / (1000 * 60 * 60 * 24);
+
+  let text: string;
+  let className: string;
+  let showIcon = false;
+
+  if (msLeft <= 0) {
+    text = labels.urgent;
+    className = "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300";
+    showIcon = true;
+  } else if (msLeft <= thresholds.amberMs) {
+    text = labels.warn.replace("{}", thresholds.greenMs > 24 * 60 * 60 * 1000 ? `${Math.ceil(daysLeft)}d` : `${Math.ceil(hoursLeft)}h`);
+    className = "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300";
+  } else {
+    text = labels.ok.replace("{}", thresholds.greenMs > 24 * 60 * 60 * 1000 ? `${Math.ceil(daysLeft)}d` : `${Math.ceil(hoursLeft)}h`);
+    className = "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300";
+  }
+
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${className}`}>
+      {showIcon && <AlertTriangle className="h-3 w-3" />}
+      {text}
+      <span className="text-[10px] opacity-70 ml-1">(by {format(new Date(deadline), "MMM d, h:mm a")})</span>
+    </span>
+  );
 };
 
 const SellerOrders = () => {
@@ -107,6 +145,8 @@ const SellerOrders = () => {
   const [deliverDialog, setDeliverDialog] = useState<string | null>(null);
   const [cancelDialog, setCancelDialog] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
+  const [acknowledgeDialog, setAcknowledgeDialog] = useState<string | null>(null);
+  const [readyPickupDialog, setReadyPickupDialog] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
 
   const fetchOrders = useCallback(async () => {
@@ -114,7 +154,7 @@ const SellerOrders = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("order_items")
-      .select("id, product_name, product_sku, product_image, quantity, unit_price, total_price, order_id, orders!inner(id, order_number, created_at, status, payment_status, shipping_name, shipping_address_line_1, shipping_address_line_2, shipping_city, shipping_province, shipping_postal_code, shipping_country, shipping_phone, tracking_number, tracking_url, notes, shipped_at, delivered_at, cancelled_at, cancellation_reason), products!inner(seller_id, delivery_option, delivery_price, delivery_prep_days, pickup_available, pickup_prep_days, pickup_city, pickup_province)")
+      .select("id, product_name, product_sku, product_image, quantity, unit_price, total_price, order_id, orders!inner(id, order_number, created_at, status, payment_status, shipping_name, shipping_address_line_1, shipping_address_line_2, shipping_city, shipping_province, shipping_postal_code, shipping_country, shipping_phone, tracking_number, tracking_url, notes, shipped_at, delivered_at, cancelled_at, cancellation_reason, must_acknowledge_by, must_ship_by, acknowledged_at, preparing_at), products!inner(seller_id, delivery_option, delivery_price, delivery_prep_days, pickup_available, pickup_prep_days, pickup_city, pickup_province)")
       .eq("products.seller_id", effectiveId);
 
     if (error) {
@@ -202,6 +242,7 @@ const SellerOrders = () => {
       if (!res.ok) throw new Error(result.error || 'Update failed');
       toast({ title: "Order updated" });
       setShipDialog(null); setDeliverDialog(null); setCancelDialog(null);
+      setAcknowledgeDialog(null); setReadyPickupDialog(null);
       setTrackNum(""); setTrackUrl(""); setCancelReason("");
       await fetchOrders();
     } catch (err: any) {
@@ -211,17 +252,6 @@ const SellerOrders = () => {
     }
   };
 
-  const getPrepCountdown = (orderCreatedAt: string, prepDays: number | null) => {
-    if (!prepDays) return null;
-    const orderDate = new Date(orderCreatedAt);
-    const deadlineDate = new Date(orderDate);
-    deadlineDate.setDate(deadlineDate.getDate() + prepDays);
-    const now = new Date();
-    const msLeft = deadlineDate.getTime() - now.getTime();
-    const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
-    return { daysLeft, deadline: deadlineDate };
-  };
-
   const SortHeader = ({ label, sk, className }: { label: string; sk: SortKey; className?: string }) => (
     <TableHead className={className}>
       <button className="flex items-center gap-1 font-medium" onClick={() => toggleSort(sk)}>
@@ -229,6 +259,106 @@ const SellerOrders = () => {
       </button>
     </TableHead>
   );
+
+  const renderStatusLabel = (status: string) => {
+    return status.replace(/_/g, " ");
+  };
+
+  const renderActionButtons = (g: GroupedOrder) => {
+    const { order, items } = g;
+    const s = order.status;
+
+    if (s === "paid") {
+      const ackBadge = getDeadlineBadge(
+        order.must_acknowledge_by,
+        { ok: "{} left to acknowledge", warn: "{} left to acknowledge", urgent: "Overdue — acknowledge now!" },
+        { greenMs: 12 * 60 * 60 * 1000, amberMs: 6 * 60 * 60 * 1000 }
+      );
+      return (
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" onClick={(e) => { e.stopPropagation(); setAcknowledgeDialog(order.id); }}>
+            <Package className="h-4 w-4 mr-1" /> Acknowledge Order
+          </Button>
+          <Button size="sm" variant="destructive" onClick={(e) => { e.stopPropagation(); setCancelDialog(order.id); }}>
+            <XCircle className="h-4 w-4 mr-1" /> Cancel
+          </Button>
+          {ackBadge}
+        </div>
+      );
+    }
+
+    if (s === "preparing") {
+      const hasDelivery = items.some(i => i.delivery_option === "delivery" || i.delivery_option === "both");
+      const hasPickupOnly = items.some(i => i.delivery_option === "pickup_only");
+      const shipBadge = getDeadlineBadge(
+        order.must_ship_by,
+        { ok: "{} left to ship", warn: "{} left to ship", urgent: "Overdue — ship now!" },
+        { greenMs: 3 * 24 * 60 * 60 * 1000, amberMs: 1 * 24 * 60 * 60 * 1000 }
+      );
+      return (
+        <div className="flex flex-wrap items-center gap-2">
+          {hasDelivery && (
+            <Button size="sm" onClick={(e) => { e.stopPropagation(); setShipDialog(order.id); }}>
+              <Truck className="h-4 w-4 mr-1" /> Mark Shipped
+            </Button>
+          )}
+          {hasPickupOnly && (
+            <Button size="sm" onClick={(e) => { e.stopPropagation(); setReadyPickupDialog(order.id); }}>
+              <Package className="h-4 w-4 mr-1" /> Ready for Pickup
+            </Button>
+          )}
+          <Button size="sm" variant="destructive" onClick={(e) => { e.stopPropagation(); setCancelDialog(order.id); }}>
+            <XCircle className="h-4 w-4 mr-1" /> Cancel
+          </Button>
+          {shipBadge}
+        </div>
+      );
+    }
+
+    if (s === "shipped") {
+      return (
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" onClick={(e) => { e.stopPropagation(); updateStatus(order.id, { status: "in_transit" }); }}>
+            <Truck className="h-4 w-4 mr-1" /> Mark In Transit
+          </Button>
+          <Button size="sm" variant="destructive" onClick={(e) => { e.stopPropagation(); setCancelDialog(order.id); }}>
+            <XCircle className="h-4 w-4 mr-1" /> Cancel
+          </Button>
+        </div>
+      );
+    }
+
+    if (s === "ready_for_pickup") {
+      return (
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-sm text-muted-foreground flex items-center gap-1"><Clock className="h-4 w-4" /> Waiting for buyer pickup</p>
+          <Button size="sm" variant="destructive" onClick={(e) => { e.stopPropagation(); setCancelDialog(order.id); }}>
+            <XCircle className="h-4 w-4 mr-1" /> Cancel
+          </Button>
+        </div>
+      );
+    }
+
+    if (s === "in_transit") {
+      return (
+        <p className="text-sm text-muted-foreground flex items-center gap-1"><Truck className="h-4 w-4" /> In transit — buyer will confirm delivery</p>
+      );
+    }
+
+    if (s === "delivered" || s === "completed") {
+      return (
+        <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4" /> Order complete</p>
+      );
+    }
+
+    if (s === "pending") {
+      return (
+        <p className="text-sm text-muted-foreground flex items-center gap-1"><Clock className="h-4 w-4" /> Awaiting payment confirmation</p>
+      );
+    }
+
+    return null;
+  };
 
   if (loading) {
     return (
@@ -258,10 +388,11 @@ const SellerOrders = () => {
             <Tabs value={tab} onValueChange={setTab}>
               <TabsList>
                 <TabsTrigger value="all">All ({grouped.length})</TabsTrigger>
-                <TabsTrigger value="pending">Pending</TabsTrigger>
-                <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
+                <TabsTrigger value="paid">Paid</TabsTrigger>
+                <TabsTrigger value="preparing">Preparing</TabsTrigger>
                 <TabsTrigger value="shipped">Shipped</TabsTrigger>
                 <TabsTrigger value="delivered">Delivered</TabsTrigger>
+                <TabsTrigger value="completed">Completed</TabsTrigger>
               </TabsList>
             </Tabs>
             <Input placeholder="Search order # or customer…" className="max-w-xs" value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -297,7 +428,7 @@ const SellerOrders = () => {
                         <TableCell className="text-center">{g.items.length}</TableCell>
                         <TableCell className="text-right font-medium">${g.sellerTotal.toFixed(2)}</TableCell>
                         <TableCell className="text-center">
-                          <Badge variant="outline" className={statusColors[g.order.status] || ""}>{g.order.status}</Badge>
+                          <Badge variant="outline" className={statusColors[g.order.status] || ""}>{renderStatusLabel(g.order.status)}</Badge>
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="outline" className={paymentColors[g.order.payment_status] || ""}>{g.order.payment_status}</Badge>
@@ -348,6 +479,8 @@ const SellerOrders = () => {
                                 )}
 
                                 {/* Timestamps */}
+                                {g.order.acknowledged_at && <p className="text-xs text-muted-foreground">Acknowledged: {format(new Date(g.order.acknowledged_at), "MMM d, yyyy h:mm a")}</p>}
+                                {g.order.preparing_at && <p className="text-xs text-muted-foreground">Preparing since: {format(new Date(g.order.preparing_at), "MMM d, yyyy h:mm a")}</p>}
                                 {g.order.shipped_at && <p className="text-xs text-muted-foreground">Shipped: {format(new Date(g.order.shipped_at), "MMM d, yyyy h:mm a")}</p>}
                                 {g.order.delivered_at && <p className="text-xs text-muted-foreground">Delivered: {format(new Date(g.order.delivered_at), "MMM d, yyyy h:mm a")}</p>}
                                 {g.order.cancelled_at && (
@@ -372,41 +505,15 @@ const SellerOrders = () => {
                                       <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">{item.product_name}</p>
                                         {item.product_sku && <p className="text-xs text-muted-foreground">SKU: {item.product_sku}</p>}
-                                        {item.delivery_option && (() => {
-                                          const prepDays = item.delivery_option === "pickup_only"
-                                            ? item.pickup_prep_days
-                                            : item.delivery_prep_days;
-                                          const countdown = getPrepCountdown(g.order.created_at, prepDays);
-                                          const isUrgent = countdown && countdown.daysLeft <= 1;
-                                          const isWarning = countdown && countdown.daysLeft <= 3 && countdown.daysLeft > 1;
-
-                                          return (
-                                            <div className="text-xs text-muted-foreground space-y-1">
-                                              <p>
-                                                {item.delivery_option === "delivery" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)})`}
-                                                {item.delivery_option === "pickup_only" && `Pickup only${item.pickup_city ? ` — ${item.pickup_city}, ${item.pickup_province}` : ""}`}
-                                                {item.delivery_option === "both" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)}) or Pickup${item.pickup_city ? ` (${item.pickup_city})` : ""}`}
-                                              </p>
-                                              {countdown && (g.order.status === "confirmed" || g.order.status === "pending") && (
-                                                <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
-                                                  isUrgent
-                                                    ? "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
-                                                    : isWarning
-                                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                                                    : "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-                                                }`}>
-                                                  {isUrgent && <AlertTriangle className="h-3 w-3" />}
-                                                  {countdown.daysLeft <= 0
-                                                    ? "Prep overdue!"
-                                                    : `${countdown.daysLeft} day${countdown.daysLeft !== 1 ? "s" : ""} left to prepare`}
-                                                  <span className="text-[10px] opacity-70 ml-1">
-                                                    (by {format(countdown.deadline, "MMM d")})
-                                                  </span>
-                                                </div>
-                                              )}
-                                            </div>
-                                          );
-                                        })()}
+                                        {item.delivery_option && (
+                                          <div className="text-xs text-muted-foreground space-y-1">
+                                            <p>
+                                              {item.delivery_option === "delivery" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)})`}
+                                              {item.delivery_option === "pickup_only" && `Pickup only${item.pickup_city ? ` — ${item.pickup_city}, ${item.pickup_province}` : ""}`}
+                                              {item.delivery_option === "both" && `Delivery ($${Number(item.delivery_price || 0).toFixed(2)}) or Pickup${item.pickup_city ? ` (${item.pickup_city})` : ""}`}
+                                            </p>
+                                          </div>
+                                        )}
                                       </div>
                                       <div className="text-right text-sm">
                                         <p>{item.quantity} × ${item.unit_price.toFixed(2)}</p>
@@ -417,30 +524,8 @@ const SellerOrders = () => {
                                 </div>
 
                                 {/* Action buttons */}
-                                <div className="flex flex-wrap gap-2 mt-4">
-                                  {g.order.status === "pending" && (
-                                    <p className="text-sm text-muted-foreground flex items-center gap-1"><Clock className="h-4 w-4" /> Awaiting payment confirmation</p>
-                                  )}
-                                  {g.order.status === "confirmed" && (
-                                    <>
-                                      <Button size="sm" onClick={(e) => { e.stopPropagation(); setShipDialog(g.order.id); }}>
-                                        <Truck className="h-4 w-4 mr-1" /> Mark as Shipped
-                                      </Button>
-                                      <Button size="sm" variant="destructive" onClick={(e) => { e.stopPropagation(); setCancelDialog(g.order.id); }}>
-                                        <XCircle className="h-4 w-4 mr-1" /> Cancel Order
-                                      </Button>
-                                    </>
-                                  )}
-                                  {g.order.status === "shipped" && (
-                                    <>
-                                      <Button size="sm" onClick={(e) => { e.stopPropagation(); setDeliverDialog(g.order.id); }}>
-                                        <CheckCircle2 className="h-4 w-4 mr-1" /> Mark as Delivered
-                                      </Button>
-                                      <Button size="sm" variant="destructive" onClick={(e) => { e.stopPropagation(); setCancelDialog(g.order.id); }}>
-                                        <XCircle className="h-4 w-4 mr-1" /> Cancel Order
-                                      </Button>
-                                    </>
-                                  )}
+                                <div className="mt-4">
+                                  {renderActionButtons(g)}
                                 </div>
                               </div>
                             </div>
@@ -455,6 +540,47 @@ const SellerOrders = () => {
           </Card>
         </>
       )}
+
+      {/* Acknowledge Dialog */}
+      <Dialog open={!!acknowledgeDialog} onOpenChange={(o) => { if (!o) setAcknowledgeDialog(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Acknowledge Order</DialogTitle>
+            <DialogDescription>
+              Confirm you've received this order and will begin preparing it.
+              {acknowledgeDialog && (() => {
+                const order = grouped.find(g => g.order.id === acknowledgeDialog)?.order;
+                if (order?.must_acknowledge_by) {
+                  return <span className="block mt-1">Deadline: {format(new Date(order.must_acknowledge_by), "MMM d, yyyy h:mm a")}</span>;
+                }
+                return null;
+              })()}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAcknowledgeDialog(null)}>Cancel</Button>
+            <Button disabled={updating} onClick={() => acknowledgeDialog && updateStatus(acknowledgeDialog, { status: "preparing" })}>
+              Acknowledge &amp; Start Preparing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ready for Pickup Dialog */}
+      <Dialog open={!!readyPickupDialog} onOpenChange={(o) => { if (!o) setReadyPickupDialog(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mark Ready for Pickup</DialogTitle>
+            <DialogDescription>Confirm this order is ready for the buyer to pick up at your location.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReadyPickupDialog(null)}>Cancel</Button>
+            <Button disabled={updating} onClick={() => readyPickupDialog && updateStatus(readyPickupDialog, { status: "ready_for_pickup" })}>
+              Confirm Ready
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Ship Dialog */}
       <Dialog open={!!shipDialog} onOpenChange={(o) => { if (!o) setShipDialog(null); }}>
@@ -477,7 +603,6 @@ const SellerOrders = () => {
             <Button variant="outline" onClick={() => setShipDialog(null)}>Cancel</Button>
             <Button disabled={updating} onClick={() => shipDialog && updateStatus(shipDialog, {
               status: "shipped",
-              shipped_at: new Date().toISOString(),
               ...(trackNum && { tracking_number: trackNum }),
               ...(trackUrl && { tracking_url: trackUrl }),
             })}>
