@@ -48,6 +48,28 @@ const AccountOrders = () => {
     refetchOnWindowFocus: true,
   });
 
+  // Fetch open disputes for this user's orders
+  const { data: openDisputes, refetch: refetchDisputes } = useQuery({
+    queryKey: ["account-order-disputes", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("order_disputes")
+        .select("order_id, status")
+        .eq("buyer_id", user!.id)
+        .in("status", ["open", "seller_responded", "admin_reviewing"]);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const hasOpenDispute = (orderId: string) =>
+    openDisputes?.some((d) => d.order_id === orderId) ?? false;
+
+  const canReportIssue = (status: string, orderId: string) =>
+    ["shipped", "in_transit", "ready_for_pickup", "delivered", "completed"].includes(status) &&
+    !hasOpenDispute(orderId);
+
   const handleConfirmDelivery = async (orderId: string) => {
     setConfirmingId(orderId);
     try {
