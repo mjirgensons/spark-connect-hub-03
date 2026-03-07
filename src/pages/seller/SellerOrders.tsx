@@ -130,6 +130,7 @@ const SellerOrders = () => {
         map.set(o.id, { order: o, items: [], sellerTotal: 0 });
       }
       const g = map.get(o.id)!;
+      const prod = (row as any).products || {};
       g.items.push({
         id: row.id,
         product_name: row.product_name,
@@ -138,6 +139,13 @@ const SellerOrders = () => {
         quantity: row.quantity,
         unit_price: row.unit_price,
         total_price: row.total_price,
+        delivery_option: prod.delivery_option ?? null,
+        delivery_price: prod.delivery_price ?? null,
+        delivery_prep_days: prod.delivery_prep_days ?? null,
+        pickup_available: prod.pickup_available ?? null,
+        pickup_prep_days: prod.pickup_prep_days ?? null,
+        pickup_city: prod.pickup_city ?? null,
+        pickup_province: prod.pickup_province ?? null,
       });
       g.sellerTotal += row.unit_price * row.quantity;
     }
