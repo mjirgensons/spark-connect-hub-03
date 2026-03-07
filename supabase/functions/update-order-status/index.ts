@@ -80,7 +80,19 @@ Deno.serve(async (req) => {
     });
   }
 
-  const validStatuses = ["confirmed", "shipped", "delivered", "cancelled"];
+  const validStatuses = ["paid", "preparing", "shipped", "ready_for_pickup", "in_transit", "delivered", "cancelled", "completed"];
+
+  const TRANSITIONS: Record<string, string[]> = {
+    paid: ["preparing", "cancelled"],
+    preparing: ["shipped", "ready_for_pickup", "cancelled"],
+    shipped: ["in_transit", "cancelled"],
+    in_transit: ["delivered"],
+    ready_for_pickup: ["delivered", "cancelled"],
+    delivered: ["completed"],
+    completed: [],
+    cancelled: [],
+  };
+
   if (!validStatuses.includes(status)) {
     return new Response(
       JSON.stringify({ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` }),
