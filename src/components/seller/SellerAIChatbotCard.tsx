@@ -33,11 +33,9 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
     if (!sellerId) return;
     const fetch = async () => {
       setLoading(true);
-      const [profileRes, kbRes, prodRes] = await Promise.all([
-        supabase.from("profiles").select("ai_chatbot_enabled").eq("id", sellerId).single(),
-        (supabase as any).from("seller_knowledge_base").select("id", { count: "exact", head: true }).eq("seller_id", sellerId),
-        supabase.from("products").select("id", { count: "exact", head: true }).eq("seller_id", sellerId).eq("pinecone_synced", true),
-      ]);
+      const profileRes = await supabase.from("profiles").select("ai_chatbot_enabled").eq("id", sellerId).single();
+      const kbRes = await (supabase as any).from("seller_knowledge_base").select("id", { count: "exact", head: true }).eq("seller_id", sellerId);
+      const prodRes = await (supabase as any).from("products").select("id", { count: "exact", head: true }).eq("seller_id", sellerId).eq("pinecone_synced", true);
       const enabled = !!(profileRes.data as any)?.ai_chatbot_enabled;
       setChatbotEnabled(enabled);
       if (enabled) setConsentAccepted(true);
