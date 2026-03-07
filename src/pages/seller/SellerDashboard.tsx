@@ -73,13 +73,23 @@ const SellerDashboard = () => {
         .is("deleted_at", null);
       setProductCount(pCount ?? 0);
 
-      // Active orders
-      const { count: oCount } = await supabase
-        .from("orders")
-        .select("id", { count: "exact", head: true })
-        .eq("seller_id", sellerId)
-        .in("status", ["pending", "confirmed"]);
-      setOrderCount(oCount ?? 0);
+      // Active orders — join through order_items → products to find seller's orders
+      const { data: sellerOrderItems } = await supabase
+        .from("order_items")
+        .select("order_id, unit_price, quantity, orders!inner(id, status), products!inner(seller_id)")
+        .eq("products.seller_id", sellerId);
+
+      const activeOrderIds = new Set<string>();
+      let revenue = 0;
+      for (const row of sellerOrderItems || []) {
+        const order = (row as any).orders;
+        if (order && ["pending", "confirmed"].includes(order.status)) {
+          activeOrderIds.add(row.order_id);
+        }
+        revenue += (row.unit_price ?? 0) * (row.quantity ?? 0);
+      }
+      setOrderCount(activeOrderIds.size);
+      setTotalRevenue(revenue);
 
       // Pending RFQs — quote_requests doesn't have product_id directly,
       // so we count quotes where status = 'new' linked to seller's products via quote_request_items
