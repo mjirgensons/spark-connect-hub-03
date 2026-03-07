@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
   // Get order items joined with products to get seller_id
   const { data: items, error: itemsError } = await supabase
     .from("order_items")
-    .select("product_name, quantity, unit_price, total_price, product_id, products(seller_id)")
+    .select("product_name, quantity, unit_price, total_price, product_id, products(seller_id, delivery_option, delivery_prep_days, pickup_prep_days)")
     .eq("order_id", order_id);
 
   if (itemsError) {
@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
   // Group items by seller_id
   const sellerMap: Record<string, {
     seller_id: string;
-    items: { product_name: string; quantity: number; unit_price: number; total_price: number; product_id: string | null }[];
+    items: { product_name: string; quantity: number; unit_price: number; total_price: number; product_id: string | null; delivery_option: string | null; delivery_prep_days: number | null; pickup_prep_days: number | null }[];
   }> = {};
 
   for (const item of items || []) {
@@ -96,6 +96,9 @@ Deno.serve(async (req) => {
       unit_price: item.unit_price,
       total_price: item.total_price,
       product_id: item.product_id,
+      delivery_option: (item as any).products?.delivery_option ?? null,
+      delivery_prep_days: (item as any).products?.delivery_prep_days ?? null,
+      pickup_prep_days: (item as any).products?.pickup_prep_days ?? null,
     });
   }
 
