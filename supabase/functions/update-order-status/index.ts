@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
   // Fetch current order status for transition validation
   const { data: currentOrder, error: currentOrderErr } = await supabaseAdmin
     .from("orders")
-    .select("status")
+    .select("status, delivery_expected_by")
     .eq("id", order_id)
     .single();
 
@@ -203,6 +203,36 @@ Deno.serve(async (req) => {
   // Shipped: default shipped_at
   if (status === "shipped" && !body.shipped_at) {
     updatePayload.shipped_at = new Date().toISOString();
+  }
+
+  // Calculate delivery_expected_by on first shipped/in_transit transition
+  if ((status === "shipped" || status === "in_transit") && !currentOrder.delivery_expected_by) {
+    try {
+      const { data: orderItems } = await supabaseAdmin
+        .from("order_items")
+        .select("product_id, products(delivery_prep_days)")
+        .eq("order_id", order_id);
+
+      let maxPrepDays = 7; // default
+      if (orderItems && orderItems.length > 0) {
+        for (const item of orderItems) {
+          const prepDays = (item as any).products?.delivery_prep_days;
+          if (typeof prepDays === "number" && prepDays > maxPrepDays) {
+            maxPrepDays = prepDays;
+          }
+        }
+      }
+
+      const expectedBy = new Date();
+      expectedBy.setDate(expectedBy.getDate() + maxPrepDays);
+      updatePayload.delivery_expected_by = expectedBy.toISOString();
+    } catch (err) {
+      console.error("Failed to calculate delivery_expected_by:", err);
+      // Default to 7 days if calculation fails
+      const expectedBy = new Date();
+      expectedBy.setDate(expectedBy.getDate() + 7);
+      updatePayload.delivery_expected_by = expectedBy.toISOString();
+    }
   }
 
   if (status === "delivered" && !body.delivered_at) {
