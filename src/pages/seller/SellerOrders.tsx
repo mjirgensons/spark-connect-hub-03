@@ -223,8 +223,6 @@ const SellerOrders = () => {
 
   useEffect(() => { fetchDisputes(); }, [fetchDisputes]);
 
-  const getDisputeForOrder = (orderId: string) =>
-    disputes.find((d) => d.order_id === orderId && d.status === "open");
 
   const getAnyDisputeForOrder = (orderId: string) =>
     disputes.find((d) => d.order_id === orderId);
