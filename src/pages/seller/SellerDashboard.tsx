@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DollarSign } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
