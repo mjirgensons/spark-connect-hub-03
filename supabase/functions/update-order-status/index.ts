@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
   // Fetch current order status for transition validation
   const { data: currentOrder, error: currentOrderErr } = await supabaseAdmin
     .from("orders")
-    .select("status")
+    .select("status, delivery_expected_by")
     .eq("id", order_id)
     .single();
 
