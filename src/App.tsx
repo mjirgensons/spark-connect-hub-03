@@ -71,6 +71,7 @@ const SellerOrders = lazy(() => import("./pages/seller/SellerOrders"));
 const SellerAnalytics = lazy(() => import("./pages/seller/SellerAnalytics"));
 const SellerQuestions = lazy(() => import("./pages/seller/SellerQuestions"));
 const SellerMessages = lazy(() => import("./pages/seller/SellerMessages"));
+const SellerPayouts = lazy(() => import("./pages/seller/SellerPayouts"));
 
 // Lazy-loaded: Messaging
 const Messages = lazy(() => import("./pages/Messages"));
@@ -204,6 +205,7 @@ const App = () => (
             <Route path="quotes/:quoteId" element={<SellerQuoteDetail />} />
             <Route path="orders" element={<SellerOrders />} />
             <Route path="analytics" element={<SellerAnalytics />} />
+            <Route path="payouts" element={<SellerPayouts />} />
             <Route path="questions" element={<SellerQuestions />} />
             <Route path="messages" element={<SellerMessages />} />
             <Route path="messages/:conversationId" element={<SellerMessages />} />
