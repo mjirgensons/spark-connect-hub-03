@@ -321,6 +321,7 @@ const SellerOrders = () => {
                                   </p>
                                 </div>
 
+                                {g.order.notes && (
                                   <div className="mt-3">
                                     <h4 className="font-semibold text-sm">Notes</h4>
                                     <p className="text-sm text-muted-foreground">{g.order.notes}</p>
