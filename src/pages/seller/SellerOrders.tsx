@@ -186,14 +186,20 @@ const SellerOrders = () => {
     setUpdating(true);
     try {
       const session = await supabase.auth.getSession();
-      const token = session.data.session?.access_token;
-      const res = await supabase.functions.invoke("update-order-status", {
-        body: { order_id: orderId, ...updates },
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
-      if (res.error || res.data?.error) {
-        throw new Error(res.data?.error || res.error?.message || "Update failed");
-      }
+      const token = session.data.session?.access_token || '';
+      const res = await fetch(
+        `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/update-order-status`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ order_id: orderId, ...updates }),
+        }
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Update failed');
       toast({ title: "Order updated" });
       setShipDialog(null); setDeliverDialog(null); setCancelDialog(null);
       setTrackNum(""); setTrackUrl(""); setCancelReason("");
@@ -302,6 +308,17 @@ const SellerOrders = () => {
                                   <p>{g.order.shipping_city}, {g.order.shipping_province} {g.order.shipping_postal_code}</p>
                                   <p>{g.order.shipping_country}</p>
                                   {g.order.shipping_phone && <p>Phone: {g.order.shipping_phone}</p>}
+                                </div>
+
+                                <div className="mt-3">
+                                  <h4 className="font-semibold text-sm flex items-center gap-1">
+                                    <Truck className="h-4 w-4" /> Fulfillment
+                                  </h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    {g.items.some(i => i.delivery_option === 'pickup_only')
+                                      ? 'Customer will pick up this order'
+                                      : 'Delivery to shipping address above'}
+                                  </p>
                                 </div>
 
                                 {g.order.notes && (
