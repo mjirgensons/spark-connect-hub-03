@@ -40,6 +40,7 @@ const SECTION_TITLES: Record<AdminSection, string> = {
   orders: "Orders",
   quotes: "Quotes",
   sellers: "Sellers",
+  "seller-health": "Seller Health",
   "product-review": "Product Review",
   "qa-overview": "Q&A Overview",
   customers: "Customers",
