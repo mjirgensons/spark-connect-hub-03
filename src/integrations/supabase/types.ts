@@ -942,6 +942,69 @@ export type Database = {
         }
         Relationships: []
       }
+      order_disputes: {
+        Row: {
+          admin_note: string | null
+          buyer_email: string
+          buyer_id: string | null
+          created_at: string | null
+          description: string | null
+          dispute_type: string
+          id: string
+          order_id: string
+          resolved_at: string | null
+          seller_responded_at: string | null
+          seller_response: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          admin_note?: string | null
+          buyer_email: string
+          buyer_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          dispute_type: string
+          id?: string
+          order_id: string
+          resolved_at?: string | null
+          seller_responded_at?: string | null
+          seller_response?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          admin_note?: string | null
+          buyer_email?: string
+          buyer_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          dispute_type?: string
+          id?: string
+          order_id?: string
+          resolved_at?: string | null
+          seller_responded_at?: string | null
+          seller_response?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_disputes_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_disputes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string

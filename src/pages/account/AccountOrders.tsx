@@ -11,6 +11,7 @@ import { ChevronDown, ChevronUp, ExternalLink, Loader2, PackageCheck, ShoppingBa
 import { OrderCardSkeleton } from "@/components/ui/order-card-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import ReportIssueDialog from "@/components/ReportIssueDialog";
 import { format } from "date-fns";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "sonner";
@@ -46,6 +47,28 @@ const AccountOrders = () => {
     enabled: !!user,
     refetchOnWindowFocus: true,
   });
+
+  // Fetch open disputes for this user's orders
+  const { data: openDisputes, refetch: refetchDisputes } = useQuery({
+    queryKey: ["account-order-disputes", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("order_disputes")
+        .select("order_id, status")
+        .eq("buyer_id", user!.id)
+        .in("status", ["open", "seller_responded", "admin_reviewing"]);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const hasOpenDispute = (orderId: string) =>
+    openDisputes?.some((d) => d.order_id === orderId) ?? false;
+
+  const canReportIssue = (status: string, orderId: string) =>
+    ["shipped", "in_transit", "ready_for_pickup", "delivered", "completed"].includes(status) &&
+    !hasOpenDispute(orderId);
 
   const handleConfirmDelivery = async (orderId: string) => {
     setConfirmingId(orderId);
@@ -232,6 +255,14 @@ const AccountOrders = () => {
                           <PackageCheck className="h-4 w-4" />
                           Delivery confirmed on {format(new Date((order as any).delivery_confirmed_at), "MMM d, yyyy")}
                         </div>
+                      )}
+
+                      {/* Report Issue */}
+                      {canReportIssue(order.status, order.id) && (
+                        <ReportIssueDialog
+                          orderId={order.id}
+                          onReported={() => refetchDisputes()}
+                        />
                       )}
 
                       {/* Price breakdown */}

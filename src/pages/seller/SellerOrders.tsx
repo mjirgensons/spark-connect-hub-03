@@ -22,6 +22,16 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 
+interface Dispute {
+  id: string;
+  order_id: string;
+  dispute_type: string;
+  description: string | null;
+  status: string;
+  seller_response: string | null;
+  created_at: string;
+}
+
 interface OrderItem {
   id: string;
   product_name: string;
@@ -149,6 +159,12 @@ const SellerOrders = () => {
   const [readyPickupDialog, setReadyPickupDialog] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
 
+  // Dispute state
+  const [disputes, setDisputes] = useState<Dispute[]>([]);
+  const [disputeViewId, setDisputeViewId] = useState<string | null>(null);
+  const [disputeResponse, setDisputeResponse] = useState("");
+  const [respondingDispute, setRespondingDispute] = useState(false);
+
   const fetchOrders = useCallback(async () => {
     if (!effectiveId) return;
     setLoading(true);
@@ -194,6 +210,47 @@ const SellerOrders = () => {
   }, [effectiveId]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
+
+  // Fetch disputes for seller's orders
+  const fetchDisputes = useCallback(async () => {
+    if (!effectiveId) return;
+    const { data } = await supabase
+      .from("order_disputes")
+      .select("id, order_id, dispute_type, description, status, seller_response, created_at")
+      .in("status", ["open", "seller_responded", "admin_reviewing"]);
+    if (data) setDisputes(data as Dispute[]);
+  }, [effectiveId]);
+
+  useEffect(() => { fetchDisputes(); }, [fetchDisputes]);
+
+
+  const getAnyDisputeForOrder = (orderId: string) =>
+    disputes.find((d) => d.order_id === orderId);
+
+  const handleDisputeRespond = async () => {
+    const dispute = disputeViewId ? getAnyDisputeForOrder(disputeViewId) : null;
+    if (!dispute || !disputeResponse.trim()) return;
+    setRespondingDispute(true);
+    try {
+      const { error } = await supabase
+        .from("order_disputes")
+        .update({
+          seller_response: disputeResponse.trim(),
+          seller_responded_at: new Date().toISOString(),
+          status: "seller_responded",
+        })
+        .eq("id", dispute.id);
+      if (error) throw error;
+      toast({ title: "Response submitted" });
+      setDisputeViewId(null);
+      setDisputeResponse("");
+      fetchDisputes();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setRespondingDispute(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     let list = grouped;
@@ -428,7 +485,18 @@ const SellerOrders = () => {
                         <TableCell className="text-center">{g.items.length}</TableCell>
                         <TableCell className="text-right font-medium">${g.sellerTotal.toFixed(2)}</TableCell>
                         <TableCell className="text-center">
-                          <Badge variant="outline" className={statusColors[g.order.status] || ""}>{renderStatusLabel(g.order.status)}</Badge>
+                          <div className="flex items-center justify-center gap-1.5">
+                            <Badge variant="outline" className={statusColors[g.order.status] || ""}>{renderStatusLabel(g.order.status)}</Badge>
+                            {getAnyDisputeForOrder(g.order.id) && (
+                              <Badge
+                                variant="outline"
+                                className="bg-red-500/15 text-red-700 border-red-300 text-[10px] cursor-pointer"
+                                onClick={(e) => { e.stopPropagation(); setDisputeViewId(g.order.id); setDisputeResponse(""); }}
+                              >
+                                Dispute
+                              </Badge>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="outline" className={paymentColors[g.order.payment_status] || ""}>{g.order.payment_status}</Badge>
@@ -652,6 +720,71 @@ const SellerOrders = () => {
               Cancel Order
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dispute View/Respond Dialog */}
+      <Dialog open={!!disputeViewId} onOpenChange={(o) => { if (!o) setDisputeViewId(null); }}>
+        <DialogContent>
+          {(() => {
+            const dispute = disputeViewId ? getAnyDisputeForOrder(disputeViewId) : null;
+            if (!dispute) return null;
+            const typeLabels: Record<string, string> = {
+              not_received: "Not received",
+              wrong_item: "Wrong item",
+              damaged: "Damaged",
+              other: "Other",
+            };
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle>Buyer Dispute</DialogTitle>
+                  <DialogDescription>
+                    Reported on {format(new Date(dispute.created_at), "MMM d, yyyy h:mm a")}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs font-bold text-muted-foreground uppercase">Issue Type</p>
+                    <p className="text-sm font-medium">{typeLabels[dispute.dispute_type] || dispute.dispute_type}</p>
+                  </div>
+                  {dispute.description && (
+                    <div>
+                      <p className="text-xs font-bold text-muted-foreground uppercase">Description</p>
+                      <p className="text-sm">{dispute.description}</p>
+                    </div>
+                  )}
+                  {dispute.seller_response ? (
+                    <div>
+                      <p className="text-xs font-bold text-muted-foreground uppercase">Your Response</p>
+                      <p className="text-sm">{dispute.seller_response}</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <Label>Your Response</Label>
+                      <Textarea
+                        value={disputeResponse}
+                        onChange={(e) => setDisputeResponse(e.target.value)}
+                        placeholder="Respond to the buyer's issue..."
+                        rows={3}
+                      />
+                    </div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setDisputeViewId(null)}>Close</Button>
+                  {!dispute.seller_response && (
+                    <Button
+                      disabled={respondingDispute || !disputeResponse.trim()}
+                      onClick={handleDisputeRespond}
+                    >
+                      Submit Response
+                    </Button>
+                  )}
+                </DialogFooter>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>
