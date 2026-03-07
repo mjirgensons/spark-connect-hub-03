@@ -47,7 +47,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         const cleaned = state.items.filter(
           (i) => i.productId !== pid && !i.productId.startsWith(pid + "_option_")
         );
-        return recalc([...cleaned, { ...action.payload, quantity: 1 }]);
+        return recalc([...cleaned, { ...action.payload, itemType: 'main' as const, quantity: 1 }]);
       }
 
       // ADD-ON: never remove anything. Just check for duplicate — skip if exists, append if new.
