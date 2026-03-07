@@ -8,6 +8,7 @@ export interface CartItem {
   quantity: number;
   dimensions: string;
   maxStock: number;
+  itemType?: 'main' | 'addon' | 'delivery';
   // Delivery fields (per-product)
   deliveryChoice?: 'delivery' | 'pickup' | null;
   deliveryPrice?: number;
@@ -32,7 +33,7 @@ type CartAction =
 
 const recalc = (items: CartItem[]): CartState => ({
   items,
-  itemCount: items.reduce((s, i) => s + i.quantity, 0),
+  itemCount: items.filter((i) => i.itemType === 'main' || (!i.itemType && !i.productId.includes("_option_"))).length,
   subtotal: items.reduce((s, i) => s + i.price * i.quantity, 0),
 });
 
@@ -47,14 +48,14 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         const cleaned = state.items.filter(
           (i) => i.productId !== pid && !i.productId.startsWith(pid + "_option_")
         );
-        return recalc([...cleaned, { ...action.payload, quantity: 1 }]);
+        return recalc([...cleaned, { ...action.payload, itemType: 'main' as const, quantity: 1 }]);
       }
 
       // ADD-ON: never remove anything. Just check for duplicate — skip if exists, append if new.
       if (state.items.some((i) => i.productId === pid)) {
         return state; // already exists, skip
       }
-      return recalc([...state.items, { ...action.payload, quantity: 1 }]);
+      return recalc([...state.items, { ...action.payload, itemType: 'addon' as const, quantity: 1 }]);
     }
     case "REMOVE_ITEM":
       return recalc(state.items.filter((i) => i.productId !== action.payload));
