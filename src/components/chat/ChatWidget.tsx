@@ -114,7 +114,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
   const [hasOpened, setHasOpened] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const [launcherIcon, setLauncherIcon] = useState<"chat" | "mic">("chat");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
