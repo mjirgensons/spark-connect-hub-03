@@ -81,19 +81,24 @@ function SignUpView({
     }
     setBusy(true);
     try {
-      const { data, error: authErr } = await supabase.auth.signUp({
+      const { error: authErr } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: { data: { full_name: name.trim(), user_type: "client" } },
       });
       if (authErr) throw authErr;
-      // If session returned immediately (auto-confirm enabled), skip OTP
-      if (data.session) {
-        await callConsentEdge(email.trim(), marketingOptIn, sessionId);
-        onAuthenticated();
-        return;
-      }
+      // Account created with session (auto-confirm enabled). Now send custom OTP.
       _pendingFormData = { email: email.trim(), name: name.trim(), marketingOptIn };
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      try {
+        await fetch(`${supabaseUrl}/functions/v1/send-verification-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim() }),
+        });
+      } catch {
+        // non-blocking — user can resend from OTP view
+      }
       onOtp({ email: email.trim() });
     } catch (err: any) {
       setError(err.message || "Sign up failed.");
