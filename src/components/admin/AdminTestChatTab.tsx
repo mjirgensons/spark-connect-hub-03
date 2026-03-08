@@ -349,6 +349,15 @@ const AdminTestChatTab = ({ onNavigateToChatbotSettings }: AdminTestChatTabProps
   );
 
   return (
+    <div className="space-y-3">
+      {onNavigateToChatbotSettings && (
+        <button
+          onClick={onNavigateToChatbotSettings}
+          className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors flex items-center gap-1"
+        >
+          <ArrowLeft className="w-3 h-3" /> Chatbot Settings
+        </button>
+      )}
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList>
         <TabsTrigger value="console" className="gap-1.5">
