@@ -66,15 +66,13 @@ Deno.serve(async (req) => {
       body: JSON.stringify(payload ?? {}),
     })
 
+    const responseText = await n8nRes.text();
     let data;
     try {
-      data = await n8nRes.json();
+      data = JSON.parse(responseText);
     } catch {
-      const text = await n8nRes.text();
-      data = { text };
+      data = { text: responseText };
     }
-
-    return new Response(JSON.stringify(data), {
       status: n8nRes.status,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     })
