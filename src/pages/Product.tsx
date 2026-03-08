@@ -77,6 +77,24 @@ const Product = () => {
     staleTime: 5 * 60 * 1000,
   });
 
+  // ── Seller chatbot enabled check ──
+  const sellerId = product?.seller_id;
+  const { data: sellerProfile } = useQuery({
+    queryKey: ["seller-chatbot-enabled", sellerId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("ai_chatbot_enabled, company_name, full_name")
+        .eq("id", sellerId!)
+        .single();
+      return data;
+    },
+    enabled: !!sellerId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const sellerChatbotEnabled = sellerProfile?.ai_chatbot_enabled === true;
+  const sellerStoreName = (sellerProfile?.company_name || sellerProfile?.full_name || "this seller");
   const chatDelaySeconds = parseInt(chatbotSettings?.chatbot_auto_open_delay_seconds || "30", 10) || 30;
   const consentModalEnabled = chatbotSettings?.chatbot_consent_modal_enabled !== "false";
 
@@ -85,8 +103,7 @@ const Product = () => {
   const chatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const sellerEnabled = (product as any)?.ai_chatbot_enabled === true;
-    if (!sellerEnabled || isMobile) {
+    if (!sellerChatbotEnabled || isMobile) {
       setShowChat(false);
       return;
     }
@@ -94,7 +111,7 @@ const Product = () => {
     return () => {
       if (chatTimerRef.current) clearTimeout(chatTimerRef.current);
     };
-  }, [product, isMobile, chatDelaySeconds]);
+  }, [sellerChatbotEnabled, isMobile, chatDelaySeconds]);
 
   // ── Sticky mini sidebar visibility ──
   const heroRef = useRef<HTMLDivElement>(null);
