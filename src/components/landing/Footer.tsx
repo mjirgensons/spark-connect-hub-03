@@ -121,7 +121,7 @@ const Footer = () => {
       </div>
 
       {/* ROW 3 — Newsletter + Contact */}
-      <div className="border-t border-gray-800">
+      <div className="border-t border-border">
         <div className="container mx-auto px-4 py-12">
           <div className="grid md:grid-cols-2 gap-12">
             {/* Newsletter */}
