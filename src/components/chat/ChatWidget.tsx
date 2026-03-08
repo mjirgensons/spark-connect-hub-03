@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, X, ArrowUp, ExternalLink } from "lucide-react";
+import { MessageCircle, X, ArrowUp, ExternalLink, Mic, MicOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useChatSession, type ChatMessage } from "./useChatSession";
 import ChatConsentModal from "./ChatConsentModal";
@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useVoiceInput } from "./useVoiceInput";
 
 interface ChatWidgetProps {
   sellerId: string;
@@ -212,6 +213,13 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
   const handleDecline = useCallback(() => setOpen(false), []);
 
   const [draft, setDraft] = useState("");
+
+  const { isSupported: voiceSupported, isListening, startListening, stopListening } = useVoiceInput({
+    onTranscript: useCallback((text: string) => {
+      setDraft((prev) => (prev ? prev + " " + text : text));
+    }, []),
+  });
+
   const handleSend = useCallback(() => {
     if (!draft.trim() || loading) return;
     sendMessage(draft);
@@ -228,6 +236,11 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     [handleSend]
   );
 
+  const handleMicToggle = useCallback(() => {
+    if (isListening) stopListening();
+    else startListening();
+  }, [isListening, startListening, stopListening]);
+
   return (
     <>
       {/* Keyframes injected once */}
@@ -235,6 +248,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
         @keyframes chat-bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-4px)}}
         @keyframes chatPulse{0%{box-shadow:0 0 0 0 rgba(0,0,0,0.4)}70%{box-shadow:0 0 0 12px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
         @keyframes chatEntrance{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+        @keyframes mic-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.08)}}
       `}</style>
 
       {/* Launcher */}
@@ -311,25 +325,45 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
               </ScrollArea>
 
               {/* Input */}
-              <div className="shrink-0 border-t-2 border-foreground p-3 flex items-center gap-2">
-                <input
-                  ref={inputRef}
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  disabled={loading}
-                  placeholder="Ask about this product..."
-                  className="flex-1 h-9 px-3 text-sm font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
-                  style={{ borderRadius: 0 }}
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={loading || !draft.trim()}
-                  aria-label="Send message"
-                  className="w-9 h-9 flex items-center justify-center bg-foreground text-background rounded-full shrink-0 disabled:opacity-40 hover:opacity-80 transition-opacity"
-                >
-                  <ArrowUp className="w-4 h-4" />
-                </button>
+              <div className="shrink-0 border-t-2 border-foreground p-3">
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={inputRef}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={loading}
+                    placeholder="Ask about this product..."
+                    className="flex-1 h-9 px-3 text-sm font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
+                    style={{ borderRadius: 0 }}
+                  />
+                  {voiceSupported && (
+                    <button
+                      onClick={handleMicToggle}
+                      disabled={loading}
+                      aria-label={isListening ? "Stop listening" : "Start voice input"}
+                      className={`w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full shrink-0 transition-all disabled:opacity-40 ${
+                        isListening
+                          ? "bg-destructive text-destructive-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      }`}
+                      style={isListening ? { animation: "mic-pulse 1.5s ease-in-out infinite" } : undefined}
+                    >
+                      {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    </button>
+                  )}
+                  <button
+                    onClick={handleSend}
+                    disabled={loading || !draft.trim()}
+                    aria-label="Send message"
+                    className="w-9 h-9 flex items-center justify-center bg-foreground text-background rounded-full shrink-0 disabled:opacity-40 hover:opacity-80 transition-opacity"
+                  >
+                    <ArrowUp className="w-4 h-4" />
+                  </button>
+                </div>
+                {isListening && (
+                  <p className="text-xs text-muted-foreground mt-1.5 animate-pulse">Listening...</p>
+                )}
               </div>
             </>
           )}
