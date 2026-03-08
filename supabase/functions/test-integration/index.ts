@@ -174,17 +174,7 @@ Deno.serve(async (req) => {
         break;
       }
       case "elevenlabs": {
-        const apiKey = creds.api_key;
-        if (!apiKey) {
-          result = { status: "error", message: "ElevenLabs API key required" };
-          break;
-        }
-        const res = await fetch("https://api.elevenlabs.io/v1/user", {
-          headers: { "xi-api-key": apiKey },
-        });
-        result = res.ok
-          ? { status: "healthy", message: "ElevenLabs connection verified" }
-          : { status: "error", message: `ElevenLabs returned ${res.status}` };
+        result = { status: "error", message: "ElevenLabs integration has been removed" };
         break;
       }
       default:
