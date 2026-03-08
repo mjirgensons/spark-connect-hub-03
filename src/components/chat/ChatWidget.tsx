@@ -379,15 +379,21 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
               {/* Input */}
               <div className="shrink-0 border-t-2 border-foreground p-3">
                 <div className="flex items-center gap-2">
-                  <input
+                  <textarea
                     ref={inputRef}
                     value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
+                    onChange={(e) => {
+                      setDraft(e.target.value);
+                      const el = e.target;
+                      el.style.height = "auto";
+                      el.style.height = Math.min(el.scrollHeight, 4 * 24) + "px";
+                    }}
                     onKeyDown={handleKeyDown}
                     disabled={loading}
+                    rows={1}
                     placeholder="Ask about this product..."
-                    className="flex-1 h-9 px-3 text-sm font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
-                    style={{ borderRadius: 0 }}
+                    className="flex-1 min-h-[36px] px-3 py-2 text-sm font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 resize-none overflow-y-auto"
+                    style={{ borderRadius: 0, maxHeight: 4 * 24 }}
                   />
                   {voiceSupported && (
                     <div className="relative shrink-0 flex items-center justify-center" style={{ width: 44, height: 44 }}>
