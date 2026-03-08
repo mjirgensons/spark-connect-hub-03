@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, MessageCircleOff, X, ArrowUp, ExternalLink } from "lucide-react";
+import { MessageCircle, X, ArrowUp, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useChatSession, type ChatMessage } from "./useChatSession";
 import ChatConsentModal from "./ChatConsentModal";
@@ -86,7 +86,7 @@ function InactiveChatBody({ sellerId, productId, productName }: { sellerId: stri
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 text-center gap-4">
-      <MessageCircleOff className="w-10 h-10 text-muted-foreground" />
+      <MessageCircle className="w-10 h-10 text-muted-foreground" />
       <div className="space-y-2">
         <p className="font-sans font-bold text-sm text-foreground">AI Assistant Not Available</p>
         <p className="text-sm text-muted-foreground leading-relaxed">
@@ -228,27 +228,29 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     [handleSend]
   );
 
-  const LauncherIcon = chatbotActive ? MessageCircle : MessageCircleOff;
-
   return (
     <>
-      {/* Bounce keyframes injected once */}
-      <style>{`@keyframes chat-bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-4px)}}`}</style>
+      {/* Keyframes injected once */}
+      <style>{`
+        @keyframes chat-bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-4px)}}
+        @keyframes chatPulse{0%{box-shadow:0 0 0 0 rgba(0,0,0,0.4)}70%{box-shadow:0 0 0 12px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+        @keyframes chatEntrance{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+      `}</style>
 
       {/* Launcher */}
       {!open && (
         <button
           onClick={handleOpen}
-          aria-label={chatbotActive ? "Open chat with AI assistant" : "AI assistant not available — click for options"}
+          aria-label="Open chat"
           className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-foreground text-background flex items-center justify-center rounded-full"
-          style={{ boxShadow: "4px 4px 0px hsl(var(--foreground))" }}
+          style={{
+            boxShadow: "4px 4px 0px hsl(var(--foreground))",
+            animation: "chatEntrance 400ms ease-out, chatPulse 2s 400ms infinite",
+          }}
         >
-          <LauncherIcon className="w-6 h-6" />
+          <MessageCircle className="w-6 h-6" />
           {hasUnread && chatbotActive && (
             <span className="absolute top-0 right-0 w-3 h-3 bg-destructive rounded-full" />
-          )}
-          {!chatbotActive && (
-            <span className="absolute top-0 right-0 w-3 h-3 bg-amber-500 rounded-full" />
           )}
         </button>
       )}
