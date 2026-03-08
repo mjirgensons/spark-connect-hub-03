@@ -112,7 +112,7 @@ const Product = () => {
   const chatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!sellerChatbotEnabled || isChatMobile) {
+    if (isChatMobile) {
       setShowChat(false);
       return;
     }
@@ -120,7 +120,7 @@ const Product = () => {
     return () => {
       if (chatTimerRef.current) clearTimeout(chatTimerRef.current);
     };
-  }, [sellerChatbotEnabled, isChatMobile, chatDelaySeconds]);
+  }, [isChatMobile, chatDelaySeconds]);
 
 
   // ── Sticky mini sidebar visibility ──
