@@ -50,7 +50,8 @@ export type AdminSection =
   | "blog"
   | "newsletter"
   | "cookie-manager"
-  | "settings";
+  | "settings"
+  | "test-chat";
 
 interface AdminSidebarProps {
   active: AdminSection;
