@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const CheckoutContent = () => {
-  usePageMeta("Checkout");
+  usePageMeta("Checkout", "Complete your order for premium European cabinetry at FitMatch.");
   const { items } = useCart();
   const { step } = useCheckout();
   const navigate = useNavigate();

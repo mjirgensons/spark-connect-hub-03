@@ -25,9 +25,18 @@ import ProductStickySidebar from "@/components/product/ProductStickySidebar";
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
-  usePageMeta();
-
   const { product, isLoading, error, productOptions, productAppliances, relatedProducts } = useProductData(id);
+
+  // Dynamic SEO meta
+  usePageMeta({
+    title: product ? `${product.product_name} — FitMatch` : "Loading…",
+    description: product
+      ? ((product.short_description || product.long_description || "Premium European cabinet available at FitMatch.").slice(0, 155))
+      : undefined,
+    ogType: "product",
+    ogImage: product?.main_image_url || undefined,
+    ogUrl: id ? `https://fitmatch.ca/product/${id}` : undefined,
+  });
 
   const {
     qtyInCart,

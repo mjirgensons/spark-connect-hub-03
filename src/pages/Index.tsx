@@ -12,7 +12,13 @@ import Footer from "@/components/landing/Footer";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const Index = () => {
-  usePageMeta();
+  usePageMeta({
+    title: "FitMatch — Premium European Cabinetry at 50-80% Off | GTA",
+    description: "Shop premium European kitchen and bathroom cabinets at 50-80% off retail. Free quotes, local delivery in the Greater Toronto Area.",
+    ogType: "website",
+    ogImage: "https://fitmatch.ca/og-image.jpg",
+    ogUrl: "https://fitmatch.ca/",
+  });
   return (
     <div className="min-h-screen bg-background">
       <Header />
