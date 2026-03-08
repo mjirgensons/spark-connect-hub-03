@@ -64,12 +64,13 @@ export function useVoiceInput({ onTranscript, onInterim, lang }: UseVoiceInputOp
   const startListening = useCallback(() => {
     if (!recognitionRef.current || isListening) return;
     try {
+      if (lang) recognitionRef.current.lang = lang;
       recognitionRef.current.start();
       setIsListening(true);
     } catch (e) {
       console.error("Failed to start speech recognition:", e);
     }
-  }, [isListening]);
+  }, [isListening, lang]);
 
   const stopListening = useCallback(() => {
     if (!recognitionRef.current) return;
