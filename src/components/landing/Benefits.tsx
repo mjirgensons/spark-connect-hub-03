@@ -70,6 +70,8 @@ const Benefits = React.memo(() => {
       </div>
     </section>
   );
-};
+});
+
+Benefits.displayName = "Benefits";
 
 export default Benefits;

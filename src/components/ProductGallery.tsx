@@ -154,6 +154,8 @@ const ProductGallery = React.memo(({ mainImage, additionalImages, productName, d
       </Dialog>
     </>
   );
-};
+});
+
+ProductGallery.displayName = "ProductGallery";
 
 export default ProductGallery;

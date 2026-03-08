@@ -105,6 +105,8 @@ const ForContractors = React.memo(() => {
       </div>
     </section>
   );
-};
+});
+
+ForContractors.displayName = "ForContractors";
 
 export default ForContractors;

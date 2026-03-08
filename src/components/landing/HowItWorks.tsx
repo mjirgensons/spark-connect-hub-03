@@ -72,6 +72,8 @@ const HowItWorks = React.memo(() => {
       </div>
     </section>
   );
-};
+});
+
+HowItWorks.displayName = "HowItWorks";
 
 export default HowItWorks;
