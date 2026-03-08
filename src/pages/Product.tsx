@@ -586,6 +586,7 @@ const Product = () => {
             sellerName={(product as any).seller_store_name || "this seller"}
             productId={product.id}
             userRole={user ? "registered" : "guest"}
+            skipConsent={!consentModalEnabled}
           />
         </div>
       )}
