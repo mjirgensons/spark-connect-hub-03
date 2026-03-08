@@ -14,7 +14,7 @@ const formatPrice = (n: number) =>
   n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const Cart = () => {
-  usePageMeta("Your Cart");
+  usePageMeta("Your Cart", "Review your selected premium European cabinets before checkout.");
   const { items, dispatch } = useCart();
 
   const isAddon = (productId: string) => productId.includes("_option_");
