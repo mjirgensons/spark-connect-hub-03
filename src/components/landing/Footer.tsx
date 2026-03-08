@@ -107,7 +107,7 @@ const Footer = () => {
                           {link.label}
                         </a>
                       ) : (
-                        <Link to={link.to} className="text-sm text-gray-400 hover:text-background transition-colors inline-block min-h-[44px] py-2">
+                        <Link to={link.to} className="text-sm text-muted-foreground hover:text-background transition-colors inline-block min-h-[44px] py-2">
                           {link.label}
                         </Link>
                       )}
