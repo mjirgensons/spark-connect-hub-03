@@ -44,9 +44,17 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Build the full n8n webhook URL — strip trailing slash from base, prepend webhookPath
-  const base = n8nBaseUrl.replace(/\/webhook\/?$/, '').replace(/\/$/, '')
+  // Debug: log URL construction
+  console.log("N8N_WEBHOOK_URL =", n8nBaseUrl)
+  console.log("webhookPath =", webhookPath)
+
+  // Build the full n8n webhook URL
+  // N8N_WEBHOOK_URL may be "https://x.app.n8n.cloud/webhook/UUID" or just "https://x.app.n8n.cloud"
+  // webhookPath is "/webhook/seller-chatbot", so strip everything from /webhook onward in the base
+  const base = n8nBaseUrl.replace(/\/webhook.*$/, '')
   const url = `${base}${webhookPath}`
+
+  console.log("chatbot-proxy →", url)
 
   try {
     const n8nRes = await fetch(url, {
@@ -58,12 +66,12 @@ Deno.serve(async (req) => {
       body: JSON.stringify(payload ?? {}),
     })
 
+    const responseText = await n8nRes.text();
     let data;
     try {
-      data = await n8nRes.json();
+      data = JSON.parse(responseText);
     } catch {
-      const text = await n8nRes.text();
-      data = { text };
+      data = { text: responseText };
     }
 
     return new Response(JSON.stringify(data), {
