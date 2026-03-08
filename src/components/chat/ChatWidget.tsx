@@ -36,7 +36,7 @@ function Timestamp({ date }: { date: Date }) {
   return <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">{t}</span>;
 }
 
-export default function ChatWidget({ sellerId, sellerName, productId, userRole }: ChatWidgetProps) {
+export default function ChatWidget({ sellerId, sellerName, productId, userRole, skipConsent = false }: ChatWidgetProps) {
   const [open, setOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
