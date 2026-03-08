@@ -111,7 +111,9 @@ function InactiveChatBody({ sellerId, productId, productName }: { sellerId: stri
 
 export default function ChatWidget({ sellerId, sellerName, productId, userRole, skipConsent = false, chatbotActive = true }: ChatWidgetProps) {
   const [open, setOpen] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
+  const [launcherIcon, setLauncherIcon] = useState<"chat" | "mic">("chat");
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
