@@ -60,6 +60,22 @@ const Product = () => {
   const [activeTab, setActiveTab] = useState("specs");
   const [qaPrefill, setQaPrefill] = useState<{ text: string; optionId: string } | null>(null);
 
+  // ── Chat widget delayed reveal ──
+  const [showChat, setShowChat] = useState(false);
+  const chatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const sellerEnabled = (product as any)?.ai_chatbot_enabled === true;
+    if (!sellerEnabled || isMobile) {
+      setShowChat(false);
+      return;
+    }
+    chatTimerRef.current = setTimeout(() => setShowChat(true), 30000);
+    return () => {
+      if (chatTimerRef.current) clearTimeout(chatTimerRef.current);
+    };
+  }, [product, isMobile]);
+
   // ── Sticky mini sidebar visibility ──
   const heroRef = useRef<HTMLDivElement>(null);
   const [showMiniSidebar, setShowMiniSidebar] = useState(false);
