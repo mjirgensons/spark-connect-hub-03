@@ -1,3 +1,4 @@
+import React from "react";
 import { Ruler, Search, Package, CheckCircle } from "lucide-react";
 
 const steps = [
