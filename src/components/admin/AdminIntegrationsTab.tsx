@@ -141,20 +141,27 @@ const AdminIntegrationsTab = () => {
   }, [logLimit, logFilter]);
 
   const fetchLastFired = useCallback(async () => {
+    const allEvents = WEBHOOK_EVENTS.map(we => we.event);
+    const testEvents = allEvents.map(e => `${e}.test`);
+    const allKeys = [...allEvents, ...testEvents];
+
+    const { data } = await supabase
+      .from("webhook_logs")
+      .select("event_type, created_at, status")
+      .in("event_type", allKeys)
+      .order("created_at", { ascending: false });
+
     const fired: Record<string, string> = {};
     const statuses: Record<string, string> = {};
-    for (const we of WEBHOOK_EVENTS) {
-      // Get the most recent log for this event (regardless of status)
-      const { data } = await supabase
-        .from("webhook_logs")
-        .select("created_at, status")
-        .or(`event_type.eq.${we.event},event_type.eq.${we.event}.test`)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (data) {
-        fired[we.event] = data.created_at;
-        statuses[we.event] = data.status as string;
+    if (data) {
+      for (const we of WEBHOOK_EVENTS) {
+        const match = data.find(
+          (d: any) => d.event_type === we.event || d.event_type === `${we.event}.test`
+        );
+        if (match) {
+          fired[we.event] = match.created_at;
+          statuses[we.event] = match.status as string;
+        }
       }
     }
     setLastFired(fired);
