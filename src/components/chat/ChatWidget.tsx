@@ -385,7 +385,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
               </ScrollArea>
 
               {/* Input */}
-              <div className="shrink-0 border-t-2 border-foreground p-3">
+              <div className="shrink-0 min-h-[56px] h-auto border-t-2 border-foreground p-3">
                 <div className="flex items-end gap-2">
                   <textarea
                     ref={inputRef}
@@ -402,8 +402,8 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                     placeholder="Ask about this product..."
                     spellCheck={false}
                     autoCorrect="off"
-                    className="flex-1 min-h-[40px] px-3 py-2.5 text-sm font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 resize-none overflow-y-auto box-border"
-                    style={{ borderRadius: 0, maxHeight: 120 }}
+                    className="flex-1 min-h-[40px] h-[40px] px-3 py-2.5 text-sm leading-5 font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 resize-none overflow-y-auto box-border appearance-none"
+                    style={{ borderRadius: 0, maxHeight: 120, boxSizing: "border-box" }}
                   />
                   {voiceSupported && (
                     <div className="relative shrink-0 flex items-center justify-center" style={{ width: 44, height: 44 }}>
