@@ -51,7 +51,8 @@ export type AdminSection =
   | "newsletter"
   | "cookie-manager"
   | "settings"
-  | "test-chat";
+  | "test-chat"
+  | "ai-chatbot";
 
 interface AdminSidebarProps {
   active: AdminSection;
