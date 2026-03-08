@@ -243,9 +243,13 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
   );
 
   const handleMicToggle = useCallback(() => {
-    if (isListening) stopListening();
-    else startListening();
-  }, [isListening, startListening, stopListening]);
+    if (isListening) {
+      stopListening();
+    } else {
+      prefixRef.current = draft.trim();
+      startListening();
+    }
+  }, [isListening, startListening, stopListening, draft]);
 
   return (
     <>
