@@ -133,7 +133,7 @@ const ProductGallery = React.memo(({ mainImage, additionalImages, productName, d
             )}
             <img
               src={allImages[selectedIndex]}
-              alt={`${productName} full view`}
+              alt={`${productName} — image ${selectedIndex + 1}`}
               className="max-h-[80vh] w-auto mx-auto object-contain"
             />
             {allImages.length > 1 && (
