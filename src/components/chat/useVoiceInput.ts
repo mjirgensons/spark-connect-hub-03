@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 interface UseVoiceInputOptions {
   onTranscript: (text: string) => void;
   onInterim?: (text: string) => void;
+  lang?: string;
 }
 
 interface UseVoiceInputReturn {
