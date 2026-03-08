@@ -70,20 +70,20 @@ const Footer = () => {
             </div>
             <div>
               <span className="font-serif text-xl font-semibold">Fit-Match</span>
-              <span className="block text-xs text-gray-400 -mt-1">Luxury Cabinet Exchange</span>
-              <p className="text-sm text-gray-400 mt-3 max-w-md">
+              <span className="block text-xs text-muted-foreground -mt-1">Luxury Cabinet Exchange</span>
+              <p className="text-sm text-muted-foreground mt-3 max-w-md">
                 GTA's premier marketplace for premium European cabinetry at 50-80% off retail.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <a href="#" aria-label="Instagram" className="text-gray-400 hover:text-background transition-colors">
+            <a href="#" aria-label="Instagram" className="text-muted-foreground hover:text-background transition-colors">
               <Instagram className="w-5 h-5" />
             </a>
-            <a href="#" aria-label="Facebook" className="text-gray-400 hover:text-background transition-colors">
+            <a href="#" aria-label="Facebook" className="text-muted-foreground hover:text-background transition-colors">
               <Facebook className="w-5 h-5" />
             </a>
-            <a href="#" aria-label="LinkedIn" className="text-gray-400 hover:text-background transition-colors">
+            <a href="#" aria-label="LinkedIn" className="text-muted-foreground hover:text-background transition-colors">
               <Linkedin className="w-5 h-5" />
             </a>
           </div>
@@ -91,23 +91,23 @@ const Footer = () => {
       </div>
 
       {/* ROW 2 — Link Grid */}
-      <div className="border-t border-gray-800">
+      <div className="border-t border-border">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
             {linkColumns.map((col) => (
               <div key={col.title}>
-                <h4 className="font-sans font-bold text-sm tracking-wider uppercase mb-4">
+                <p className="font-sans font-bold text-sm tracking-wider uppercase mb-4">
                   {col.title}
-                </h4>
+                </p>
                 <ul className="space-y-1">
                   {col.links.map((link) => (
                     <li key={link.label}>
                       {link.to === "#" ? (
-                        <a href="#" className="text-sm text-gray-400 hover:text-background transition-colors inline-block min-h-[44px] py-2">
+                        <a href="#" className="text-sm text-muted-foreground hover:text-background transition-colors inline-block min-h-[44px] py-2">
                           {link.label}
                         </a>
                       ) : (
-                        <Link to={link.to} className="text-sm text-gray-400 hover:text-background transition-colors inline-block min-h-[44px] py-2">
+                        <Link to={link.to} className="text-sm text-muted-foreground hover:text-background transition-colors inline-block min-h-[44px] py-2">
                           {link.label}
                         </Link>
                       )}
@@ -121,7 +121,7 @@ const Footer = () => {
       </div>
 
       {/* ROW 3 — Newsletter + Contact */}
-      <div className="border-t border-gray-800">
+      <div className="border-t border-border">
         <div className="container mx-auto px-4 py-12">
           <div className="grid md:grid-cols-2 gap-12">
             {/* Newsletter */}
@@ -131,23 +131,23 @@ const Footer = () => {
 
             {/* Contact */}
             <div>
-              <h4 className="font-sans font-bold text-sm tracking-wider uppercase mb-4">
+              <p className="font-sans font-bold text-sm tracking-wider uppercase mb-4">
                 Contact Us
-              </h4>
+              </p>
               <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm text-gray-400">
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <MapPin className="w-4 h-4 shrink-0" />
                   <span>137 Chrislea Rd, Woodbridge, ON L4L 8N6</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <Mail className="w-4 h-4 text-gray-400 shrink-0" />
-                  <a href="mailto:info@fitmatch.ca" className="text-gray-400 hover:text-background transition-colors">
+                  <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <a href="mailto:info@fitmatch.ca" className="text-muted-foreground hover:text-background transition-colors">
                     info@fitmatch.ca
                   </a>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <Phone className="w-4 h-4 text-gray-400 shrink-0" />
-                  <a href="tel:+14168541412" className="text-gray-400 hover:text-background transition-colors">
+                  <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <a href="tel:+14168541412" className="text-muted-foreground hover:text-background transition-colors">
                     +1 (416) 854-1412
                   </a>
                 </div>
@@ -158,9 +158,9 @@ const Footer = () => {
       </div>
 
       {/* ROW 4 — Bottom Bar */}
-      <div className="border-t border-gray-800">
+      <div className="border-t border-border">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-gray-500">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-muted-foreground">
             <span>© {new Date().getFullYear()} The Fit-Match Luxury Cabinet Exchange. All rights reserved.</span>
             <span>All prices in CAD. HST (13%) not included.</span>
             <span>Built in Toronto 🇨🇦</span>

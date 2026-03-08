@@ -122,20 +122,20 @@ const Header = () => {
           <div className="flex items-center gap-1">
             <SearchBar />
             {user && (
-              <Link to="/messages" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/messages" aria-label="Messages" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
                 <MessageSquare className="w-5 h-5" />
                 {buyerUnread > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{buyerUnread}</span>
                 )}
               </Link>
             )}
-            <Link to="/account/wishlist" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/account/wishlist" aria-label="Wishlist" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
               <Heart className="w-5 h-5" />
               {wishlistCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{wishlistCount}</span>
               )}
             </Link>
-            <Link to="/cart" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/cart" aria-label="Shopping cart" className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
               <ShoppingCart className="w-5 h-5" />
               {itemCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{itemCount}</span>
@@ -145,7 +145,7 @@ const Header = () => {
               <div className="hidden lg:flex items-center ml-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+                    <button aria-label="Account menu" className="min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
                       <CircleUser className="w-5 h-5" />
                     </button>
                   </DropdownMenuTrigger>
@@ -180,7 +180,7 @@ const Header = () => {
                 </Button>
               </div>
             )}
-            <button className="lg:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
+            <button className="lg:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label={isMenuOpen ? "Close menu" : "Open menu"} aria-expanded={isMenuOpen}>
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>

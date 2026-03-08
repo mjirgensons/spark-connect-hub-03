@@ -36,12 +36,12 @@ const CompareButton = ({ productId, variant = "icon" }: CompareButtonProps) => {
     <button
       onClick={handleClick}
       className={cn(
-        "w-8 h-8 flex items-center justify-center rounded-sm border-2 transition-colors",
+        "min-w-[44px] min-h-[44px] flex items-center justify-center rounded-sm border-2 transition-colors",
         active
           ? "bg-primary text-primary-foreground border-primary"
           : "bg-background/80 text-muted-foreground border-foreground/30 hover:border-foreground"
       )}
-      title={active ? "Remove from compare" : "Add to compare"}
+      aria-label={active ? "Remove from compare" : "Add to compare"}
     >
       <ArrowLeftRight className="w-4 h-4" />
     </button>

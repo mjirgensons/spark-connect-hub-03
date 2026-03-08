@@ -18,7 +18,7 @@ const WishlistButton = ({ productId, size = "md" }: WishlistButtonProps) => {
         e.stopPropagation();
         toggleWishlist(productId);
       }}
-      className="p-1.5 rounded-sm bg-background/80 backdrop-blur-sm border border-border hover:bg-background transition-colors"
+      className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-sm bg-background/80 backdrop-blur-sm border border-border hover:bg-background transition-colors"
       aria-label={active ? "Remove from wishlist" : "Add to wishlist"}
     >
       <Heart

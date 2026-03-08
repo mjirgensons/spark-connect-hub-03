@@ -65,6 +65,7 @@ const DimensionMatcher = () => {
                 }`}
                 onClick={() => setUnit("in")}
                 type="button"
+                aria-pressed={unit === "in"}
               >
                 inches
               </button>
@@ -74,6 +75,7 @@ const DimensionMatcher = () => {
                 }`}
                 onClick={() => setUnit("mm")}
                 type="button"
+                aria-pressed={unit === "mm"}
               >
                 mm
               </button>
