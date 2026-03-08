@@ -145,7 +145,7 @@ const Header = () => {
               <div className="hidden lg:flex items-center ml-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+                    <button aria-label="Account menu" className="min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
                       <CircleUser className="w-5 h-5" />
                     </button>
                   </DropdownMenuTrigger>
