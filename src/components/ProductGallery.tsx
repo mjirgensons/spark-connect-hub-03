@@ -10,7 +10,7 @@ interface ProductGalleryProps {
   discountPercentage: number;
 }
 
-const ProductGallery = ({ mainImage, additionalImages, productName, discountPercentage }: ProductGalleryProps) => {
+const ProductGallery = React.memo(({ mainImage, additionalImages, productName, discountPercentage }: ProductGalleryProps) => {
   const allImages = [mainImage, ...additionalImages].filter(Boolean);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
