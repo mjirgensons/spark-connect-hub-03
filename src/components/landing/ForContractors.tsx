@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2, DollarSign, Clock3, FileText } from "lucide-react";
 import { trackCTAClick } from "@/lib/analytics";
