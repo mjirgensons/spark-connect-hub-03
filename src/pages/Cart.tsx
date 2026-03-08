@@ -113,7 +113,7 @@ const Cart = () => {
                 <div className="flex items-center gap-4">
                   <span className="font-semibold text-foreground">${formatPrice(item.price * item.quantity)}</span>
                   <button
-                    className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                    className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
                     onClick={() => handleRemove(item.productId, item.name)}
                     aria-label="Remove item"
                   >
