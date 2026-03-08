@@ -77,13 +77,13 @@ const Footer = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <a href="#" aria-label="Instagram" className="text-gray-400 hover:text-background transition-colors">
+            <a href="#" aria-label="Instagram" className="text-muted-foreground hover:text-background transition-colors">
               <Instagram className="w-5 h-5" />
             </a>
-            <a href="#" aria-label="Facebook" className="text-gray-400 hover:text-background transition-colors">
+            <a href="#" aria-label="Facebook" className="text-muted-foreground hover:text-background transition-colors">
               <Facebook className="w-5 h-5" />
             </a>
-            <a href="#" aria-label="LinkedIn" className="text-gray-400 hover:text-background transition-colors">
+            <a href="#" aria-label="LinkedIn" className="text-muted-foreground hover:text-background transition-colors">
               <Linkedin className="w-5 h-5" />
             </a>
           </div>
