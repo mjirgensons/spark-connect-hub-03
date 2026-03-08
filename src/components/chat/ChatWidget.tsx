@@ -111,7 +111,9 @@ function InactiveChatBody({ sellerId, productId, productName }: { sellerId: stri
 
 export default function ChatWidget({ sellerId, sellerName, productId, userRole, skipConsent = false, chatbotActive = true }: ChatWidgetProps) {
   const [open, setOpen] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
+  const [launcherIcon, setLauncherIcon] = useState<"chat" | "mic">("chat");
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -197,8 +199,18 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
       .then(() => {});
   }, [chatbotActive, sellerId, productId]);
 
+  /* Launcher icon rotation — stop after first open */
+  useEffect(() => {
+    if (hasOpened) return;
+    const interval = setInterval(() => {
+      setLauncherIcon((prev) => (prev === "chat" ? "mic" : "chat"));
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [hasOpened]);
+
   const handleOpen = useCallback(() => {
     setOpen(true);
+    setHasOpened(true);
     setHasUnread(false);
     if (!chatbotActive) trackMissedAttempt();
   }, [chatbotActive, trackMissedAttempt]);
@@ -214,9 +226,15 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
 
   const [draft, setDraft] = useState("");
 
+  const prefixRef = useRef("");
+
   const { isSupported: voiceSupported, isListening, startListening, stopListening } = useVoiceInput({
     onTranscript: useCallback((text: string) => {
-      setDraft((prev) => (prev ? prev + " " + text : text));
+      setDraft(prefixRef.current ? prefixRef.current + " " + text : text);
+      prefixRef.current = "";
+    }, []),
+    onInterim: useCallback((text: string) => {
+      setDraft(prefixRef.current ? prefixRef.current + " " + text : text);
     }, []),
   });
 
@@ -237,9 +255,13 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
   );
 
   const handleMicToggle = useCallback(() => {
-    if (isListening) stopListening();
-    else startListening();
-  }, [isListening, startListening, stopListening]);
+    if (isListening) {
+      stopListening();
+    } else {
+      prefixRef.current = draft.trim();
+      startListening();
+    }
+  }, [isListening, startListening, stopListening, draft]);
 
   return (
     <>
@@ -249,6 +271,8 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
         @keyframes chatPulse{0%{box-shadow:0 0 0 0 rgba(0,0,0,0.4)}70%{box-shadow:0 0 0 12px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
         @keyframes chatEntrance{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
         @keyframes mic-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.08)}}
+        @keyframes mic-ring{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.6);opacity:0}}
+        @keyframes launcherShadow{0%,100%{box-shadow:4px 4px 0px hsl(var(--foreground))}50%{box-shadow:4px 4px 12px hsl(var(--foreground)/0.5)}}
       `}</style>
 
       {/* Launcher */}
@@ -259,10 +283,23 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
           className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-foreground text-background flex items-center justify-center rounded-full"
           style={{
             boxShadow: "4px 4px 0px hsl(var(--foreground))",
-            animation: "chatEntrance 400ms ease-out, chatPulse 2s 400ms infinite",
+            animation: hasOpened
+              ? "chatEntrance 400ms ease-out"
+              : "chatEntrance 400ms ease-out, launcherShadow 3s 400ms ease-in-out infinite",
           }}
         >
-          <MessageCircle className="w-6 h-6" />
+          <span className="relative w-6 h-6">
+            <MessageCircle
+              className="w-6 h-6 absolute inset-0 transition-opacity duration-300"
+              style={{ opacity: hasOpened || launcherIcon === "chat" ? 1 : 0 }}
+            />
+            {!hasOpened && (
+              <Mic
+                className="w-6 h-6 absolute inset-0 transition-opacity duration-300"
+                style={{ opacity: launcherIcon === "mic" ? 1 : 0 }}
+              />
+            )}
+          </span>
           {hasUnread && chatbotActive && (
             <span className="absolute top-0 right-0 w-3 h-3 bg-destructive rounded-full" />
           )}
@@ -338,19 +375,26 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                     style={{ borderRadius: 0 }}
                   />
                   {voiceSupported && (
-                    <button
-                      onClick={handleMicToggle}
-                      disabled={loading}
-                      aria-label={isListening ? "Stop listening" : "Start voice input"}
-                      className={`w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full shrink-0 transition-all disabled:opacity-40 ${
-                        isListening
-                          ? "bg-destructive text-destructive-foreground"
-                          : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                      }`}
-                      style={isListening ? { animation: "mic-pulse 1.5s ease-in-out infinite" } : undefined}
-                    >
-                      {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                    </button>
+                    <div className="relative shrink-0 flex items-center justify-center" style={{ width: 44, height: 44 }}>
+                      {isListening && (
+                        <span
+                          className="absolute inset-0 rounded-full bg-destructive"
+                          style={{ animation: "mic-ring 1.5s ease-out infinite" }}
+                        />
+                      )}
+                      <button
+                        onClick={handleMicToggle}
+                        disabled={loading}
+                        aria-label={isListening ? "Stop listening" : "Start voice input"}
+                        className={`relative z-10 w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-all disabled:opacity-40 ${
+                          isListening
+                            ? "bg-destructive text-destructive-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        }`}
+                      >
+                        {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                      </button>
+                    </div>
                   )}
                   <button
                     onClick={handleSend}
