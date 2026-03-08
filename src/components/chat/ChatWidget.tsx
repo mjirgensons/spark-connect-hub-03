@@ -273,6 +273,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
         @keyframes mic-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.08)}}
         @keyframes mic-ring{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.6);opacity:0}}
         @keyframes launcherShadow{0%,100%{box-shadow:4px 4px 0px hsl(var(--foreground))}50%{box-shadow:4px 4px 12px hsl(var(--foreground)/0.5)}}
+        @keyframes launcherFlip{0%{transform:rotateY(0deg)}100%{transform:rotateY(180deg)}}
       `}</style>
 
       {/* Launcher */}
