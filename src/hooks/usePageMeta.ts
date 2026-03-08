@@ -20,7 +20,7 @@ interface PageMetaOptions {
  * Overload 1 (legacy): usePageMeta(title?, description?)
  * Overload 2 (new):    usePageMeta(options)
  */
-export function usePageMeta(titleOrOptions?: string | PageMetaOptions, description?: string) {
+export function usePageMeta(titleOrOptions?: string | PageMetaOptions, descriptionArg?: string) {
   useEffect(() => {
     let opts: PageMetaOptions;
 
