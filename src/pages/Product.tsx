@@ -34,6 +34,15 @@ const Product = () => {
   const isMobile = useIsMobile();
   const { product, isLoading, error, productOptions, productAppliances, relatedProducts } = useProductData(id);
 
+  // Separate mobile check for chat widget (640px) vs general mobile (768px)
+  const [isChatMobile, setIsChatMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsChatMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   // Dynamic SEO meta
   usePageMeta({
     title: product ? `${product.product_name} — FitMatch` : "Loading…",
