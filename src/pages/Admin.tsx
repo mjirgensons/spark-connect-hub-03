@@ -150,6 +150,8 @@ const Admin = () => {
             <ConsentLogsAdmin />
           </div>
         );
+      case "test-chat":
+        return <AdminTestChatTab />;
       case "settings":
         return (
           <div className="space-y-6">
