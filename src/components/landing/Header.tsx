@@ -40,7 +40,16 @@ const Header = () => {
   const isHome = location.pathname === "/";
   const { itemCount } = useCart();
   const { wishlistCount } = useWishlist();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const { profile } = useProfile();
+
+  const getDashboardPath = () => {
+    const role = profile?.user_type;
+    if (role === "seller") return "/seller";
+    if (role === "contractor") return "/contractor";
+    if (role === "builder") return "/builder";
+    return "/client";
+  };
 
   const { data: buyerUnread = 0 } = useQuery({
     queryKey: ["buyer-unread-count", user?.id],
