@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, X, ArrowUp, ExternalLink } from "lucide-react";
+import { MessageCircle, X, ArrowUp, ExternalLink, Mic, MicOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useChatSession, type ChatMessage } from "./useChatSession";
 import ChatConsentModal from "./ChatConsentModal";
