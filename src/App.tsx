@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -122,6 +123,7 @@ const AnalyticsTracker = () => {
 
 // Cart provider wraps all routes for global cart state
 const App = () => (
+  <AuthProvider>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <CompareProvider>
@@ -244,6 +246,7 @@ const App = () => (
       </CompareProvider>
     </TooltipProvider>
   </QueryClientProvider>
+  </AuthProvider>
 );
 
 export default App;
