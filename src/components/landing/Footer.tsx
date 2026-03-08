@@ -140,8 +140,8 @@ const Footer = () => {
                   <span>137 Chrislea Rd, Woodbridge, ON L4L 8N6</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <Mail className="w-4 h-4 text-gray-400 shrink-0" />
-                  <a href="mailto:info@fitmatch.ca" className="text-gray-400 hover:text-background transition-colors">
+                  <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <a href="mailto:info@fitmatch.ca" className="text-muted-foreground hover:text-background transition-colors">
                     info@fitmatch.ca
                   </a>
                 </div>
