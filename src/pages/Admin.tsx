@@ -58,6 +58,7 @@ const SECTION_TITLES: Record<AdminSection, string> = {
   newsletter: "Newsletter",
   "cookie-manager": "Cookie Manager",
   "test-chat": "Test Chat",
+  "ai-chatbot": "AI Chatbot Settings",
   settings: "System Settings",
 };
 
