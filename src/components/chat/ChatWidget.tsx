@@ -423,7 +423,17 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
           ) : !consented ? (
             <ChatConsentModal onAccept={handleConsent} onDecline={handleDecline} />
           ) : (
-            <>
+            <div className="flex-1 flex flex-col min-h-0 relative">
+              {/* Registration Gate Overlay */}
+              {gateVisible && (
+                <ChatRegistrationGate
+                  dismissable={!gateHard}
+                  onDismiss={handleGateDismiss}
+                  onAuthenticated={handleGateAuthenticated}
+                  sessionId={chatSessionId}
+                />
+              )}
+
               {/* Messages */}
               <ScrollArea className="flex-1 min-h-0">
                 <div className="px-4 py-3 space-y-3">
@@ -452,7 +462,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                       el.style.height = Math.min(el.scrollHeight, 120) + "px";
                     }}
                     onKeyDown={handleKeyDown}
-                    disabled={loading}
+                    disabled={loading || gateVisible}
                     rows={1}
                     placeholder="Ask about this product..."
                     spellCheck={false}
@@ -473,7 +483,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                       )}
                       <button
                         onClick={handleMicToggle}
-                        disabled={loading}
+                        disabled={loading || gateVisible}
                         aria-label={isListening ? "Stop listening" : "Start voice input"}
                         className={`relative z-10 w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-all disabled:opacity-40 ${
                           isListening
@@ -487,7 +497,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                   )}
                   <button
                     onClick={handleSend}
-                    disabled={loading || !draft.trim()}
+                    disabled={loading || !draft.trim() || gateVisible}
                     aria-label="Send message"
                     className="w-9 h-9 flex items-center justify-center bg-foreground text-background rounded-full shrink-0 disabled:opacity-40 hover:opacity-80 transition-opacity"
                   >
@@ -498,7 +508,8 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                   <p className="text-xs text-muted-foreground mt-1.5 animate-pulse">Listening...</p>
                 )}
               </div>
-            </>
+            </div>
+          )}
           )}
         </div>
       )}
