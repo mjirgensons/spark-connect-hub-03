@@ -269,7 +269,20 @@ function OtpView({
   const handleResend = async () => {
     if (resendCooldown > 0) return;
     setResendCooldown(60);
-    await supabase.auth.resend({ type: "signup", email });
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    try {
+      const res = await fetch(`${supabaseUrl}/functions/v1/send-verification-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const result = await res.json();
+      if (!result.success && result.retry_after) {
+        setResendCooldown(result.retry_after);
+      }
+    } catch {
+      // non-blocking
+    }
   };
 
   return (
