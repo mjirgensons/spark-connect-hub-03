@@ -243,6 +243,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     const el = inputRef.current;
     el.style.height = "auto";
     el.style.height = Math.min(el.scrollHeight, 120) + "px";
+    el.scrollTop = el.scrollHeight;
   }, [draft]);
 
   const handleSend = useCallback(() => {
