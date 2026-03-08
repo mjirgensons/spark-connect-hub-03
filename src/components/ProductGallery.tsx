@@ -97,7 +97,7 @@ const ProductGallery = React.memo(({ mainImage, additionalImages, productName, d
                 >
                   <img
                     src={url}
-                    alt={`${productName} view ${i + 1}`}
+                    alt={`${productName} — image ${i + 1}`}
                     className="w-full h-full object-cover"
                   />
                 </div>
