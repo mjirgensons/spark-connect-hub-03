@@ -324,25 +324,45 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
               </ScrollArea>
 
               {/* Input */}
-              <div className="shrink-0 border-t-2 border-foreground p-3 flex items-center gap-2">
-                <input
-                  ref={inputRef}
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  disabled={loading}
-                  placeholder="Ask about this product..."
-                  className="flex-1 h-9 px-3 text-sm font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
-                  style={{ borderRadius: 0 }}
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={loading || !draft.trim()}
-                  aria-label="Send message"
-                  className="w-9 h-9 flex items-center justify-center bg-foreground text-background rounded-full shrink-0 disabled:opacity-40 hover:opacity-80 transition-opacity"
-                >
-                  <ArrowUp className="w-4 h-4" />
-                </button>
+              <div className="shrink-0 border-t-2 border-foreground p-3">
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={inputRef}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={loading}
+                    placeholder="Ask about this product..."
+                    className="flex-1 h-9 px-3 text-sm font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
+                    style={{ borderRadius: 0 }}
+                  />
+                  {voiceSupported && (
+                    <button
+                      onClick={handleMicToggle}
+                      disabled={loading}
+                      aria-label={isListening ? "Stop listening" : "Start voice input"}
+                      className={`w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full shrink-0 transition-all disabled:opacity-40 ${
+                        isListening
+                          ? "bg-destructive text-destructive-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      }`}
+                      style={isListening ? { animation: "mic-pulse 1.5s ease-in-out infinite" } : undefined}
+                    >
+                      {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    </button>
+                  )}
+                  <button
+                    onClick={handleSend}
+                    disabled={loading || !draft.trim()}
+                    aria-label="Send message"
+                    className="w-9 h-9 flex items-center justify-center bg-foreground text-background rounded-full shrink-0 disabled:opacity-40 hover:opacity-80 transition-opacity"
+                  >
+                    <ArrowUp className="w-4 h-4" />
+                  </button>
+                </div>
+                {isListening && (
+                  <p className="text-xs text-muted-foreground mt-1.5 animate-pulse">Listening...</p>
+                )}
               </div>
             </>
           )}
