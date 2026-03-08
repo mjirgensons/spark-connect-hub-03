@@ -122,19 +122,6 @@ const Product = () => {
     };
   }, [sellerChatbotEnabled, isChatMobile, chatDelaySeconds]);
 
-  // Debug logging for chat widget visibility
-  useEffect(() => {
-    console.log('[ChatWidget Debug]', {
-      productExists: !!product,
-      sellerId: product?.seller_id,
-      sellerProfileData: sellerProfile,
-      sellerChatbotEnabled,
-      isChatMobile,
-      chatDelaySeconds,
-      consentModalEnabled,
-      showChat,
-    });
-  }, [product, sellerProfile, sellerChatbotEnabled, isChatMobile, chatDelaySeconds, consentModalEnabled, showChat]);
 
   // ── Sticky mini sidebar visibility ──
   const heroRef = useRef<HTMLDivElement>(null);
@@ -616,11 +603,6 @@ const Product = () => {
       </Dialog>
 
       <Footer />
-
-      {/* Debug element for chat widget */}
-      {product && !showChat && (
-        <div id="chat-debug" style={{ display: 'none' }} data-seller-id={product.seller_id} data-show-chat={String(showChat)} data-seller-enabled={String(sellerChatbotEnabled)} data-is-chat-mobile={String(isChatMobile)} />
-      )}
 
       {/* AI Chat Widget */}
       {showChat && product && (

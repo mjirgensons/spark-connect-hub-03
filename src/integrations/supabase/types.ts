@@ -1950,6 +1950,7 @@ export type Database = {
           location: string | null
           logo_url: string | null
           phone: string | null
+          seller_ai_consent_accepted: boolean | null
           seller_branding_visible: boolean | null
           seller_restricted_at: string | null
           seller_restriction_reason: string | null
@@ -1981,6 +1982,7 @@ export type Database = {
           location?: string | null
           logo_url?: string | null
           phone?: string | null
+          seller_ai_consent_accepted?: boolean | null
           seller_branding_visible?: boolean | null
           seller_restricted_at?: string | null
           seller_restriction_reason?: string | null
@@ -2012,6 +2014,7 @@ export type Database = {
           location?: string | null
           logo_url?: string | null
           phone?: string | null
+          seller_ai_consent_accepted?: boolean | null
           seller_branding_visible?: boolean | null
           seller_restricted_at?: string | null
           seller_restriction_reason?: string | null
