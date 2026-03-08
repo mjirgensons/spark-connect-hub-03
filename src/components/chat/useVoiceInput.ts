@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 interface UseVoiceInputOptions {
   onTranscript: (text: string) => void;
   onInterim?: (text: string) => void;
+  lang?: string;
 }
 
 interface UseVoiceInputReturn {
@@ -12,7 +13,7 @@ interface UseVoiceInputReturn {
   stopListening: () => void;
 }
 
-export function useVoiceInput({ onTranscript, onInterim }: UseVoiceInputOptions): UseVoiceInputReturn {
+export function useVoiceInput({ onTranscript, onInterim, lang }: UseVoiceInputOptions): UseVoiceInputReturn {
   const SpeechRecognition =
     typeof window !== "undefined"
       ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
@@ -63,12 +64,13 @@ export function useVoiceInput({ onTranscript, onInterim }: UseVoiceInputOptions)
   const startListening = useCallback(() => {
     if (!recognitionRef.current || isListening) return;
     try {
+      if (lang) recognitionRef.current.lang = lang;
       recognitionRef.current.start();
       setIsListening(true);
     } catch (e) {
       console.error("Failed to start speech recognition:", e);
     }
-  }, [isListening]);
+  }, [isListening, lang]);
 
   const stopListening = useCallback(() => {
     if (!recognitionRef.current) return;

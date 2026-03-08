@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useVoiceInput } from "./useVoiceInput";
+import VoiceLangSelector, { useVoiceLang } from "./VoiceLangSelector";
 
 interface ChatWidgetProps {
   sellerId: string;
@@ -228,7 +229,10 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
 
   const prefixRef = useRef("");
 
+  const voiceLang = useVoiceLang();
+
   const { isSupported: voiceSupported, isListening, startListening, stopListening } = useVoiceInput({
+    lang: voiceLang.bcp47,
     onTranscript: useCallback((text: string) => {
       setDraft(prefixRef.current ? prefixRef.current + " " + text : text);
       prefixRef.current = "";
@@ -406,6 +410,9 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                     className="flex-1 min-h-[40px] h-[40px] px-3 py-2.5 text-sm leading-5 font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 resize-none overflow-y-auto box-border appearance-none"
                     style={{ borderRadius: 0, maxHeight: 120, boxSizing: "border-box", WebkitAppearance: "none", MozAppearance: "none" }}
                   />
+                  {voiceSupported && (
+                    <VoiceLangSelector value={voiceLang.lang} onChange={voiceLang.select} />
+                  )}
                   {voiceSupported && (
                     <div className="relative shrink-0 flex items-center justify-center" style={{ width: 44, height: 44 }}>
                       {isListening && (
