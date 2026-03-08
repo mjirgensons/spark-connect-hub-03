@@ -229,7 +229,10 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
 
   const prefixRef = useRef("");
 
+  const voiceLang = useVoiceLang();
+
   const { isSupported: voiceSupported, isListening, startListening, stopListening } = useVoiceInput({
+    lang: voiceLang.bcp47,
     onTranscript: useCallback((text: string) => {
       setDraft(prefixRef.current ? prefixRef.current + " " + text : text);
       prefixRef.current = "";
