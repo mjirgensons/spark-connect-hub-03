@@ -13,18 +13,23 @@ interface UseChatSessionOptions {
   sellerName: string;
   productId: string;
   userRole: string;
+  authenticatedUserId?: string | null;
 }
 
 function generateId() {
   return crypto.randomUUID();
 }
 
-export function useChatSession({ sellerId, sellerName, productId, userRole }: UseChatSessionOptions) {
+export function useChatSession({ sellerId, sellerName, productId, userRole, authenticatedUserId }: UseChatSessionOptions) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [consented, setConsented] = useState(() => sessionStorage.getItem("fitmatch_chat_consent") === "true");
   const sessionIdRef = useRef<string>(generateId());
   const introShownRef = useRef(false);
+  const [aiResponseCount, setAiResponseCount] = useState<number>(() => {
+    const stored = sessionStorage.getItem(`fitmatch_chat_response_count_${sellerId}`);
+    return stored ? parseInt(stored, 10) : 0;
+  });
 
   const grantConsent = useCallback(() => {
     sessionStorage.setItem("fitmatch_chat_consent", "true");
@@ -59,6 +64,14 @@ export function useChatSession({ sellerId, sellerName, productId, userRole }: Us
       setLoading(true);
 
       try {
+        const metadata: Record<string, any> = {
+          user_role: authenticatedUserId ? "registered" : userRole,
+          page_url: window.location.href,
+        };
+        if (authenticatedUserId) {
+          metadata.buyer_id = authenticatedUserId;
+        }
+
         const { data, error } = await supabase.functions.invoke("chatbot-proxy", {
           body: {
             webhookPath: "/webhook/seller-chatbot",
@@ -67,10 +80,7 @@ export function useChatSession({ sellerId, sellerName, productId, userRole }: Us
               sessionId: sessionIdRef.current,
               sellerId,
               productId,
-              metadata: {
-                user_role: userRole,
-                page_url: window.location.href,
-              },
+              metadata,
             },
           },
         });
@@ -78,6 +88,10 @@ export function useChatSession({ sellerId, sellerName, productId, userRole }: Us
         if (error) throw error;
 
         const aiText = data?.output ?? data?.response ?? data?.text ?? "I wasn't able to generate a response. Please try again.";
+
+        const newCount = aiResponseCount + 1;
+        setAiResponseCount(newCount);
+        sessionStorage.setItem(`fitmatch_chat_response_count_${sellerId}`, String(newCount));
 
         setMessages((prev) => [
           ...prev,
@@ -102,7 +116,7 @@ export function useChatSession({ sellerId, sellerName, productId, userRole }: Us
         setLoading(false);
       }
     },
-    [loading, sellerId, productId, userRole]
+    [loading, sellerId, productId, userRole, authenticatedUserId, aiResponseCount]
   );
 
   const resetChat = useCallback(() => {
@@ -119,5 +133,7 @@ export function useChatSession({ sellerId, sellerName, productId, userRole }: Us
     showIntro,
     sendMessage,
     resetChat,
+    aiResponseCount,
+    sessionId: sessionIdRef.current,
   };
 }

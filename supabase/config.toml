@@ -1,1 +1,4 @@
 project_id = "uiflubaywbpkcgwnedzp"
+
+[functions.save-marketing-consent]
+verify_jwt = false
