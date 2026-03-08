@@ -3,17 +3,8 @@ import { Bot, CheckCircle2, Circle, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import SellerAIConsentModal from "./SellerAIConsentModal";
 
 interface Props {
   sellerId: string;
@@ -24,9 +15,15 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
   const [kbCount, setKbCount] = useState(0);
   const [syncedProductCount, setSyncedProductCount] = useState(0);
   const [consentAccepted, setConsentAccepted] = useState(false);
+  const [consentAcceptedAt, setConsentAcceptedAt] = useState<string | null>(null);
   const [showConsent, setShowConsent] = useState(false);
   const [missedAttemptCount, setMissedAttemptCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [sellerProfile, setSellerProfile] = useState<{
+    full_name: string;
+    company_name: string | null;
+    email: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!sellerId) return;
@@ -34,9 +31,17 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
       setLoading(true);
       const profileRes = await supabase
         .from("profiles")
-        .select("ai_chatbot_enabled, seller_ai_consent_accepted")
+        .select("ai_chatbot_enabled, seller_ai_consent_accepted, full_name, company_name, email")
         .eq("id", sellerId)
         .single();
+
+      // Fetch consent accepted_at separately since it may not be in types yet
+      const acceptedAtRes = await supabase
+        .from("profiles")
+        .select("seller_ai_consent_accepted_at" as any)
+        .eq("id", sellerId)
+        .single();
+
       const kbRes = await (supabase as any)
         .from("seller_knowledge_base")
         .select("id", { count: "exact", head: true })
@@ -54,6 +59,12 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
       const profile = profileRes.data as any;
       setChatbotEnabled(!!profile?.ai_chatbot_enabled);
       setConsentAccepted(!!profile?.seller_ai_consent_accepted);
+      setConsentAcceptedAt((acceptedAtRes.data as any)?.seller_ai_consent_accepted_at ?? null);
+      setSellerProfile(profile ? {
+        full_name: profile.full_name || "",
+        company_name: profile.company_name || null,
+        email: profile.email || "",
+      } : null);
       setKbCount(kbRes.count ?? 0);
       setSyncedProductCount(prodRes.count ?? 0);
       setMissedAttemptCount(missedRes.count ?? 0);
@@ -96,17 +107,9 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
     toast.success(value ? "AI Chatbot enabled" : "AI Chatbot disabled");
   };
 
-  const handleConsentAccept = async () => {
-    const { error } = await supabase
-      .from("profiles")
-      .update({ seller_ai_consent_accepted: true } as any)
-      .eq("id", sellerId);
-    if (error) {
-      toast.error("Failed to save consent");
-      return;
-    }
+  const handleConsentAccepted = async () => {
     setConsentAccepted(true);
-    setShowConsent(false);
+    setConsentAcceptedAt(new Date().toISOString());
     if (hasKb && hasSyncedProducts) {
       await updateEnabled(true);
     }
@@ -122,7 +125,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
     {
       ok: consentAccepted,
       label: "Review and accept AI consent terms",
-      clickable: !consentAccepted,
+      clickable: true,
     },
   ];
 
@@ -252,25 +255,17 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
       </div>
 
       {/* ── Consent Modal ── */}
-      <AlertDialog open={showConsent} onOpenChange={setShowConsent}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>AI Chatbot Consent</AlertDialogTitle>
-            <AlertDialogDescription>
-              By enabling the AI Chatbot, I acknowledge that I am responsible for the accuracy of
-              information in my Knowledge Base. FitMatch's AI assistant will use this information to
-              answer buyer questions about my products. I understand that inaccurate information may
-              affect buyer trust and my seller reputation.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConsentAccept}>
-              I Accept &amp; Enable
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <SellerAIConsentModal
+        open={showConsent}
+        onOpenChange={setShowConsent}
+        sellerName={sellerProfile?.full_name || ""}
+        sellerBusinessName={sellerProfile?.company_name || ""}
+        sellerEmail={sellerProfile?.email || ""}
+        alreadyAccepted={consentAccepted}
+        acceptedAt={consentAcceptedAt}
+        onAccepted={handleConsentAccepted}
+        sellerId={sellerId}
+      />
     </>
   );
 }
