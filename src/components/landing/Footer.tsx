@@ -131,7 +131,7 @@ const Footer = () => {
 
             {/* Contact */}
             <div>
-              <h4 className="font-sans font-bold text-sm tracking-wider uppercase mb-4">
+              <p className="font-sans font-bold text-sm tracking-wider uppercase mb-4">
                 Contact Us
               </h4>
               <div className="space-y-3">
