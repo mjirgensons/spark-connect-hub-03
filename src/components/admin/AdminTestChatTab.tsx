@@ -47,7 +47,11 @@ const FieldHint = ({ children }: { children: React.ReactNode }) => (
   <p className="text-xs text-muted-foreground mt-1">{children}</p>
 );
 
-const AdminTestChatTab = () => {
+interface AdminTestChatTabProps {
+  onNavigateToChatbotSettings?: () => void;
+}
+
+const AdminTestChatTab = ({ onNavigateToChatbotSettings }: AdminTestChatTabProps) => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
