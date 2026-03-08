@@ -18,6 +18,7 @@ export function useProfile() {
       return data;
     },
     enabled: !!user,
+    staleTime: 300_000,
   });
 
   return {

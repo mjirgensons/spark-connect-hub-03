@@ -1,3 +1,4 @@
+import React from "react";
 import { TrendingDown, Zap, Shield, Wrench, Sparkles, Users } from "lucide-react";
 
 const benefits = [
@@ -33,7 +34,7 @@ const benefits = [
   },
 ];
 
-const Benefits = () => {
+const Benefits = React.memo(() => {
   return (
     <section id="benefits" className="py-20 md:py-32 bg-background">
       <div className="container mx-auto px-4">
@@ -69,6 +70,8 @@ const Benefits = () => {
       </div>
     </section>
   );
-};
+});
+
+Benefits.displayName = "Benefits";
 
 export default Benefits;

@@ -42,6 +42,7 @@ const BlogPage = () => {
       if (error) throw error;
       return data as BlogPost[];
     },
+    staleTime: 300_000,
   });
 
   const filtered = useMemo(() => {

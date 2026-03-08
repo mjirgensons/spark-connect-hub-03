@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -10,7 +10,7 @@ interface ProductGalleryProps {
   discountPercentage: number;
 }
 
-const ProductGallery = ({ mainImage, additionalImages, productName, discountPercentage }: ProductGalleryProps) => {
+const ProductGallery = React.memo(({ mainImage, additionalImages, productName, discountPercentage }: ProductGalleryProps) => {
   const allImages = [mainImage, ...additionalImages].filter(Boolean);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -154,6 +154,8 @@ const ProductGallery = ({ mainImage, additionalImages, productName, discountPerc
       </Dialog>
     </>
   );
-};
+});
+
+ProductGallery.displayName = "ProductGallery";
 
 export default ProductGallery;

@@ -11,6 +11,10 @@ const Hero = () => {
         <img
           src={heroImage}
           alt="Luxury kitchen interior"
+          width={1920}
+          height={1280}
+          loading="eager"
+          fetchPriority="high"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/90 via-foreground/70 to-foreground/40" />

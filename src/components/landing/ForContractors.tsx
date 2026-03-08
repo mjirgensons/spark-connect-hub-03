@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2, DollarSign, Clock3, FileText } from "lucide-react";
 import { trackCTAClick } from "@/lib/analytics";
@@ -25,7 +26,7 @@ const contractorBenefits = [
   },
 ];
 
-const ForContractors = () => {
+const ForContractors = React.memo(() => {
   return (
     <section id="contractors" className="py-20 md:py-32 bg-secondary/30">
       <div className="container mx-auto px-4">
@@ -104,6 +105,8 @@ const ForContractors = () => {
       </div>
     </section>
   );
-};
+});
+
+ForContractors.displayName = "ForContractors";
 
 export default ForContractors;

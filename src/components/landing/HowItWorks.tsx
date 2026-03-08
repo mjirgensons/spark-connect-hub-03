@@ -1,3 +1,4 @@
+import React from "react";
 import { Ruler, Search, Package, CheckCircle } from "lucide-react";
 
 const steps = [
@@ -23,7 +24,7 @@ const steps = [
   },
 ];
 
-const HowItWorks = () => {
+const HowItWorks = React.memo(() => {
   return (
     <section id="how-it-works" className="py-20 md:py-32 bg-card">
       <div className="container mx-auto px-4">
@@ -71,6 +72,8 @@ const HowItWorks = () => {
       </div>
     </section>
   );
-};
+});
+
+HowItWorks.displayName = "HowItWorks";
 
 export default HowItWorks;
