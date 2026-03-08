@@ -62,6 +62,24 @@ const Product = () => {
   const [activeTab, setActiveTab] = useState("specs");
   const [qaPrefill, setQaPrefill] = useState<{ text: string; optionId: string } | null>(null);
 
+  // ── Chatbot widget settings from site_settings ──
+  const { data: chatbotSettings } = useQuery({
+    queryKey: ["chatbot-widget-settings"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("key, value")
+        .in("key", ["chatbot_auto_open_delay_seconds", "chatbot_consent_modal_enabled"]);
+      const map: Record<string, string> = {};
+      (data || []).forEach((r: any) => { map[r.key] = r.value; });
+      return map;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const chatDelaySeconds = parseInt(chatbotSettings?.chatbot_auto_open_delay_seconds || "30", 10) || 30;
+  const consentModalEnabled = chatbotSettings?.chatbot_consent_modal_enabled !== "false";
+
   // ── Chat widget delayed reveal ──
   const [showChat, setShowChat] = useState(false);
   const chatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -72,11 +90,11 @@ const Product = () => {
       setShowChat(false);
       return;
     }
-    chatTimerRef.current = setTimeout(() => setShowChat(true), 30000);
+    chatTimerRef.current = setTimeout(() => setShowChat(true), chatDelaySeconds * 1000);
     return () => {
       if (chatTimerRef.current) clearTimeout(chatTimerRef.current);
     };
-  }, [product, isMobile]);
+  }, [product, isMobile, chatDelaySeconds]);
 
   // ── Sticky mini sidebar visibility ──
   const heroRef = useRef<HTMLDivElement>(null);
