@@ -9,6 +9,7 @@ interface ChatWidgetProps {
   sellerName: string;
   productId: string;
   userRole: string;
+  skipConsent?: boolean;
 }
 
 /* ── Typing indicator ── */
