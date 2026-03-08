@@ -135,7 +135,7 @@ const Footer = () => {
                 Contact Us
               </p>
               <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm text-gray-400">
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <MapPin className="w-4 h-4 shrink-0" />
                   <span>137 Chrislea Rd, Woodbridge, ON L4L 8N6</span>
                 </div>
