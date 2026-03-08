@@ -617,6 +617,11 @@ const Product = () => {
 
       <Footer />
 
+      {/* Debug element for chat widget */}
+      {product && !showChat && (
+        <div id="chat-debug" style={{ display: 'none' }} data-seller-id={product.seller_id} data-show-chat={String(showChat)} data-seller-enabled={String(sellerChatbotEnabled)} data-is-chat-mobile={String(isChatMobile)} />
+      )}
+
       {/* AI Chat Widget */}
       {showChat && product && (
         <div style={{ animation: "chat-launcher-fade 500ms ease-out" }}>
