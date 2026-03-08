@@ -559,11 +559,7 @@ const AdminIntegrationsTab = () => {
 
   const renderVoiceConfig = () => (
     <div className="space-y-4">
-      <div><Label>ElevenLabs API Key</Label><Input type="password" value={credForm.api_key || ""} onChange={e => setCredForm(p => ({ ...p, api_key: e.target.value }))} /></div>
-      <div><Label>Agent ID</Label><Input value={configForm.agent_id || ""} onChange={e => setConfigForm(p => ({ ...p, agent_id: e.target.value }))} /></div>
-      <div><Label>Voice ID</Label><Input value={configForm.voice_id || ""} onChange={e => setConfigForm(p => ({ ...p, voice_id: e.target.value }))} /></div>
-      <div><Label>n8n Webhook URL for Voice Events</Label><Input value={configForm.webhook_url || ""} onChange={e => setConfigForm(p => ({ ...p, webhook_url: e.target.value }))} /></div>
-      {renderTestButton("elevenlabs")}
+      <p className="text-sm text-muted-foreground">Voice integration has been removed. The platform now uses the WF-23 AI Chatbot instead.</p>
     </div>
   );
 
