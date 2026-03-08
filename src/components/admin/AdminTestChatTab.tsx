@@ -374,6 +374,7 @@ const AdminTestChatTab = ({ onNavigateToChatbotSettings }: AdminTestChatTabProps
         <SessionHistoryTab onLoadSession={handleLoadSession} />
       </TabsContent>
     </Tabs>
+    </div>
   );
 };
 
