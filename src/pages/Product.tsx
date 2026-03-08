@@ -34,6 +34,15 @@ const Product = () => {
   const isMobile = useIsMobile();
   const { product, isLoading, error, productOptions, productAppliances, relatedProducts } = useProductData(id);
 
+  // Separate mobile check for chat widget (640px) vs general mobile (768px)
+  const [isChatMobile, setIsChatMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsChatMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   // Dynamic SEO meta
   usePageMeta({
     title: product ? `${product.product_name} — FitMatch` : "Loading…",
@@ -103,7 +112,7 @@ const Product = () => {
   const chatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!sellerChatbotEnabled || isMobile) {
+    if (!sellerChatbotEnabled || isChatMobile) {
       setShowChat(false);
       return;
     }
@@ -111,7 +120,21 @@ const Product = () => {
     return () => {
       if (chatTimerRef.current) clearTimeout(chatTimerRef.current);
     };
-  }, [sellerChatbotEnabled, isMobile, chatDelaySeconds]);
+  }, [sellerChatbotEnabled, isChatMobile, chatDelaySeconds]);
+
+  // Debug logging for chat widget visibility
+  useEffect(() => {
+    console.log('[ChatWidget Debug]', {
+      productExists: !!product,
+      sellerId: product?.seller_id,
+      sellerProfileData: sellerProfile,
+      sellerChatbotEnabled,
+      isChatMobile,
+      chatDelaySeconds,
+      consentModalEnabled,
+      showChat,
+    });
+  }, [product, sellerProfile, sellerChatbotEnabled, isChatMobile, chatDelaySeconds, consentModalEnabled, showChat]);
 
   // ── Sticky mini sidebar visibility ──
   const heroRef = useRef<HTMLDivElement>(null);
@@ -593,6 +616,11 @@ const Product = () => {
       </Dialog>
 
       <Footer />
+
+      {/* Debug element for chat widget */}
+      {product && !showChat && (
+        <div id="chat-debug" style={{ display: 'none' }} data-seller-id={product.seller_id} data-show-chat={String(showChat)} data-seller-enabled={String(sellerChatbotEnabled)} data-is-chat-mobile={String(isChatMobile)} />
+      )}
 
       {/* AI Chat Widget */}
       {showChat && product && (
