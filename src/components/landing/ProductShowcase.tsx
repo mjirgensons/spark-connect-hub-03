@@ -15,6 +15,7 @@ const ProductShowcase = () => {
       const { data } = await supabase.from("categories").select("id").eq("slug", KITCHENS_SLUG).single();
       return data;
     },
+    staleTime: 300_000,
   });
 
   const { data: dbProducts = [] } = useQuery({
