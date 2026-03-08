@@ -92,7 +92,7 @@ const Cart = () => {
               <div className="flex items-center justify-between mt-3">
                 <div className="flex items-center border-2 border-border">
                   <button
-                    className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
+                    className="min-w-[48px] min-h-[48px] flex items-center justify-center hover:bg-muted transition-colors"
                     onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity - 1 } })}
                     disabled={item.quantity <= 1}
                     aria-label="Decrease quantity"
@@ -101,7 +101,7 @@ const Cart = () => {
                   </button>
                   <span className="px-3 text-sm font-mono font-medium min-w-[2rem] text-center">{item.quantity}</span>
                   <button
-                    className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
+                    className="min-w-[48px] min-h-[48px] flex items-center justify-center hover:bg-muted transition-colors"
                     onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity + 1 } })}
                     disabled={item.quantity >= item.maxStock}
                     aria-label="Increase quantity"
@@ -113,7 +113,7 @@ const Cart = () => {
                 <div className="flex items-center gap-4">
                   <span className="font-semibold text-foreground">${formatPrice(item.price * item.quantity)}</span>
                   <button
-                    className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                    className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
                     onClick={() => handleRemove(item.productId, item.name)}
                     aria-label="Remove item"
                   >
@@ -138,7 +138,7 @@ const Cart = () => {
                       {addon.price > 0 ? `$${formatPrice(addon.price)}` : "Included"}
                     </span>
                     <button
-                      className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                      className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
                       onClick={() => handleRemove(addon.productId, addon.name)}
                       aria-label={`Remove ${addon.name}`}
                     >
@@ -222,7 +222,7 @@ const Cart = () => {
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="text-sm font-mono font-medium text-foreground">${formatPrice(addon.price)}</span>
                       <button
-                        className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                        className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
                         onClick={() => handleRemove(addon.productId, addon.name)}
                         aria-label={`Remove ${addon.name}`}
                       >

@@ -196,7 +196,7 @@ const Product = () => {
 
             {/* Tab content + optional mini sidebar */}
             <div className="container mx-auto px-4">
-              <div className="flex gap-8">
+              <div className="flex gap-4 lg:gap-8">
                 <div className="max-w-5xl mx-auto py-8 flex-1 min-w-0">
                   {/* SPECIFICATIONS */}
                   <TabsContent value="specs" className="mt-0">
