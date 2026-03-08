@@ -556,6 +556,19 @@ const Product = () => {
       </Dialog>
 
       <Footer />
+
+      {/* AI Chat Widget */}
+      {showChat && product && (
+        <div style={{ animation: "chat-launcher-fade 500ms ease-out" }}>
+          <style>{`@keyframes chat-launcher-fade{from{opacity:0}to{opacity:1}}`}</style>
+          <ChatWidget
+            sellerId={product.seller_id}
+            sellerName={(product as any).seller_store_name || "this seller"}
+            productId={product.id}
+            userRole={user ? "registered" : "guest"}
+          />
+        </div>
+      )}
     </div>
   );
 };
