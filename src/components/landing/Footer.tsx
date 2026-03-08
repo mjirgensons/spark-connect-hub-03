@@ -133,7 +133,7 @@ const Footer = () => {
             <div>
               <p className="font-sans font-bold text-sm tracking-wider uppercase mb-4">
                 Contact Us
-              </h4>
+              </p>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-sm text-gray-400">
                   <MapPin className="w-4 h-4 shrink-0" />
