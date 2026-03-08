@@ -13,7 +13,7 @@ interface UseVoiceInputReturn {
   stopListening: () => void;
 }
 
-export function useVoiceInput({ onTranscript, onInterim }: UseVoiceInputOptions): UseVoiceInputReturn {
+export function useVoiceInput({ onTranscript, onInterim, lang }: UseVoiceInputOptions): UseVoiceInputReturn {
   const SpeechRecognition =
     typeof window !== "undefined"
       ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
