@@ -150,10 +150,19 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
       });
   }, []);
 
-  /* Gate logic: show after limit, hard gate at limit+2 */
+  /* Gate logic: show after limit, hard gate at limit+2.
+     After signUp with auto-confirm, user gets a session immediately but
+     email_verified_at is not yet set. We must NOT auto-close the gate
+     until the custom OTP flow sets that metadata. */
   useEffect(() => {
     if (user) {
-      setGateVisible(false);
+      const isVerified = !!(user.user_metadata as any)?.email_verified_at;
+      if (isVerified) {
+        setGateVisible(false);
+        return;
+      }
+      // User has session but hasn't verified email — keep gate as-is
+      // (visible if already showing OTP view, hidden otherwise)
       return;
     }
     if (aiResponseCount >= guestMessageLimit + 2) {
