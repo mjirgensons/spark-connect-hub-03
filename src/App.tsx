@@ -131,7 +131,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
-        <HideChatOnAdmin />
+        
         <AnalyticsTracker />
         <CookieConsent />
         <CompareBar />
