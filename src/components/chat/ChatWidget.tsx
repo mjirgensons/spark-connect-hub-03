@@ -62,6 +62,11 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     }
   }, [open, consented]);
 
+  /* auto-grant consent when skipConsent is true */
+  useEffect(() => {
+    if (skipConsent && !consented) grantConsent();
+  }, [skipConsent, consented, grantConsent]);
+
   /* show intro after consent */
   useEffect(() => {
     if (open && consented) showIntro();
