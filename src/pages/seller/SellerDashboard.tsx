@@ -227,7 +227,7 @@ const SellerDashboard = () => {
   const getCategoryName = (id: string | null) => categories.find((c) => c.id === id)?.name || "—";
 
   return (
-    <div className="space-y-8">
+    <div className="w-full max-w-[1200px] mx-auto px-6 space-y-8">
       <Breadcrumbs items={[{ label: "Dashboard" }]} />
 
       {/* Stripe Connect Status */}
