@@ -50,7 +50,8 @@ export type AdminSection =
   | "blog"
   | "newsletter"
   | "cookie-manager"
-  | "settings";
+  | "settings"
+  | "test-chat";
 
 interface AdminSidebarProps {
   active: AdminSection;
@@ -90,6 +91,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: "integrations", label: "Integrations", icon: Plug },
       { id: "webhooks", label: "Webhooks & Events", icon: Webhook },
+      { id: "test-chat", label: "Test Chat", icon: MessageSquare },
       { id: "settings", label: "System Settings", icon: Settings },
     ],
   },
