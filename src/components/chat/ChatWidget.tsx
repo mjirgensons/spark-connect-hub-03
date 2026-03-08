@@ -213,6 +213,13 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
   const handleDecline = useCallback(() => setOpen(false), []);
 
   const [draft, setDraft] = useState("");
+
+  const { isSupported: voiceSupported, isListening, startListening, stopListening } = useVoiceInput({
+    onTranscript: useCallback((text: string) => {
+      setDraft((prev) => (prev ? prev + " " + text : text));
+    }, []),
+  });
+
   const handleSend = useCallback(() => {
     if (!draft.trim() || loading) return;
     sendMessage(draft);
@@ -228,6 +235,11 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     },
     [handleSend]
   );
+
+  const handleMicToggle = useCallback(() => {
+    if (isListening) stopListening();
+    else startListening();
+  }, [isListening, startListening, stopListening]);
 
   return (
     <>
