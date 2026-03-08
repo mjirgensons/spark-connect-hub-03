@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import { Bot, CheckCircle, AlertTriangle } from "lucide-react";
+import { Bot, CheckCircle2, Circle, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
@@ -67,8 +65,6 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
   const hasKb = kbCount >= 3;
   const hasSyncedProducts = syncedProductCount > 0;
   const allChecks = hasKb && hasSyncedProducts && consentAccepted;
-
-  // Chatbot is enabled but setup incomplete
   const enabledButIncomplete = chatbotEnabled && !allChecks;
 
   const handleToggle = async (checked: boolean) => {
@@ -111,111 +107,149 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
     }
     setConsentAccepted(true);
     setShowConsent(false);
-    // If all other checks pass, enable
     if (hasKb && hasSyncedProducts) {
       await updateEnabled(true);
     }
   };
 
-  const checkIcon = (ok: boolean) => (
-    <CheckCircle className={`w-5 h-5 shrink-0 ${ok ? "text-green-600" : "text-muted-foreground/40"}`} />
-  );
-
   if (loading) return null;
+
+  const isLive = chatbotEnabled && allChecks;
+
+  const checklist = [
+    { ok: hasKb, label: "Add at least 3 Knowledge Base articles" },
+    { ok: hasSyncedProducts, label: "Products synced to AI" },
+    {
+      ok: consentAccepted,
+      label: "Review and accept AI consent terms",
+      clickable: !consentAccepted,
+    },
+  ];
 
   return (
     <>
-      <Card className="border-2 border-foreground p-6" style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 bg-primary flex items-center justify-center shrink-0">
-            <Bot className="w-5 h-5 text-primary-foreground" />
+      <div
+        className="bg-background border-2 border-foreground w-full"
+        style={{ boxShadow: "4px 4px 0px hsl(var(--foreground))" }}
+      >
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between p-4 border-b-2 border-foreground">
+          <div className="flex items-center gap-3 min-w-0">
+            <Bot className="w-5 h-5 shrink-0" />
+            <div className="min-w-0">
+              <p className="font-sans font-bold text-lg leading-tight">AI Chatbot</p>
+              {isLive ? (
+                <span
+                  className="inline-block mt-1 text-xs font-bold px-2 py-0.5 text-background"
+                  style={{ backgroundColor: "hsl(142, 71%, 45%)" }}
+                >
+                  LIVE
+                </span>
+              ) : (
+                <span
+                  className="inline-block mt-1 text-xs font-bold px-2 py-0.5 text-background"
+                  style={{ backgroundColor: "hsl(0, 84%, 60%)" }}
+                >
+                  OFFLINE
+                </span>
+              )}
+            </div>
           </div>
-          <p className="font-sans font-bold text-lg">AI Chatbot</p>
+          <Switch
+            checked={chatbotEnabled}
+            disabled={!allChecks && !chatbotEnabled}
+            onCheckedChange={handleToggle}
+          />
         </div>
 
-        {chatbotEnabled && allChecks ? (
-          /* STATE B — ON and fully set up */
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Enable AI Chatbot</span>
-              <Switch checked onCheckedChange={handleToggle} />
+        {/* ── Setup Checklist ── */}
+        <div className="p-4">
+          {enabledButIncomplete && (
+            <div className="flex items-center gap-2 text-amber-700 mb-3">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span className="text-sm font-medium">Chatbot is enabled but setup is incomplete</span>
             </div>
-            <p className="text-sm font-semibold text-green-700 dark:text-green-400">
-              Your AI assistant is LIVE on your product pages
-            </p>
-            <div className="flex gap-6 text-sm text-muted-foreground">
-              <span>0 conversations this week</span>
-              <span>0 messages handled</span>
-            </div>
-            <Button variant="outline" className="border-2 border-foreground" asChild>
-              <Link to="/seller/knowledge-base">Manage Knowledge Base</Link>
-            </Button>
+          )}
+
+          <p className="text-sm font-semibold mb-3">Setup Checklist</p>
+          <div className="space-y-3">
+            {checklist.map((item, i) => (
+              <div key={i} className="flex items-center gap-2">
+                {item.ok ? (
+                  <CheckCircle2 className="w-5 h-5 shrink-0 text-green-600" />
+                ) : (
+                  <Circle className="w-5 h-5 shrink-0 text-muted-foreground/40" />
+                )}
+                {item.clickable ? (
+                  <button
+                    className="text-sm underline text-foreground hover:opacity-70 transition-opacity text-left"
+                    onClick={() => setShowConsent(true)}
+                  >
+                    {item.label}
+                  </button>
+                ) : (
+                  <span className="text-sm">{item.label}</span>
+                )}
+              </div>
+            ))}
           </div>
-        ) : (
-          /* STATE A — OFF or incomplete */
-          <div className="space-y-4">
-            {enabledButIncomplete && (
-              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-2">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span className="text-sm font-medium">⚠ Chatbot is enabled but setup is incomplete</span>
-              </div>
-            )}
+        </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Enable AI Chatbot</span>
-              <Switch
-                checked={chatbotEnabled}
-                disabled={!allChecks && !chatbotEnabled}
-                onCheckedChange={handleToggle}
-              />
+        {/* ── Missed Attempts Callout ── */}
+        {!chatbotEnabled && missedAttemptCount > 0 && (
+          <div className="mx-4 mb-4 border-t border-muted pt-4">
+            <div
+              className="flex items-center gap-2 p-3 border-2"
+              style={{
+                backgroundColor: "hsl(48, 96%, 95%)",
+                borderColor: "hsl(45, 93%, 47%)",
+              }}
+            >
+              <AlertTriangle className="w-5 h-5 shrink-0" style={{ color: "hsl(25, 95%, 53%)" }} />
+              <span className="text-sm" style={{ color: "hsl(25, 95%, 26%)" }}>
+                <strong>{missedAttemptCount}</strong> buyer{missedAttemptCount === 1 ? "" : "s"} tried to chat about your products but your AI assistant was offline.
+              </span>
             </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                {checkIcon(hasKb)}
-                <span>Add at least 3 Knowledge Base articles</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                {checkIcon(hasSyncedProducts)}
-                <span>Products synced to AI</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                {checkIcon(consentAccepted)}
-                <span>
-                  {consentAccepted ? (
-                    "Review and accept AI consent terms"
-                  ) : (
-                    <button
-                      className="underline text-primary hover:text-primary/80"
-                      onClick={() => setShowConsent(true)}
-                    >
-                      Review and accept AI consent terms
-                    </button>
-                  )}
-                </span>
-              </div>
-            </div>
-
-            {missedAttemptCount > 0 && (
-              <div className="flex items-center gap-2 p-3 border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30">
-                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                <span className="text-sm text-amber-800 dark:text-amber-300">
-                  <strong>{missedAttemptCount}</strong> buyer{missedAttemptCount === 1 ? '' : 's'} tried to chat about your products but your AI assistant was offline.
-                </span>
-              </div>
-            )}
-
-            <p className="text-xs text-muted-foreground">
-              Complete all steps above to activate your AI assistant
-            </p>
-
-            <Button variant="outline" className="border-2 border-foreground" asChild>
-              <Link to="/seller/knowledge-base">Manage Knowledge Base</Link>
-            </Button>
           </div>
         )}
-      </Card>
 
+        {/* ── Action Row ── */}
+        <div className="p-4 border-t-2 border-foreground text-center">
+          {isLive ? (
+            <>
+              <p className="text-xs text-green-600 mb-2">Your AI assistant is live on your product pages</p>
+              <div className="flex items-center justify-center gap-2">
+                <Link
+                  to="/seller/knowledge-base"
+                  className="inline-flex items-center justify-center h-9 px-4 text-sm font-sans font-bold bg-foreground text-background hover:opacity-80 transition-opacity"
+                  style={{ boxShadow: "2px 2px 0px hsl(var(--foreground))" }}
+                >
+                  Manage Knowledge Base
+                </Link>
+                <Link
+                  to="/seller/analytics"
+                  className="inline-flex items-center justify-center h-9 px-4 text-sm font-sans font-bold bg-background text-foreground border-2 border-foreground hover:opacity-80 transition-opacity"
+                >
+                  View Chat Analytics
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-muted-foreground mb-2">Complete all steps above to activate your AI assistant</p>
+              <Link
+                to="/seller/knowledge-base"
+                className="inline-flex items-center justify-center h-9 px-4 text-sm font-sans font-bold bg-foreground text-background hover:opacity-80 transition-opacity"
+                style={{ boxShadow: "2px 2px 0px hsl(var(--foreground))" }}
+              >
+                Manage Knowledge Base
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── Consent Modal ── */}
       <AlertDialog open={showConsent} onOpenChange={setShowConsent}>
         <AlertDialogContent>
           <AlertDialogHeader>
