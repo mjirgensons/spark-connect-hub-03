@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
-import { HideChatOnAdmin } from "./components/HideChatOnAdmin";
+
 import CookieConsent from "./components/CookieConsent";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import "./App.css";
