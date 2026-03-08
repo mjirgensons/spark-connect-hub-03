@@ -123,6 +123,7 @@ const AnalyticsTracker = () => {
 
 // Cart provider wraps all routes for global cart state
 const App = () => (
+  <AuthProvider>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <CompareProvider>
@@ -245,6 +246,7 @@ const App = () => (
       </CompareProvider>
     </TooltipProvider>
   </QueryClientProvider>
+  </AuthProvider>
 );
 
 export default App;
