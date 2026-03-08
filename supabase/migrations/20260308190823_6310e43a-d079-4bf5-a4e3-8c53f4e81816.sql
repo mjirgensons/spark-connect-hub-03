@@ -1,0 +1,1 @@
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS seller_ai_consent_accepted_at TIMESTAMPTZ;
