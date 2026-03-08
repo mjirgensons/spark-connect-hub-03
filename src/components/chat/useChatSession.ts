@@ -20,12 +20,16 @@ function generateId() {
   return crypto.randomUUID();
 }
 
-export function useChatSession({ sellerId, sellerName, productId, userRole }: UseChatSessionOptions) {
+export function useChatSession({ sellerId, sellerName, productId, userRole, authenticatedUserId }: UseChatSessionOptions) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [consented, setConsented] = useState(() => sessionStorage.getItem("fitmatch_chat_consent") === "true");
   const sessionIdRef = useRef<string>(generateId());
   const introShownRef = useRef(false);
+  const [aiResponseCount, setAiResponseCount] = useState<number>(() => {
+    const stored = sessionStorage.getItem(`fitmatch_chat_response_count_${sellerId}`);
+    return stored ? parseInt(stored, 10) : 0;
+  });
 
   const grantConsent = useCallback(() => {
     sessionStorage.setItem("fitmatch_chat_consent", "true");
