@@ -265,6 +265,7 @@ const CTA = () => {
             <button
               type="button"
               onClick={() => toggleSection("project")}
+              aria-expanded={expandedSections.project}
               className="w-full flex items-center justify-between p-5 text-left"
             >
               <div className="flex items-center gap-3">
