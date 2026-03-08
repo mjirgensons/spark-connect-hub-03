@@ -33,7 +33,7 @@ const benefits = [
   },
 ];
 
-const Benefits = () => {
+const Benefits = React.memo(() => {
   return (
     <section id="benefits" className="py-20 md:py-32 bg-background">
       <div className="container mx-auto px-4">
