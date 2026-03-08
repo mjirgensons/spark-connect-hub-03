@@ -375,19 +375,26 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                     style={{ borderRadius: 0 }}
                   />
                   {voiceSupported && (
-                    <button
-                      onClick={handleMicToggle}
-                      disabled={loading}
-                      aria-label={isListening ? "Stop listening" : "Start voice input"}
-                      className={`w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full shrink-0 transition-all disabled:opacity-40 ${
-                        isListening
-                          ? "bg-destructive text-destructive-foreground"
-                          : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                      }`}
-                      style={isListening ? { animation: "mic-pulse 1.5s ease-in-out infinite" } : undefined}
-                    >
-                      {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                    </button>
+                    <div className="relative shrink-0 flex items-center justify-center" style={{ width: 44, height: 44 }}>
+                      {isListening && (
+                        <span
+                          className="absolute inset-0 rounded-full bg-destructive"
+                          style={{ animation: "mic-ring 1.5s ease-out infinite" }}
+                        />
+                      )}
+                      <button
+                        onClick={handleMicToggle}
+                        disabled={loading}
+                        aria-label={isListening ? "Stop listening" : "Start voice input"}
+                        className={`relative z-10 w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-all disabled:opacity-40 ${
+                          isListening
+                            ? "bg-destructive text-destructive-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        }`}
+                      >
+                        {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                      </button>
+                    </div>
                   )}
                   <button
                     onClick={handleSend}
