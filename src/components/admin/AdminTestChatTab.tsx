@@ -5,11 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Send, RefreshCw, Trash2, Loader2, AlertTriangle, BookOpen } from "lucide-react";
+import { Send, RefreshCw, Trash2, Loader2, AlertTriangle, BookOpen, MessageSquare, History } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import SessionHistoryTab from "./SessionHistoryTab";
 
 function generateUUID() {
   return crypto.randomUUID();
@@ -46,8 +49,10 @@ const FieldHint = ({ children }: { children: React.ReactNode }) => (
 
 const AdminTestChatTab = () => {
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const [activeTab, setActiveTab] = useState("console");
   const [sellerId, setSellerId] = useState(DEFAULT_SELLER_ID);
   const [sessionId, setSessionId] = useState<string>(() => generateUUID());
   const [useProduction, setUseProduction] = useState(false);
@@ -76,6 +81,22 @@ const AdminTestChatTab = () => {
     setMessages([]);
     regenerateSession();
   }, [regenerateSession]);
+
+  const handleLoadSession = useCallback((data: {
+    seller_id: string;
+    session_id: string;
+    user_role: string;
+    chatbot_mode: string;
+    messages: Array<{ role: "user" | "bot" | "error"; content: string; timestamp: Date; id: string }>;
+  }) => {
+    setSellerId(data.seller_id);
+    setSessionId(data.session_id);
+    setUserRole(data.user_role);
+    setChatbotMode(data.chatbot_mode);
+    setMessages(data.messages.map((m) => ({ ...m, escalated: false })));
+    setActiveTab("console");
+    toast({ title: "Session loaded — you can continue this conversation" });
+  }, [toast]);
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
@@ -247,7 +268,7 @@ const AdminTestChatTab = () => {
   );
 
   const chatPanel = (
-    <Card className="flex flex-col h-[calc(100vh-200px)] min-h-[400px]">
+    <Card className="flex flex-col h-[calc(100vh-260px)] min-h-[400px]">
       <CardHeader className="py-3 border-b border-border">
         <CardTitle className="text-sm font-mono">Chat — {sessionId.slice(0, 8)}…</CardTitle>
       </CardHeader>
@@ -301,21 +322,17 @@ const AdminTestChatTab = () => {
     </Card>
   );
 
-  if (isMobile) {
-    return (
-      <div className="space-y-4">
-        <Accordion type="single" collapsible>
-          <AccordionItem value="config">
-            <AccordionTrigger className="text-sm font-medium">Chatbot Test Console — Config</AccordionTrigger>
-            <AccordionContent>{configPanel}</AccordionContent>
-          </AccordionItem>
-        </Accordion>
-        {chatPanel}
-      </div>
-    );
-  }
-
-  return (
+  const consoleContent = isMobile ? (
+    <div className="space-y-4">
+      <Accordion type="single" collapsible>
+        <AccordionItem value="config">
+          <AccordionTrigger className="text-sm font-medium">Chatbot Test Console — Config</AccordionTrigger>
+          <AccordionContent>{configPanel}</AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      {chatPanel}
+    </div>
+  ) : (
     <div className="flex gap-4">
       <Card className="w-[300px] shrink-0">
         <CardHeader className="py-3 border-b border-border">
@@ -325,6 +342,25 @@ const AdminTestChatTab = () => {
       </Card>
       <div className="flex-1 min-w-0">{chatPanel}</div>
     </div>
+  );
+
+  return (
+    <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <TabsList>
+        <TabsTrigger value="console" className="gap-1.5">
+          <MessageSquare className="w-3.5 h-3.5" /> Chat Console
+        </TabsTrigger>
+        <TabsTrigger value="history" className="gap-1.5">
+          <History className="w-3.5 h-3.5" /> Session History
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="console" className="mt-4">
+        {consoleContent}
+      </TabsContent>
+      <TabsContent value="history" className="mt-4">
+        <SessionHistoryTab onLoadSession={handleLoadSession} />
+      </TabsContent>
+    </Tabs>
   );
 };
 
