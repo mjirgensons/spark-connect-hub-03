@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bot, CheckCircle } from "lucide-react";
+import { Bot, CheckCircle, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -31,29 +31,48 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
 
   useEffect(() => {
     if (!sellerId) return;
-    const fetch = async () => {
+    const fetchData = async () => {
       setLoading(true);
-      const profileRes = await supabase.from("profiles").select("ai_chatbot_enabled").eq("id", sellerId).single();
-      const kbRes = await (supabase as any).from("seller_knowledge_base").select("id", { count: "exact", head: true }).eq("seller_id", sellerId);
-      const prodRes = await (supabase as any).from("products").select("id", { count: "exact", head: true }).eq("seller_id", sellerId).eq("pinecone_synced", true);
-      const enabled = !!(profileRes.data as any)?.ai_chatbot_enabled;
-      setChatbotEnabled(enabled);
-      if (enabled) setConsentAccepted(true);
+      const profileRes = await supabase
+        .from("profiles")
+        .select("ai_chatbot_enabled, seller_ai_consent_accepted")
+        .eq("id", sellerId)
+        .single();
+      const kbRes = await (supabase as any)
+        .from("seller_knowledge_base")
+        .select("id", { count: "exact", head: true })
+        .eq("seller_id", sellerId);
+      const prodRes = await (supabase as any)
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .eq("seller_id", sellerId)
+        .eq("pinecone_synced", true);
+
+      const profile = profileRes.data as any;
+      setChatbotEnabled(!!profile?.ai_chatbot_enabled);
+      setConsentAccepted(!!profile?.seller_ai_consent_accepted);
       setKbCount(kbRes.count ?? 0);
       setSyncedProductCount(prodRes.count ?? 0);
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, [sellerId]);
 
   const hasKb = kbCount >= 3;
   const hasSyncedProducts = syncedProductCount > 0;
   const allChecks = hasKb && hasSyncedProducts && consentAccepted;
 
+  // Chatbot is enabled but setup incomplete
+  const enabledButIncomplete = chatbotEnabled && !allChecks;
+
   const handleToggle = async (checked: boolean) => {
     if (checked) {
       if (!consentAccepted) {
         setShowConsent(true);
+        return;
+      }
+      if (!allChecks) {
+        toast.error("Complete all checklist items before enabling");
         return;
       }
       await updateEnabled(true);
@@ -76,9 +95,20 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
   };
 
   const handleConsentAccept = async () => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ seller_ai_consent_accepted: true } as any)
+      .eq("id", sellerId);
+    if (error) {
+      toast.error("Failed to save consent");
+      return;
+    }
     setConsentAccepted(true);
     setShowConsent(false);
-    await updateEnabled(true);
+    // If all other checks pass, enable
+    if (hasKb && hasSyncedProducts) {
+      await updateEnabled(true);
+    }
   };
 
   const checkIcon = (ok: boolean) => (
@@ -97,8 +127,8 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
           <p className="font-sans font-bold text-lg">AI Chatbot</p>
         </div>
 
-        {chatbotEnabled ? (
-          /* STATE B — ON */
+        {chatbotEnabled && allChecks ? (
+          /* STATE B — ON and fully set up */
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Enable AI Chatbot</span>
@@ -116,11 +146,22 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
             </Button>
           </div>
         ) : (
-          /* STATE A — OFF */
+          /* STATE A — OFF or incomplete */
           <div className="space-y-4">
+            {enabledButIncomplete && (
+              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span className="text-sm font-medium">⚠ Chatbot is enabled but setup is incomplete</span>
+              </div>
+            )}
+
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Enable AI Chatbot</span>
-              <Switch checked={false} disabled={!allChecks} onCheckedChange={handleToggle} />
+              <Switch
+                checked={chatbotEnabled}
+                disabled={!allChecks && !chatbotEnabled}
+                onCheckedChange={handleToggle}
+              />
             </div>
 
             <div className="space-y-2">
@@ -134,7 +175,18 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
               </div>
               <div className="flex items-center gap-2 text-sm">
                 {checkIcon(consentAccepted)}
-                <span>Review and accept AI consent terms</span>
+                <span>
+                  {consentAccepted ? (
+                    "Review and accept AI consent terms"
+                  ) : (
+                    <button
+                      className="underline text-primary hover:text-primary/80"
+                      onClick={() => setShowConsent(true)}
+                    >
+                      Review and accept AI consent terms
+                    </button>
+                  )}
+                </span>
               </div>
             </div>
 
