@@ -1,3 +1,4 @@
+import React from "react";
 import { TrendingDown, Zap, Shield, Wrench, Sparkles, Users } from "lucide-react";
 
 const benefits = [
