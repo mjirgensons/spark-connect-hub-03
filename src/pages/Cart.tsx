@@ -138,7 +138,7 @@ const Cart = () => {
                       {addon.price > 0 ? `$${formatPrice(addon.price)}` : "Included"}
                     </span>
                     <button
-                      className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                      className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
                       onClick={() => handleRemove(addon.productId, addon.name)}
                       aria-label={`Remove ${addon.name}`}
                     >
