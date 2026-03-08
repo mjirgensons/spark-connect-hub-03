@@ -57,7 +57,13 @@ Deno.serve(async (req) => {
       body: JSON.stringify(payload ?? {}),
     })
 
-    const data = await n8nRes.json().catch(() => ({ text: await n8nRes.text() }))
+    let data;
+    try {
+      data = await n8nRes.json();
+    } catch {
+      const text = await n8nRes.text();
+      data = { text };
+    }
 
     return new Response(JSON.stringify(data), {
       status: n8nRes.status,
