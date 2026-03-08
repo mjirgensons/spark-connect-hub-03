@@ -242,6 +242,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     if (!draft.trim() || loading) return;
     sendMessage(draft);
     setDraft("");
+    if (inputRef.current) inputRef.current.style.height = "auto";
   }, [draft, loading, sendMessage]);
 
   const handleKeyDown = useCallback(
