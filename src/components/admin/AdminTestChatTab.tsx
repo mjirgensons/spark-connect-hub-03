@@ -48,7 +48,7 @@ const AdminTestChatTab = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const regenerateSession = useCallback(() => setSessionId(generateUUID()), []);
+  const regenerateSession = useCallback(() => setSessionId(() => generateUUID()), []);
 
   const clearChat = useCallback(() => {
     setMessages([]);
