@@ -112,7 +112,7 @@ const Product = () => {
   const chatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!sellerChatbotEnabled || isMobile) {
+    if (!sellerChatbotEnabled || isChatMobile) {
       setShowChat(false);
       return;
     }
@@ -120,7 +120,21 @@ const Product = () => {
     return () => {
       if (chatTimerRef.current) clearTimeout(chatTimerRef.current);
     };
-  }, [sellerChatbotEnabled, isMobile, chatDelaySeconds]);
+  }, [sellerChatbotEnabled, isChatMobile, chatDelaySeconds]);
+
+  // Debug logging for chat widget visibility
+  useEffect(() => {
+    console.log('[ChatWidget Debug]', {
+      productExists: !!product,
+      sellerId: product?.seller_id,
+      sellerProfileData: sellerProfile,
+      sellerChatbotEnabled,
+      isChatMobile,
+      chatDelaySeconds,
+      consentModalEnabled,
+      showChat,
+    });
+  }, [product, sellerProfile, sellerChatbotEnabled, isChatMobile, chatDelaySeconds, consentModalEnabled, showChat]);
 
   // ── Sticky mini sidebar visibility ──
   const heroRef = useRef<HTMLDivElement>(null);
