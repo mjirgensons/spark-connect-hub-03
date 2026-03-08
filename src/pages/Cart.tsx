@@ -92,7 +92,7 @@ const Cart = () => {
               <div className="flex items-center justify-between mt-3">
                 <div className="flex items-center border-2 border-border">
                   <button
-                    className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
+                    className="min-w-[48px] min-h-[48px] flex items-center justify-center hover:bg-muted transition-colors"
                     onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity - 1 } })}
                     disabled={item.quantity <= 1}
                     aria-label="Decrease quantity"
