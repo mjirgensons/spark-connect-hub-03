@@ -101,7 +101,7 @@ const Cart = () => {
                   </button>
                   <span className="px-3 text-sm font-mono font-medium min-w-[2rem] text-center">{item.quantity}</span>
                   <button
-                    className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted transition-colors"
+                    className="min-w-[48px] min-h-[48px] flex items-center justify-center hover:bg-muted transition-colors"
                     onClick={() => dispatch({ type: "UPDATE_QUANTITY", payload: { productId: item.productId, quantity: item.quantity + 1 } })}
                     disabled={item.quantity >= item.maxStock}
                     aria-label="Increase quantity"
