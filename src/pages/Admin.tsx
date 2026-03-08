@@ -33,6 +33,7 @@ import AdminProductReviewTab from "@/components/admin/AdminProductReviewTab";
 import AdminQATab from "@/components/admin/AdminQATab";
 import AdminSellerHealthTab from "@/components/admin/AdminSellerHealthTab";
 import AdminTestChatTab from "@/components/admin/AdminTestChatTab";
+import AdminChatbotControlPanel from "@/components/admin/AdminChatbotControlPanel";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 
@@ -57,6 +58,7 @@ const SECTION_TITLES: Record<AdminSection, string> = {
   newsletter: "Newsletter",
   "cookie-manager": "Cookie Manager",
   "test-chat": "Test Chat",
+  "ai-chatbot": "AI Chatbot Settings",
   settings: "System Settings",
 };
 
@@ -151,7 +153,9 @@ const Admin = () => {
           </div>
         );
       case "test-chat":
-        return <AdminTestChatTab />;
+        return <AdminTestChatTab onNavigateToChatbotSettings={() => setActiveSection("ai-chatbot")} />;
+      case "ai-chatbot":
+        return <AdminChatbotControlPanel onNavigateToTestChat={() => setActiveSection("test-chat")} />;
       case "settings":
         return (
           <div className="space-y-6">

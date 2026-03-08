@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Send, RefreshCw, Trash2, Loader2, AlertTriangle, BookOpen, MessageSquare, History } from "lucide-react";
+import { Send, RefreshCw, Trash2, Loader2, AlertTriangle, BookOpen, MessageSquare, History, ArrowLeft } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -47,7 +47,11 @@ const FieldHint = ({ children }: { children: React.ReactNode }) => (
   <p className="text-xs text-muted-foreground mt-1">{children}</p>
 );
 
-const AdminTestChatTab = () => {
+interface AdminTestChatTabProps {
+  onNavigateToChatbotSettings?: () => void;
+}
+
+const AdminTestChatTab = ({ onNavigateToChatbotSettings }: AdminTestChatTabProps) => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -345,6 +349,15 @@ const AdminTestChatTab = () => {
   );
 
   return (
+    <div className="space-y-3">
+      {onNavigateToChatbotSettings && (
+        <button
+          onClick={onNavigateToChatbotSettings}
+          className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors flex items-center gap-1"
+        >
+          <ArrowLeft className="w-3 h-3" /> Chatbot Settings
+        </button>
+      )}
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList>
         <TabsTrigger value="console" className="gap-1.5">
@@ -361,6 +374,7 @@ const AdminTestChatTab = () => {
         <SessionHistoryTab onLoadSession={handleLoadSession} />
       </TabsContent>
     </Tabs>
+    </div>
   );
 };
 
