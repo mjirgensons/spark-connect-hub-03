@@ -44,9 +44,15 @@ Deno.serve(async (req) => {
     })
   }
 
+  // Debug: log URL construction
+  console.log("N8N_WEBHOOK_URL =", n8nBaseUrl)
+  console.log("webhookPath =", webhookPath)
+
   // Build the full n8n webhook URL — strip trailing slash from base, prepend webhookPath
   const base = n8nBaseUrl.replace(/\/webhook\/?$/, '').replace(/\/$/, '')
   const url = `${base}${webhookPath}`
+
+  console.log("chatbot-proxy →", url)
 
   try {
     const n8nRes = await fetch(url, {
