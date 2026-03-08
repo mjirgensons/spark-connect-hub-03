@@ -92,6 +92,7 @@ const navGroups: NavGroup[] = [
     label: "System & Developer",
     items: [
       { id: "integrations", label: "Integrations", icon: Plug },
+      { id: "ai-chatbot", label: "AI Chatbot", icon: Bot },
       { id: "webhooks", label: "Webhooks & Events", icon: Webhook },
       { id: "test-chat", label: "Test Chat", icon: MessageSquare },
       { id: "settings", label: "System Settings", icon: Settings },
