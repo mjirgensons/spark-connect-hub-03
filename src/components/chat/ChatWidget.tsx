@@ -3,6 +3,7 @@ import { MessageCircle, X, ArrowUp, ExternalLink, Mic, MicOff } from "lucide-rea
 import { useNavigate } from "react-router-dom";
 import { useChatSession, type ChatMessage } from "./useChatSession";
 import ChatConsentModal from "./ChatConsentModal";
+import ChatRegistrationGate from "./ChatRegistrationGate";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
