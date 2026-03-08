@@ -65,7 +65,7 @@ export function usePageMeta(titleOrOptions?: string | PageMetaOptions, descripti
       removeMeta("og:type", true);
       removeMeta("og:url", true);
     };
-  }, [titleOrOptions, description]);
+  }, [titleOrOptions, descriptionArg]);
 }
 
 function setMeta(name: string, content: string, isProperty = false) {
