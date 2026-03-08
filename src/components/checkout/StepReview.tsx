@@ -194,7 +194,7 @@ const StepReview = () => {
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-2">
             <h3 className="font-serif font-semibold text-sm">Shipping Address</h3>
-            <button onClick={() => setStep(1)} className="text-muted-foreground hover:text-foreground">
+            <button onClick={() => setStep(1)} className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center text-muted-foreground hover:text-foreground">
               <Edit2 className="w-4 h-4" />
             </button>
           </div>
