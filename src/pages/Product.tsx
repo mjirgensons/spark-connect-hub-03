@@ -28,6 +28,8 @@ import ProductStickySidebar from "@/components/product/ProductStickySidebar";
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { product, isLoading, error, productOptions, productAppliances, relatedProducts } = useProductData(id);
 
   // Dynamic SEO meta
