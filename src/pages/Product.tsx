@@ -17,6 +17,9 @@ import ContactSellerButton from "@/components/ContactSellerButton";
 
 import { useProductData } from "@/hooks/useProductData";
 import { useProductCart } from "@/hooks/useProductCart";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
+import ChatWidget from "@/components/chat/ChatWidget";
 
 import ProductHero from "@/components/product/ProductHero";
 import ProductSpecs from "@/components/product/ProductSpecs";
@@ -25,6 +28,8 @@ import ProductStickySidebar from "@/components/product/ProductStickySidebar";
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { product, isLoading, error, productOptions, productAppliances, relatedProducts } = useProductData(id);
 
   // Dynamic SEO meta
@@ -54,6 +59,22 @@ const Product = () => {
   const [hwImageOpen, setHwImageOpen] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("specs");
   const [qaPrefill, setQaPrefill] = useState<{ text: string; optionId: string } | null>(null);
+
+  // ── Chat widget delayed reveal ──
+  const [showChat, setShowChat] = useState(false);
+  const chatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const sellerEnabled = (product as any)?.ai_chatbot_enabled === true;
+    if (!sellerEnabled || isMobile) {
+      setShowChat(false);
+      return;
+    }
+    chatTimerRef.current = setTimeout(() => setShowChat(true), 30000);
+    return () => {
+      if (chatTimerRef.current) clearTimeout(chatTimerRef.current);
+    };
+  }, [product, isMobile]);
 
   // ── Sticky mini sidebar visibility ──
   const heroRef = useRef<HTMLDivElement>(null);
@@ -535,6 +556,19 @@ const Product = () => {
       </Dialog>
 
       <Footer />
+
+      {/* AI Chat Widget */}
+      {showChat && product && (
+        <div style={{ animation: "chat-launcher-fade 500ms ease-out" }}>
+          <style>{`@keyframes chat-launcher-fade{from{opacity:0}to{opacity:1}}`}</style>
+          <ChatWidget
+            sellerId={product.seller_id}
+            sellerName={(product as any).seller_store_name || "this seller"}
+            productId={product.id}
+            userRole={user ? "registered" : "guest"}
+          />
+        </div>
+      )}
     </div>
   );
 };
