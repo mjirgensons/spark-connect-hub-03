@@ -248,6 +248,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
         @keyframes chat-bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-4px)}}
         @keyframes chatPulse{0%{box-shadow:0 0 0 0 rgba(0,0,0,0.4)}70%{box-shadow:0 0 0 12px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
         @keyframes chatEntrance{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+        @keyframes mic-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.08)}}
       `}</style>
 
       {/* Launcher */}
