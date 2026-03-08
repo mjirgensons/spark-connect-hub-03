@@ -29,6 +29,7 @@ const OtherProducts = () => {
       const { data } = await supabase.from("categories").select("id").eq("slug", KITCHENS_SLUG).single();
       return data;
     },
+    staleTime: 300_000,
   });
 
   // Fetch all non-kitchen categories with approved products
