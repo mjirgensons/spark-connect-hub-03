@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Send, RefreshCw, Trash2, Loader2, AlertTriangle, BookOpen, MessageSquare, History, ArrowLeft } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Send, RefreshCw, Trash2, Loader2, AlertTriangle, BookOpen, MessageSquare, History, ArrowLeft, Info } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -43,8 +44,15 @@ const CHATBOT_MODE_OPTIONS = [
   { value: "general", label: "General", description: "Open-ended. AI answers about store, brand, policies, lead times — not limited to specific products." },
 ];
 
-const FieldHint = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-xs text-muted-foreground mt-1">{children}</p>
+const InfoTip = ({ text }: { text: string }) => (
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help shrink-0" />
+    </TooltipTrigger>
+    <TooltipContent side="top" className="max-w-[260px] text-xs">
+      {text}
+    </TooltipContent>
+  </Tooltip>
 );
 
 interface AdminTestChatTabProps {
@@ -54,7 +62,7 @@ interface AdminTestChatTabProps {
 const AdminTestChatTab = ({ onNavigateToChatbotSettings }: AdminTestChatTabProps) => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const [activeTab, setActiveTab] = useState("console");
   const [sellerId, setSellerId] = useState(DEFAULT_SELLER_ID);
@@ -72,7 +80,10 @@ const AdminTestChatTab = ({ onNavigateToChatbotSettings }: AdminTestChatTabProps
   const webhookUrl = useProduction ? PROD_URL : TEST_URL;
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
   }, [messages]);
 
   const regenerateSession = useCallback(() => setSessionId(generateUUID() as string), []);
@@ -199,84 +210,102 @@ const AdminTestChatTab = ({ onNavigateToChatbotSettings }: AdminTestChatTabProps
   );
 
   const configPanel = (
-    <div className="space-y-4">
-      {testGuide}
-      <div>
-        <Label htmlFor="seller-id">Seller ID</Label>
-        <Input id="seller-id" value={sellerId} onChange={(e) => setSellerId(e.target.value)} className="font-mono text-xs mt-1" />
-        <FieldHint>UUID of the seller whose AI chatbot you are testing. Each seller has an isolated Pinecone namespace (seller_&#123;id&#125;).</FieldHint>
-      </div>
-      <div>
-        <Label htmlFor="session-id">Session ID</Label>
-        <div className="flex gap-2 mt-1">
-          <Input id="session-id" value={sessionId} onChange={(e) => setSessionId(e.target.value)} className="font-mono text-xs" />
-          <Button variant="outline" size="icon" onClick={regenerateSession} title="New Session ID">
-            <RefreshCw className="w-4 h-4" />
-          </Button>
+    <TooltipProvider delayDuration={200}>
+      <div className="space-y-3">
+        {testGuide}
+        <div>
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="seller-id" className="text-xs">Seller ID</Label>
+            <InfoTip text="UUID of the seller whose AI chatbot you are testing. Each seller has an isolated Pinecone namespace (seller_{id})." />
+          </div>
+          <Input id="seller-id" value={sellerId} onChange={(e) => setSellerId(e.target.value)} className="font-mono text-xs mt-1" />
         </div>
-        <FieldHint>Unique conversation identifier. All messages share this ID. Used by WF-23 to fetch chat history and maintain context.</FieldHint>
-      </div>
-      <div>
-        <Label>Webhook URL</Label>
-        <div className="flex items-center gap-2 mt-1">
-          <Button variant={!useProduction ? "default" : "outline"} size="sm" onClick={() => setUseProduction(false)}>Test</Button>
-          <Button variant={useProduction ? "default" : "outline"} size="sm" onClick={() => setUseProduction(true)}>Production</Button>
+        <div>
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="session-id" className="text-xs">Session ID</Label>
+            <InfoTip text="Unique conversation identifier. All messages share this ID. Used by WF-23 to fetch chat history and maintain context." />
+          </div>
+          <div className="flex gap-2 mt-1">
+            <Input id="session-id" value={sessionId} onChange={(e) => setSessionId(e.target.value)} className="font-mono text-xs" />
+            <Button variant="outline" size="icon" onClick={regenerateSession} title="New Session ID">
+              <RefreshCw className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
-        <p className="text-[10px] font-mono text-muted-foreground mt-1 break-all">{webhookUrl}</p>
-        <FieldHint>Test URL (webhook-test/) works only while WF-23 is in listening mode in n8n. Production URL (webhook/) works when WF-23 is active.</FieldHint>
-      </div>
-      <div>
-        <Label htmlFor="buyer-id">Buyer ID (Optional)</Label>
-        <Input id="buyer-id" value={buyerId} onChange={(e) => setBuyerId(e.target.value)} className="font-mono text-xs mt-1" placeholder="Leave empty" />
-        <FieldHint>UUID of a specific buyer from profiles table. Leave empty = anonymous guest. Enter a UUID = test as that buyer with their history and rate limits.</FieldHint>
-      </div>
-      <div>
-        <Label>User Role</Label>
-        <Select value={userRole} onValueChange={setUserRole}>
-          <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {USER_ROLE_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {selectedRole && <FieldHint>{selectedRole.description}</FieldHint>}
-      </div>
-      <div>
-        <Label>Chatbot Mode</Label>
-        <Select value={chatbotMode} onValueChange={setChatbotMode}>
-          <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {CHATBOT_MODE_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {selectedMode && <FieldHint>{selectedMode.description}</FieldHint>}
-      </div>
-      <div className="flex gap-2 pt-2">
-        <div className="flex-1 space-y-1">
-          <Button variant="outline" size="sm" onClick={clearChat} className="w-full">
-            <Trash2 className="w-3 h-3 mr-1" /> Clear Chat
-          </Button>
-          <FieldHint>Removes messages from display only. Backend still has old messages. Visual cleanup.</FieldHint>
+        <div>
+          <div className="flex items-center gap-1.5">
+            <Label className="text-xs">Webhook URL</Label>
+            <InfoTip text="Test URL (webhook-test/) works only while WF-23 is in listening mode in n8n. Production URL (webhook/) works when WF-23 is active." />
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <Button variant={!useProduction ? "default" : "outline"} size="sm" onClick={() => setUseProduction(false)}>Test</Button>
+            <Button variant={useProduction ? "default" : "outline"} size="sm" onClick={() => setUseProduction(true)}>Prod</Button>
+          </div>
+          <p className="text-[10px] font-mono text-muted-foreground mt-1 break-all">{webhookUrl}</p>
         </div>
-        <div className="flex-1 space-y-1">
-          <Button variant="outline" size="sm" onClick={newSession} className="w-full">
-            <RefreshCw className="w-3 h-3 mr-1" /> New Session
-          </Button>
-          <FieldHint>Creates new session ID and clears chat. Backend treats as fresh conversation — no prior context.</FieldHint>
+        <div>
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="buyer-id" className="text-xs">Buyer ID</Label>
+            <InfoTip text="UUID of a specific buyer from profiles table. Leave empty = anonymous guest. Enter a UUID = test as that buyer with their history and rate limits." />
+          </div>
+          <Input id="buyer-id" value={buyerId} onChange={(e) => setBuyerId(e.target.value)} className="font-mono text-xs mt-1" placeholder="Optional" />
+        </div>
+        <div>
+          <div className="flex items-center gap-1.5">
+            <Label className="text-xs">User Role</Label>
+            <InfoTip text={selectedRole?.description || "Select a user role to simulate."} />
+          </div>
+          <Select value={userRole} onValueChange={setUserRole}>
+            <SelectTrigger className="mt-1 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {USER_ROLE_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <div className="flex items-center gap-1.5">
+            <Label className="text-xs">Chatbot Mode</Label>
+            <InfoTip text={selectedMode?.description || "Select a chatbot mode."} />
+          </div>
+          <Select value={chatbotMode} onValueChange={setChatbotMode}>
+            <SelectTrigger className="mt-1 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {CHATBOT_MODE_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex gap-2 pt-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" onClick={clearChat} className="flex-1">
+                <Trash2 className="w-3 h-3 mr-1" /> Clear
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="text-xs">Removes messages from display only. Backend still has old messages.</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" onClick={newSession} className="flex-1">
+                <RefreshCw className="w-3 h-3 mr-1" /> New Session
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="text-xs">Creates new session ID and clears chat. Backend treats as fresh conversation.</TooltipContent>
+          </Tooltip>
         </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 
   const chatPanel = (
-    <Card className="flex flex-col h-[calc(100vh-260px)] min-h-[400px]">
-      <CardHeader className="py-3 border-b border-border">
-        <CardTitle className="text-sm font-mono">Chat — {sessionId.slice(0, 8)}…</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto p-4 space-y-3">
+    <div className="flex flex-col h-full border rounded-lg bg-card overflow-hidden">
+      <div className="py-2 px-4 border-b border-border shrink-0">
+        <p className="text-sm font-mono font-medium">Chat — {sessionId.slice(0, 8)}…</p>
+      </div>
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <p className="text-muted-foreground text-sm text-center py-8">Send a message to start testing the chatbot.</p>
         )}
@@ -308,9 +337,8 @@ const AdminTestChatTab = ({ onNavigateToChatbotSettings }: AdminTestChatTabProps
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
-      </CardContent>
-      <div className="border-t border-border p-3 flex gap-2">
+      </div>
+      <div className="border-t border-border p-3 flex gap-2 shrink-0">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -323,7 +351,7 @@ const AdminTestChatTab = ({ onNavigateToChatbotSettings }: AdminTestChatTabProps
           {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </Button>
       </div>
-    </Card>
+    </div>
   );
 
   const consoleContent = isMobile ? (
@@ -337,43 +365,43 @@ const AdminTestChatTab = ({ onNavigateToChatbotSettings }: AdminTestChatTabProps
       {chatPanel}
     </div>
   ) : (
-    <div className="flex gap-4">
-      <Card className="w-[300px] shrink-0">
-        <CardHeader className="py-3 border-b border-border">
+    <div className="flex gap-4 h-[calc(100vh-180px)] overflow-hidden">
+      <Card className="w-[35%] min-w-[260px] max-w-[340px] shrink-0 flex flex-col overflow-hidden">
+        <CardHeader className="py-3 border-b border-border shrink-0">
           <CardTitle className="text-sm">Chatbot Test Console</CardTitle>
         </CardHeader>
-        <CardContent className="pt-4">{configPanel}</CardContent>
+        <CardContent className="pt-3 pb-3 overflow-y-auto flex-1">{configPanel}</CardContent>
       </Card>
       <div className="flex-1 min-w-0">{chatPanel}</div>
     </div>
   );
 
   return (
-    <div className="space-y-3">
+    <div>
       {onNavigateToChatbotSettings && (
         <button
           onClick={onNavigateToChatbotSettings}
-          className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors flex items-center gap-1"
+          className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors flex items-center gap-1 mb-2"
         >
           <ArrowLeft className="w-3 h-3" /> Chatbot Settings
         </button>
       )}
-    <Tabs value={activeTab} onValueChange={setActiveTab}>
-      <TabsList>
-        <TabsTrigger value="console" className="gap-1.5">
-          <MessageSquare className="w-3.5 h-3.5" /> Chat Console
-        </TabsTrigger>
-        <TabsTrigger value="history" className="gap-1.5">
-          <History className="w-3.5 h-3.5" /> Session History
-        </TabsTrigger>
-      </TabsList>
-      <TabsContent value="console" className="mt-4">
-        {consoleContent}
-      </TabsContent>
-      <TabsContent value="history" className="mt-4">
-        <SessionHistoryTab onLoadSession={handleLoadSession} />
-      </TabsContent>
-    </Tabs>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="console" className="gap-1.5">
+            <MessageSquare className="w-3.5 h-3.5" /> Chat Console
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-1.5">
+            <History className="w-3.5 h-3.5" /> Session History
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="console" className="mt-3">
+          {consoleContent}
+        </TabsContent>
+        <TabsContent value="history" className="mt-3">
+          <SessionHistoryTab onLoadSession={handleLoadSession} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
