@@ -64,6 +64,14 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
       setLoading(true);
 
       try {
+        const metadata: Record<string, any> = {
+          user_role: authenticatedUserId ? "registered" : userRole,
+          page_url: window.location.href,
+        };
+        if (authenticatedUserId) {
+          metadata.buyer_id = authenticatedUserId;
+        }
+
         const { data, error } = await supabase.functions.invoke("chatbot-proxy", {
           body: {
             webhookPath: "/webhook/seller-chatbot",
@@ -72,10 +80,7 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
               sessionId: sessionIdRef.current,
               sellerId,
               productId,
-              metadata: {
-                user_role: userRole,
-                page_url: window.location.href,
-              },
+              metadata,
             },
           },
         });
@@ -83,6 +88,10 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
         if (error) throw error;
 
         const aiText = data?.output ?? data?.response ?? data?.text ?? "I wasn't able to generate a response. Please try again.";
+
+        const newCount = aiResponseCount + 1;
+        setAiResponseCount(newCount);
+        sessionStorage.setItem(`fitmatch_chat_response_count_${sellerId}`, String(newCount));
 
         setMessages((prev) => [
           ...prev,
