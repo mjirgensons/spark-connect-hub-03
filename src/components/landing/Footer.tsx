@@ -91,7 +91,7 @@ const Footer = () => {
       </div>
 
       {/* ROW 2 — Link Grid */}
-      <div className="border-t border-gray-800">
+      <div className="border-t border-border">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
             {linkColumns.map((col) => (
