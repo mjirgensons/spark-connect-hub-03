@@ -114,7 +114,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
   const [hasOpened, setHasOpened] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const [launcherIcon, setLauncherIcon] = useState<"chat" | "mic">("chat");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -242,6 +242,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     if (!draft.trim() || loading) return;
     sendMessage(draft);
     setDraft("");
+    if (inputRef.current) inputRef.current.style.height = "auto";
   }, [draft, loading, sendMessage]);
 
   const handleKeyDown = useCallback(
@@ -273,6 +274,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
         @keyframes mic-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.08)}}
         @keyframes mic-ring{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.6);opacity:0}}
         @keyframes launcherShadow{0%,100%{box-shadow:4px 4px 0px hsl(var(--foreground))}50%{box-shadow:4px 4px 12px hsl(var(--foreground)/0.5)}}
+        @keyframes launcherFlip{0%{transform:rotateY(0deg)}100%{transform:rotateY(180deg)}}
       `}</style>
 
       {/* Launcher */}
@@ -288,18 +290,32 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
               : "chatEntrance 400ms ease-out, launcherShadow 3s 400ms ease-in-out infinite",
           }}
         >
-          <span className="relative w-6 h-6">
-            <MessageCircle
-              className="w-6 h-6 absolute inset-0 transition-opacity duration-300"
-              style={{ opacity: hasOpened || launcherIcon === "chat" ? 1 : 0 }}
-            />
-            {!hasOpened && (
-              <Mic
-                className="w-6 h-6 absolute inset-0 transition-opacity duration-300"
-                style={{ opacity: launcherIcon === "mic" ? 1 : 0 }}
-              />
-            )}
-          </span>
+          {hasOpened ? (
+            <MessageCircle className="w-6 h-6" />
+          ) : (
+            <span
+              className="relative w-6 h-6"
+              style={{
+                perspective: "400px",
+              }}
+            >
+              <span
+                className="absolute inset-0 flex items-center justify-center"
+                style={{
+                  transformStyle: "preserve-3d",
+                  transition: "transform 600ms ease-in-out",
+                  transform: launcherIcon === "mic" ? "rotateY(180deg)" : "rotateY(0deg)",
+                }}
+              >
+                <span className="absolute inset-0 flex items-center justify-center" style={{ backfaceVisibility: "hidden" }}>
+                  <MessageCircle className="w-6 h-6" />
+                </span>
+                <span className="absolute inset-0 flex items-center justify-center" style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
+                  <Mic className="w-6 h-6" />
+                </span>
+              </span>
+            </span>
+          )}
           {hasUnread && chatbotActive && (
             <span className="absolute top-0 right-0 w-3 h-3 bg-destructive rounded-full" />
           )}
@@ -364,15 +380,21 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
               {/* Input */}
               <div className="shrink-0 border-t-2 border-foreground p-3">
                 <div className="flex items-center gap-2">
-                  <input
+                  <textarea
                     ref={inputRef}
                     value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
+                    onChange={(e) => {
+                      setDraft(e.target.value);
+                      const el = e.target;
+                      el.style.height = "auto";
+                      el.style.height = Math.min(el.scrollHeight, 4 * 24) + "px";
+                    }}
                     onKeyDown={handleKeyDown}
                     disabled={loading}
+                    rows={1}
                     placeholder="Ask about this product..."
-                    className="flex-1 h-9 px-3 text-sm font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
-                    style={{ borderRadius: 0 }}
+                    className="flex-1 min-h-[36px] px-3 py-2 text-sm font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 resize-none overflow-y-auto"
+                    style={{ borderRadius: 0, maxHeight: 4 * 24 }}
                   />
                   {voiceSupported && (
                     <div className="relative shrink-0 flex items-center justify-center" style={{ width: 44, height: 44 }}>
