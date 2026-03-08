@@ -238,11 +238,18 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     }, []),
   });
 
+  useEffect(() => {
+    if (!inputRef.current) return;
+    const el = inputRef.current;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+  }, [draft]);
+
   const handleSend = useCallback(() => {
     if (!draft.trim() || loading) return;
     sendMessage(draft);
     setDraft("");
-    if (inputRef.current) inputRef.current.style.height = "auto";
+    if (inputRef.current) inputRef.current.style.height = "40px";
   }, [draft, loading, sendMessage]);
 
   const handleKeyDown = useCallback(
