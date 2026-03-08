@@ -32,7 +32,7 @@ const AdminTestChatTab = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [sellerId, setSellerId] = useState(DEFAULT_SELLER_ID);
-  const [sessionId, setSessionId] = useState(() => generateUUID());
+  const [sessionId, setSessionId] = useState<string>(() => generateUUID());
   const [useProduction, setUseProduction] = useState(false);
   const [buyerId, setBuyerId] = useState("");
   const [userRole, setUserRole] = useState("guest");
