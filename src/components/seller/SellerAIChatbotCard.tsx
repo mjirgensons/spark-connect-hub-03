@@ -27,6 +27,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
   const [syncedProductCount, setSyncedProductCount] = useState(0);
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
+  const [missedAttemptCount, setMissedAttemptCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,12 +48,17 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
         .select("id", { count: "exact", head: true })
         .eq("seller_id", sellerId)
         .eq("pinecone_synced", true);
+      const missedRes = await (supabase as any)
+        .from("chatbot_missed_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("seller_id", sellerId);
 
       const profile = profileRes.data as any;
       setChatbotEnabled(!!profile?.ai_chatbot_enabled);
       setConsentAccepted(!!profile?.seller_ai_consent_accepted);
       setKbCount(kbRes.count ?? 0);
       setSyncedProductCount(prodRes.count ?? 0);
+      setMissedAttemptCount(missedRes.count ?? 0);
       setLoading(false);
     };
     fetchData();

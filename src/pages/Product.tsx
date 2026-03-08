@@ -614,6 +614,7 @@ const Product = () => {
             productId={product.id}
             userRole={user ? "registered" : "guest"}
             skipConsent={!consentModalEnabled}
+            chatbotActive={sellerChatbotEnabled}
           />
         </div>
       )}

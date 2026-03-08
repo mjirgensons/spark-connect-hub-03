@@ -1,8 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, X, ArrowUp } from "lucide-react";
+import { MessageCircle, MessageCircleOff, X, ArrowUp, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useChatSession, type ChatMessage } from "./useChatSession";
 import ChatConsentModal from "./ChatConsentModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ChatWidgetProps {
   sellerId: string;
@@ -10,6 +14,7 @@ interface ChatWidgetProps {
   productId: string;
   userRole: string;
   skipConsent?: boolean;
+  chatbotActive?: boolean;
 }
 
 /* ── Typing indicator ── */
@@ -36,7 +41,74 @@ function Timestamp({ date }: { date: Date }) {
   return <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">{t}</span>;
 }
 
-export default function ChatWidget({ sellerId, sellerName, productId, userRole, skipConsent = false }: ChatWidgetProps) {
+/* ── Inactive chatbot body ── */
+function InactiveChatBody({ sellerId, productId, productName }: { sellerId: string; productId: string; productName: string }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleContactSeller = async () => {
+    if (!user) {
+      navigate(`/login?redirect=/product/${productId}`);
+      return;
+    }
+    // Reuse ContactSellerButton logic
+    try {
+      const { data: existing } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("product_id", productId)
+        .eq("buyer_id", user.id)
+        .eq("seller_id", sellerId)
+        .maybeSingle();
+
+      if (existing) {
+        navigate(`/messages/${existing.id}`);
+        return;
+      }
+
+      const { data: newConv, error } = await supabase
+        .from("conversations")
+        .insert({
+          product_id: productId,
+          buyer_id: user.id,
+          seller_id: sellerId,
+          subject: productName || "Product inquiry",
+        })
+        .select("id")
+        .single();
+
+      if (error) throw error;
+      navigate(`/messages/${newConv.id}`);
+    } catch {
+      navigate("/messages");
+    }
+  };
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 text-center gap-4">
+      <MessageCircleOff className="w-10 h-10 text-muted-foreground" />
+      <div className="space-y-2">
+        <p className="font-sans font-bold text-sm text-foreground">AI Assistant Not Available</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          The seller has not yet activated the AI assistant for this product.
+        </p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          You can message the seller directly for questions about dimensions, materials, pricing, or delivery.
+        </p>
+      </div>
+      <Button
+        variant="outline"
+        className="border-2 border-foreground mt-2"
+        style={{ borderRadius: 0 }}
+        onClick={handleContactSeller}
+      >
+        Message Seller <ExternalLink className="w-4 h-4 ml-1" />
+      </Button>
+    </div>
+  );
+}
+
+export default function ChatWidget({ sellerId, sellerName, productId, userRole, skipConsent = false, chatbotActive = true }: ChatWidgetProps) {
   const [open, setOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,10 +129,10 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
 
   /* focus input on open */
   useEffect(() => {
-    if (open && consented) {
+    if (open && consented && chatbotActive) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [open, consented]);
+  }, [open, consented, chatbotActive]);
 
   /* auto-grant consent when skipConsent is true */
   useEffect(() => {
@@ -69,12 +141,12 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
 
   /* show intro after consent */
   useEffect(() => {
-    if (open && consented) showIntro();
-  }, [open, consented, showIntro]);
+    if (open && consented && chatbotActive) showIntro();
+  }, [open, consented, chatbotActive, showIntro]);
 
   /* unread dot */
   useEffect(() => {
-    if (!open && consented) setHasUnread(true);
+    if (!open && consented && chatbotActive) setHasUnread(true);
   }, [consented]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* Escape to close */
@@ -112,10 +184,23 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
+  /* Track missed attempt when inactive widget is opened */
+  const trackMissedAttempt = useCallback(() => {
+    if (chatbotActive) return;
+    const key = `fitmatch_missed_attempt_${sellerId}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    supabase
+      .from("chatbot_missed_attempts" as any)
+      .insert({ seller_id: sellerId, product_id: productId, page_url: window.location.href } as any)
+      .then(() => {});
+  }, [chatbotActive, sellerId, productId]);
+
   const handleOpen = useCallback(() => {
     setOpen(true);
     setHasUnread(false);
-  }, []);
+    if (!chatbotActive) trackMissedAttempt();
+  }, [chatbotActive, trackMissedAttempt]);
 
   const handleClose = useCallback(() => setOpen(false), []);
 
@@ -143,6 +228,8 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     [handleSend]
   );
 
+  const LauncherIcon = chatbotActive ? MessageCircle : MessageCircleOff;
+
   return (
     <>
       {/* Bounce keyframes injected once */}
@@ -152,13 +239,16 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
       {!open && (
         <button
           onClick={handleOpen}
-          aria-label="Open chat with AI assistant"
+          aria-label={chatbotActive ? "Open chat with AI assistant" : "AI assistant not available — click for options"}
           className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-foreground text-background flex items-center justify-center rounded-full"
           style={{ boxShadow: "4px 4px 0px hsl(var(--foreground))" }}
         >
-          <MessageCircle className="w-6 h-6" />
-          {hasUnread && (
+          <LauncherIcon className="w-6 h-6" />
+          {hasUnread && chatbotActive && (
             <span className="absolute top-0 right-0 w-3 h-3 bg-destructive rounded-full" />
+          )}
+          {!chatbotActive && (
+            <span className="absolute top-0 right-0 w-3 h-3 bg-amber-500 rounded-full" />
           )}
         </button>
       )}
@@ -185,14 +275,21 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
 
           {/* Header */}
           <div className="flex items-center justify-between h-12 px-4 bg-foreground text-background shrink-0">
-            <span className="font-bold text-sm font-sans truncate">{sellerName}</span>
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-sm font-sans truncate">{sellerName}</span>
+              {!chatbotActive && (
+                <span className="text-xs opacity-60 font-sans">AI Assistant · Offline</span>
+              )}
+            </div>
             <button onClick={handleClose} aria-label="Close chat" className="text-background hover:opacity-70 transition-opacity">
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Body */}
-          {!consented ? (
+          {!chatbotActive ? (
+            <InactiveChatBody sellerId={sellerId} productId={productId} productName={sellerName} />
+          ) : !consented ? (
             <ChatConsentModal onAccept={handleConsent} onDecline={handleDecline} />
           ) : (
             <>
