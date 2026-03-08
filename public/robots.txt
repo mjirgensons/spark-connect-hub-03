@@ -2,17 +2,40 @@ User-agent: *
 Allow: /
 
 Disallow: /admin
-Disallow: /admin/login
-Disallow: /cart
+Disallow: /admin/*
+Disallow: /account/*
 Disallow: /checkout
 Disallow: /order-confirmation
 Disallow: /login
 Disallow: /register
-Disallow: /account
-Disallow: /client
-Disallow: /contractor
-Disallow: /seller
-Disallow: /builder
+Disallow: /client/*
+Disallow: /contractor/*
+Disallow: /seller/*
+Disallow: /builder/*
 Disallow: /coming-soon
+Disallow: /messages
+
+User-agent: Googlebot
+Allow: /browse
+Allow: /product/
+Allow: /blog
+Allow: /faq
+Allow: /for-contractors
+Allow: /for-sellers
+Allow: /how-it-works
+Allow: /about
+Allow: /page/
+
+User-agent: Bingbot
+Allow: /browse
+Allow: /product/
+Allow: /blog
+Allow: /faq
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
 
 Sitemap: https://fitmatch.ca/sitemap.xml
