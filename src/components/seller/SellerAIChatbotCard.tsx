@@ -155,11 +155,16 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
               )}
             </div>
           </div>
-          <Switch
-            checked={chatbotEnabled}
-            disabled={!allChecks && !chatbotEnabled}
-            onCheckedChange={handleToggle}
-          />
+          <div className="flex flex-col items-end gap-1">
+            <Switch
+              checked={chatbotEnabled}
+              disabled={!allChecks && !chatbotEnabled}
+              onCheckedChange={handleToggle}
+            />
+            {!allChecks && !chatbotEnabled && (
+              <span className="text-xs text-muted-foreground">Complete all 3 steps to activate</span>
+            )}
+          </div>
         </div>
 
         {/* ── Setup Checklist ── */}
