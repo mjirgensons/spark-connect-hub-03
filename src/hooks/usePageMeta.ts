@@ -27,7 +27,7 @@ export function usePageMeta(titleOrOptions?: string | PageMetaOptions, descripti
     if (typeof titleOrOptions === "object" && titleOrOptions !== null) {
       opts = titleOrOptions;
     } else {
-      opts = { title: titleOrOptions, description };
+      opts = { title: titleOrOptions as string | undefined, description: descriptionArg };
     }
 
     // Title
