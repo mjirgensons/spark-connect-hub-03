@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 interface UseVoiceInputOptions {
   onTranscript: (text: string) => void;
+  onInterim?: (text: string) => void;
 }
 
 interface UseVoiceInputReturn {
@@ -11,7 +12,7 @@ interface UseVoiceInputReturn {
   stopListening: () => void;
 }
 
-export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): UseVoiceInputReturn {
+export function useVoiceInput({ onTranscript, onInterim }: UseVoiceInputOptions): UseVoiceInputReturn {
   const SpeechRecognition =
     typeof window !== "undefined"
       ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
@@ -21,18 +22,26 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): UseVoiceI
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
   const onTranscriptRef = useRef(onTranscript);
+  const onInterimRef = useRef(onInterim);
   onTranscriptRef.current = onTranscript;
+  onInterimRef.current = onInterim;
 
   useEffect(() => {
     if (!SpeechRecognition) return;
     const recognition = new SpeechRecognition();
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.maxAlternatives = 1;
-    // Do NOT set recognition.lang — let browser auto-detect
 
     recognition.onresult = (event: any) => {
-      const transcript = event.results[0]?.[0]?.transcript;
-      if (transcript) onTranscriptRef.current(transcript);
+      const result = event.results[0];
+      const transcript = result?.[0]?.transcript;
+      if (!transcript) return;
+
+      if (result.isFinal) {
+        onTranscriptRef.current(transcript);
+      } else {
+        onInterimRef.current?.(transcript);
+      }
     };
 
     recognition.onerror = (event: any) => {
