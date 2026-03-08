@@ -17,6 +17,9 @@ import ContactSellerButton from "@/components/ContactSellerButton";
 
 import { useProductData } from "@/hooks/useProductData";
 import { useProductCart } from "@/hooks/useProductCart";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
+import ChatWidget from "@/components/chat/ChatWidget";
 
 import ProductHero from "@/components/product/ProductHero";
 import ProductSpecs from "@/components/product/ProductSpecs";
