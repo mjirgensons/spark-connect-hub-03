@@ -116,7 +116,7 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
         setLoading(false);
       }
     },
-    [loading, sellerId, productId, userRole]
+    [loading, sellerId, productId, userRole, authenticatedUserId, aiResponseCount]
   );
 
   const resetChat = useCallback(() => {
@@ -133,5 +133,7 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
     showIntro,
     sendMessage,
     resetChat,
+    aiResponseCount,
+    sessionId: sessionIdRef.current,
   };
 }
