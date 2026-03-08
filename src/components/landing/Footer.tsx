@@ -98,7 +98,7 @@ const Footer = () => {
               <div key={col.title}>
                 <p className="font-sans font-bold text-sm tracking-wider uppercase mb-4">
                   {col.title}
-                </h4>
+                </p>
                 <ul className="space-y-1">
                   {col.links.map((link) => (
                     <li key={link.label}>
