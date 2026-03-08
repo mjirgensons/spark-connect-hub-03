@@ -119,13 +119,62 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
-  const { messages, loading, consented, grantConsent, showIntro, sendMessage, resetChat } = useChatSession({
+  const { messages, loading, consented, grantConsent, showIntro, sendMessage, resetChat, aiResponseCount, sessionId: chatSessionId } = useChatSession({
     sellerId,
     sellerName,
     productId,
     userRole,
+    authenticatedUserId: user?.id ?? null,
   });
+
+  /* Registration gate state */
+  const [guestMessageLimit, setGuestMessageLimit] = useState(3);
+  const [gateDismissed, setGateDismissed] = useState(false);
+  const [gateVisible, setGateVisible] = useState(false);
+  const [gateHard, setGateHard] = useState(false);
+
+  /* Fetch guest message limit from site_settings */
+  useEffect(() => {
+    supabase
+      .from("site_settings" as any)
+      .select("value")
+      .eq("key", "chatbot_guest_message_limit")
+      .maybeSingle()
+      .then(({ data }: any) => {
+        if (data?.value) {
+          const n = parseInt(data.value, 10);
+          if (!isNaN(n) && n > 0) setGuestMessageLimit(n);
+        }
+      });
+  }, []);
+
+  /* Gate logic: show after limit, hard gate at limit+2 */
+  useEffect(() => {
+    if (user) {
+      setGateVisible(false);
+      return;
+    }
+    if (aiResponseCount >= guestMessageLimit + 2) {
+      setGateVisible(true);
+      setGateHard(true);
+      setGateDismissed(false);
+    } else if (aiResponseCount >= guestMessageLimit && !gateDismissed) {
+      setGateVisible(true);
+      setGateHard(false);
+    }
+  }, [aiResponseCount, guestMessageLimit, user, gateDismissed]);
+
+  const handleGateDismiss = useCallback(() => {
+    setGateDismissed(true);
+    setGateVisible(false);
+  }, []);
+
+  const handleGateAuthenticated = useCallback(() => {
+    setGateVisible(false);
+    setGateDismissed(true);
+  }, []);
 
   /* auto-scroll */
   useEffect(() => {
