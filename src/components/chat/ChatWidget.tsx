@@ -510,7 +510,6 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
               </div>
             </div>
           )}
-          )}
         </div>
       )}
     </>
