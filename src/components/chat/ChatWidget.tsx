@@ -271,6 +271,8 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
         @keyframes chatPulse{0%{box-shadow:0 0 0 0 rgba(0,0,0,0.4)}70%{box-shadow:0 0 0 12px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
         @keyframes chatEntrance{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
         @keyframes mic-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.08)}}
+        @keyframes mic-ring{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.6);opacity:0}}
+        @keyframes launcherShadow{0%,100%{box-shadow:4px 4px 0px hsl(var(--foreground))}50%{box-shadow:4px 4px 12px hsl(var(--foreground)/0.5)}}
       `}</style>
 
       {/* Launcher */}
@@ -281,10 +283,23 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
           className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-foreground text-background flex items-center justify-center rounded-full"
           style={{
             boxShadow: "4px 4px 0px hsl(var(--foreground))",
-            animation: "chatEntrance 400ms ease-out, chatPulse 2s 400ms infinite",
+            animation: hasOpened
+              ? "chatEntrance 400ms ease-out"
+              : "chatEntrance 400ms ease-out, launcherShadow 3s 400ms ease-in-out infinite",
           }}
         >
-          <MessageCircle className="w-6 h-6" />
+          <span className="relative w-6 h-6">
+            <MessageCircle
+              className="w-6 h-6 absolute inset-0 transition-opacity duration-300"
+              style={{ opacity: hasOpened || launcherIcon === "chat" ? 1 : 0 }}
+            />
+            {!hasOpened && (
+              <Mic
+                className="w-6 h-6 absolute inset-0 transition-opacity duration-300"
+                style={{ opacity: launcherIcon === "mic" ? 1 : 0 }}
+              />
+            )}
+          </span>
           {hasUnread && chatbotActive && (
             <span className="absolute top-0 right-0 w-3 h-3 bg-destructive rounded-full" />
           )}
