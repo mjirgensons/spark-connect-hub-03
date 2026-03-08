@@ -195,7 +195,7 @@ const AdminTestChatTab = () => {
             >
               {msg.role === "error" && <AlertTriangle className="w-3 h-3 inline mr-1" />}
               {msg.content}
-              {msg.escalated && <Badge variant="outline" className="ml-2 text-[10px] border-orange-500 text-orange-500">Escalated</Badge>}
+              {msg.escalated && <Badge variant="outline" className="ml-2 text-[10px] border-border">Escalated</Badge>}
               <div className={cn("text-[10px] mt-1 opacity-60", msg.role === "user" ? "text-right" : "text-left")}>
                 {msg.timestamp.toLocaleTimeString()}
               </div>
