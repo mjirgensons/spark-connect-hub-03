@@ -24,7 +24,7 @@ const steps = [
   },
 ];
 
-const HowItWorks = () => {
+const HowItWorks = React.memo(() => {
   return (
     <section id="how-it-works" className="py-20 md:py-32 bg-card">
       <div className="container mx-auto px-4">
