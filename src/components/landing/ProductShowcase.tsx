@@ -58,7 +58,7 @@ const ProductShowcase = () => {
             <Link to={`/product/${product.id}`} key={product.id}>
               <Card className="group overflow-hidden h-full">
                 <div className="relative aspect-square overflow-hidden">
-                  <img src={product.main_image_url || "/placeholder.svg"} alt={`${product.product_name} kitchen cabinets`} className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${product.availability_status === "Deactivated" ? "opacity-60" : ""}`} loading="lazy" />
+                  <img src={product.main_image_url || "/placeholder.svg"} alt={`${product.product_name} kitchen cabinets`} width={400} height={400} className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${product.availability_status === "Deactivated" ? "opacity-60" : ""}`} loading="lazy" />
                   {product.availability_status === "Deactivated" && (
                     <div className="absolute top-3 left-3 right-3 bg-foreground/80 text-background text-sm font-bold px-3 py-2 rounded-md text-center">
                       Temporarily Unavailable

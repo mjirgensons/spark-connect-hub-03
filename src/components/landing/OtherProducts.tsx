@@ -104,6 +104,8 @@ const OtherProducts = () => {
                           <img
                             src={product.main_image_url || "/placeholder.svg"}
                             alt={`${product.product_name} luxury cabinetry`}
+                            width={400}
+                            height={400}
                             className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${product.availability_status === "Deactivated" ? "opacity-60" : ""}`}
                             loading="lazy"
                           />

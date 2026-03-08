@@ -41,6 +41,7 @@ const FAQPage = () => {
       if (error) throw error;
       return data as FAQItem[];
     },
+    staleTime: 300_000,
   });
 
   const faqGroups = useMemo(() => {

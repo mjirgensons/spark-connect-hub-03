@@ -62,6 +62,7 @@ const Header = () => {
       return data?.reduce((sum: number, c: any) => sum + (c.buyer_unread_count || 0), 0) || 0;
     },
     enabled: !!user,
+    staleTime: 60_000,
     refetchInterval: 30000,
   });
 

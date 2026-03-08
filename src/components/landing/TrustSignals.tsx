@@ -25,6 +25,7 @@ const TrustSignals = () => {
       if (error) throw error;
       return data;
     },
+    staleTime: 300_000,
   });
 
   const stats = data?.filter((s) => s.type === "stat") ?? [];

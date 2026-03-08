@@ -81,6 +81,7 @@ const ProductCatalog = () => {
       if (error) throw error;
       return data || [];
     },
+    staleTime: 300_000,
   });
 
   // Extract unique styles
