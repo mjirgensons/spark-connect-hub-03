@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -19,22 +18,6 @@ interface ChatbotSetting {
 interface AdminChatbotControlPanelProps {
   onNavigateToTestChat?: () => void;
 }
-
-const NUMBER_KEYS = [
-  "chatbot_guest_message_limit",
-  "chatbot_email_gate_dismiss_extra",
-  "chatbot_email_gate_hard_limit",
-  "chatbot_email_tier_session_limit",
-  "chatbot_registered_per_seller_limit",
-  "chatbot_registered_total_daily_limit",
-  "chatbot_auto_open_delay_seconds",
-];
-
-const TOGGLE_KEYS = [
-  "chatbot_marketing_checkbox_default",
-  "chatbot_consent_modal_enabled",
-  "chatbot_voice_input_enabled",
-];
 
 const AdminChatbotControlPanel = ({ onNavigateToTestChat }: AdminChatbotControlPanelProps) => {
   const { toast } = useToast();
@@ -113,72 +96,85 @@ const AdminChatbotControlPanel = ({ onNavigateToTestChat }: AdminChatbotControlP
     setSaving(false);
   };
 
-  const NumberField = ({ label, settingKey }: { label: string; settingKey: string }) => (
-    <div className="flex items-center justify-between gap-4 py-3">
+  /* ── Row components ── */
+
+  const NumberRow = ({ label, settingKey, min = 0, max }: { label: string; settingKey: string; min?: number; max?: number }) => (
+    <div className="flex items-center justify-between gap-4 py-4 border-b border-muted last:border-b-0" style={{ maxWidth: 600 }}>
       <div className="flex-1 min-w-0">
         <Label className="text-sm font-medium">{label}</Label>
         <p className="text-xs text-muted-foreground mt-0.5">{getDescription(settingKey)}</p>
       </div>
       <Input
         type="number"
-        min={0}
-        className="w-24 text-right"
+        min={min}
+        max={max}
+        className="w-20 text-right border-2 border-foreground"
+        style={{ borderRadius: 0 }}
         value={getValue(settingKey)}
         onChange={(e) => setField(settingKey, e.target.value)}
       />
     </div>
   );
 
-  const ToggleField = ({ label, settingKey, warning }: { label: string; settingKey: string; warning?: string }) => {
+  const ToggleRow = ({ label, settingKey, warning }: { label: string; settingKey: string; warning?: string }) => {
     const checked = getValue(settingKey) === "true";
     return (
-      <div className="flex items-center justify-between gap-4 py-3">
+      <div className="flex items-center justify-between gap-4 py-4 border-b border-muted last:border-b-0" style={{ maxWidth: 600 }}>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <Label className="text-sm font-medium">{label}</Label>
-            {warning && checked && (
-              <Badge variant="destructive" className="text-[10px] gap-1">
-                <AlertTriangle className="w-3 h-3" />
-                {warning}
-              </Badge>
-            )}
-          </div>
+          <Label className="text-sm font-medium">{label}</Label>
           <p className="text-xs text-muted-foreground mt-0.5">{getDescription(settingKey)}</p>
         </div>
-        <Switch
-          checked={checked}
-          onCheckedChange={(val) => setField(settingKey, val ? "true" : "false")}
-        />
+        <div className="flex items-center gap-3 shrink-0">
+          {warning && checked && (
+            <Badge variant="destructive" className="text-xs px-2 py-0.5 gap-1" style={{ borderRadius: 0 }}>
+              <AlertTriangle className="w-3 h-3" />
+              CASL: must be OFF
+            </Badge>
+          )}
+          <Switch
+            checked={checked}
+            onCheckedChange={(val) => setField(settingKey, val ? "true" : "false")}
+          />
+        </div>
       </div>
     );
   };
 
+  /* ── Section card wrapper ── */
+  const SectionCard = ({ title, description, children }: { title: string; description: string; children: React.ReactNode }) => (
+    <div
+      className="bg-background border-2 border-foreground"
+      style={{ borderRadius: 0, boxShadow: "4px 4px 0px hsl(var(--foreground))" }}
+    >
+      <div className="px-4 py-4 border-b border-foreground">
+        <h3 className="text-base font-bold font-sans">{title}</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+      </div>
+      <div className="px-4 py-4">{children}</div>
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-[700px] mx-auto">
         <div className="flex items-center justify-between">
-          <div>
-            <Skeleton className="h-7 w-64 mb-2" />
-            <Skeleton className="h-4 w-96" />
-          </div>
+          <Skeleton className="h-7 w-64 mb-2" />
           <Skeleton className="h-9 w-32" />
         </div>
         {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-48 w-full rounded-lg" />
+          <Skeleton key={i} className="h-48 w-full" style={{ borderRadius: 0 }} />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="max-w-[700px] mx-auto space-y-6">
+      {/* Header bar */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <p className="text-sm text-muted-foreground">
-            Configure chatbot behavior, gating rules, and compliance settings. Changes apply immediately to all active chat widgets.
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground max-w-md">
+          Configure chatbot behavior, gating rules, and compliance settings. Changes apply immediately.
+        </p>
         <div className="flex items-center gap-3 shrink-0">
           {onNavigateToTestChat && (
             <button
@@ -188,7 +184,13 @@ const AdminChatbotControlPanel = ({ onNavigateToTestChat }: AdminChatbotControlP
               Open Test Console <ArrowRight className="w-3 h-3" />
             </button>
           )}
-          <Button onClick={handleSave} disabled={!hasChanges || saving} size="sm" className="gap-1.5">
+          <Button
+            onClick={handleSave}
+            disabled={!hasChanges || saving}
+            size="sm"
+            className="gap-1.5"
+            style={{ borderRadius: 0 }}
+          >
             <Save className="w-4 h-4" />
             {saving ? "Saving…" : "Save Changes"}
           </Button>
@@ -196,58 +198,34 @@ const AdminChatbotControlPanel = ({ onNavigateToTestChat }: AdminChatbotControlP
       </div>
 
       {/* Section 1 — Guest Gating */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Guest Gating</CardTitle>
-          <CardDescription>Controls when the email capture form appears for anonymous visitors.</CardDescription>
-        </CardHeader>
-        <CardContent className="divide-y divide-border">
-          <NumberField label="Free messages before email gate" settingKey="chatbot_guest_message_limit" />
-          <NumberField label="Extra messages after dismiss" settingKey="chatbot_email_gate_dismiss_extra" />
-          <NumberField label="Hard gate total limit" settingKey="chatbot_email_gate_hard_limit" />
-          <NumberField label="Messages per session (email captured)" settingKey="chatbot_email_tier_session_limit" />
-        </CardContent>
-      </Card>
+      <SectionCard title="Guest Gating" description="Controls when the email capture form appears for anonymous visitors.">
+        <NumberRow label="Free messages before email gate" settingKey="chatbot_guest_message_limit" />
+        <NumberRow label="Extra messages after dismiss" settingKey="chatbot_email_gate_dismiss_extra" />
+        <NumberRow label="Hard gate total limit" settingKey="chatbot_email_gate_hard_limit" />
+        <NumberRow label="Messages per session (email captured)" settingKey="chatbot_email_tier_session_limit" />
+      </SectionCard>
 
       {/* Section 2 — Registered User Limits */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Registered User Limits</CardTitle>
-          <CardDescription>Rate limits for authenticated buyers to prevent abuse.</CardDescription>
-        </CardHeader>
-        <CardContent className="divide-y divide-border">
-          <NumberField label="Messages per seller per day" settingKey="chatbot_registered_per_seller_limit" />
-          <NumberField label="Total messages per day" settingKey="chatbot_registered_total_daily_limit" />
-        </CardContent>
-      </Card>
+      <SectionCard title="Registered User Limits" description="Rate limits for authenticated buyers to prevent abuse.">
+        <NumberRow label="Messages per seller per day" settingKey="chatbot_registered_per_seller_limit" />
+        <NumberRow label="Total messages per day" settingKey="chatbot_registered_total_daily_limit" />
+      </SectionCard>
 
       {/* Section 3 — Compliance & Consent */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Compliance & Consent</CardTitle>
-          <CardDescription>PIPEDA and CASL compliance settings.</CardDescription>
-        </CardHeader>
-        <CardContent className="divide-y divide-border">
-          <ToggleField
-            label="Marketing checkbox default"
-            settingKey="chatbot_marketing_checkbox_default"
-            warning="CASL requires this to be OFF"
-          />
-          <ToggleField label="Show consent modal" settingKey="chatbot_consent_modal_enabled" />
-        </CardContent>
-      </Card>
+      <SectionCard title="Compliance & Consent" description="PIPEDA and CASL compliance settings.">
+        <ToggleRow
+          label="Marketing checkbox default"
+          settingKey="chatbot_marketing_checkbox_default"
+          warning="CASL"
+        />
+        <ToggleRow label="Show consent modal" settingKey="chatbot_consent_modal_enabled" />
+      </SectionCard>
 
       {/* Section 4 — Widget Behavior */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Widget Behavior</CardTitle>
-          <CardDescription>Controls chat widget appearance and features.</CardDescription>
-        </CardHeader>
-        <CardContent className="divide-y divide-border">
-          <ToggleField label="Voice input enabled" settingKey="chatbot_voice_input_enabled" />
-          <NumberField label="Chat button delay (seconds)" settingKey="chatbot_auto_open_delay_seconds" />
-        </CardContent>
-      </Card>
+      <SectionCard title="Widget Behavior" description="Controls chat widget appearance and features.">
+        <ToggleRow label="Voice input enabled" settingKey="chatbot_voice_input_enabled" />
+        <NumberRow label="Chat button appear delay" settingKey="chatbot_auto_open_delay_seconds" min={0} max={300} />
+      </SectionCard>
     </div>
   );
 };

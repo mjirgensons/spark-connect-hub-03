@@ -9,6 +9,7 @@ interface ChatWidgetProps {
   sellerName: string;
   productId: string;
   userRole: string;
+  skipConsent?: boolean;
 }
 
 /* ── Typing indicator ── */
@@ -35,7 +36,7 @@ function Timestamp({ date }: { date: Date }) {
   return <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">{t}</span>;
 }
 
-export default function ChatWidget({ sellerId, sellerName, productId, userRole }: ChatWidgetProps) {
+export default function ChatWidget({ sellerId, sellerName, productId, userRole, skipConsent = false }: ChatWidgetProps) {
   const [open, setOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,6 +61,11 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole }
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [open, consented]);
+
+  /* auto-grant consent when skipConsent is true */
+  useEffect(() => {
+    if (skipConsent && !consented) grantConsent();
+  }, [skipConsent, consented, grantConsent]);
 
   /* show intro after consent */
   useEffect(() => {
