@@ -13,6 +13,7 @@ interface UseChatSessionOptions {
   sellerName: string;
   productId: string;
   userRole: string;
+  authenticatedUserId?: string | null;
 }
 
 function generateId() {
