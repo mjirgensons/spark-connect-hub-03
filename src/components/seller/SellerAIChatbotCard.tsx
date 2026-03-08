@@ -27,6 +27,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
   const [syncedProductCount, setSyncedProductCount] = useState(0);
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
+  const [missedAttemptCount, setMissedAttemptCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,12 +48,17 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
         .select("id", { count: "exact", head: true })
         .eq("seller_id", sellerId)
         .eq("pinecone_synced", true);
+      const missedRes = await (supabase as any)
+        .from("chatbot_missed_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("seller_id", sellerId);
 
       const profile = profileRes.data as any;
       setChatbotEnabled(!!profile?.ai_chatbot_enabled);
       setConsentAccepted(!!profile?.seller_ai_consent_accepted);
       setKbCount(kbRes.count ?? 0);
       setSyncedProductCount(prodRes.count ?? 0);
+      setMissedAttemptCount(missedRes.count ?? 0);
       setLoading(false);
     };
     fetchData();
@@ -189,6 +195,15 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
                 </span>
               </div>
             </div>
+
+            {missedAttemptCount > 0 && (
+              <div className="flex items-center gap-2 p-3 border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30">
+                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span className="text-sm text-amber-800 dark:text-amber-300">
+                  <strong>{missedAttemptCount}</strong> buyer{missedAttemptCount === 1 ? '' : 's'} tried to chat about your products but your AI assistant was offline.
+                </span>
+              </div>
+            )}
 
             <p className="text-xs text-muted-foreground">
               Complete all steps above to activate your AI assistant
