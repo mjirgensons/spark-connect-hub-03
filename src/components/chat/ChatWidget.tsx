@@ -228,27 +228,29 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     [handleSend]
   );
 
-  const LauncherIcon = chatbotActive ? MessageCircle : MessageCircleOff;
-
   return (
     <>
-      {/* Bounce keyframes injected once */}
-      <style>{`@keyframes chat-bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-4px)}}`}</style>
+      {/* Keyframes injected once */}
+      <style>{`
+        @keyframes chat-bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-4px)}}
+        @keyframes chatPulse{0%{box-shadow:0 0 0 0 rgba(0,0,0,0.4)}70%{box-shadow:0 0 0 12px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+        @keyframes chatEntrance{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+      `}</style>
 
       {/* Launcher */}
       {!open && (
         <button
           onClick={handleOpen}
-          aria-label={chatbotActive ? "Open chat with AI assistant" : "AI assistant not available — click for options"}
+          aria-label="Open chat"
           className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-foreground text-background flex items-center justify-center rounded-full"
-          style={{ boxShadow: "4px 4px 0px hsl(var(--foreground))" }}
+          style={{
+            boxShadow: "4px 4px 0px hsl(var(--foreground))",
+            animation: "chatEntrance 400ms ease-out, chatPulse 2s 400ms infinite",
+          }}
         >
-          <LauncherIcon className="w-6 h-6" />
+          <MessageCircle className="w-6 h-6" />
           {hasUnread && chatbotActive && (
             <span className="absolute top-0 right-0 w-3 h-3 bg-destructive rounded-full" />
-          )}
-          {!chatbotActive && (
-            <span className="absolute top-0 right-0 w-3 h-3 bg-amber-500 rounded-full" />
           )}
         </button>
       )}
