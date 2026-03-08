@@ -199,8 +199,18 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
       .then(() => {});
   }, [chatbotActive, sellerId, productId]);
 
+  /* Launcher icon rotation — stop after first open */
+  useEffect(() => {
+    if (hasOpened) return;
+    const interval = setInterval(() => {
+      setLauncherIcon((prev) => (prev === "chat" ? "mic" : "chat"));
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [hasOpened]);
+
   const handleOpen = useCallback(() => {
     setOpen(true);
+    setHasOpened(true);
     setHasUnread(false);
     if (!chatbotActive) trackMissedAttempt();
   }, [chatbotActive, trackMissedAttempt]);
