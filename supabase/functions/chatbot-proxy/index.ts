@@ -73,6 +73,8 @@ Deno.serve(async (req) => {
     } catch {
       data = { text: responseText };
     }
+
+    return new Response(JSON.stringify(data), {
       status: n8nRes.status,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     })
