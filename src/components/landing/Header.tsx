@@ -201,14 +201,31 @@ const Header = () => {
                 <ShoppingCart className="w-4 h-4" />
                 Cart {itemCount > 0 && `(${itemCount})`}
               </Link>
-              <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
-                </Button>
-                <Button size="sm" asChild>
-                  <Link to="/register" onClick={() => setIsMenuOpen(false)}>Get Started</Link>
-                </Button>
-              </div>
+              {user ? (
+                <div className="flex flex-col gap-1 pt-4 border-t border-border">
+                  <Link to={getDashboardPath()} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground min-h-[44px]" onClick={() => setIsMenuOpen(false)}>
+                    <LayoutDashboard className="w-4 h-4" />
+                    My Account
+                  </Link>
+                  <Link to="/account/orders" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground min-h-[44px]" onClick={() => setIsMenuOpen(false)}>
+                    <Package className="w-4 h-4" />
+                    Orders
+                  </Link>
+                  <button onClick={() => { signOut(); setIsMenuOpen(false); }} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground min-h-[44px]">
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 pt-4 border-t border-border">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
+                  </Button>
+                  <Button size="sm" asChild>
+                    <Link to="/register" onClick={() => setIsMenuOpen(false)}>Get Started</Link>
+                  </Button>
+                </div>
+              )}
             </nav>
           </div>
         )}
