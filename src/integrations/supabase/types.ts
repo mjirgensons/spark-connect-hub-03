@@ -383,6 +383,38 @@ export type Database = {
           },
         ]
       }
+      chatbot_missed_attempts: {
+        Row: {
+          created_at: string | null
+          id: string
+          page_url: string | null
+          product_id: string | null
+          seller_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          page_url?: string | null
+          product_id?: string | null
+          seller_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          page_url?: string | null
+          product_id?: string | null
+          seller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatbot_missed_attempts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communication_logs: {
         Row: {
           clicked_at: string | null
