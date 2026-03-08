@@ -27,6 +27,7 @@ import {
   Store,
   ClipboardCheck,
   HeartPulse,
+  Bot,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
