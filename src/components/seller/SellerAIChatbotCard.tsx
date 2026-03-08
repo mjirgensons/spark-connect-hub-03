@@ -240,16 +240,13 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
               </div>
             </>
           ) : (
-            <>
-              <p className="text-xs text-muted-foreground mb-2">Complete all steps above to activate your AI assistant</p>
-              <Link
-                to="/seller/knowledge-base"
-                className="inline-flex items-center justify-center h-9 px-4 text-sm font-sans font-bold bg-foreground text-background hover:opacity-80 transition-opacity"
-                style={{ boxShadow: "2px 2px 0px hsl(var(--foreground))" }}
-              >
-                Manage Knowledge Base
-              </Link>
-            </>
+            <Link
+              to="/seller/knowledge-base"
+              className="inline-flex items-center justify-center h-9 px-4 text-sm font-sans font-bold bg-foreground text-background hover:opacity-80 transition-opacity"
+              style={{ boxShadow: "2px 2px 0px hsl(var(--foreground))" }}
+            >
+              Manage Knowledge Base
+            </Link>
           )}
         </div>
       </div>
