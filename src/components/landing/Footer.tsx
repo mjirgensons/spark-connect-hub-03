@@ -158,9 +158,9 @@ const Footer = () => {
       </div>
 
       {/* ROW 4 — Bottom Bar */}
-      <div className="border-t border-gray-800">
+      <div className="border-t border-border">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-gray-500">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-muted-foreground">
             <span>© {new Date().getFullYear()} The Fit-Match Luxury Cabinet Exchange. All rights reserved.</span>
             <span>All prices in CAD. HST (13%) not included.</span>
             <span>Built in Toronto 🇨🇦</span>

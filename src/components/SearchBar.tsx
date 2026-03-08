@@ -157,7 +157,7 @@ const SearchBar = () => {
                 />
                 {isFetching && <Loader2 className="w-4 h-4 animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />}
                 {!isFetching && query && (
-                  <button className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setQuery("")}>
+                  <button className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setQuery("")} aria-label="Clear search">
                     <X className="w-4 h-4" />
                   </button>
                 )}

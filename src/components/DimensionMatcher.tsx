@@ -75,6 +75,7 @@ const DimensionMatcher = () => {
                 }`}
                 onClick={() => setUnit("mm")}
                 type="button"
+                aria-pressed={unit === "mm"}
               >
                 mm
               </button>
