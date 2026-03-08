@@ -26,7 +26,7 @@ const contractorBenefits = [
   },
 ];
 
-const ForContractors = () => {
+const ForContractors = React.memo(() => {
   return (
     <section id="contractors" className="py-20 md:py-32 bg-secondary/30">
       <div className="container mx-auto px-4">
