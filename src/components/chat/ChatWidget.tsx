@@ -289,18 +289,32 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
               : "chatEntrance 400ms ease-out, launcherShadow 3s 400ms ease-in-out infinite",
           }}
         >
-          <span className="relative w-6 h-6">
-            <MessageCircle
-              className="w-6 h-6 absolute inset-0 transition-opacity duration-300"
-              style={{ opacity: hasOpened || launcherIcon === "chat" ? 1 : 0 }}
-            />
-            {!hasOpened && (
-              <Mic
-                className="w-6 h-6 absolute inset-0 transition-opacity duration-300"
-                style={{ opacity: launcherIcon === "mic" ? 1 : 0 }}
-              />
-            )}
-          </span>
+          {hasOpened ? (
+            <MessageCircle className="w-6 h-6" />
+          ) : (
+            <span
+              className="relative w-6 h-6"
+              style={{
+                perspective: "400px",
+              }}
+            >
+              <span
+                className="absolute inset-0 flex items-center justify-center"
+                style={{
+                  transformStyle: "preserve-3d",
+                  transition: "transform 600ms ease-in-out",
+                  transform: launcherIcon === "mic" ? "rotateY(180deg)" : "rotateY(0deg)",
+                }}
+              >
+                <span className="absolute inset-0 flex items-center justify-center" style={{ backfaceVisibility: "hidden" }}>
+                  <MessageCircle className="w-6 h-6" />
+                </span>
+                <span className="absolute inset-0 flex items-center justify-center" style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
+                  <Mic className="w-6 h-6" />
+                </span>
+              </span>
+            </span>
+          )}
           {hasUnread && chatbotActive && (
             <span className="absolute top-0 right-0 w-3 h-3 bg-destructive rounded-full" />
           )}
