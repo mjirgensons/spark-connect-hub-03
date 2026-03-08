@@ -206,19 +206,28 @@ function OtpView({
       setError("");
       setBusy(true);
       try {
-        const { error: otpErr } = await supabase.auth.verifyOtp({
-          email,
-          token: code,
-          type: "email",
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const res = await fetch(`${supabaseUrl}/functions/v1/verify-otp-code`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, code }),
         });
-        if (otpErr) throw otpErr;
+        const result = await res.json();
+        if (!result.success) {
+          setError(result.error || "Invalid code, please try again.");
+          setDigits(Array(6).fill(""));
+          setTimeout(() => inputsRef.current[0]?.focus(), 50);
+          return;
+        }
+        // Mark email as verified in user metadata
+        await supabase.auth.updateUser({ data: { email_verified_at: new Date().toISOString() } });
         if (_pendingFormData) {
           await callConsentEdge(_pendingFormData.email, _pendingFormData.marketingOptIn, sessionId);
         }
         _pendingFormData = null;
         onAuthenticated();
-      } catch (err: any) {
-        setError("Invalid code, please try again.");
+      } catch {
+        setError("Verification failed. Please try again.");
         setDigits(Array(6).fill(""));
         setTimeout(() => inputsRef.current[0]?.focus(), 50);
       } finally {
