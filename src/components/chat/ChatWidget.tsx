@@ -411,6 +411,9 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                     style={{ borderRadius: 0, maxHeight: 120, boxSizing: "border-box", WebkitAppearance: "none", MozAppearance: "none" }}
                   />
                   {voiceSupported && (
+                    <VoiceLangSelector value={voiceLang.lang} onChange={voiceLang.select} />
+                  )}
+                  {voiceSupported && (
                     <div className="relative shrink-0 flex items-center justify-center" style={{ width: 44, height: 44 }}>
                       {isListening && (
                         <span
