@@ -140,14 +140,45 @@ const Header = () => {
                 <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">{itemCount}</span>
               )}
             </Link>
-            <div className="hidden lg:flex items-center gap-2 ml-2">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/login">Sign In</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link to="/register">Get Started</Link>
-              </Button>
-            </div>
+            {user ? (
+              <div className="hidden lg:flex items-center ml-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+                      <CircleUser className="w-5 h-5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to={getDashboardPath()} className="flex items-center gap-2">
+                        <LayoutDashboard className="w-4 h-4" />
+                        My Account
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/account/orders" className="flex items-center gap-2">
+                        <Package className="w-4 h-4" />
+                        Orders
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut} className="flex items-center gap-2">
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ) : (
+              <div className="hidden lg:flex items-center gap-2 ml-2">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/login">Sign In</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link to="/register">Get Started</Link>
+                </Button>
+              </div>
+            )}
             <button className="lg:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
