@@ -227,8 +227,8 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
         </main>
       </div>
 
-      {/* Seller AI chat widget — only for seller role with chatbot enabled */}
-      {role === "seller" && profile && (profile as any).ai_chatbot_enabled === true && (
+      {/* Seller AI chat widget — only for seller role with personal assistant enabled */}
+      {role === "seller" && profile && (profile as any).personal_assistant_enabled === true && (
         <SellerDashboardChatWidget sellerId={adminViewSellerId || profile.id} />
       )}
     </div>
