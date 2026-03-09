@@ -320,7 +320,7 @@ const AdminSellersTab = () => {
                                 </DropdownMenuItem>
                               )}
                               {status === "suspended" && (
-                                <DropdownMenuItem onClick={() => handleAction(seller.id, "approved", name)}>
+                                <DropdownMenuItem onClick={() => handleAction(seller.id, "approved", name, seller.seller_status)}>
                                   <RotateCcw className="w-4 h-4 mr-2" /> Reactivate Seller
                                 </DropdownMenuItem>
                               )}
