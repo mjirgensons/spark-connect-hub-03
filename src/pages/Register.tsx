@@ -192,24 +192,7 @@ const Register = () => {
         return;
       }
 
-      if (selectedRole === "seller") {
-        // Fire-and-forget n8n webhook notification
-        try {
-          supabase.functions.invoke('notify-seller-registration', {
-            body: {
-              seller_name: parsed.data.fullName,
-              company_name: businessName.trim(),
-              email: parsed.data.email,
-              phone: phone.trim(),
-              business_type: businessType,
-              website: website.trim() || null,
-              description: bio.trim() || null,
-            },
-          }).catch((err) => console.warn('[webhook] notify-seller-registration failed:', err));
-        } catch (err) {
-          console.warn('[webhook] notify-seller-registration error:', err);
-        }
-      }
+      // Admin notification moved to after OTP verification
 
       // Send OTP and show verification UI
       const sent = await sendOtp(parsed.data.email);
@@ -250,6 +233,25 @@ const Register = () => {
         await supabase.auth.updateUser({
           data: { email_verified_at: new Date().toISOString() },
         });
+
+        // Notify admin about seller registration AFTER email is verified
+        if (selectedRole === "seller") {
+          try {
+            supabase.functions.invoke('notify-seller-registration', {
+              body: {
+                seller_name: fullName,
+                company_name: businessName.trim(),
+                email: email.trim().toLowerCase(),
+                phone: phone.trim(),
+                business_type: businessType,
+                website: website.trim() || null,
+                description: bio.trim() || null,
+              },
+            }).catch((err) => console.warn('[webhook] notify-seller-registration failed:', err));
+          } catch (err) {
+            console.warn('[webhook] notify-seller-registration error:', err);
+          }
+        }
 
         toast({ title: "Email verified!", description: "Welcome to FitMatch." });
 
