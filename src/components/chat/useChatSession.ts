@@ -80,6 +80,7 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
               sessionId: sessionIdRef.current,
               sellerId,
               productId,
+              user_role: userRole || (authenticatedUserId ? "registered" : "guest"),
               metadata,
             },
           },
