@@ -15,7 +15,7 @@ interface Props {
   sessionId: string;
 }
 
-export default function ChatRegistrationGate({ dismissable, onDismiss, onAuthenticated, sessionId }: Props) {
+export default function ChatRegistrationGate({ dismissable, onDismiss, onAuthenticated, onVerificationComplete, sessionId }: Props) {
   const [view, setView] = useState<View>("signup");
 
   return (
@@ -34,6 +34,7 @@ export default function ChatRegistrationGate({ dismissable, onDismiss, onAuthent
         <OtpView
           onBack={() => setView("signup")}
           onAuthenticated={onAuthenticated}
+          onVerificationComplete={onVerificationComplete}
           sessionId={sessionId}
         />
       )}
