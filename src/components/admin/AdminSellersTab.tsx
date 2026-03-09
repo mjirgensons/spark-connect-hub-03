@@ -416,7 +416,7 @@ const AdminSellersTab = () => {
             <AlertDialogAction
               onClick={() => {
                 if (confirmAction) {
-                  updateStatus.mutate({ sellerId: confirmAction.sellerId, status: confirmAction.action });
+                  updateStatus.mutate({ sellerId: confirmAction.sellerId, status: confirmAction.action, previousStatus: confirmAction.previousStatus });
                 }
               }}
             >
