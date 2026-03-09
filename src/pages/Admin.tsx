@@ -35,6 +35,7 @@ import AdminQATab from "@/components/admin/AdminQATab";
 import AdminSellerHealthTab from "@/components/admin/AdminSellerHealthTab";
 import AdminTestChatTab from "@/components/admin/AdminTestChatTab";
 import AdminChatbotControlPanel from "@/components/admin/AdminChatbotControlPanel";
+import AdminPlatformKBTab from "@/components/admin/AdminPlatformKBTab";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 
