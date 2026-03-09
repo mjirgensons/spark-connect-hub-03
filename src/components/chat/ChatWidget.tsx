@@ -183,6 +183,9 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
   const handleGateAuthenticated = useCallback(() => {
     setGateVisible(false);
     setGateDismissed(true);
+    if (window.innerWidth >= 768) {
+      setTimeout(() => inputRef.current?.focus(), 150);
+    }
   }, []);
 
   const handleVerificationComplete = useCallback(() => {
@@ -328,6 +331,9 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     sendMessage(draft);
     setDraft("");
     if (inputRef.current) inputRef.current.style.height = "40px";
+    if (window.innerWidth >= 768) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
   }, [draft, loading, sendMessage]);
 
   const handleKeyDown = useCallback(
@@ -521,6 +527,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                   )}
                   <button
                     onClick={handleSend}
+                    onMouseDown={(e) => e.preventDefault()}
                     disabled={loading || !draft.trim() || gateVisible}
                     aria-label="Send message"
                     className="w-9 h-9 flex items-center justify-center bg-foreground text-background rounded-full shrink-0 disabled:opacity-40 hover:opacity-80 transition-opacity"
