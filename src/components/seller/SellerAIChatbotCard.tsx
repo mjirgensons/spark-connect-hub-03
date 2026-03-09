@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Bot, CheckCircle2, Circle, AlertTriangle } from "lucide-react";
+import { Bot, CheckCircle2, Circle, AlertTriangle, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import SellerAIConsentModal from "./SellerAIConsentModal";
 
 interface Props {
