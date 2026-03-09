@@ -237,6 +237,7 @@ const Register = () => {
         });
 
         // Notify admin about seller registration AFTER email is verified
+        console.log(`[Register] Calling notify-seller-registration for role=${selectedRole}`);
         if (selectedRole === "seller") {
           try {
             supabase.functions.invoke('notify-seller-registration', {

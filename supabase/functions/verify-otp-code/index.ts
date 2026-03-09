@@ -110,6 +110,8 @@ Deno.serve(async (req) => {
           ? 'contractor_registration_pending'
           : 'account_welcome'
 
+        console.log(`[verify-otp-code] user_type=${userType}, templateKey=${templateKey}, email=${email}`)
+
         // Send email via n8n webhook
         await fetch(webhookSetting.value, {
           method: 'POST',
