@@ -155,12 +155,12 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="font-sans font-bold text-sm whitespace-nowrap">AI Storefront Assistant</span>
                 {sfLive ? (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 text-background leading-none shrink-0" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}>LIVE</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 text-background leading-none shrink-0 animate-pulse" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}>LIVE</span>
                 ) : (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-muted-foreground/20 text-muted-foreground leading-none shrink-0">OFF</span>
                 )}
               </div>
-              <Switch checked={storefrontEnabled} disabled={!allStorefrontChecks && !storefrontEnabled} onCheckedChange={handleStorefrontToggle} />
+              <Switch checked={storefrontEnabled} onCheckedChange={handleStorefrontToggle} />
             </div>
 
             {/* Short desc */}
