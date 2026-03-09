@@ -437,8 +437,10 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
           <div className="flex items-center justify-between h-12 px-4 bg-foreground text-background shrink-0">
             <div className="flex flex-col min-w-0">
               <span className="font-bold text-sm font-sans truncate">{sellerName}</span>
-              {!chatbotActive && (
-                <span className="text-xs opacity-60 font-sans">AI Assistant · Offline</span>
+              {chatbotActive ? (
+                <span className="text-xs opacity-60 font-sans">AI Storefront Assistant</span>
+              ) : (
+                <span className="text-xs opacity-60 font-sans">AI Storefront Assistant · Offline</span>
               )}
             </div>
             <button onClick={handleClose} aria-label="Close chat" className="text-background hover:opacity-70 transition-opacity">

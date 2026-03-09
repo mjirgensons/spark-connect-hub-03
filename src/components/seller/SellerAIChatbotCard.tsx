@@ -240,6 +240,51 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
           </div>
         )}
 
+        {/* ── AI Assistant Info Sections ── */}
+        {(aiDescriptions["ai_storefront_assistant_short_desc"] || aiDescriptions["ai_personal_assistant_short_desc"]) && (
+          <div className="px-4 pb-4 space-y-4">
+            {aiDescriptions["ai_storefront_assistant_short_desc"] && (
+              <div className="border-t border-muted pt-4">
+                <p className="text-sm font-bold mb-1">AI Storefront Assistant</p>
+                <p className="text-sm text-muted-foreground">{aiDescriptions["ai_storefront_assistant_short_desc"]}</p>
+                {aiDescriptions["ai_storefront_assistant_full_desc"] && (
+                  <Collapsible>
+                    <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors mt-2">
+                      <ChevronDown className="w-3 h-3" />
+                      Read more
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2">
+                      <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                        {aiDescriptions["ai_storefront_assistant_full_desc"]}
+                      </p>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+              </div>
+            )}
+
+            {aiDescriptions["ai_personal_assistant_short_desc"] && (
+              <div className="border-t border-muted pt-4">
+                <p className="text-sm font-bold mb-1">Personal Assistant</p>
+                <p className="text-sm text-muted-foreground">{aiDescriptions["ai_personal_assistant_short_desc"]}</p>
+                {aiDescriptions["ai_personal_assistant_full_desc"] && (
+                  <Collapsible>
+                    <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors mt-2">
+                      <ChevronDown className="w-3 h-3" />
+                      Read more
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2">
+                      <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                        {aiDescriptions["ai_personal_assistant_full_desc"]}
+                      </p>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── Action Row ── */}
         <div className="p-4 border-t-2 border-foreground text-center">
           {isLive ? (

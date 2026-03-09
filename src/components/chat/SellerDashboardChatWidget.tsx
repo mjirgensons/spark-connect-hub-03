@@ -210,7 +210,7 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
         >
           {/* Header */}
           <div className="flex items-center justify-between h-12 px-4 bg-foreground text-background shrink-0">
-            <span className="font-bold text-sm font-sans truncate">FitMatch AI Assistant</span>
+            <span className="font-bold text-sm font-sans truncate">Personal Assistant</span>
             <button onClick={() => setOpen(false)} aria-label="Close chat" className="text-background hover:opacity-70 transition-opacity">
               <X className="w-5 h-5" />
             </button>
