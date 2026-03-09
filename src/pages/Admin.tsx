@@ -160,6 +160,8 @@ const Admin = () => {
         return <AdminTestChatTab onNavigateToChatbotSettings={() => setActiveSection("ai-chatbot")} />;
       case "ai-chatbot":
         return <AdminChatbotControlPanel onNavigateToTestChat={() => setActiveSection("test-chat")} />;
+      case "platform-kb":
+        return <AdminPlatformKBTab />;
       case "settings":
         return (
           <div className="space-y-6">
