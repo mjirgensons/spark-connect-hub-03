@@ -37,7 +37,7 @@ const Hero = () => {
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 leading-relaxed">
-            Transform surplus luxury cabinetry into your dream kitchen. Our proprietary fit-matching 
+            Transform surplus luxury cabinetry into your dream kitchen. Our proprietary Fitmatch 
             technology connects you with perfectly-sized premium cabinets in days, not weeks.
           </p>
 

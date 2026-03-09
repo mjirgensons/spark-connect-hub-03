@@ -69,7 +69,7 @@ const Footer = () => {
               <span className="font-serif font-bold text-xl text-foreground">F</span>
             </div>
             <div>
-              <span className="font-serif text-xl font-semibold">Fit-Match</span>
+              <span className="font-serif text-xl font-semibold">Fitmatch</span>
               <span className="block text-xs text-muted-foreground -mt-1">Luxury Cabinet Exchange</span>
               <p className="text-sm text-muted-foreground mt-3 max-w-md">
                 GTA's premier marketplace for premium European cabinetry at 50-80% off retail.
@@ -161,7 +161,7 @@ const Footer = () => {
       <div className="border-t border-border">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-muted-foreground">
-            <span>© {new Date().getFullYear()} The Fit-Match Luxury Cabinet Exchange. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} The Fitmatch Luxury Cabinet Exchange. All rights reserved.</span>
             <span>All prices in CAD. HST (13%) not included.</span>
             <span>Built in Toronto 🇨🇦</span>
           </div>

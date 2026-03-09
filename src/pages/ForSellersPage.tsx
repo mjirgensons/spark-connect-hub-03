@@ -26,7 +26,7 @@ const benefits = [
   {
     icon: Search,
     title: "Automated Matching",
-    text: "Our fit-matching engine automatically surfaces your products to buyers whose opening dimensions match — no manual quoting needed.",
+    text: "Our Fitmatch engine automatically surfaces your products to buyers whose opening dimensions match — no manual quoting needed.",
   },
   {
     icon: FileText,

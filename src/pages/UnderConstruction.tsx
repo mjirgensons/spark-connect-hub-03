@@ -18,7 +18,7 @@ const UnderConstruction = () => {
         <div className="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
           <span className="text-primary-foreground font-serif font-bold text-3xl">F</span>
         </div>
-        <span className="font-serif text-2xl font-semibold text-foreground">Fit-Match</span>
+        <span className="font-serif text-2xl font-semibold text-foreground">Fitmatch</span>
         <span className="block text-sm text-muted-foreground">Luxury Cabinet Exchange</span>
       </div>
 
@@ -41,7 +41,7 @@ const UnderConstruction = () => {
       </a>
 
       <p className="mt-12 text-xs text-muted-foreground">
-        © {new Date().getFullYear()} The Fit-Match Luxury Cabinet Exchange. All rights reserved.
+        © {new Date().getFullYear()} The Fitmatch Luxury Cabinet Exchange. All rights reserved.
       </p>
     </div>
   );
