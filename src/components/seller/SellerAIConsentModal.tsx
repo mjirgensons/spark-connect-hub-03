@@ -32,24 +32,37 @@ const currentDate = new Date().toLocaleDateString("en-US", {
   day: "numeric",
 });
 
-/** Render raw consent text with \n\n as paragraph breaks and bold numbered headers */
+/** Normalize escaped newlines from DB then render with paragraph breaks and bold numbered headers */
+function normalizeNewlines(raw: string): string {
+  // DB may store literal \n sequences — convert to real newlines
+  return raw.replace(/\\n/g, "\n");
+}
+
 function ConsentBody({ text }: { text: string }) {
-  const paragraphs = text.split(/\n\n/);
+  const normalized = normalizeNewlines(text);
+  const paragraphs = normalized.split(/\n\n/);
   return (
     <>
       {paragraphs.map((p, i) => {
-        // Check if paragraph starts with a numbered header like "1. Title\nBody"
         const headerMatch = p.match(/^(\d+\.\s+.+?)(?:\n)([\s\S]*)$/);
         if (headerMatch) {
           return (
             <div key={i} className="mb-4">
               <h3 className="font-sans font-bold text-sm mb-1">{headerMatch[1]}</h3>
-              <p className="text-sm leading-relaxed">{headerMatch[2]}</p>
+              <p className="text-sm leading-relaxed">
+                {headerMatch[2].split("\n").map((line, j, arr) => (
+                  <span key={j}>{line}{j < arr.length - 1 && <br />}</span>
+                ))}
+              </p>
             </div>
           );
         }
         return (
-          <p key={i} className="text-sm leading-relaxed mb-4">{p}</p>
+          <p key={i} className="text-sm leading-relaxed mb-4">
+            {p.split("\n").map((line, j, arr) => (
+              <span key={j}>{line}{j < arr.length - 1 && <br />}</span>
+            ))}
+          </p>
         );
       })}
     </>
