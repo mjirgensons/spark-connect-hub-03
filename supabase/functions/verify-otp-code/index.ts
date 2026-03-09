@@ -7,6 +7,7 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
+  console.log("[verify-otp-code] v3 deployed - role-based templates active")
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
