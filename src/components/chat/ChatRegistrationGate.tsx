@@ -229,6 +229,7 @@ function OtpView({
           await callConsentEdge(_pendingFormData.email, _pendingFormData.marketingOptIn, sessionId);
         }
         _pendingFormData = null;
+        onVerificationComplete?.();
         onAuthenticated();
       } catch {
         setError("Verification failed. Please try again.");

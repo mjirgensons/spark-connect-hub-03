@@ -443,6 +443,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                   dismissable={!gateHard}
                   onDismiss={handleGateDismiss}
                   onAuthenticated={handleGateAuthenticated}
+                  onVerificationComplete={handleVerificationComplete}
                   sessionId={chatSessionId}
                 />
               )}
