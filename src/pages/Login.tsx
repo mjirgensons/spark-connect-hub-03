@@ -50,12 +50,16 @@ const Login = () => {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("user_type")
+        .select("user_type, seller_status")
         .eq("id", user.id)
         .single();
 
       if (profile?.user_type) {
-        navigate(`/${profile.user_type}/dashboard`);
+        if (profile.user_type === "seller" && profile.seller_status !== "approved") {
+          navigate("/seller/pending");
+        } else {
+          navigate(`/${profile.user_type}/dashboard`);
+        }
       } else {
         // Fallback — might be admin or profile not created yet
         navigate("/");

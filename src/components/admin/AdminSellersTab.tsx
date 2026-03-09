@@ -109,31 +109,31 @@ const AdminSellersTab = () => {
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ sellerId, status }: { sellerId: string; status: SellerStatus }) => {
+    mutationFn: async ({ sellerId, status, previousStatus }: { sellerId: string; status: SellerStatus; previousStatus?: string | null }) => {
       const { error } = await supabase
         .from("profiles")
         .update({ seller_status: status } as Record<string, unknown>)
         .eq("id", sellerId);
       if (error) throw error;
-      return { sellerId, status };
+      return { sellerId, status, previousStatus };
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (result) => {
       const labels: Record<string, string> = {
         approved: "Seller approved",
         rejected: "Seller rejected",
         suspended: "Seller suspended",
       };
-      toast({ title: labels[variables.status] || "Seller reactivated" });
+      toast({ title: labels[result.status] || "Seller reactivated" });
       queryClient.invalidateQueries({ queryKey: ["admin-sellers"] });
       setSelectedSeller(null);
       setConfirmAction(null);
 
-      if (variables.status === "approved") {
+      if (result.status === "approved" && result.previousStatus !== "approved") {
         try {
           supabase
             .from("profiles")
             .select("full_name, company_name, email, id")
-            .eq("id", variables.sellerId)
+            .eq("id", result.sellerId)
             .single()
             .then(({ data: sellerProfile }) => {
               if (sellerProfile) {
