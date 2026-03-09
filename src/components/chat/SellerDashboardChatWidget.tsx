@@ -66,8 +66,8 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
   const {
     messages,
     loading,
-    showIntro,
     sendMessage,
+    addMessage,
   } = useChatSession({
     sellerId,
     sellerName: "FitMatch AI",
@@ -76,15 +76,14 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
     authenticatedUserId: user?.id ?? null,
   });
 
-  // Show intro on open
+  // Show custom intro on first open
+  const introShown = useRef(false);
   useEffect(() => {
-    if (open) showIntro();
-  }, [open, showIntro]);
-
-  // Override intro message
-  useEffect(() => {
-    // The useChatSession showIntro sets a default message; we handle our own intro via the intro text below
-  }, []);
+    if (open && !introShown.current) {
+      introShown.current = true;
+      addMessage(INTRO_MESSAGE, "assistant");
+    }
+  }, [open, addMessage]);
 
   // Auto-scroll
   useEffect(() => {
