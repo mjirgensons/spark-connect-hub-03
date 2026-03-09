@@ -155,12 +155,12 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="font-sans font-bold text-sm whitespace-nowrap">AI Storefront Assistant</span>
                 {sfLive ? (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 text-background leading-none shrink-0" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}>LIVE</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 text-background leading-none shrink-0 animate-pulse" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}>LIVE</span>
                 ) : (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-muted-foreground/20 text-muted-foreground leading-none shrink-0">OFF</span>
                 )}
               </div>
-              <Switch checked={storefrontEnabled} disabled={!allStorefrontChecks && !storefrontEnabled} onCheckedChange={handleStorefrontToggle} />
+              <Switch checked={storefrontEnabled} onCheckedChange={handleStorefrontToggle} />
             </div>
 
             {/* Short desc */}
@@ -214,9 +214,9 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
             {/* Title + badge + toggle */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
-                <span className="font-sans font-bold text-sm whitespace-nowrap">Personal Assistant</span>
+                <span className="font-sans font-bold text-sm whitespace-nowrap">Seller AI Assistant</span>
                 {paActive ? (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 text-background leading-none shrink-0" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}>ACTIVE</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 text-background leading-none shrink-0 animate-pulse" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}>ACTIVE</span>
                 ) : (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-muted-foreground/20 text-muted-foreground leading-none shrink-0">OFF</span>
                 )}
@@ -267,7 +267,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
           <div className="relative z-10 bg-background border-2 border-foreground w-full max-w-lg mx-4 max-h-[70vh] flex flex-col" style={{ boxShadow: "4px 4px 0px hsl(var(--foreground))" }}>
             <div className="flex items-center justify-between p-4 border-b-2 border-foreground shrink-0">
               <h2 className="font-sans font-bold text-base">
-                {readMoreModal === "storefront" ? "AI Storefront Assistant" : "Personal Assistant"}
+                {readMoreModal === "storefront" ? "AI Storefront Assistant" : "Seller AI Assistant"}
               </h2>
               <button onClick={() => setReadMoreModal(null)} className="hover:opacity-70 transition-opacity"><X className="w-4 h-4" /></button>
             </div>
