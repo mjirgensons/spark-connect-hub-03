@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
     await supabase
       .from('email_verification_codes')
       .update({ verified: true })
-      .eq('id', match.id)
+      .match({ id: match.id })
 
     // Fire-and-forget welcome email (don't block on success)
     (async () => {
