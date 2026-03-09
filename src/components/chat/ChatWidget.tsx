@@ -185,6 +185,10 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     setGateDismissed(true);
   }, []);
 
+  const handleVerificationComplete = useCallback(() => {
+    addMessage("✅ Email verified! Welcome to FitMatch. You can now continue chatting.");
+  }, [addMessage]);
+
   /* auto-scroll */
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
