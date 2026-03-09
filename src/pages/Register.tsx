@@ -234,6 +234,25 @@ const Register = () => {
           data: { email_verified_at: new Date().toISOString() },
         });
 
+        // Notify admin about seller registration AFTER email is verified
+        if (selectedRole === "seller") {
+          try {
+            supabase.functions.invoke('notify-seller-registration', {
+              body: {
+                seller_name: fullName,
+                company_name: businessName.trim(),
+                email: email.trim().toLowerCase(),
+                phone: phone.trim(),
+                business_type: businessType,
+                website: website.trim() || null,
+                description: bio.trim() || null,
+              },
+            }).catch((err) => console.warn('[webhook] notify-seller-registration failed:', err));
+          } catch (err) {
+            console.warn('[webhook] notify-seller-registration error:', err);
+          }
+        }
+
         toast({ title: "Email verified!", description: "Welcome to FitMatch." });
 
         // Redirect based on role
