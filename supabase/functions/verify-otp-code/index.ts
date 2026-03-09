@@ -1,4 +1,4 @@
-// v2: role-based template selection
+// v3: role-based template selection with deploy logging
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
 
 const corsHeaders = {
@@ -7,6 +7,7 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
+  console.log("[verify-otp-code] v3 deployed - role-based templates active")
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -108,6 +109,8 @@ Deno.serve(async (req) => {
           : userType === 'contractor'
           ? 'contractor_registration_pending'
           : 'account_welcome'
+
+        console.log(`[verify-otp-code] user_type=${userType}, templateKey=${templateKey}, email=${email}`)
 
         // Send email via n8n webhook
         await fetch(webhookSetting.value, {
