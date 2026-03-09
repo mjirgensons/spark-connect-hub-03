@@ -221,12 +221,14 @@ const Register = () => {
 
     setOtpLoading(true);
     try {
+      console.log(`[Register] Verifying OTP with user_type=${selectedRole}`);
       const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-otp-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim().toLowerCase(), code: otpCode, user_type: selectedRole }),
       });
       const result = await res.json();
+      console.log(`[Register] verify-otp-code response:`, result);
 
       if (result.success) {
         // Mark email as verified in user metadata
