@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
       }
     })()
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, version: "v3" }), {
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     })
   }

@@ -182,7 +182,6 @@ const Register = () => {
         email: parsed.data.email,
         password: parsed.data.password,
         options: {
-          emailRedirectTo: window.location.origin,
           data: metadata,
         },
       });
