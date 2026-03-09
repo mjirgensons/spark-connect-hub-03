@@ -159,7 +159,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
           <div className="flex items-center gap-3 min-w-0">
             <Bot className="w-5 h-5 shrink-0" />
             <div className="min-w-0">
-              <p className="font-sans font-bold text-lg leading-tight">AI Chatbot</p>
+              <p className="font-sans font-bold text-lg leading-tight">AI Assistants</p>
               {isLive ? (
                 <span
                   className="inline-block mt-1 text-xs font-bold px-2 py-0.5 text-background"
