@@ -100,9 +100,17 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
   const handlePersonalToggle = async (checked: boolean) => {
     if (checked) {
       if (!paConsentGiven) { setShowConsentModal("personal"); return; }
-      if (await updateProfileField("personal_assistant_enabled", true)) { setPersonalEnabled(true); toast.success("Personal Assistant enabled"); }
+      if (await updateProfileField("personal_assistant_enabled", true)) {
+        setPersonalEnabled(true);
+        toast.success("Personal Assistant enabled");
+        window.dispatchEvent(new CustomEvent("seller-assistant-state-changed"));
+      }
     } else {
-      if (await updateProfileField("personal_assistant_enabled", false)) { setPersonalEnabled(false); toast.success("Personal Assistant disabled"); }
+      if (await updateProfileField("personal_assistant_enabled", false)) {
+        setPersonalEnabled(false);
+        toast.success("Personal Assistant disabled");
+        window.dispatchEvent(new CustomEvent("seller-assistant-state-changed"));
+      }
     }
   };
 
