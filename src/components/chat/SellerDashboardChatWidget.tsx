@@ -54,7 +54,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   );
 }
 
-const INTRO_MESSAGE = "Hi! I'm your FitMatch AI assistant. Ask me anything about your products, store setup, or FitMatch platform features.";
+const INTRO_MESSAGE = "Hi! I'm your AI Personal Assistant. Ask me anything about your products, store setup, or FitMatch platform features.";
 
 export default function SellerDashboardChatWidget({ sellerId }: { sellerId: string }) {
   const [open, setOpen] = useState(false);
