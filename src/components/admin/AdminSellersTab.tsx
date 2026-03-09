@@ -307,7 +307,7 @@ const AdminSellersTab = () => {
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               {(status === "pending" || status === "rejected") && (
-                                <DropdownMenuItem onClick={() => handleAction(seller.id, "approved", name)}>
+                                <DropdownMenuItem onClick={() => handleAction(seller.id, "approved", name, seller.seller_status)}>
                                   <ShieldCheck className="w-4 h-4 mr-2" /> Approve Seller
                                 </DropdownMenuItem>
                               )}
