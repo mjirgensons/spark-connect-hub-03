@@ -29,6 +29,7 @@ Deno.serve(async (req) => {
 
   const email = body.email?.trim().toLowerCase()
   const code = body.code?.trim()
+  const userType = body.user_type?.trim()
 
   if (!email || !code) {
     return new Response(JSON.stringify({ success: false, error: 'Email and code are required.' }), {
