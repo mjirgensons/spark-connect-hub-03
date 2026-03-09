@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
   // Look for matching valid code
   const { data: match } = await supabase
     .from('email_verification_codes')
-    .select('id, attempts')
+    .select('id, email, code, expires_at, verified, attempts')
     .eq('email', email)
     .eq('code', code)
     .eq('verified', false)
@@ -56,10 +56,24 @@ Deno.serve(async (req) => {
 
   if (match) {
     // Valid code found — mark verified
-    await supabase
+    const { error: updateError } = await supabase
       .from('email_verification_codes')
-      .update({ verified: true })
-      .match({ id: match.id })
+      .upsert({
+        id: match.id,
+        email: match.email,
+        code: match.code,
+        expires_at: match.expires_at,
+        verified: true,
+        attempts: match.attempts ?? 0,
+      })
+
+    if (updateError) {
+      console.error('Failed to mark OTP as verified:', updateError)
+      return new Response(JSON.stringify({ success: false, error: 'Verification failed. Please try again.' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      })
+    }
 
     // Fire-and-forget welcome email (don't block on success)
     (async () => {
