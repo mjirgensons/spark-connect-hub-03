@@ -11,10 +11,11 @@ interface Props {
   dismissable: boolean;
   onDismiss: () => void;
   onAuthenticated: () => void;
+  onVerificationComplete?: () => void;
   sessionId: string;
 }
 
-export default function ChatRegistrationGate({ dismissable, onDismiss, onAuthenticated, sessionId }: Props) {
+export default function ChatRegistrationGate({ dismissable, onDismiss, onAuthenticated, onVerificationComplete, sessionId }: Props) {
   const [view, setView] = useState<View>("signup");
 
   return (
@@ -33,6 +34,7 @@ export default function ChatRegistrationGate({ dismissable, onDismiss, onAuthent
         <OtpView
           onBack={() => setView("signup")}
           onAuthenticated={onAuthenticated}
+          onVerificationComplete={onVerificationComplete}
           sessionId={sessionId}
         />
       )}
@@ -178,10 +180,12 @@ function SignUpView({
 function OtpView({
   onBack,
   onAuthenticated,
+  onVerificationComplete,
   sessionId,
 }: {
   onBack: () => void;
   onAuthenticated: () => void;
+  onVerificationComplete?: () => void;
   sessionId: string;
 }) {
   const email = _pendingFormData?.email ?? "";
@@ -225,6 +229,7 @@ function OtpView({
           await callConsentEdge(_pendingFormData.email, _pendingFormData.marketingOptIn, sessionId);
         }
         _pendingFormData = null;
+        onVerificationComplete?.();
         onAuthenticated();
       } catch {
         setError("Verification failed. Please try again.");

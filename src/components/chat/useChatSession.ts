@@ -125,6 +125,13 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
     introShownRef.current = false;
   }, []);
 
+  const addMessage = useCallback((content: string, role: "assistant" | "system" = "assistant") => {
+    setMessages((prev) => [
+      ...prev,
+      { id: generateId(), role, content, timestamp: new Date() },
+    ]);
+  }, []);
+
   return {
     messages,
     loading,
@@ -133,6 +140,7 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
     showIntro,
     sendMessage,
     resetChat,
+    addMessage,
     aiResponseCount,
     sessionId: sessionIdRef.current,
   };

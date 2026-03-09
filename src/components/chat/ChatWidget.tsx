@@ -121,7 +121,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
   const panelRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
-  const { messages, loading, consented, grantConsent, showIntro, sendMessage, resetChat, aiResponseCount, sessionId: chatSessionId } = useChatSession({
+  const { messages, loading, consented, grantConsent, showIntro, sendMessage, resetChat, addMessage, aiResponseCount, sessionId: chatSessionId } = useChatSession({
     sellerId,
     sellerName,
     productId,
@@ -184,6 +184,10 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     setGateVisible(false);
     setGateDismissed(true);
   }, []);
+
+  const handleVerificationComplete = useCallback(() => {
+    addMessage("✅ Email verified! Welcome to FitMatch. You can now continue chatting.");
+  }, [addMessage]);
 
   /* auto-scroll */
   useEffect(() => {
@@ -439,6 +443,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                   dismissable={!gateHard}
                   onDismiss={handleGateDismiss}
                   onAuthenticated={handleGateAuthenticated}
+                  onVerificationComplete={handleVerificationComplete}
                   sessionId={chatSessionId}
                 />
               )}
