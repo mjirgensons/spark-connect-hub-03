@@ -63,6 +63,7 @@ const AdminSellersTab = () => {
     sellerId: string;
     action: SellerStatus;
     companyName: string;
+    previousStatus?: string | null;
   } | null>(null);
 
   const { data: sellers = [], isLoading } = useQuery({
