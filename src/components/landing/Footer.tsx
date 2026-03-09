@@ -69,7 +69,7 @@ const Footer = () => {
               <span className="font-serif font-bold text-xl text-foreground">F</span>
             </div>
             <div>
-              <span className="font-serif text-xl font-semibold">Fit-Match</span>
+              <span className="font-serif text-xl font-semibold">Fitmatch</span>
               <span className="block text-xs text-muted-foreground -mt-1">Luxury Cabinet Exchange</span>
               <p className="text-sm text-muted-foreground mt-3 max-w-md">
                 GTA's premier marketplace for premium European cabinetry at 50-80% off retail.
