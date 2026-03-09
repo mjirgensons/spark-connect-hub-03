@@ -78,12 +78,10 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
     return true;
   };
 
-  const upsertConsent = async (consentType: "storefront_assistant" | "personal_assistant") => {
+  const upsertConsent = async (consentType: "storefront_assistant" | "personal_assistant", consentText: string) => {
     const { error } = await (supabase as any).from("seller_ai_consents").upsert({
       seller_id: sellerId, consent_type: consentType, consent_given: true, consent_at: new Date().toISOString(),
-      consent_text: consentType === "storefront_assistant"
-        ? "I acknowledge that the AI Storefront Assistant will interact with buyers on my behalf using my product listings and Knowledge Base articles. I am responsible for the accuracy of information in my Knowledge Base."
-        : "I acknowledge that the Personal Assistant uses AI to help me manage my store. My questions and interactions are processed by AI services. I understand this assistant uses my product data and Knowledge Base articles to provide answers.",
+      consent_text: consentText,
     }, { onConflict: "seller_id,consent_type" });
     if (error) { toast.error("Failed to save consent"); return false; }
     return true;
@@ -108,8 +106,8 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
     }
   };
 
-  const handleStorefrontConsentAccepted = async () => {
-    if (await upsertConsent("storefront_assistant")) {
+  const handleStorefrontConsentAccepted = async (consentText: string) => {
+    if (await upsertConsent("storefront_assistant", consentText)) {
       setStorefrontConsent({ consent_type: "storefront_assistant", consent_given: true, consent_at: new Date().toISOString() });
       toast.success("Storefront Assistant consent accepted");
       if (hasKb && hasSyncedProducts) {
@@ -118,8 +116,8 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
     }
   };
 
-  const handlePersonalConsentAccepted = async () => {
-    if (await upsertConsent("personal_assistant")) {
+  const handlePersonalConsentAccepted = async (consentText: string) => {
+    if (await upsertConsent("personal_assistant", consentText)) {
       setPersonalConsent({ consent_type: "personal_assistant", consent_given: true, consent_at: new Date().toISOString() });
       toast.success("Personal Assistant consent accepted");
       if (await updateProfileField("personal_assistant_enabled", true)) { setPersonalEnabled(true); toast.success("Personal Assistant enabled"); }
