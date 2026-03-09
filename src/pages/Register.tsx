@@ -241,7 +241,7 @@ const Register = () => {
       const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-otp-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), code: otpCode }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), code: otpCode, user_type: selectedRole }),
       });
       const result = await res.json();
 

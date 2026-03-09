@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     })
   }
 
-  let body: { email?: string; code?: string }
+  let body: { email?: string; code?: string; user_type?: string }
   try {
     body = await req.json()
   } catch {
