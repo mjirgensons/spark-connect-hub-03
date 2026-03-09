@@ -41,7 +41,7 @@ const UnderConstruction = () => {
       </a>
 
       <p className="mt-12 text-xs text-muted-foreground">
-        © {new Date().getFullYear()} The Fit-Match Luxury Cabinet Exchange. All rights reserved.
+        © {new Date().getFullYear()} The Fitmatch Luxury Cabinet Exchange. All rights reserved.
       </p>
     </div>
   );

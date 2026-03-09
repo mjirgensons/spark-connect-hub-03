@@ -31,7 +31,7 @@ const steps = [
     number: "02",
     title: "Get Matched Instantly",
     description:
-      "Our proprietary fit-matching engine scans thousands of premium cabinets to find your perfect match.",
+      "Our proprietary Fitmatch engine scans thousands of premium cabinets to find your perfect match.",
     detail:
       "FitMatch cross-references your opening dimensions against every cabinet in our inventory — factoring in style, colour, and budget preferences. Results appear in seconds, not weeks.",
   },

@@ -10,7 +10,7 @@ const steps = [
   {
     icon: Search,
     title: "Get Matched Instantly",
-    description: "Our proprietary fit-matching engine scans thousands of premium cabinets to find your perfect match.",
+    description: "Our proprietary Fitmatch engine scans thousands of premium cabinets to find your perfect match.",
   },
   {
     icon: Package,
