@@ -11,13 +11,20 @@ interface Props {
   sellerId: string;
 }
 
+interface ConsentRecord {
+  consent_type: string;
+  consent_given: boolean;
+  consent_at: string | null;
+}
+
 export default function SellerAIChatbotCard({ sellerId }: Props) {
-  const [chatbotEnabled, setChatbotEnabled] = useState(false);
+  const [storefrontEnabled, setStorefrontEnabled] = useState(false);
+  const [personalEnabled, setPersonalEnabled] = useState(false);
   const [kbCount, setKbCount] = useState(0);
   const [syncedProductCount, setSyncedProductCount] = useState(0);
-  const [consentAccepted, setConsentAccepted] = useState(false);
-  const [consentAcceptedAt, setConsentAcceptedAt] = useState<string | null>(null);
-  const [showConsent, setShowConsent] = useState(false);
+  const [storefrontConsent, setStorefrontConsent] = useState<ConsentRecord | null>(null);
+  const [personalConsent, setPersonalConsent] = useState<ConsentRecord | null>(null);
+  const [showConsentModal, setShowConsentModal] = useState<"storefront" | "personal" | null>(null);
   const [missedAttemptCount, setMissedAttemptCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [aiDescriptions, setAiDescriptions] = useState<Record<string, string>>({});
@@ -31,56 +38,59 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
     if (!sellerId) return;
     const fetchData = async () => {
       setLoading(true);
-      const profileRes = await supabase
-        .from("profiles")
-        .select("ai_chatbot_enabled, seller_ai_consent_accepted, full_name, company_name, email")
-        .eq("id", sellerId)
-        .single();
 
-      // Fetch consent accepted_at separately since it may not be in types yet
-      const acceptedAtRes = await supabase
-        .from("profiles")
-        .select("seller_ai_consent_accepted_at" as any)
-        .eq("id", sellerId)
-        .single();
-
-      const kbRes = await (supabase as any)
-        .from("seller_knowledge_base")
-        .select("id", { count: "exact", head: true })
-        .eq("seller_id", sellerId);
-      const prodRes = await (supabase as any)
-        .from("products")
-        .select("id", { count: "exact", head: true })
-        .eq("seller_id", sellerId)
-        .eq("pinecone_synced", true);
-      const missedRes = await (supabase as any)
-        .from("chatbot_missed_attempts")
-        .select("id", { count: "exact", head: true })
-        .eq("seller_id", sellerId);
+      const [profileRes, kbRes, prodRes, missedRes, consentRes, descRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("ai_chatbot_enabled, full_name, company_name, email, personal_assistant_enabled" as any)
+          .eq("id", sellerId)
+          .single(),
+        (supabase as any)
+          .from("seller_knowledge_base")
+          .select("id", { count: "exact", head: true })
+          .eq("seller_id", sellerId),
+        (supabase as any)
+          .from("products")
+          .select("id", { count: "exact", head: true })
+          .eq("seller_id", sellerId)
+          .eq("pinecone_synced", true),
+        (supabase as any)
+          .from("chatbot_missed_attempts")
+          .select("id", { count: "exact", head: true })
+          .eq("seller_id", sellerId),
+        (supabase as any)
+          .from("seller_ai_consents")
+          .select("consent_type, consent_given, consent_at")
+          .eq("seller_id", sellerId),
+        supabase
+          .from("site_settings" as any)
+          .select("key, value")
+          .in("key", [
+            "ai_storefront_assistant_short_desc",
+            "ai_storefront_assistant_full_desc",
+            "ai_personal_assistant_short_desc",
+            "ai_personal_assistant_full_desc",
+          ]),
+      ]);
 
       const profile = profileRes.data as any;
-      setChatbotEnabled(!!profile?.ai_chatbot_enabled);
-      setConsentAccepted(!!profile?.seller_ai_consent_accepted);
-      setConsentAcceptedAt((acceptedAtRes.data as any)?.seller_ai_consent_accepted_at ?? null);
+      setStorefrontEnabled(!!profile?.ai_chatbot_enabled);
+      setPersonalEnabled(!!profile?.personal_assistant_enabled);
       setSellerProfile(profile ? {
         full_name: profile.full_name || "",
         company_name: profile.company_name || null,
         email: profile.email || "",
       } : null);
+
       setKbCount(kbRes.count ?? 0);
       setSyncedProductCount(prodRes.count ?? 0);
       setMissedAttemptCount(missedRes.count ?? 0);
 
-      // Fetch AI assistant descriptions from site_settings
-      const descRes = await supabase
-        .from("site_settings" as any)
-        .select("key, value")
-        .in("key", [
-          "ai_storefront_assistant_short_desc",
-          "ai_storefront_assistant_full_desc",
-          "ai_personal_assistant_short_desc",
-          "ai_personal_assistant_full_desc",
-        ]);
+      // Parse consents
+      const consents = (consentRes.data as ConsentRecord[]) || [];
+      setStorefrontConsent(consents.find(c => c.consent_type === "storefront_assistant") || null);
+      setPersonalConsent(consents.find(c => c.consent_type === "personal_assistant") || null);
+
       if (descRes.data) {
         const map: Record<string, string> = {};
         (descRes.data as any[]).forEach((r: any) => { map[r.key] = r.value; });
@@ -94,55 +104,118 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
 
   const hasKb = kbCount >= 3;
   const hasSyncedProducts = syncedProductCount > 0;
-  const allChecks = hasKb && hasSyncedProducts && consentAccepted;
-  const enabledButIncomplete = chatbotEnabled && !allChecks;
+  const sfConsentGiven = storefrontConsent?.consent_given === true;
+  const paConsentGiven = personalConsent?.consent_given === true;
+  const allStorefrontChecks = hasKb && hasSyncedProducts && sfConsentGiven;
 
-  const handleToggle = async (checked: boolean) => {
+  const updateProfileField = async (field: string, value: boolean) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ [field]: value } as any)
+      .eq("id", sellerId);
+    if (error) {
+      toast.error("Failed to update setting");
+      return false;
+    }
+    return true;
+  };
+
+  const upsertConsent = async (consentType: "storefront_assistant" | "personal_assistant") => {
+    const { error } = await (supabase as any)
+      .from("seller_ai_consents")
+      .upsert({
+        seller_id: sellerId,
+        consent_type: consentType,
+        consent_given: true,
+        consent_at: new Date().toISOString(),
+        consent_text: consentType === "storefront_assistant"
+          ? "I acknowledge that the AI Storefront Assistant will interact with buyers on my behalf using my product listings and Knowledge Base articles. I am responsible for the accuracy of information in my Knowledge Base."
+          : "I acknowledge that the Personal Assistant uses AI to help me manage my store. My questions and interactions are processed by AI services. I understand this assistant uses my product data and Knowledge Base articles to provide answers.",
+      }, { onConflict: "seller_id,consent_type" });
+    if (error) {
+      toast.error("Failed to save consent");
+      return false;
+    }
+    return true;
+  };
+
+  // Storefront toggle
+  const handleStorefrontToggle = async (checked: boolean) => {
     if (checked) {
-      if (!consentAccepted) {
-        setShowConsent(true);
+      if (!sfConsentGiven) {
+        setShowConsentModal("storefront");
         return;
       }
-      if (!allChecks) {
+      if (!allStorefrontChecks) {
         toast.error("Complete all checklist items before enabling");
         return;
       }
-      await updateEnabled(true);
+      if (await updateProfileField("ai_chatbot_enabled", true)) {
+        setStorefrontEnabled(true);
+        toast.success("AI Storefront Assistant enabled");
+      }
     } else {
-      await updateEnabled(false);
+      if (await updateProfileField("ai_chatbot_enabled", false)) {
+        setStorefrontEnabled(false);
+        toast.success("AI Storefront Assistant disabled");
+      }
     }
   };
 
-  const updateEnabled = async (value: boolean) => {
-    const { error } = await supabase
-      .from("profiles")
-      .update({ ai_chatbot_enabled: value } as any)
-      .eq("id", sellerId);
-    if (error) {
-      toast.error("Failed to update chatbot setting");
-      return;
+  // Personal toggle
+  const handlePersonalToggle = async (checked: boolean) => {
+    if (checked) {
+      if (!paConsentGiven) {
+        setShowConsentModal("personal");
+        return;
+      }
+      if (await updateProfileField("personal_assistant_enabled", true)) {
+        setPersonalEnabled(true);
+        toast.success("Personal Assistant enabled");
+      }
+    } else {
+      if (await updateProfileField("personal_assistant_enabled", false)) {
+        setPersonalEnabled(false);
+        toast.success("Personal Assistant disabled");
+      }
     }
-    setChatbotEnabled(value);
-    toast.success(value ? "AI Chatbot enabled" : "AI Chatbot disabled");
   };
 
-  const handleConsentAccepted = async () => {
-    setConsentAccepted(true);
-    setConsentAcceptedAt(new Date().toISOString());
-    if (hasKb && hasSyncedProducts) {
-      await updateEnabled(true);
+  // Consent accepted callbacks
+  const handleStorefrontConsentAccepted = async () => {
+    if (await upsertConsent("storefront_assistant")) {
+      setStorefrontConsent({ consent_type: "storefront_assistant", consent_given: true, consent_at: new Date().toISOString() });
+      toast.success("Storefront Assistant consent accepted");
+      if (hasKb && hasSyncedProducts) {
+        if (await updateProfileField("ai_chatbot_enabled", true)) {
+          setStorefrontEnabled(true);
+          toast.success("AI Storefront Assistant enabled");
+        }
+      }
+    }
+  };
+
+  const handlePersonalConsentAccepted = async () => {
+    if (await upsertConsent("personal_assistant")) {
+      setPersonalConsent({ consent_type: "personal_assistant", consent_given: true, consent_at: new Date().toISOString() });
+      toast.success("Personal Assistant consent accepted");
+      if (await updateProfileField("personal_assistant_enabled", true)) {
+        setPersonalEnabled(true);
+        toast.success("Personal Assistant enabled");
+      }
     }
   };
 
   if (loading) return null;
 
-  const isLive = chatbotEnabled && allChecks;
+  const sfLive = storefrontEnabled && allStorefrontChecks;
+  const paActive = personalEnabled && paConsentGiven;
 
-  const checklist = [
+  const storefrontChecklist = [
     { ok: hasKb, label: "Add at least 3 Knowledge Base articles" },
     { ok: hasSyncedProducts, label: "Products synced to AI" },
     {
-      ok: consentAccepted,
+      ok: sfConsentGiven,
       label: "Review and accept AI consent terms",
       clickable: true,
     },
@@ -154,181 +227,221 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
         className="bg-background border-2 border-foreground w-full"
         style={{ boxShadow: "4px 4px 0px hsl(var(--foreground))" }}
       >
-        {/* ── Header ── */}
-        <div className="flex items-center justify-between p-4 border-b-2 border-foreground">
-          <div className="flex items-center gap-3 min-w-0">
-            <Bot className="w-5 h-5 shrink-0" />
-            <div className="min-w-0">
-              <p className="font-sans font-bold text-lg leading-tight">AI Assistants</p>
-              {isLive ? (
+        {/* ── Card Header ── */}
+        <div className="flex items-center gap-3 p-4 border-b-2 border-foreground">
+          <Bot className="w-5 h-5 shrink-0" />
+          <p className="font-sans font-bold text-lg leading-tight">AI Assistants</p>
+        </div>
+
+        {/* ── SECTION 1: Storefront Assistant ── */}
+        <div className="p-4">
+          {/* Title row */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <p className="font-sans font-bold text-sm">AI Storefront Assistant</p>
+              {sfLive ? (
                 <span
-                  className="inline-block mt-1 text-xs font-bold px-2 py-0.5 text-background"
+                  className="inline-block text-[10px] font-bold px-1.5 py-0.5 text-background leading-none"
                   style={{ backgroundColor: "hsl(142, 71%, 45%)" }}
                 >
                   LIVE
                 </span>
               ) : (
-                <span
-                  className="inline-block mt-1 text-xs font-bold px-2 py-0.5 text-background"
-                  style={{ backgroundColor: "hsl(0, 84%, 60%)" }}
-                >
-                  OFFLINE
+                <span className="inline-block text-[10px] font-bold px-1.5 py-0.5 bg-muted-foreground/20 text-muted-foreground leading-none">
+                  OFF
                 </span>
               )}
             </div>
-          </div>
-          <div className="flex flex-col items-end gap-1">
             <Switch
-              checked={chatbotEnabled}
-              disabled={!allChecks && !chatbotEnabled}
-              onCheckedChange={handleToggle}
+              checked={storefrontEnabled}
+              disabled={!allStorefrontChecks && !storefrontEnabled}
+              onCheckedChange={handleStorefrontToggle}
             />
-            {!allChecks && !chatbotEnabled && (
-              <span className="text-xs text-muted-foreground">Complete all 3 steps to activate</span>
-            )}
           </div>
-        </div>
 
-        {/* ── Setup Checklist ── */}
-        <div className="p-4">
-          {enabledButIncomplete && (
-            <div className="flex items-center gap-2 text-amber-700 mb-3">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              <span className="text-sm font-medium">Chatbot is enabled but setup is incomplete</span>
+          {/* Description */}
+          {aiDescriptions["ai_storefront_assistant_short_desc"] && (
+            <div className="mb-3">
+              <p className="text-xs text-muted-foreground">{aiDescriptions["ai_storefront_assistant_short_desc"]}</p>
+              {aiDescriptions["ai_storefront_assistant_full_desc"] && (
+                <Collapsible>
+                  <CollapsibleTrigger className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors mt-1">
+                    <ChevronDown className="w-3 h-3" />
+                    Read more
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-1">
+                    <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">
+                      {aiDescriptions["ai_storefront_assistant_full_desc"]}
+                    </p>
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
             </div>
           )}
 
-          <p className="text-sm font-semibold mb-3">Setup Checklist</p>
-          <div className="space-y-3">
-            {checklist.map((item, i) => (
+          {/* Storefront Checklist */}
+          {storefrontEnabled && !allStorefrontChecks && (
+            <div className="flex items-center gap-2 text-amber-700 mb-2">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span className="text-xs font-medium">Enabled but setup is incomplete</span>
+            </div>
+          )}
+          {!allStorefrontChecks && !storefrontEnabled && (
+            <p className="text-[11px] text-muted-foreground mb-2">Complete all 3 steps to activate</p>
+          )}
+          <div className="space-y-2">
+            {storefrontChecklist.map((item, i) => (
               <div key={i} className="flex items-center gap-2">
                 {item.ok ? (
-                  <CheckCircle2 className="w-5 h-5 shrink-0 text-green-600" />
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-green-600" />
                 ) : (
-                  <Circle className="w-5 h-5 shrink-0 text-muted-foreground/40" />
+                  <Circle className="w-4 h-4 shrink-0 text-muted-foreground/40" />
                 )}
                 {item.clickable ? (
                   <button
-                    className="text-sm underline text-foreground hover:opacity-70 transition-opacity text-left"
-                    onClick={() => setShowConsent(true)}
+                    className="text-xs underline text-foreground hover:opacity-70 transition-opacity text-left"
+                    onClick={() => setShowConsentModal("storefront")}
                   >
                     {item.label}
                   </button>
                 ) : (
-                  <span className="text-sm">{item.label}</span>
+                  <span className="text-xs">{item.label}</span>
                 )}
               </div>
             ))}
           </div>
-        </div>
 
-        {/* ── Missed Attempts Callout ── */}
-        {!chatbotEnabled && missedAttemptCount > 0 && (
-          <div className="mx-4 mb-4 border-t border-muted pt-4">
-            <div
-              className="flex items-center gap-2 p-3 border-2"
-              style={{
-                backgroundColor: "hsl(48, 96%, 95%)",
-                borderColor: "hsl(45, 93%, 47%)",
-              }}
-            >
-              <AlertTriangle className="w-5 h-5 shrink-0" style={{ color: "hsl(25, 95%, 53%)" }} />
-              <span className="text-sm" style={{ color: "hsl(25, 95%, 26%)" }}>
-                <strong>{missedAttemptCount}</strong> buyer{missedAttemptCount === 1 ? "" : "s"} tried to chat about your products but your AI assistant was offline.
-              </span>
+          {/* Missed Attempts */}
+          {!storefrontEnabled && missedAttemptCount > 0 && (
+            <div className="mt-3">
+              <div
+                className="flex items-center gap-2 p-2 border-2"
+                style={{
+                  backgroundColor: "hsl(48, 96%, 95%)",
+                  borderColor: "hsl(45, 93%, 47%)",
+                }}
+              >
+                <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: "hsl(25, 95%, 53%)" }} />
+                <span className="text-xs" style={{ color: "hsl(25, 95%, 26%)" }}>
+                  <strong>{missedAttemptCount}</strong> buyer{missedAttemptCount === 1 ? "" : "s"} tried to chat but your AI assistant was offline.
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ── AI Assistant Info Sections ── */}
-        {(aiDescriptions["ai_storefront_assistant_short_desc"] || aiDescriptions["ai_personal_assistant_short_desc"]) && (
-          <div className="px-4 pb-4 space-y-4">
-            {aiDescriptions["ai_storefront_assistant_short_desc"] && (
-              <div className="border-t border-muted pt-4">
-                <p className="text-sm font-bold mb-1">AI Storefront Assistant</p>
-                <p className="text-sm text-muted-foreground">{aiDescriptions["ai_storefront_assistant_short_desc"]}</p>
-                {aiDescriptions["ai_storefront_assistant_full_desc"] && (
-                  <Collapsible>
-                    <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors mt-2">
-                      <ChevronDown className="w-3 h-3" />
-                      Read more
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="mt-2">
-                      <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
-                        {aiDescriptions["ai_storefront_assistant_full_desc"]}
-                      </p>
-                    </CollapsibleContent>
-                  </Collapsible>
-                )}
-              </div>
-            )}
-
-            {aiDescriptions["ai_personal_assistant_short_desc"] && (
-              <div className="border-t border-muted pt-4">
-                <p className="text-sm font-bold mb-1">Personal Assistant</p>
-                <p className="text-sm text-muted-foreground">{aiDescriptions["ai_personal_assistant_short_desc"]}</p>
-                {aiDescriptions["ai_personal_assistant_full_desc"] && (
-                  <Collapsible>
-                    <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors mt-2">
-                      <ChevronDown className="w-3 h-3" />
-                      Read more
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="mt-2">
-                      <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
-                        {aiDescriptions["ai_personal_assistant_full_desc"]}
-                      </p>
-                    </CollapsibleContent>
-                  </Collapsible>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── Action Row ── */}
-        <div className="p-4 border-t-2 border-foreground text-center">
-          {isLive ? (
-            <>
-              <p className="text-xs text-green-600 mb-2">Your AI assistant is live on your product pages</p>
-              <div className="flex items-center justify-center gap-2">
-                <Link
-                  to="/seller/knowledge-base"
-                  className="inline-flex items-center justify-center h-9 px-4 text-sm font-sans font-bold bg-foreground text-background hover:opacity-80 transition-opacity"
-                  style={{ boxShadow: "2px 2px 0px hsl(var(--foreground))" }}
-                >
-                  Manage Knowledge Base
-                </Link>
-                <Link
-                  to="/seller/analytics"
-                  className="inline-flex items-center justify-center h-9 px-4 text-sm font-sans font-bold bg-background text-foreground border-2 border-foreground hover:opacity-80 transition-opacity"
-                >
-                  View Chat Analytics
-                </Link>
-              </div>
-            </>
-          ) : (
+          {/* Manage KB button */}
+          <div className="mt-3">
             <Link
-              to="/seller/knowledge-base"
-              className="inline-flex items-center justify-center h-9 px-4 text-sm font-sans font-bold bg-foreground text-background hover:opacity-80 transition-opacity"
+              to="/seller/knowledge-base?scope=storefront"
+              className="inline-flex items-center justify-center h-8 px-3 text-xs font-sans font-bold bg-foreground text-background hover:opacity-80 transition-opacity"
               style={{ boxShadow: "2px 2px 0px hsl(var(--foreground))" }}
             >
               Manage Knowledge Base
             </Link>
-          )}
+          </div>
         </div>
+
+        {/* ── Divider ── */}
+        <div className="border-t border-muted" />
+
+        {/* ── SECTION 2: Personal Assistant ── */}
+        <div className="p-4">
+          {/* Title row */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <p className="font-sans font-bold text-sm">Personal Assistant</p>
+              {paActive ? (
+                <span
+                  className="inline-block text-[10px] font-bold px-1.5 py-0.5 text-background leading-none"
+                  style={{ backgroundColor: "hsl(142, 71%, 45%)" }}
+                >
+                  ACTIVE
+                </span>
+              ) : (
+                <span className="inline-block text-[10px] font-bold px-1.5 py-0.5 bg-muted-foreground/20 text-muted-foreground leading-none">
+                  OFF
+                </span>
+              )}
+            </div>
+            <Switch
+              checked={personalEnabled}
+              onCheckedChange={handlePersonalToggle}
+            />
+          </div>
+
+          {/* Description */}
+          {aiDescriptions["ai_personal_assistant_short_desc"] && (
+            <div className="mb-3">
+              <p className="text-xs text-muted-foreground">{aiDescriptions["ai_personal_assistant_short_desc"]}</p>
+              {aiDescriptions["ai_personal_assistant_full_desc"] && (
+                <Collapsible>
+                  <CollapsibleTrigger className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors mt-1">
+                    <ChevronDown className="w-3 h-3" />
+                    Read more
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-1">
+                    <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">
+                      {aiDescriptions["ai_personal_assistant_full_desc"]}
+                    </p>
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+            </div>
+          )}
+
+          {!paConsentGiven && (
+            <p className="text-[11px] text-muted-foreground mb-2">Accept consent terms to activate</p>
+          )}
+
+          {/* Manage KB button */}
+          <div className="mt-2">
+            <Link
+              to="/seller/knowledge-base?scope=personal"
+              className="inline-flex items-center justify-center h-8 px-3 text-xs font-sans font-bold bg-foreground text-background hover:opacity-80 transition-opacity"
+              style={{ boxShadow: "2px 2px 0px hsl(var(--foreground))" }}
+            >
+              Manage Knowledge Base
+            </Link>
+          </div>
+        </div>
+
+        {/* ── Footer: Analytics ── */}
+        {(sfLive || paActive) && (
+          <div className="p-4 border-t-2 border-foreground text-center">
+            <Link
+              to="/seller/analytics"
+              className="inline-flex items-center justify-center h-8 px-4 text-xs font-sans font-bold bg-background text-foreground border-2 border-foreground hover:opacity-80 transition-opacity"
+            >
+              View Chat Analytics
+            </Link>
+          </div>
+        )}
       </div>
 
-      {/* ── Consent Modal ── */}
+      {/* ── Consent Modals ── */}
       <SellerAIConsentModal
-        open={showConsent}
-        onOpenChange={setShowConsent}
+        open={showConsentModal === "storefront"}
+        onOpenChange={(open) => !open && setShowConsentModal(null)}
         sellerName={sellerProfile?.full_name || ""}
         sellerBusinessName={sellerProfile?.company_name || ""}
         sellerEmail={sellerProfile?.email || ""}
-        alreadyAccepted={consentAccepted}
-        acceptedAt={consentAcceptedAt}
-        onAccepted={handleConsentAccepted}
+        alreadyAccepted={sfConsentGiven}
+        acceptedAt={storefrontConsent?.consent_at}
+        onAccepted={handleStorefrontConsentAccepted}
         sellerId={sellerId}
+        consentType="storefront_assistant"
+      />
+      <SellerAIConsentModal
+        open={showConsentModal === "personal"}
+        onOpenChange={(open) => !open && setShowConsentModal(null)}
+        sellerName={sellerProfile?.full_name || ""}
+        sellerBusinessName={sellerProfile?.company_name || ""}
+        sellerEmail={sellerProfile?.email || ""}
+        alreadyAccepted={paConsentGiven}
+        acceptedAt={personalConsent?.consent_at}
+        onAccepted={handlePersonalConsentAccepted}
+        sellerId={sellerId}
+        consentType="personal_assistant"
       />
     </>
   );
