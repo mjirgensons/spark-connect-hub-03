@@ -5,6 +5,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/useAuth";
 import { useVoiceInput } from "./useVoiceInput";
 import VoiceLangSelector, { useVoiceLang } from "./VoiceLangSelector";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import SellerAIConsentModal from "@/components/seller/SellerAIConsentModal";
 
 /* ── Typing indicator ── */
 function TypingDots() {
@@ -58,10 +61,33 @@ const INTRO_MESSAGE = "Hi! I'm your AI Personal Assistant. Ask me anything about
 
 export default function SellerDashboardChatWidget({ sellerId }: { sellerId: string }) {
   const [open, setOpen] = useState(false);
+  const [showConsent, setShowConsent] = useState(false);
+  const [personalEnabled, setPersonalEnabled] = useState<boolean | null>(null);
+  const [consentGiven, setConsentGiven] = useState<boolean | null>(null);
+  const [sellerProfile, setSellerProfile] = useState<{ full_name: string; company_name: string | null; email: string } | null>(null);
+  const [consentRecord, setConsentRecord] = useState<{ consent_at: string | null } | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+  const openAfterConsentRef = useRef(false);
+
+  // Fetch consent & enabled state
+  useEffect(() => {
+    if (!sellerId) return;
+    const fetch = async () => {
+      const [profileRes, consentRes] = await Promise.all([
+        supabase.from("profiles").select("personal_assistant_enabled, full_name, company_name, email" as any).eq("id", sellerId).single(),
+        (supabase as any).from("seller_ai_consents").select("consent_given, consent_at").eq("seller_id", sellerId).eq("consent_type", "personal_assistant").maybeSingle(),
+      ]);
+      const p = profileRes.data as any;
+      setPersonalEnabled(!!p?.personal_assistant_enabled);
+      setSellerProfile(p ? { full_name: p.full_name || "", company_name: p.company_name || null, email: p.email || "" } : null);
+      setConsentGiven(!!consentRes.data?.consent_given);
+      setConsentRecord(consentRes.data || null);
+    };
+    fetch();
+  }, [sellerId]);
 
   const {
     messages,
@@ -170,6 +196,58 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
     }
   }, [isListening, startListening, stopListening, draft]);
 
+  // Handle bubble click — if no consent, show consent modal; otherwise open widget
+  const handleBubbleClick = () => {
+    if (!consentGiven || !personalEnabled) {
+      if (!consentGiven) {
+        openAfterConsentRef.current = true;
+        setShowConsent(true);
+        return;
+      }
+      // Consent given but not enabled — re-enable
+      enablePersonalAssistant();
+      return;
+    }
+    setOpen(true);
+  };
+
+  const enablePersonalAssistant = async () => {
+    const { error } = await supabase.from("profiles").update({ personal_assistant_enabled: true } as any).eq("id", sellerId);
+    if (error) { toast.error("Failed to enable assistant"); return; }
+    setPersonalEnabled(true);
+    setOpen(true);
+  };
+
+  const handleConsentAccepted = async (consentText: string) => {
+    // Save consent
+    const { error } = await (supabase as any).from("seller_ai_consents").upsert({
+      seller_id: sellerId,
+      consent_type: "personal_assistant",
+      consent_given: true,
+      consent_at: new Date().toISOString(),
+      consent_text: consentText,
+    }, { onConflict: "seller_id,consent_type" });
+    if (error) { toast.error("Failed to save consent"); return; }
+    setConsentGiven(true);
+    setConsentRecord({ consent_at: new Date().toISOString() });
+    toast.success("Personal Assistant consent accepted");
+
+    // Auto-enable
+    await enablePersonalAssistant();
+
+    // Open widget if triggered from bubble
+    if (openAfterConsentRef.current) {
+      openAfterConsentRef.current = false;
+      setOpen(true);
+    }
+  };
+
+  // Don't render anything until we know the state
+  if (personalEnabled === null || consentGiven === null) return null;
+
+  // Widget is fully active
+  const isActive = personalEnabled && consentGiven;
+
   return (
     <>
       <style>{`
@@ -178,10 +256,10 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
         @keyframes seller-chat-entrance{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
       `}</style>
 
-      {/* Launcher */}
+      {/* Launcher — always visible for sellers */}
       {!open && (
         <button
-          onClick={() => setOpen(true)}
+          onClick={handleBubbleClick}
           aria-label="Open AI assistant"
           className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-foreground text-background flex items-center justify-center rounded-full"
           style={{
@@ -193,8 +271,8 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
         </button>
       )}
 
-      {/* Panel */}
-      {open && (
+      {/* Panel — only when active and open */}
+      {open && isActive && (
         <div
           ref={panelRef}
           role="dialog"
@@ -279,6 +357,25 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
           </div>
         </div>
       )}
+
+      {/* Consent Modal */}
+      <SellerAIConsentModal
+        open={showConsent}
+        onOpenChange={(o) => {
+          if (!o) {
+            setShowConsent(false);
+            openAfterConsentRef.current = false;
+          }
+        }}
+        sellerName={sellerProfile?.full_name || ""}
+        sellerBusinessName={sellerProfile?.company_name || ""}
+        sellerEmail={sellerProfile?.email || ""}
+        alreadyAccepted={consentGiven}
+        acceptedAt={consentRecord?.consent_at}
+        onAccepted={handleConsentAccepted}
+        sellerId={sellerId}
+        consentType="personal_assistant"
+      />
     </>
   );
 }
