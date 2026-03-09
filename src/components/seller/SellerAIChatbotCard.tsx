@@ -20,6 +20,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
   const [showConsent, setShowConsent] = useState(false);
   const [missedAttemptCount, setMissedAttemptCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [aiDescriptions, setAiDescriptions] = useState<Record<string, string>>({});
   const [sellerProfile, setSellerProfile] = useState<{
     full_name: string;
     company_name: string | null;
