@@ -331,6 +331,9 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
     sendMessage(draft);
     setDraft("");
     if (inputRef.current) inputRef.current.style.height = "40px";
+    if (window.innerWidth >= 768) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
   }, [draft, loading, sendMessage]);
 
   const handleKeyDown = useCallback(
