@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     })
   }
 
-  let body: { email?: string; code?: string }
+  let body: { email?: string; code?: string; user_type?: string }
   try {
     body = await req.json()
   } catch {
@@ -29,6 +29,7 @@ Deno.serve(async (req) => {
 
   const email = body.email?.trim().toLowerCase()
   const code = body.code?.trim()
+  const userType = body.user_type?.trim()
 
   if (!email || !code) {
     return new Response(JSON.stringify({ success: false, error: 'Email and code are required.' }), {
@@ -100,7 +101,14 @@ Deno.serve(async (req) => {
         const userName = profile?.full_name || 'there'
         const toName = profile?.full_name || ''
 
-        // Send welcome email via n8n webhook
+        // Choose template based on user_type
+        const templateKey = userType === 'seller'
+          ? 'seller_registration_pending'
+          : userType === 'contractor'
+          ? 'contractor_registration_pending'
+          : 'account_welcome'
+
+        // Send email via n8n webhook
         await fetch(webhookSetting.value, {
           method: 'POST',
           headers: {
@@ -108,7 +116,7 @@ Deno.serve(async (req) => {
             'x-api-secret': 'fitmatch-n8n-secret-2026',
           },
           body: JSON.stringify({
-            template_key: 'account_welcome',
+            template_key: templateKey,
             to_email: email,
             to_name: toName,
             variables: {
