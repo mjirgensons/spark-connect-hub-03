@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/landing/Header";
@@ -6,7 +6,6 @@ import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -16,15 +15,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { Badge } from "@/components/ui/badge";
 import {
   ShoppingBag,
   Wrench,
   Store,
-  ArrowLeft,
   UserPlus,
+  Loader2,
+  ArrowLeft,
+  Mail,
 } from "lucide-react";
 import { z } from "zod";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 type UserType = "client" | "contractor" | "seller";
 
@@ -43,6 +48,8 @@ const baseSchema = z.object({
   email: z.string().trim().email("Invalid email"),
   password: z.string().min(6, "Password must be at least 6 characters").max(128),
 });
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -65,6 +72,54 @@ const Register = () => {
   const [postalCode, setPostalCode] = useState("");
   const [website, setWebsite] = useState("");
   const [bio, setBio] = useState("");
+
+  // OTP state
+  const [showOtp, setShowOtp] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Start cooldown timer
+  const startCooldown = useCallback(() => {
+    setResendCooldown(60);
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+    cooldownRef.current = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) {
+          if (cooldownRef.current) clearInterval(cooldownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+    };
+  }, []);
+
+  const sendOtp = async (targetEmail: string) => {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-verification-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: targetEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast({ title: data.error || "Failed to send verification code", variant: "destructive" });
+        return false;
+      }
+      startCooldown();
+      return true;
+    } catch {
+      toast({ title: "Failed to send verification code", variant: "destructive" });
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,18 +209,19 @@ const Register = () => {
         } catch (err) {
           console.warn('[webhook] notify-seller-registration error:', err);
         }
+      }
 
+      // Send OTP and show verification UI
+      const sent = await sendOtp(parsed.data.email);
+      if (sent) {
+        setShowOtp(true);
         toast({
-          title: "Check your email!",
-          description: "Verify your email, then your seller application will be reviewed.",
+          title: "Account created!",
+          description: "Please verify your email with the code we sent.",
         });
-        navigate("/seller/pending");
       } else {
-        toast({
-          title: "Check your email!",
-          description: "We've sent a confirmation link to " + parsed.data.email + ". Please verify your email to sign in.",
-        });
-        navigate("/login");
+        // Even if OTP send fails, show the OTP screen so user can retry
+        setShowOtp(true);
       }
     } catch {
       toast({ title: "An unexpected error occurred", variant: "destructive" });
@@ -174,8 +230,146 @@ const Register = () => {
     }
   };
 
+  const handleVerifyOtp = async () => {
+    if (otpCode.length !== 6) {
+      toast({ title: "Please enter the 6-digit code", variant: "destructive" });
+      return;
+    }
+
+    setOtpLoading(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-otp-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), code: otpCode }),
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        // Mark email as verified in user metadata
+        await supabase.auth.updateUser({
+          data: { email_verified_at: new Date().toISOString() },
+        });
+
+        toast({ title: "Email verified!", description: "Welcome to FitMatch." });
+
+        // Redirect based on role
+        if (selectedRole === "seller") {
+          navigate("/seller/pending");
+        } else if (selectedRole === "client") {
+          navigate("/client/dashboard");
+        } else {
+          navigate("/login");
+        }
+      } else {
+        toast({
+          title: "Verification failed",
+          description: result.error || "Invalid or expired code.",
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({ title: "Verification failed", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (resendCooldown > 0) return;
+    setOtpLoading(true);
+    await sendOtp(email.trim().toLowerCase());
+    setOtpLoading(false);
+    toast({ title: "New code sent!", description: `Check ${email} for the new verification code.` });
+  };
+
   const sectionClass = "space-y-3";
   const inputClass = "mt-1 border-2 border-foreground";
+
+  // OTP Verification View
+  if (showOtp) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 pt-24 pb-12 max-w-md">
+          <div
+            className="border-2 border-foreground bg-card p-6 md:p-8 space-y-6"
+            style={{ boxShadow: "6px 6px 0 0 hsl(var(--foreground))" }}
+          >
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                <Mail className="w-7 h-7 text-primary" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold">Verify Your Email</h2>
+              <p className="text-muted-foreground text-sm">
+                We sent a 6-digit verification code to{" "}
+                <span className="font-semibold text-foreground">{email}</span>
+              </p>
+            </div>
+
+            <div className="flex justify-center">
+              <InputOTP
+                maxLength={6}
+                value={otpCode}
+                onChange={setOtpCode}
+                autoFocus
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+
+            <Button
+              onClick={handleVerifyOtp}
+              disabled={otpLoading || otpCode.length !== 6}
+              className="w-full"
+            >
+              {otpLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Verifying…
+                </>
+              ) : (
+                "Verify Email"
+              )}
+            </Button>
+
+            <div className="flex flex-col items-center gap-3 text-sm">
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resendCooldown > 0 || otpLoading}
+                className="text-primary font-semibold hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {resendCooldown > 0
+                  ? `Resend code in ${resendCooldown}s`
+                  : "Resend Code"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowOtp(false);
+                  setOtpCode("");
+                }}
+                className="text-muted-foreground hover:text-foreground flex items-center gap-1"
+              >
+                <ArrowLeft className="w-3 h-3" />
+                Back to registration
+              </button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -319,8 +513,17 @@ const Register = () => {
           )}
 
           <Button type="submit" disabled={loading || !selectedRole} className="w-full">
-            <UserPlus className="w-4 h-4 mr-2" />
-            {loading ? "Creating account…" : "Create Account"}
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Creating account…
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-4 h-4 mr-2" />
+                Create Account
+              </>
+            )}
           </Button>
         </form>
 
