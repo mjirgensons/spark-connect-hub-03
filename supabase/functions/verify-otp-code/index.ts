@@ -61,6 +61,53 @@ Deno.serve(async (req) => {
       .update({ verified: true })
       .eq('id', match.id)
 
+    // Fire-and-forget welcome email (don't block on success)
+    (async () => {
+      try {
+        // Get webhook URL from site_settings
+        const { data: webhookSetting } = await supabase
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'otp_email_webhook_url')
+          .maybeSingle()
+
+        if (!webhookSetting?.value) {
+          console.error('otp_email_webhook_url not configured in site_settings')
+          return
+        }
+
+        // Get user's full_name from profiles
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('email', email)
+          .maybeSingle()
+
+        const userName = profile?.full_name || 'there'
+        const toName = profile?.full_name || ''
+
+        // Send welcome email via n8n webhook
+        await fetch(webhookSetting.value, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-secret': 'fitmatch-n8n-secret-2026',
+          },
+          body: JSON.stringify({
+            template_key: 'account_welcome',
+            to_email: email,
+            to_name: toName,
+            variables: {
+              user_name: userName,
+              login_url: 'https://spark-connect-hub-03.lovable.app',
+            },
+          }),
+        })
+      } catch (error) {
+        console.error('Failed to send welcome email:', error)
+      }
+    })()
+
     return new Response(JSON.stringify({ success: true }), {
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     })
