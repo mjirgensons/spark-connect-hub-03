@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
             to_email: email,
             to_name: toName,
             variables: {
-              user_name: userName,
+              customer_name: userName,
               login_url: 'https://spark-connect-hub-03.lovable.app',
             },
           }),
