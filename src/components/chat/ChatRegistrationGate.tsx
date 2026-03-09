@@ -11,6 +11,7 @@ interface Props {
   dismissable: boolean;
   onDismiss: () => void;
   onAuthenticated: () => void;
+  onVerificationComplete?: () => void;
   sessionId: string;
 }
 
