@@ -227,6 +227,11 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
           <Outlet context={{ adminViewSellerId }} />
         </main>
       </div>
+
+      {/* Seller AI chat widget — only for seller role with chatbot enabled */}
+      {role === "seller" && profile && (profile as any).ai_chatbot_enabled === true && (
+        <SellerDashboardChatWidget sellerId={adminViewSellerId || profile.id} />
+      )}
     </div>
   );
 };
