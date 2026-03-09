@@ -318,7 +318,7 @@ const SellerDashboard = () => {
       )}
 
       <h1 className="font-serif text-2xl md:text-3xl font-bold">
-        Welcome back, {profile?.full_name?.split(" ")[0] || "there"}
+        Welcome, {profile?.full_name?.split(" ")[0] || "there"}
       </h1>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
