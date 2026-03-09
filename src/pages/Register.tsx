@@ -258,8 +258,9 @@ const Register = () => {
         toast({ title: "Email verified!", description: "Welcome to FitMatch." });
 
         // Redirect based on role
-        if (selectedRole === "seller") {
-          navigate("/seller/pending");
+        if (selectedRole === "seller" || selectedRole === "contractor") {
+          await supabase.auth.signOut();
+          navigate(selectedRole === "seller" ? "/seller/pending" : "/login");
         } else if (selectedRole === "client") {
           navigate("/client/dashboard");
         } else {
