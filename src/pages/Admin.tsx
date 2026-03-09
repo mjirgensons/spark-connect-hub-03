@@ -141,6 +141,7 @@ const Admin = () => {
           <div className="space-y-8">
             <FooterPagesAdmin />
             <LegalPagesAdmin />
+            <AdminAIDescriptionsTab />
             <AnalyticsDashboard />
           </div>
         );
