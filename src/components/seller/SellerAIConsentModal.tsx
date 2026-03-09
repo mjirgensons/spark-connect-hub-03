@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 interface Props {
   open: boolean;
