@@ -1,4 +1,4 @@
-// v2: role-based template selection
+// v3: role-based template selection with deploy logging
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
 
 const corsHeaders = {
