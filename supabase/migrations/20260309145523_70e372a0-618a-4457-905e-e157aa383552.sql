@@ -1,0 +1,2 @@
+ALTER TABLE public.seller_knowledge_base DROP CONSTRAINT seller_knowledge_base_kb_type_check;
+ALTER TABLE public.seller_knowledge_base ADD CONSTRAINT seller_knowledge_base_kb_type_check CHECK (kb_type = ANY (ARRAY['product_faq','policy','installation_guide','lead_times','custom','internal_note','process_guide','reference']));
