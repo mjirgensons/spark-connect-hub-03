@@ -220,11 +220,11 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
     const { error } = await supabase.from("profiles").update({ personal_assistant_enabled: true } as any).eq("id", sellerId);
     if (error) { toast.error("Failed to enable assistant"); return; }
     setPersonalEnabled(true);
+    window.dispatchEvent(new CustomEvent("seller-assistant-state-changed"));
     setOpen(true);
   };
 
   const handleConsentAccepted = async (consentText: string) => {
-    // Save consent
     const { error } = await (supabase as any).from("seller_ai_consents").upsert({
       seller_id: sellerId,
       consent_type: "personal_assistant",
