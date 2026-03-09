@@ -196,10 +196,20 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
 
   /* focus input on open */
   useEffect(() => {
-    if (open && consented && chatbotActive) {
+    if (open && consented && chatbotActive && window.innerWidth >= 768) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [open, consented, chatbotActive]);
+
+  /* Auto-focus input after bot response (desktop only) */
+  useEffect(() => {
+    if (!open || !consented || !chatbotActive) return;
+    if (window.innerWidth < 768) return;
+    const last = messages[messages.length - 1];
+    if (last && last.role === "assistant") {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [messages, open, consented, chatbotActive]);
 
   /* auto-grant consent when skipConsent is true */
   useEffect(() => {
