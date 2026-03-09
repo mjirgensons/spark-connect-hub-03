@@ -70,6 +70,23 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
       setKbCount(kbRes.count ?? 0);
       setSyncedProductCount(prodRes.count ?? 0);
       setMissedAttemptCount(missedRes.count ?? 0);
+
+      // Fetch AI assistant descriptions from site_settings
+      const descRes = await supabase
+        .from("site_settings" as any)
+        .select("key, value")
+        .in("key", [
+          "ai_storefront_assistant_short_desc",
+          "ai_storefront_assistant_full_desc",
+          "ai_personal_assistant_short_desc",
+          "ai_personal_assistant_full_desc",
+        ]);
+      if (descRes.data) {
+        const map: Record<string, string> = {};
+        (descRes.data as any[]).forEach((r: any) => { map[r.key] = r.value; });
+        setAiDescriptions(map);
+      }
+
       setLoading(false);
     };
     fetchData();
