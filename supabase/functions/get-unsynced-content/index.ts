@@ -6,6 +6,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-api-secret",
 };
 
+const ALLOWED_TABLES = ["products", "seller_knowledge_base", "platform_knowledge_base"] as const;
+type AllowedTable = (typeof ALLOWED_TABLES)[number];
+
+const TABLE_COLUMNS: Record<AllowedTable, string> = {
+  products: "id, seller_id, title, description, category_id, created_at",
+  seller_knowledge_base: "id, seller_id, title, content, kb_type, kb_scope, created_at",
+  platform_knowledge_base: "id, title, content, kb_type, created_at",
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders, status: 200 });
@@ -26,14 +35,33 @@ Deno.serve(async (req) => {
     });
   }
 
+  let table: string | undefined;
+  try {
+    const body = await req.json();
+    table = body?.table;
+  } catch {
+    // no body or invalid JSON
+  }
+
+  if (!table || !ALLOWED_TABLES.includes(table as AllowedTable)) {
+    return new Response(
+      JSON.stringify({
+        error: `Invalid or missing table. Must be one of: ${ALLOWED_TABLES.join(", ")}`,
+      }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
+  const columns = TABLE_COLUMNS[table as AllowedTable];
+
   const { data, error } = await supabase
-    .from("seller_knowledge_base")
-    .select("id, seller_id, title, content, kb_type, kb_scope, created_at")
+    .from(table)
+    .select(columns)
     .eq("pinecone_synced", false);
 
   if (error) {
