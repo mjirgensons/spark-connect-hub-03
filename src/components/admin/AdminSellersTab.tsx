@@ -314,7 +314,7 @@ const AdminSellersTab = () => {
                               {status === "approved" && (
                                 <DropdownMenuItem
                                   className="text-destructive focus:text-destructive"
-                                  onClick={() => handleAction(seller.id, "suspended", name)}
+                                  onClick={() => handleAction(seller.id, "suspended", name, seller.seller_status)}
                                 >
                                   <ShieldOff className="w-4 h-4 mr-2" /> Suspend Seller
                                 </DropdownMenuItem>
