@@ -527,6 +527,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                   )}
                   <button
                     onClick={handleSend}
+                    onMouseDown={(e) => e.preventDefault()}
                     disabled={loading || !draft.trim() || gateVisible}
                     aria-label="Send message"
                     className="w-9 h-9 flex items-center justify-center bg-foreground text-background rounded-full shrink-0 disabled:opacity-40 hover:opacity-80 transition-opacity"
