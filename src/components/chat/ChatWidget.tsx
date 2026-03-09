@@ -183,6 +183,9 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
   const handleGateAuthenticated = useCallback(() => {
     setGateVisible(false);
     setGateDismissed(true);
+    if (window.innerWidth >= 768) {
+      setTimeout(() => inputRef.current?.focus(), 150);
+    }
   }, []);
 
   const handleVerificationComplete = useCallback(() => {
