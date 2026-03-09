@@ -101,7 +101,14 @@ Deno.serve(async (req) => {
         const userName = profile?.full_name || 'there'
         const toName = profile?.full_name || ''
 
-        // Send welcome email via n8n webhook
+        // Choose template based on user_type
+        const templateKey = userType === 'seller'
+          ? 'seller_registration_pending'
+          : userType === 'contractor'
+          ? 'contractor_registration_pending'
+          : 'account_welcome'
+
+        // Send email via n8n webhook
         await fetch(webhookSetting.value, {
           method: 'POST',
           headers: {
@@ -109,7 +116,7 @@ Deno.serve(async (req) => {
             'x-api-secret': 'fitmatch-n8n-secret-2026',
           },
           body: JSON.stringify({
-            template_key: 'account_welcome',
+            template_key: templateKey,
             to_email: email,
             to_name: toName,
             variables: {
