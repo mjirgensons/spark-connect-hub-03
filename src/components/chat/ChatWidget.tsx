@@ -121,7 +121,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
   const panelRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
-  const { messages, loading, consented, grantConsent, showIntro, sendMessage, resetChat, aiResponseCount, sessionId: chatSessionId } = useChatSession({
+  const { messages, loading, consented, grantConsent, showIntro, sendMessage, resetChat, addMessage, aiResponseCount, sessionId: chatSessionId } = useChatSession({
     sellerId,
     sellerName,
     productId,
