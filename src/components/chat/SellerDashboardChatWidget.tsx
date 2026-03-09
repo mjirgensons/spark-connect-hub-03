@@ -86,7 +86,12 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
       setConsentGiven(!!consentRes.data?.consent_given);
       setConsentRecord(consentRes.data || null);
     };
-    fetch();
+    fetchData();
+
+    // Listen for state changes from the card component
+    const handler = () => fetchData();
+    window.addEventListener("seller-assistant-state-changed", handler);
+    return () => window.removeEventListener("seller-assistant-state-changed", handler);
   }, [sellerId]);
 
   const {
