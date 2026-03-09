@@ -269,10 +269,29 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
               </h2>
               <button onClick={() => setReadMoreModal(null)} className="hover:opacity-70 transition-opacity"><X className="w-4 h-4" /></button>
             </div>
-            <div className="overflow-y-auto p-4">
-              <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
-                {readMoreModal === "storefront" ? aiDescriptions["ai_storefront_assistant_full_desc"] : aiDescriptions["ai_personal_assistant_full_desc"]}
-              </p>
+            <div className="overflow-y-auto p-4 text-sm text-muted-foreground leading-relaxed">
+              {(() => {
+                const raw = readMoreModal === "storefront" ? aiDescriptions["ai_storefront_assistant_full_desc"] : aiDescriptions["ai_personal_assistant_full_desc"];
+                const normalized = (raw || "").replace(/\\n/g, "\n");
+                return normalized.split(/\n\n/).map((p: string, i: number) => {
+                  const headerMatch = p.match(/^(\d+\.\s+.+?)(?:\n)([\s\S]*)$/);
+                  if (headerMatch) {
+                    return (
+                      <div key={i} className="mb-4">
+                        <h3 className="font-sans font-bold text-sm mb-1 text-foreground">{headerMatch[1]}</h3>
+                        <p>{headerMatch[2].split("\n").map((line: string, j: number, arr: string[]) => (
+                          <span key={j}>{line}{j < arr.length - 1 && <br />}</span>
+                        ))}</p>
+                      </div>
+                    );
+                  }
+                  return (
+                    <p key={i} className="mb-4">{p.split("\n").map((line: string, j: number, arr: string[]) => (
+                      <span key={j}>{line}{j < arr.length - 1 && <br />}</span>
+                    ))}</p>
+                  );
+                });
+              })()}
             </div>
           </div>
         </div>
