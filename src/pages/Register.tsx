@@ -192,24 +192,7 @@ const Register = () => {
         return;
       }
 
-      if (selectedRole === "seller") {
-        // Fire-and-forget n8n webhook notification
-        try {
-          supabase.functions.invoke('notify-seller-registration', {
-            body: {
-              seller_name: parsed.data.fullName,
-              company_name: businessName.trim(),
-              email: parsed.data.email,
-              phone: phone.trim(),
-              business_type: businessType,
-              website: website.trim() || null,
-              description: bio.trim() || null,
-            },
-          }).catch((err) => console.warn('[webhook] notify-seller-registration failed:', err));
-        } catch (err) {
-          console.warn('[webhook] notify-seller-registration error:', err);
-        }
-      }
+      // Admin notification moved to after OTP verification
 
       // Send OTP and show verification UI
       const sent = await sendOtp(parsed.data.email);
