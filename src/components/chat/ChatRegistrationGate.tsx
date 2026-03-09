@@ -180,10 +180,12 @@ function SignUpView({
 function OtpView({
   onBack,
   onAuthenticated,
+  onVerificationComplete,
   sessionId,
 }: {
   onBack: () => void;
   onAuthenticated: () => void;
+  onVerificationComplete?: () => void;
   sessionId: string;
 }) {
   const email = _pendingFormData?.email ?? "";
