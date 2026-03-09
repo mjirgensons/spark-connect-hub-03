@@ -65,7 +65,7 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
 
       try {
         const metadata: Record<string, any> = {
-          user_role: authenticatedUserId ? "registered" : userRole,
+          user_role: userRole || (authenticatedUserId ? "registered" : "guest"),
           page_url: window.location.href,
         };
         if (authenticatedUserId) {
