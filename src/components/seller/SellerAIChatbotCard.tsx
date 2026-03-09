@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Bot, CheckCircle2, Circle, AlertTriangle } from "lucide-react";
+import { Bot, CheckCircle2, Circle, AlertTriangle, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import SellerAIConsentModal from "./SellerAIConsentModal";
 
 interface Props {
@@ -19,6 +20,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
   const [showConsent, setShowConsent] = useState(false);
   const [missedAttemptCount, setMissedAttemptCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [aiDescriptions, setAiDescriptions] = useState<Record<string, string>>({});
   const [sellerProfile, setSellerProfile] = useState<{
     full_name: string;
     company_name: string | null;
@@ -68,6 +70,23 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
       setKbCount(kbRes.count ?? 0);
       setSyncedProductCount(prodRes.count ?? 0);
       setMissedAttemptCount(missedRes.count ?? 0);
+
+      // Fetch AI assistant descriptions from site_settings
+      const descRes = await supabase
+        .from("site_settings" as any)
+        .select("key, value")
+        .in("key", [
+          "ai_storefront_assistant_short_desc",
+          "ai_storefront_assistant_full_desc",
+          "ai_personal_assistant_short_desc",
+          "ai_personal_assistant_full_desc",
+        ]);
+      if (descRes.data) {
+        const map: Record<string, string> = {};
+        (descRes.data as any[]).forEach((r: any) => { map[r.key] = r.value; });
+        setAiDescriptions(map);
+      }
+
       setLoading(false);
     };
     fetchData();
@@ -140,7 +159,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
           <div className="flex items-center gap-3 min-w-0">
             <Bot className="w-5 h-5 shrink-0" />
             <div className="min-w-0">
-              <p className="font-sans font-bold text-lg leading-tight">AI Chatbot</p>
+              <p className="font-sans font-bold text-lg leading-tight">AI Assistants</p>
               {isLive ? (
                 <span
                   className="inline-block mt-1 text-xs font-bold px-2 py-0.5 text-background"
@@ -218,6 +237,51 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
                 <strong>{missedAttemptCount}</strong> buyer{missedAttemptCount === 1 ? "" : "s"} tried to chat about your products but your AI assistant was offline.
               </span>
             </div>
+          </div>
+        )}
+
+        {/* ── AI Assistant Info Sections ── */}
+        {(aiDescriptions["ai_storefront_assistant_short_desc"] || aiDescriptions["ai_personal_assistant_short_desc"]) && (
+          <div className="px-4 pb-4 space-y-4">
+            {aiDescriptions["ai_storefront_assistant_short_desc"] && (
+              <div className="border-t border-muted pt-4">
+                <p className="text-sm font-bold mb-1">AI Storefront Assistant</p>
+                <p className="text-sm text-muted-foreground">{aiDescriptions["ai_storefront_assistant_short_desc"]}</p>
+                {aiDescriptions["ai_storefront_assistant_full_desc"] && (
+                  <Collapsible>
+                    <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors mt-2">
+                      <ChevronDown className="w-3 h-3" />
+                      Read more
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2">
+                      <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                        {aiDescriptions["ai_storefront_assistant_full_desc"]}
+                      </p>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+              </div>
+            )}
+
+            {aiDescriptions["ai_personal_assistant_short_desc"] && (
+              <div className="border-t border-muted pt-4">
+                <p className="text-sm font-bold mb-1">Personal Assistant</p>
+                <p className="text-sm text-muted-foreground">{aiDescriptions["ai_personal_assistant_short_desc"]}</p>
+                {aiDescriptions["ai_personal_assistant_full_desc"] && (
+                  <Collapsible>
+                    <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors mt-2">
+                      <ChevronDown className="w-3 h-3" />
+                      Read more
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2">
+                      <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                        {aiDescriptions["ai_personal_assistant_full_desc"]}
+                      </p>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+              </div>
+            )}
           </div>
         )}
 

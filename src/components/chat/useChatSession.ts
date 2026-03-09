@@ -43,7 +43,7 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
       {
         id: generateId(),
         role: "assistant",
-        content: `Hi! I'm the AI assistant for ${sellerName}. Ask me anything about this product — dimensions, materials, delivery, or pricing.`,
+        content: `Hi! I'm the AI Storefront Assistant for ${sellerName}. Ask me anything about this product — dimensions, materials, delivery, or pricing.`,
         timestamp: new Date(),
       },
     ]);
