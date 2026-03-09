@@ -146,10 +146,10 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
           <p className="font-sans font-bold text-base leading-tight">AI Assistants</p>
         </div>
 
-        {/* Two-column body */}
-        <div className="flex flex-col md:flex-row">
+        {/* Two mini-cards body */}
+        <div className="p-4 flex flex-col md:flex-row gap-4">
           {/* LEFT — Storefront */}
-          <div className="flex-1 p-4 space-y-3">
+          <div className="flex-1 border border-foreground p-4 flex flex-col gap-2">
             {/* Title + badge + toggle */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
@@ -170,7 +170,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
 
             {/* Read more link */}
             {aiDescriptions["ai_storefront_assistant_full_desc"] && (
-              <button onClick={() => setReadMoreModal("storefront")} className="text-[11px] underline text-muted-foreground hover:text-foreground transition-colors">
+              <button onClick={() => setReadMoreModal("storefront")} className="text-[11px] underline text-muted-foreground hover:text-foreground transition-colors text-left">
                 Read more
               </button>
             )}
@@ -209,11 +209,8 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
             </Link>
           </div>
 
-          {/* Vertical divider (desktop) / Horizontal divider (mobile) */}
-          <div className="border-t border-muted md:border-t-0 md:border-l md:border-muted" />
-
           {/* RIGHT — Personal */}
-          <div className="flex-1 p-4 space-y-3">
+          <div className="flex-1 border border-foreground p-4 flex flex-col gap-2">
             {/* Title + badge + toggle */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
@@ -234,14 +231,14 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
 
             {/* Read more link */}
             {aiDescriptions["ai_personal_assistant_full_desc"] && (
-              <button onClick={() => setReadMoreModal("personal")} className="text-[11px] underline text-muted-foreground hover:text-foreground transition-colors">
+              <button onClick={() => setReadMoreModal("personal")} className="text-[11px] underline text-muted-foreground hover:text-foreground transition-colors text-left">
                 Read more
               </button>
             )}
 
             {/* Consent hint */}
             {!paConsentGiven && (
-              <button onClick={() => setShowConsentModal("personal")} className="text-[11px] underline text-muted-foreground hover:text-foreground transition-colors">
+              <button onClick={() => setShowConsentModal("personal")} className="text-[11px] underline text-muted-foreground hover:text-foreground transition-colors text-left">
                 Accept consent terms to activate
               </button>
             )}
@@ -255,7 +252,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
 
         {/* Footer: Analytics */}
         {(sfLive || paActive) && (
-          <div className="px-4 py-3 border-t border-muted text-center">
+          <div className="px-4 py-3 border-t border-foreground text-center">
             <Link to="/seller/analytics" className="text-xs underline text-muted-foreground hover:text-foreground transition-colors">
               View Chat Analytics
             </Link>
