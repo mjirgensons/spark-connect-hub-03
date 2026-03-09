@@ -1454,6 +1454,39 @@ export type Database = {
           },
         ]
       }
+      platform_knowledge_base: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          kb_type: string
+          pinecone_synced: boolean | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          kb_type?: string
+          pinecone_synced?: boolean | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          kb_type?: string
+          pinecone_synced?: boolean | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       product_compatible_appliances: {
         Row: {
           appliance_type: string
