@@ -63,6 +63,7 @@ const AdminSellersTab = () => {
     sellerId: string;
     action: SellerStatus;
     companyName: string;
+    previousStatus?: string | null;
   } | null>(null);
 
   const { data: sellers = [], isLoading } = useQuery({
@@ -109,31 +110,31 @@ const AdminSellersTab = () => {
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ sellerId, status }: { sellerId: string; status: SellerStatus }) => {
+    mutationFn: async ({ sellerId, status, previousStatus }: { sellerId: string; status: SellerStatus; previousStatus?: string | null }) => {
       const { error } = await supabase
         .from("profiles")
         .update({ seller_status: status } as Record<string, unknown>)
         .eq("id", sellerId);
       if (error) throw error;
-      return { sellerId, status };
+      return { sellerId, status, previousStatus };
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (result) => {
       const labels: Record<string, string> = {
         approved: "Seller approved",
         rejected: "Seller rejected",
         suspended: "Seller suspended",
       };
-      toast({ title: labels[variables.status] || "Seller reactivated" });
+      toast({ title: labels[result.status] || "Seller reactivated" });
       queryClient.invalidateQueries({ queryKey: ["admin-sellers"] });
       setSelectedSeller(null);
       setConfirmAction(null);
 
-      if (variables.status === "approved") {
+      if (result.status === "approved" && result.previousStatus !== "approved") {
         try {
           supabase
             .from("profiles")
             .select("full_name, company_name, email, id")
-            .eq("id", variables.sellerId)
+            .eq("id", result.sellerId)
             .single()
             .then(({ data: sellerProfile }) => {
               if (sellerProfile) {
@@ -171,8 +172,8 @@ const AdminSellersTab = () => {
     );
   });
 
-  const handleAction = (sellerId: string, action: SellerStatus, companyName: string) => {
-    setConfirmAction({ sellerId, action, companyName });
+  const handleAction = (sellerId: string, action: SellerStatus, companyName: string, previousStatus?: string | null) => {
+    setConfirmAction({ sellerId, action, companyName, previousStatus });
   };
 
   const formatAddress = (addr: Record<string, string> | null) => {
@@ -306,27 +307,27 @@ const AdminSellersTab = () => {
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               {(status === "pending" || status === "rejected") && (
-                                <DropdownMenuItem onClick={() => handleAction(seller.id, "approved", name)}>
+                                <DropdownMenuItem onClick={() => handleAction(seller.id, "approved", name, seller.seller_status)}>
                                   <ShieldCheck className="w-4 h-4 mr-2" /> Approve Seller
                                 </DropdownMenuItem>
                               )}
                               {status === "approved" && (
                                 <DropdownMenuItem
                                   className="text-destructive focus:text-destructive"
-                                  onClick={() => handleAction(seller.id, "suspended", name)}
+                                  onClick={() => handleAction(seller.id, "suspended", name, seller.seller_status)}
                                 >
                                   <ShieldOff className="w-4 h-4 mr-2" /> Suspend Seller
                                 </DropdownMenuItem>
                               )}
                               {status === "suspended" && (
-                                <DropdownMenuItem onClick={() => handleAction(seller.id, "approved", name)}>
+                                <DropdownMenuItem onClick={() => handleAction(seller.id, "approved", name, seller.seller_status)}>
                                   <RotateCcw className="w-4 h-4 mr-2" /> Reactivate Seller
                                 </DropdownMenuItem>
                               )}
                               {status === "pending" && (
                                 <DropdownMenuItem
                                   className="text-destructive focus:text-destructive"
-                                  onClick={() => handleAction(seller.id, "rejected", name)}
+                                  onClick={() => handleAction(seller.id, "rejected", name, seller.seller_status)}
                                 >
                                   <ShieldX className="w-4 h-4 mr-2" /> Reject Seller
                                 </DropdownMenuItem>
@@ -415,7 +416,7 @@ const AdminSellersTab = () => {
             <AlertDialogAction
               onClick={() => {
                 if (confirmAction) {
-                  updateStatus.mutate({ sellerId: confirmAction.sellerId, status: confirmAction.action });
+                  updateStatus.mutate({ sellerId: confirmAction.sellerId, status: confirmAction.action, previousStatus: confirmAction.previousStatus });
                 }
               }}
             >
