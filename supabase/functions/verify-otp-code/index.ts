@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
     await supabase
       .from('email_verification_codes')
       .update({ attempts: newAttempts })
-      .eq('id', latest.id)
+      .match({ id: latest.id })
 
     if (newAttempts >= 5) {
       return new Response(JSON.stringify({
