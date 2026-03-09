@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-07",
+  "generated": "2026-03-09",
   "project": "FitMatch.ca",
   "tables": {
     "admin_emails": {
@@ -19,30 +19,47 @@
     "profiles": {
       "columns": {
         "id": "uuid NOT NULL",
-        "user_type": "text",
-        "full_name": "text",
-        "email": "text",
+        "user_type": "text NOT NULL",
+        "full_name": "text NOT NULL",
+        "email": "text NOT NULL",
         "phone": "text",
         "company_name": "text",
         "location": "text",
-        "avatar_url": "text",
+        "bio": "text",
+        "logo_url": "text",
+        "banner_url": "text",
+        "website": "text",
         "seller_status": "text",
+        "seller_tier": "text DEFAULT 'basic'",
+        "seller_restricted_at": "timestamptz",
+        "seller_restriction_reason": "text",
+        "seller_restriction_status": "text DEFAULT 'active'",
         "business_type": "text",
+        "business_number": "text",
         "gst_hst_number": "text",
         "business_address": "jsonb",
-        "website": "text",
-        "bio": "text",
         "stripe_account_id": "text",
-        "stripe_onboarding_complete": "boolean",
-        "logo_url": "text",
-        "brand_color": "text",
-        "tagline": "text",
-        "return_policy": "text",
+        "stripe_onboarding_status": "text",
+        "stripe_charges_enabled": "boolean DEFAULT false",
+        "stripe_payouts_enabled": "boolean DEFAULT false",
+        "seller_branding_visible": "boolean DEFAULT true",
+        "auto_approve_products": "boolean DEFAULT false",
+        "ai_chatbot_enabled": "boolean DEFAULT false",
+        "seller_ai_consent_accepted": "boolean DEFAULT false",
+        "seller_ai_consent_accepted_at": "timestamptz",
+        "personal_assistant_enabled": "boolean DEFAULT false",
         "created_at": "timestamptz NOT NULL DEFAULT now()",
         "updated_at": "timestamptz NOT NULL DEFAULT now()"
       },
       "primary_key": "id",
-      "notes": "Referenced by auth.users via handle_new_user trigger"
+      "notes": "Referenced by auth.users via handle_new_user trigger",
+      "rls_policies": [
+        { "name": "Users can read own profile", "command": "SELECT", "using": "auth.uid() = id" },
+        { "name": "Users can insert own profile", "command": "INSERT", "with_check": "auth.uid() = id" },
+        { "name": "Users can update own profile", "command": "UPDATE", "using": "auth.uid() = id" },
+        { "name": "Admins can read all profiles", "command": "SELECT", "using": "is_admin()" },
+        { "name": "Public can read seller profiles", "command": "SELECT", "roles": ["anon", "authenticated"], "using": "user_type = 'seller'" }
+      ]
     },
     "products": {
       "columns": {
@@ -140,38 +157,22 @@
         "product_id": "uuid NOT NULL FK→products",
         "option_name": "text NOT NULL",
         "option_type": "text NOT NULL",
-        "inclusion_status": "text DEFAULT 'optional'",
+        "inclusion_status": "text DEFAULT 'not_included'",
         "description": "text",
-        "price_retail": "numeric",
-        "price_discounted": "numeric",
-        "discount_percentage": "numeric",
-        "specifications": "jsonb",
+        "price_retail": "numeric DEFAULT 0",
+        "price_discounted": "numeric DEFAULT 0",
+        "discount_percentage": "numeric DEFAULT 0",
+        "specifications": "jsonb DEFAULT '{}'",
         "sort_order": "integer DEFAULT 0",
         "created_at": "timestamptz NOT NULL DEFAULT now()"
       },
       "primary_key": "id",
-      "foreign_keys": ["product_id→products.id"]
-    },
-    "product_variants": {
-      "columns": {
-        "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
-        "product_id": "uuid NOT NULL FK→products",
-        "variant_name": "text NOT NULL",
-        "color": "text",
-        "finish": "text",
-        "material": "text",
-        "main_image_url": "text",
-        "additional_image_urls": "text[]",
-        "price_retail": "numeric",
-        "price_discounted": "numeric",
-        "stock_level": "integer",
-        "availability_status": "text",
-        "sort_order": "integer DEFAULT 0",
-        "created_at": "timestamptz NOT NULL DEFAULT now()",
-        "updated_at": "timestamptz NOT NULL DEFAULT now()"
-      },
-      "primary_key": "id",
-      "foreign_keys": ["product_id→products.id"]
+      "foreign_keys": ["product_id→products.id"],
+      "rls_policies": [
+        { "name": "po_read", "command": "SELECT", "using": "true" },
+        { "name": "po_admin", "command": "ALL", "using": "is_admin()" },
+        { "name": "po_seller", "command": "ALL", "using": "product owner check" }
+      ]
     },
     "product_compatible_appliances": {
       "columns": {
@@ -188,15 +189,20 @@
         "created_at": "timestamptz NOT NULL DEFAULT now()"
       },
       "primary_key": "id",
-      "foreign_keys": ["product_id→products.id"]
+      "foreign_keys": ["product_id→products.id"],
+      "rls_policies": [
+        { "name": "pca_read", "command": "SELECT", "using": "true" },
+        { "name": "pca_admin", "command": "ALL", "using": "is_admin()" },
+        { "name": "pca_seller", "command": "ALL", "using": "product owner check" }
+      ]
     },
     "product_questions": {
       "columns": {
         "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
         "product_id": "uuid NOT NULL FK→products",
         "option_id": "uuid FK→product_options",
-        "buyer_id": "uuid NOT NULL FK→profiles",
-        "seller_id": "uuid FK→profiles",
+        "buyer_id": "uuid NOT NULL",
+        "seller_id": "uuid (auto-set by trigger)",
         "buyer_name": "text",
         "question_text": "text NOT NULL",
         "seller_response": "text",
@@ -217,7 +223,7 @@
         "product_id": "uuid NOT NULL FK→products",
         "user_id": "uuid NOT NULL",
         "reviewer_name": "text NOT NULL",
-        "rating": "integer NOT NULL",
+        "rating": "integer NOT NULL (1-5)",
         "title": "text",
         "body": "text",
         "status": "text NOT NULL DEFAULT 'pending'",
@@ -245,7 +251,7 @@
       "columns": {
         "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
         "order_number": "text NOT NULL (auto-generated FM-YYYYMMDD-XXXX)",
-        "user_id": "uuid FK→auth.users",
+        "user_id": "uuid",
         "seller_id": "uuid FK→profiles",
         "guest_email": "text",
         "status": "text NOT NULL DEFAULT 'pending'",
@@ -264,7 +270,7 @@
         "shipping_postal_code": "text NOT NULL",
         "shipping_country": "text NOT NULL DEFAULT 'CA'",
         "shipping_phone": "text",
-        "shipping_method": "text DEFAULT 'standard'",
+        "shipping_method": "text",
         "stripe_payment_intent_id": "text",
         "stripe_checkout_session_id": "text",
         "stripe_transfer_group": "text",
@@ -275,18 +281,26 @@
         "tracking_number": "text",
         "tracking_url": "text",
         "estimated_delivery": "text",
+        "delivery_expected_by": "text",
         "notes": "text",
         "cancellation_reason": "text",
         "paid_at": "timestamptz",
+        "acknowledged_at": "timestamptz",
+        "must_acknowledge_by": "timestamptz",
+        "must_ship_by": "timestamptz",
+        "preparing_at": "timestamptz",
         "shipped_at": "timestamptz",
         "delivered_at": "timestamptz",
+        "delivery_check_sent_at": "timestamptz",
         "delivery_confirmed_at": "timestamptz",
         "funds_released_at": "timestamptz",
         "cancelled_at": "timestamptz",
+        "deadline_notifications_sent": "jsonb DEFAULT '{}'",
         "created_at": "timestamptz NOT NULL DEFAULT now()",
         "updated_at": "timestamptz NOT NULL DEFAULT now()"
       },
       "primary_key": "id",
+      "foreign_keys": ["seller_id→profiles.id"],
       "triggers": ["generate_order_number", "validate_order_status"]
     },
     "order_items": {
@@ -305,6 +319,25 @@
       },
       "primary_key": "id",
       "triggers": ["validate_order_item_quantity"]
+    },
+    "order_disputes": {
+      "columns": {
+        "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
+        "order_id": "uuid NOT NULL FK→orders",
+        "buyer_id": "uuid FK→profiles",
+        "buyer_email": "text NOT NULL",
+        "dispute_type": "text NOT NULL",
+        "description": "text",
+        "status": "text NOT NULL DEFAULT 'open'",
+        "seller_response": "text",
+        "seller_responded_at": "timestamptz",
+        "admin_note": "text",
+        "resolved_at": "timestamptz",
+        "created_at": "timestamptz DEFAULT now()",
+        "updated_at": "timestamptz DEFAULT now()"
+      },
+      "primary_key": "id",
+      "triggers": ["validate_order_dispute_fields"]
     },
     "quote_requests": {
       "columns": {
@@ -382,6 +415,78 @@
       },
       "primary_key": "id"
     },
+    "chat_sessions": {
+      "columns": {
+        "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
+        "session_id": "text NOT NULL",
+        "seller_id": "text",
+        "buyer_id": "uuid",
+        "buyer_email": "text",
+        "chatbot_mode": "text NOT NULL",
+        "user_role": "text DEFAULT 'guest'",
+        "status": "text DEFAULT 'active'",
+        "consent_given": "boolean DEFAULT false",
+        "consent_at": "timestamptz",
+        "escalation_reason": "text",
+        "escalated_at": "timestamptz",
+        "metadata": "jsonb DEFAULT '{}'",
+        "started_at": "timestamptz DEFAULT now()",
+        "last_active_at": "timestamptz DEFAULT now()"
+      },
+      "primary_key": "id",
+      "triggers": ["validate_chat_session_fields"]
+    },
+    "chat_messages": {
+      "columns": {
+        "id": "bigint NOT NULL (auto-increment)",
+        "session_id": "text NOT NULL FK→chat_sessions.session_id",
+        "message_type": "text NOT NULL",
+        "content": "text NOT NULL",
+        "confidence_score": "numeric",
+        "latency_ms": "integer",
+        "token_count": "integer",
+        "was_cached": "boolean",
+        "retrieved_doc_ids": "text[]",
+        "created_at": "timestamptz DEFAULT now()"
+      },
+      "primary_key": "id",
+      "triggers": ["validate_chat_message_fields"]
+    },
+    "chat_summaries": {
+      "columns": {
+        "id": "bigint NOT NULL (auto-increment)",
+        "session_id": "text NOT NULL FK→chat_sessions.session_id",
+        "summary_text": "text NOT NULL",
+        "messages_covered": "integer",
+        "created_at": "timestamptz DEFAULT now()"
+      },
+      "primary_key": "id"
+    },
+    "chatbot_missed_attempts": {
+      "columns": {
+        "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
+        "seller_id": "text NOT NULL",
+        "product_id": "uuid FK→products",
+        "page_url": "text",
+        "created_at": "timestamptz DEFAULT now()"
+      },
+      "primary_key": "id"
+    },
+    "seller_knowledge_base": {
+      "columns": {
+        "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
+        "seller_id": "text NOT NULL",
+        "title": "text NOT NULL",
+        "content": "text NOT NULL",
+        "kb_type": "text NOT NULL",
+        "kb_scope": "text NOT NULL DEFAULT 'storefront'",
+        "pinecone_synced": "boolean DEFAULT false",
+        "created_at": "timestamptz DEFAULT now()",
+        "updated_at": "timestamptz DEFAULT now()"
+      },
+      "primary_key": "id",
+      "triggers": ["validate_kb_type", "validate_kb_scope"]
+    },
     "wishlists": {
       "columns": {
         "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
@@ -394,18 +499,18 @@
     "shipping_addresses": {
       "columns": {
         "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
-        "user_id": "uuid NOT NULL",
-        "label": "text",
+        "user_id": "uuid",
         "full_name": "text NOT NULL",
         "address_line_1": "text NOT NULL",
         "address_line_2": "text",
         "city": "text NOT NULL",
         "province": "text NOT NULL",
         "postal_code": "text NOT NULL",
-        "country": "text DEFAULT 'CA'",
+        "country": "text NOT NULL DEFAULT 'CA'",
         "phone": "text",
-        "is_default": "boolean DEFAULT false",
-        "created_at": "timestamptz NOT NULL DEFAULT now()"
+        "is_default": "boolean NOT NULL DEFAULT false",
+        "created_at": "timestamptz NOT NULL DEFAULT now()",
+        "updated_at": "timestamptz NOT NULL DEFAULT now()"
       },
       "primary_key": "id"
     },
@@ -423,66 +528,30 @@
       },
       "primary_key": "id"
     },
-    "projects": {
+    "marketing_consents": {
       "columns": {
         "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
-        "client_id": "uuid NOT NULL FK→profiles",
-        "product_id": "uuid FK→products",
-        "title": "text",
-        "status": "text DEFAULT 'draft'",
-        "opening_width_mm": "integer",
-        "opening_height_mm": "integer",
-        "opening_depth_mm": "integer",
-        "notes": "text",
-        "created_at": "timestamptz NOT NULL DEFAULT now()",
-        "updated_at": "timestamptz NOT NULL DEFAULT now()"
-      },
-      "primary_key": "id",
-      "triggers": ["validate_project_status"]
-    },
-    "project_contractors": {
-      "columns": {
-        "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
-        "project_id": "uuid NOT NULL FK→projects",
-        "contractor_id": "uuid NOT NULL FK→profiles",
-        "trade_type": "text NOT NULL",
-        "status": "text NOT NULL DEFAULT 'pending'",
-        "created_at": "timestamptz NOT NULL DEFAULT now()"
-      },
-      "primary_key": "id",
-      "triggers": ["validate_project_contractor_status"]
-    },
-    "seller_agreements": {
-      "columns": {
-        "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
-        "seller_id": "uuid NOT NULL FK→profiles",
-        "agreement_type": "text NOT NULL",
-        "agreement_version": "text NOT NULL DEFAULT '1.0'",
-        "ip_address": "text",
-        "user_agent": "text",
-        "accepted_at": "timestamptz NOT NULL DEFAULT now()"
+        "email": "text NOT NULL",
+        "consent_type": "text NOT NULL",
+        "consent_source": "text DEFAULT 'chatbot_gate'",
+        "consent_at": "timestamptz DEFAULT now()",
+        "implied_expires_at": "timestamptz",
+        "express_withdrawn_at": "timestamptz",
+        "casl_proof": "jsonb DEFAULT '{}'"
       },
       "primary_key": "id"
     },
-    "seller_payouts": {
+    "email_verification_codes": {
       "columns": {
         "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
-        "seller_id": "uuid NOT NULL FK→profiles",
-        "order_id": "uuid NOT NULL FK→orders",
-        "gross_amount_cents": "integer NOT NULL DEFAULT 0",
-        "platform_fee_cents": "integer NOT NULL DEFAULT 0",
-        "stripe_fee_cents": "integer NOT NULL DEFAULT 0",
-        "seller_payout_cents": "integer NOT NULL DEFAULT 0",
-        "hst_on_commission_cents": "integer NOT NULL DEFAULT 0",
-        "payout_status": "text NOT NULL DEFAULT 'pending'",
-        "stripe_transfer_id": "text",
-        "released_at": "timestamptz",
-        "created_at": "timestamptz NOT NULL DEFAULT now()"
+        "email": "text NOT NULL",
+        "code": "text NOT NULL",
+        "expires_at": "timestamptz NOT NULL",
+        "verified": "boolean DEFAULT false",
+        "attempts": "integer DEFAULT 0",
+        "created_at": "timestamptz DEFAULT now()"
       },
       "primary_key": "id"
-    },
-    "stripe_events": {
-      "note": "Webhook idempotency tracking"
     },
     "blog_posts": {
       "columns": {
@@ -561,12 +630,13 @@
     "site_settings": {
       "columns": {
         "id": "uuid NOT NULL DEFAULT gen_random_uuid()",
-        "key": "text NOT NULL",
+        "key": "text NOT NULL (UNIQUE)",
         "value": "text NOT NULL DEFAULT ''",
         "description": "text",
         "updated_at": "timestamptz NOT NULL DEFAULT now()"
       },
-      "primary_key": "id"
+      "primary_key": "id",
+      "notes": "Key-value config store. Key prefixes: chatbot_, email_, order_, storefront_assistant_, personal_assistant_"
     },
     "email_templates": {
       "columns": {
@@ -779,12 +849,14 @@
   "functions": {
     "is_admin": "SECURITY DEFINER — checks if current user email is in admin_emails",
     "handle_new_user": "SECURITY DEFINER trigger — creates profile row on auth.users INSERT",
-    "get_full_schema_dump": "SECURITY DEFINER — returns full live schema as text",
+    "get_full_schema_dump": "SECURITY DEFINER — returns full live schema as text for dev tools",
+    "calculate_seller_health_score": "SECURITY DEFINER — returns seller health metrics as jsonb (on_time_rate, consecutive_overdue, health_status)",
     "generate_order_number": "trigger — auto-generates FM-YYYYMMDD-XXXX order numbers",
     "generate_quote_number": "trigger — auto-generates FMQ-YYYYMMDD-XXXX quote numbers",
     "update_updated_at_column": "trigger — sets updated_at = now()",
     "validate_order_status": "trigger — validates order status + payment_status enums",
     "validate_order_item_quantity": "trigger — ensures quantity > 0",
+    "validate_order_dispute_fields": "trigger — validates dispute_type + status enums",
     "validate_delivery_option": "trigger — validates delivery/pickup_only/both",
     "validate_project_status": "trigger — validates project status enum",
     "validate_project_contractor_status": "trigger — validates contractor assignment status",
@@ -798,6 +870,11 @@
     "validate_email_consent_log_fields": "trigger — validates consent_type, consent_category",
     "validate_integration_fields": "trigger — validates category, status, health_status",
     "validate_webhook_log_fields": "trigger — validates direction, status",
+    "validate_seller_ai_consent_type": "trigger — validates storefront_assistant/personal_assistant",
+    "validate_chat_session_fields": "trigger — validates user_role, chatbot_mode, status",
+    "validate_chat_message_fields": "trigger — validates message_type enum",
+    "validate_kb_type": "trigger — validates kb_type enum",
+    "validate_kb_scope": "trigger — validates storefront/personal",
     "set_question_seller_id": "trigger — auto-populates seller_id from product"
   }
 }
