@@ -42,7 +42,7 @@ export default function SellerAIConsentModal({
   alreadyAccepted,
   acceptedAt,
   onAccepted,
-  sellerId,
+  sellerId: _sellerId,
   consentType = "storefront_assistant",
 }: Props) {
   const [agreed, setAgreed] = useState(false);
