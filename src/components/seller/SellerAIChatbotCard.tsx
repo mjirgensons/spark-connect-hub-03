@@ -214,9 +214,9 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
             {/* Title + badge + toggle */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
-                <span className="font-sans font-bold text-sm whitespace-nowrap">Personal Assistant</span>
+                <span className="font-sans font-bold text-sm whitespace-nowrap">Seller AI Assistant</span>
                 {paActive ? (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 text-background leading-none shrink-0" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}>ACTIVE</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 text-background leading-none shrink-0 animate-pulse" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}>ACTIVE</span>
                 ) : (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-muted-foreground/20 text-muted-foreground leading-none shrink-0">OFF</span>
                 )}
