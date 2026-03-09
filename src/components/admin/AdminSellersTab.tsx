@@ -327,7 +327,7 @@ const AdminSellersTab = () => {
                               {status === "pending" && (
                                 <DropdownMenuItem
                                   className="text-destructive focus:text-destructive"
-                                  onClick={() => handleAction(seller.id, "rejected", name)}
+                                  onClick={() => handleAction(seller.id, "rejected", name, seller.seller_status)}
                                 >
                                   <ShieldX className="w-4 h-4 mr-2" /> Reject Seller
                                 </DropdownMenuItem>
