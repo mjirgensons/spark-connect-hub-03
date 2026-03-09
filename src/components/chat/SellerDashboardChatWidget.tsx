@@ -219,17 +219,6 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
           {/* Messages */}
           <ScrollArea className="flex-1 min-h-0">
             <div className="px-4 py-3 space-y-3">
-              {/* Custom intro if no messages yet */}
-              {messages.length === 0 && (
-                <div className="group flex flex-col gap-1 items-start">
-                  <div
-                    className="px-3 py-2 text-sm font-sans leading-relaxed max-w-[80%] border-2 border-foreground bg-background text-foreground"
-                    style={{ borderRadius: 0 }}
-                  >
-                    {INTRO_MESSAGE}
-                  </div>
-                </div>
-              )}
               {messages.map((msg) => (
                 <MessageBubble key={msg.id} message={msg} />
               ))}
