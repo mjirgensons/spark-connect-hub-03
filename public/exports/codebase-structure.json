@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-07",
+  "generated": "2026-03-09",
   "project": "FitMatch.ca",
   "framework": "React 18 + TypeScript + Vite 5",
   "styling": "Tailwind CSS 3 + shadcn/ui",
@@ -75,8 +75,10 @@
         { "path": "/seller/quotes", "page": "seller/SellerQuotes.tsx" },
         { "path": "/seller/quotes/:quoteId", "page": "seller/SellerQuoteDetail.tsx" },
         { "path": "/seller/orders", "page": "seller/SellerOrders.tsx" },
+        { "path": "/seller/payouts", "page": "seller/SellerPayouts.tsx" },
         { "path": "/seller/analytics", "page": "seller/SellerAnalytics.tsx" },
         { "path": "/seller/questions", "page": "seller/SellerQuestions.tsx" },
+        { "path": "/seller/knowledge-base", "page": "seller/SellerKnowledgeBase.tsx" },
         { "path": "/seller/messages", "page": "seller/SellerMessages.tsx" },
         { "path": "/seller/messages/:conversationId", "page": "seller/SellerMessages.tsx" },
         { "path": "/seller/store-profile", "page": "seller/SellerStoreProfile.tsx" }
@@ -116,28 +118,44 @@
       "AdminSidebar.tsx", "AdminDashboardTab.tsx", "AdminOrdersTab.tsx",
       "AdminQuotesTab.tsx", "AdminProductsTab.tsx", "AdminCustomersTab.tsx",
       "AdminReviewsTab.tsx", "AdminProductReviewTab.tsx", "AdminQATab.tsx",
-      "AdminSellersTab.tsx", "AdminEmailTemplatesTab.tsx", "AdminNewsletterTab.tsx",
+      "AdminSellersTab.tsx", "AdminSellerHealthTab.tsx",
+      "AdminEmailTemplatesTab.tsx", "AdminNewsletterTab.tsx",
       "AdminBlogTab.tsx", "AdminFAQTab.tsx", "AdminTrustSignalsTab.tsx",
-      "AdminIntegrationsTab.tsx", "AdminWebhooksTab.tsx", "AdminDbInspectorTab.tsx",
+      "AdminIntegrationsTab.tsx", "AdminWebhooksTab.tsx",
+      "AdminChatbotControlPanel.tsx", "AdminTestChatTab.tsx",
+      "AdminAIDescriptionsTab.tsx", "AdminDbInspectorTab.tsx",
       "AnalyticsDashboard.tsx", "SiteSettingsAdmin.tsx", "FooterPagesAdmin.tsx",
       "LegalPagesAdmin.tsx", "CookieCategoriesAdmin.tsx", "CookieRegistryAdmin.tsx",
       "ConsentLogsAdmin.tsx", "BannerSettingsAdmin.tsx", "ProductDetailPreview.tsx",
-      "ImageUpload.tsx", "FileUpload.tsx",
+      "ImageUpload.tsx", "FileUpload.tsx", "SessionHistoryTab.tsx",
       "EmailSettingsTab.tsx", "EmailCommLogTab.tsx", "EmailConsentTab.tsx",
       "EmailTestConsoleTab.tsx", "EmailWF8TestTab.tsx", "EmailWF9StripeTab.tsx"
     ],
     "checkout": ["CheckoutStepper.tsx", "StepInformation.tsx", "StepReview.tsx"],
-    "seller": ["SellerProductForm.tsx", "HardwareSection.tsx", "AdditionalFeaturesSection.tsx"],
+    "chat": [
+      "ChatWidget.tsx", "ChatConsentModal.tsx", "ChatRegistrationGate.tsx",
+      "SellerDashboardChatWidget.tsx", "VoiceLangSelector.tsx",
+      "useChatSession.ts", "useVoiceInput.ts"
+    ],
+    "seller": [
+      "SellerProductForm.tsx", "HardwareSection.tsx", "AdditionalFeaturesSection.tsx",
+      "SellerAIChatbotCard.tsx", "SellerAIConsentModal.tsx", "SellerHealthCard.tsx"
+    ],
+    "product": [
+      "ProductHero.tsx", "ProductSpecs.tsx", "ProductDelivery.tsx",
+      "ProductAddOns.tsx", "ProductStickySidebar.tsx"
+    ],
     "shared": [
       "AuthGateModal.tsx", "Breadcrumbs.tsx", "CompareBar.tsx", "CompareButton.tsx",
       "ContactSellerButton.tsx", "CookieConsent.tsx", "DashboardLayout.tsx",
-      "DimensionMatcher.tsx", "HideChatOnAdmin.tsx", "NavLink.tsx",
-      "NewsletterSignup.tsx", "ProductGallery.tsx", "ProductQA.tsx",
-      "ProductReviews.tsx", "RoleGuard.tsx", "ScrollToTop.tsx",
+      "DimensionMatcher.tsx", "NavLink.tsx", "NewsletterSignup.tsx",
+      "ProductGallery.tsx", "ProductQA.tsx", "ProductReviews.tsx",
+      "ReportIssueDialog.tsx", "RoleGuard.tsx", "ScrollToTop.tsx",
       "SearchBar.tsx", "SellerGuard.tsx", "TrustBadgeBar.tsx", "WishlistButton.tsx"
     ]
   },
   "contexts": [
+    { "name": "AuthContext", "file": "contexts/AuthContext.tsx", "purpose": "Auth state provider wrapping Supabase auth" },
     { "name": "CartContext", "file": "contexts/CartContext.tsx", "purpose": "Shopping cart state (add, remove, update, delivery tracking)" },
     { "name": "WishlistContext", "file": "contexts/WishlistContext.tsx", "purpose": "Product wishlist (Supabase-persisted for auth users)" },
     { "name": "CompareContext", "file": "contexts/CompareContext.tsx", "purpose": "Product comparison (side-by-side)" },
@@ -148,6 +166,8 @@
     { "name": "useProfile", "file": "hooks/useProfile.tsx", "purpose": "User profile data fetching" },
     { "name": "useAnalytics", "file": "hooks/useAnalytics.ts", "purpose": "Page view and event tracking" },
     { "name": "usePageMeta", "file": "hooks/usePageMeta.ts", "purpose": "Dynamic page title/meta" },
+    { "name": "useProductData", "file": "hooks/useProductData.ts", "purpose": "Product detail data fetching with options/appliances" },
+    { "name": "useProductCart", "file": "hooks/useProductCart.ts", "purpose": "Product-specific cart operations" },
     { "name": "use-mobile", "file": "hooks/use-mobile.tsx", "purpose": "Mobile breakpoint detection" },
     { "name": "use-toast", "file": "hooks/use-toast.ts", "purpose": "Toast notification hook" }
   ],
@@ -155,6 +175,7 @@
     { "file": "lib/utils.ts", "purpose": "cn() class merge utility" },
     { "file": "lib/analytics.ts", "purpose": "Analytics event tracking to Supabase" },
     { "file": "lib/optimizeImage.ts", "purpose": "Image URL optimization" },
+    { "file": "lib/productHelpers.ts", "purpose": "Product data transformation helpers" },
     { "file": "lib/webhookDispatcher.ts", "purpose": "Webhook event dispatch to integrations" }
   ]
 }

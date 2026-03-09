@@ -1,8 +1,20 @@
 {
-  "generated": "2026-03-07",
+  "generated": "2026-03-09",
   "project": "FitMatch.ca",
   "base_url": "https://uiflubaywbpkcgwnedzp.supabase.co/functions/v1",
   "edge_functions": [
+    {
+      "name": "admin-update-seller-restriction",
+      "method": "POST",
+      "purpose": "Admin endpoint to update seller restriction status (restrict/unrestrict)",
+      "auth": "authenticated (admin)"
+    },
+    {
+      "name": "chatbot-proxy",
+      "method": "POST",
+      "purpose": "Proxy chatbot requests to AI provider (OpenAI) for seller storefront/personal assistants",
+      "auth": "anon key"
+    },
     {
       "name": "check-consent",
       "method": "POST",
@@ -17,16 +29,61 @@
       "secrets": ["STRIPE_SECRET_KEY"]
     },
     {
+      "name": "create-connect-account",
+      "method": "POST",
+      "purpose": "Create Stripe Connect account for seller onboarding",
+      "auth": "authenticated",
+      "secrets": ["STRIPE_SECRET_KEY"]
+    },
+    {
       "name": "create-order",
       "method": "POST",
       "purpose": "Create order record in database",
       "auth": "anon key"
     },
     {
+      "name": "create-wf10-test-user",
+      "method": "POST",
+      "purpose": "Create test user for WF-10 email reply testing",
+      "auth": "anon key",
+      "verify_jwt": false
+    },
+    {
+      "name": "get-connect-status",
+      "method": "POST",
+      "purpose": "Check Stripe Connect account onboarding status for seller",
+      "auth": "authenticated",
+      "secrets": ["STRIPE_SECRET_KEY"]
+    },
+    {
+      "name": "get-deadline-orders",
+      "method": "POST",
+      "purpose": "Fetch orders approaching shipping deadlines for notification workflows",
+      "auth": "service role"
+    },
+    {
       "name": "get-order-confirmation",
       "method": "POST",
       "purpose": "Fetch order details for confirmation page (with polling for Stripe webhook)",
       "auth": "anon key"
+    },
+    {
+      "name": "get-order-notification-data",
+      "method": "POST",
+      "purpose": "Fetch full order + items + seller data for email notification workflows",
+      "auth": "service role"
+    },
+    {
+      "name": "get-order-sellers",
+      "method": "POST",
+      "purpose": "Get distinct seller IDs for an order (multi-seller support)",
+      "auth": "service role"
+    },
+    {
+      "name": "get-unsynced-comms",
+      "method": "POST",
+      "purpose": "Fetch communication logs not yet synced to Pinecone for knowledge base",
+      "auth": "service role"
     },
     {
       "name": "get-wf9-order",
@@ -41,6 +98,12 @@
       "auth": "service role"
     },
     {
+      "name": "log-chat-message",
+      "method": "POST",
+      "purpose": "Log chatbot messages to chat_messages table (service role bypass RLS)",
+      "auth": "service role"
+    },
+    {
       "name": "log-communication",
       "method": "POST",
       "purpose": "Log outbound/inbound email to communication_logs table",
@@ -51,6 +114,12 @@
       "method": "POST",
       "purpose": "Record email consent per CASL to email_consent_log",
       "auth": "anon key"
+    },
+    {
+      "name": "mark-kb-synced",
+      "method": "POST",
+      "purpose": "Mark knowledge base entries as synced to Pinecone",
+      "auth": "service role"
     },
     {
       "name": "n8n-proxy",
@@ -72,6 +141,39 @@
       "purpose": "Notify n8n when new seller registers (triggers welcome email)",
       "auth": "anon key",
       "external_endpoint": "https://sundeco.app.n8n.cloud/webhook/seller-registration"
+    },
+    {
+      "name": "process-seller-transfers",
+      "method": "POST",
+      "purpose": "Process Stripe Connect transfers to sellers after delivery confirmation",
+      "auth": "service role",
+      "secrets": ["STRIPE_SECRET_KEY"]
+    },
+    {
+      "name": "save-marketing-consent",
+      "method": "POST",
+      "purpose": "Save marketing consent record (CASL compliant) from chatbot gate",
+      "auth": "anon key",
+      "verify_jwt": false
+    },
+    {
+      "name": "seed-wf10-test-data",
+      "method": "POST",
+      "purpose": "Seed test data for WF-10 inbound email testing",
+      "auth": "anon key"
+    },
+    {
+      "name": "send-verification-otp",
+      "method": "POST",
+      "purpose": "Send OTP verification code to email (pre-registration verification)",
+      "auth": "anon key",
+      "verify_jwt": false
+    },
+    {
+      "name": "simulate-inbound-email",
+      "method": "POST",
+      "purpose": "Simulate Mailgun inbound email for WF-10 testing",
+      "auth": "anon key"
     },
     {
       "name": "stripe-webhook",
@@ -105,24 +207,20 @@
       "auth": "service role"
     },
     {
-      "name": "simulate-inbound-email",
+      "name": "update-order-status",
       "method": "POST",
-      "purpose": "Simulate Mailgun inbound email for WF-10 testing",
-      "auth": "anon key"
+      "purpose": "Update order status with timestamp tracking (shipped, delivered, etc.)",
+      "auth": "authenticated"
     },
     {
-      "name": "create-wf10-test-user",
+      "name": "verify-otp-code",
       "method": "POST",
-      "purpose": "Create test user for WF-10 email reply testing",
-      "auth": "anon key"
-    },
-    {
-      "name": "seed-wf10-test-data",
-      "method": "POST",
-      "purpose": "Seed test data for WF-10 inbound email testing",
-      "auth": "anon key"
+      "purpose": "Verify OTP code submitted by user during registration",
+      "auth": "anon key",
+      "verify_jwt": false
     }
   ],
+  "total_functions": 34,
   "email_workflows": {
     "WF-8": "Email Dispatcher — sends outbound emails via Mailgun, logs to communication_logs",
     "WF-9": "Stripe Email Router — Stripe webhook events → email notifications",
