@@ -261,7 +261,7 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
               />
 
               {/* Voice lang selector */}
-              {voiceSupported && <VoiceLangSelector />}
+              {voiceSupported && <VoiceLangSelector value={voiceLang.lang} onChange={voiceLang.select} />}
 
               {/* Mic button */}
               {voiceSupported && (
