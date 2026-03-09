@@ -172,8 +172,8 @@ const AdminSellersTab = () => {
     );
   });
 
-  const handleAction = (sellerId: string, action: SellerStatus, companyName: string) => {
-    setConfirmAction({ sellerId, action, companyName });
+  const handleAction = (sellerId: string, action: SellerStatus, companyName: string, previousStatus?: string | null) => {
+    setConfirmAction({ sellerId, action, companyName, previousStatus });
   };
 
   const formatAddress = (addr: Record<string, string> | null) => {
