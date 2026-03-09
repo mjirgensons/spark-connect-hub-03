@@ -103,7 +103,7 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
     sellerId,
     sellerName: "FitMatch AI",
     productId: "",
-    userRole: "seller",
+    userRole: "authenticated_seller",
     authenticatedUserId: user?.id ?? null,
   });
 
