@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
     await supabase
       .from('email_verification_codes')
       .update({ verified: true })
-      .eq('id', match.id)
+      .match({ id: match.id })
 
     // Fire-and-forget welcome email (don't block on success)
     (async () => {
@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
     await supabase
       .from('email_verification_codes')
       .update({ attempts: newAttempts })
-      .eq('id', latest.id)
+      .match({ id: latest.id })
 
     if (newAttempts >= 5) {
       return new Response(JSON.stringify({
