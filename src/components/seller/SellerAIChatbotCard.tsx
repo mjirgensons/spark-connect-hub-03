@@ -64,6 +64,11 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
       setLoading(false);
     };
     fetchData();
+
+    // Listen for state changes from the widget component
+    const handler = () => fetchData();
+    window.addEventListener("seller-assistant-state-changed", handler);
+    return () => window.removeEventListener("seller-assistant-state-changed", handler);
   }, [sellerId]);
 
   const hasKb = kbCount >= 3;
