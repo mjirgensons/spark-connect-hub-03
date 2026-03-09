@@ -2011,6 +2011,7 @@ export type Database = {
           id: string
           location: string | null
           logo_url: string | null
+          personal_assistant_enabled: boolean | null
           phone: string | null
           seller_ai_consent_accepted: boolean | null
           seller_ai_consent_accepted_at: string | null
@@ -2044,6 +2045,7 @@ export type Database = {
           id: string
           location?: string | null
           logo_url?: string | null
+          personal_assistant_enabled?: boolean | null
           phone?: string | null
           seller_ai_consent_accepted?: boolean | null
           seller_ai_consent_accepted_at?: string | null
@@ -2077,6 +2079,7 @@ export type Database = {
           id?: string
           location?: string | null
           logo_url?: string | null
+          personal_assistant_enabled?: boolean | null
           phone?: string | null
           seller_ai_consent_accepted?: boolean | null
           seller_ai_consent_accepted_at?: string | null
@@ -2335,11 +2338,48 @@ export type Database = {
           },
         ]
       }
+      seller_ai_consents: {
+        Row: {
+          consent_at: string | null
+          consent_given: boolean | null
+          consent_text: string | null
+          consent_type: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          seller_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          consent_at?: string | null
+          consent_given?: boolean | null
+          consent_text?: string | null
+          consent_type: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          seller_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          consent_at?: string | null
+          consent_given?: boolean | null
+          consent_text?: string | null
+          consent_type?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          seller_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       seller_knowledge_base: {
         Row: {
           content: string
           created_at: string | null
           id: string
+          kb_scope: string
           kb_type: string
           pinecone_synced: boolean | null
           seller_id: string
@@ -2350,6 +2390,7 @@ export type Database = {
           content: string
           created_at?: string | null
           id?: string
+          kb_scope?: string
           kb_type: string
           pinecone_synced?: boolean | null
           seller_id: string
@@ -2360,6 +2401,7 @@ export type Database = {
           content?: string
           created_at?: string | null
           id?: string
+          kb_scope?: string
           kb_type?: string
           pinecone_synced?: boolean | null
           seller_id?: string
