@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
   // No match — find latest code for this email to increment attempts
   const { data: latest } = await supabase
     .from('email_verification_codes')
-    .select('id, attempts')
+    .select('id, email, code, expires_at, verified, attempts')
     .eq('email', email)
     .eq('verified', false)
     .order('created_at', { ascending: false })
@@ -139,10 +139,20 @@ Deno.serve(async (req) => {
 
   if (latest) {
     const newAttempts = (latest.attempts ?? 0) + 1
-    await supabase
+    const { error: attemptsError } = await supabase
       .from('email_verification_codes')
-      .update({ attempts: newAttempts })
-      .match({ id: latest.id })
+      .upsert({
+        id: latest.id,
+        email: latest.email,
+        code: latest.code,
+        expires_at: latest.expires_at,
+        verified: latest.verified,
+        attempts: newAttempts,
+      })
+
+    if (attemptsError) {
+      console.error('Failed to increment OTP attempts:', attemptsError)
+    }
 
     if (newAttempts >= 5) {
       return new Response(JSON.stringify({
