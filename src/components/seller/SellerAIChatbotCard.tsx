@@ -106,8 +106,8 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
     }
   };
 
-  const handleStorefrontConsentAccepted = async () => {
-    if (await upsertConsent("storefront_assistant")) {
+  const handleStorefrontConsentAccepted = async (consentText: string) => {
+    if (await upsertConsent("storefront_assistant", consentText)) {
       setStorefrontConsent({ consent_type: "storefront_assistant", consent_given: true, consent_at: new Date().toISOString() });
       toast.success("Storefront Assistant consent accepted");
       if (hasKb && hasSyncedProducts) {
@@ -116,8 +116,8 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
     }
   };
 
-  const handlePersonalConsentAccepted = async () => {
-    if (await upsertConsent("personal_assistant")) {
+  const handlePersonalConsentAccepted = async (consentText: string) => {
+    if (await upsertConsent("personal_assistant", consentText)) {
       setPersonalConsent({ consent_type: "personal_assistant", consent_given: true, consent_at: new Date().toISOString() });
       toast.success("Personal Assistant consent accepted");
       if (await updateProfileField("personal_assistant_enabled", true)) { setPersonalEnabled(true); toast.success("Personal Assistant enabled"); }
