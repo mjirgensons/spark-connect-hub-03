@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Props {
   open: boolean;
@@ -10,7 +11,7 @@ interface Props {
   sellerEmail: string;
   alreadyAccepted: boolean;
   acceptedAt?: string | null;
-  onAccepted: () => void;
+  onAccepted: (consentText: string) => void;
   sellerId: string;
   consentType?: "storefront_assistant" | "personal_assistant";
 }
@@ -30,15 +31,135 @@ const currentDate = new Date().toLocaleDateString("en-US", {
   day: "numeric",
 });
 
-const PERSONAL_CONSENT_TEXT =
-  "I acknowledge that the Personal Assistant uses AI to help me manage my store. My questions and interactions are processed by AI services. I understand this assistant uses my product data and Knowledge Base articles to provide answers.";
+const STOREFRONT_CONSENT_TEXT = `By enabling the AI Storefront Assistant, you agree to the following terms:
+
+1. AI-Powered Interactions
+The AI Storefront Assistant will interact with buyers visiting your product pages on FitMatch.ca on your behalf. It uses artificial intelligence (powered by OpenAI, Inc.) to generate responses — it is not a human representative.
+
+2. Data Processing
+Your product listings, Knowledge Base articles, and store information will be processed by OpenAI, Inc., located in the United States, to generate AI responses. Data stored in the US may be accessible to US government authorities under US law.
+
+3. Your Responsibility
+You are responsible for the accuracy of information in your Knowledge Base. FitMatch does not verify the content you provide. Inaccurate product specifications, pricing, or policies communicated by the AI assistant to buyers may result in legal liability under Canadian consumer protection laws.
+
+4. Buyer Conversations
+Conversations between buyers and your AI assistant are stored for up to 90 days. You can review these conversations in your Chat Analytics dashboard.
+
+5. Data Retention & Withdrawal
+You may disable the AI Storefront Assistant at any time by toggling it off. To request deletion of stored conversation data, contact privacy@fitmatch.ca.
+
+6. Quebec Residents
+If you are located in Quebec, by accepting this agreement you explicitly consent to the collection and processing of your information as described above, including transfer to the United States. You may withdraw consent at any time by contacting privacy@fitmatch.ca.`;
+
+const PERSONAL_CONSENT_TEXT = `By enabling the Personal Assistant, you agree to the following terms:
+
+1. AI-Powered Assistance
+The Personal Assistant uses artificial intelligence (powered by OpenAI, Inc.) to help you manage your store on FitMatch.ca. Your questions and interactions are processed by AI — not a human.
+
+2. Data Processing
+Your product listings, Knowledge Base articles, and store information will be processed by OpenAI, Inc., located in the United States, to generate AI responses. Data stored in the US may be accessible to US government authorities under US law.
+
+3. Your Data
+Your questions, product data, and Knowledge Base articles are used to generate AI responses. Do not share sensitive personal information (such as banking details or government ID) in conversations with the assistant.
+
+4. Data Retention & Withdrawal
+You may disable the Personal Assistant at any time by toggling it off. To request deletion of stored conversation data, contact privacy@fitmatch.ca.
+
+5. Quebec Residents
+If you are located in Quebec, by accepting this agreement you explicitly consent to the collection and processing of your information as described above, including transfer to the United States. You may withdraw consent at any time by contacting privacy@fitmatch.ca.`;
+
+function ConsentSection({ number, title, text }: { number: string; title: string; text: string }) {
+  return (
+    <div className="mb-4">
+      <h3 className="font-sans font-bold text-sm mb-1">
+        {number}. {title}
+      </h3>
+      <p className="text-sm leading-relaxed">{text}</p>
+    </div>
+  );
+}
+
+function StorefrontConsentBody() {
+  return (
+    <>
+      <p className="text-sm leading-relaxed mb-4">
+        By enabling the AI Storefront Assistant, you agree to the following terms:
+      </p>
+      <ConsentSection
+        number="1"
+        title="AI-Powered Interactions"
+        text="The AI Storefront Assistant will interact with buyers visiting your product pages on FitMatch.ca on your behalf. It uses artificial intelligence (powered by OpenAI, Inc.) to generate responses — it is not a human representative."
+      />
+      <ConsentSection
+        number="2"
+        title="Data Processing"
+        text="Your product listings, Knowledge Base articles, and store information will be processed by OpenAI, Inc., located in the United States, to generate AI responses. Data stored in the US may be accessible to US government authorities under US law."
+      />
+      <ConsentSection
+        number="3"
+        title="Your Responsibility"
+        text="You are responsible for the accuracy of information in your Knowledge Base. FitMatch does not verify the content you provide. Inaccurate product specifications, pricing, or policies communicated by the AI assistant to buyers may result in legal liability under Canadian consumer protection laws."
+      />
+      <ConsentSection
+        number="4"
+        title="Buyer Conversations"
+        text="Conversations between buyers and your AI assistant are stored for up to 90 days. You can review these conversations in your Chat Analytics dashboard."
+      />
+      <ConsentSection
+        number="5"
+        title="Data Retention & Withdrawal"
+        text="You may disable the AI Storefront Assistant at any time by toggling it off. To request deletion of stored conversation data, contact privacy@fitmatch.ca."
+      />
+      <ConsentSection
+        number="6"
+        title="Quebec Residents"
+        text="If you are located in Quebec, by accepting this agreement you explicitly consent to the collection and processing of your information as described above, including transfer to the United States. You may withdraw consent at any time by contacting privacy@fitmatch.ca."
+      />
+    </>
+  );
+}
+
+function PersonalConsentBody() {
+  return (
+    <>
+      <p className="text-sm leading-relaxed mb-4">
+        By enabling the Personal Assistant, you agree to the following terms:
+      </p>
+      <ConsentSection
+        number="1"
+        title="AI-Powered Assistance"
+        text="The Personal Assistant uses artificial intelligence (powered by OpenAI, Inc.) to help you manage your store on FitMatch.ca. Your questions and interactions are processed by AI — not a human."
+      />
+      <ConsentSection
+        number="2"
+        title="Data Processing"
+        text="Your product listings, Knowledge Base articles, and store information will be processed by OpenAI, Inc., located in the United States, to generate AI responses. Data stored in the US may be accessible to US government authorities under US law."
+      />
+      <ConsentSection
+        number="3"
+        title="Your Data"
+        text="Your questions, product data, and Knowledge Base articles are used to generate AI responses. Do not share sensitive personal information (such as banking details or government ID) in conversations with the assistant."
+      />
+      <ConsentSection
+        number="4"
+        title="Data Retention & Withdrawal"
+        text="You may disable the Personal Assistant at any time by toggling it off. To request deletion of stored conversation data, contact privacy@fitmatch.ca."
+      />
+      <ConsentSection
+        number="5"
+        title="Quebec Residents"
+        text="If you are located in Quebec, by accepting this agreement you explicitly consent to the collection and processing of your information as described above, including transfer to the United States. You may withdraw consent at any time by contacting privacy@fitmatch.ca."
+      />
+    </>
+  );
+}
 
 export default function SellerAIConsentModal({
   open,
   onOpenChange,
   sellerName,
   sellerBusinessName,
-  sellerEmail,
+  sellerEmail: _sellerEmail,
   alreadyAccepted,
   acceptedAt,
   onAccepted,
@@ -52,20 +173,20 @@ export default function SellerAIConsentModal({
 
   const businessName = sellerBusinessName || sellerName || "Your Business";
   const fullName = sellerName || "Seller";
-  const email = sellerEmail || "your-email@example.com";
   const isPersonal = consentType === "personal_assistant";
+
+  const modalTitle = isPersonal
+    ? "Personal Assistant — Consent Agreement"
+    : "AI Storefront Assistant — Consent Agreement";
+
+  const consentText = isPersonal ? PERSONAL_CONSENT_TEXT : STOREFRONT_CONSENT_TEXT;
 
   const handleAccept = async () => {
     setSaving(true);
-    // The parent component handles the actual upsert — just notify
+    onAccepted(consentText);
     setSaving(false);
-    onAccepted();
     onOpenChange(false);
   };
-
-  const modalTitle = isPersonal
-    ? "Personal Assistant — Consent"
-    : "AI Assistant — Seller Agreement";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -77,7 +198,7 @@ export default function SellerAIConsentModal({
         className="relative z-10 flex flex-col bg-background border-2 border-foreground w-full max-w-[640px] mx-4"
         style={{
           boxShadow: "4px 4px 0px hsl(var(--foreground))",
-          maxHeight: "80vh",
+          maxHeight: "85vh",
         }}
       >
         {/* Header */}
@@ -92,146 +213,29 @@ export default function SellerAIConsentModal({
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto flex-1 p-5 text-sm leading-relaxed">
-          {isPersonal ? (
-            <>
-              <p className="font-bold text-base mb-4">
-                PERSONAL ASSISTANT — CONSENT
-              </p>
-              <p className="mb-4">{PERSONAL_CONSENT_TEXT}</p>
-              <p className="mb-1">
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="p-5 text-foreground font-sans">
+            {/* Seller info */}
+            <div className="mb-4 text-sm space-y-0.5">
+              <p>
                 <strong>Seller:</strong> {businessName} ({fullName})
               </p>
-              <p className="mb-4">
+              <p>
                 <strong>Date:</strong> {currentDate}
               </p>
-            </>
-          ) : (
-            <>
-              <p className="font-bold text-base mb-4">
-                AI ASSISTANT — SELLER TERMS OF USE
-              </p>
-              <p className="mb-1">
-                <strong>Effective Date:</strong> {currentDate}
-              </p>
-              <p className="mb-1">
-                <strong>Seller:</strong> {businessName} ({fullName})
-              </p>
-              <p className="mb-4">
-                <strong>Platform:</strong> FitMatch
-              </p>
-              <p className="mb-4">
-                By enabling the AI Assistant for your store, you ("Seller") agree to
-                the following terms:
-              </p>
+            </div>
 
-              <h3 className="font-bold mb-2">1. ACCURACY & LIABILITY</h3>
-              <p className="mb-4">
-                You are solely responsible for the accuracy of all information in
-                your Knowledge Base, including product descriptions, specifications,
-                pricing, lead times, installation guides, and FAQs. The AI Assistant
-                generates responses based on this content.
-              </p>
-              <p className="mb-4">
-                Per the <em>Air Canada v. Moffatt</em> precedent (2024 BCCRT 149),
-                a business is liable for all information provided through its AI
-                systems. FitMatch does not verify or guarantee the accuracy of
-                AI-generated responses derived from your Knowledge Base content.
-              </p>
-              <p className="mb-4">
-                You agree to keep your Knowledge Base current and accurate at all
-                times.
-              </p>
+            {/* Legal sections */}
+            {isPersonal ? <PersonalConsentBody /> : <StorefrontConsentBody />}
 
-              <h3 className="font-bold mb-2">2. AI DISCLOSURE TO BUYERS</h3>
-              <p className="mb-4">
-                The AI Assistant will clearly identify itself as an automated system
-                to all buyers. At the start of each conversation, buyers are informed
-                they are interacting with an AI assistant, not a human representative.
-              </p>
-              <p className="mb-4">
-                You must not instruct or configure the AI Assistant to impersonate a
-                human.
-              </p>
-
-              <h3 className="font-bold mb-2">3. DATA COLLECTION & PIPEDA COMPLIANCE</h3>
-              <p className="mb-2">
-                The AI Assistant collects the following buyer data during chat
-                interactions:
-              </p>
-              <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>Chat messages and conversation history</li>
-                <li>Email address (when voluntarily provided through the email gate)</li>
-                <li>Product pages visited during the chat session</li>
-              </ul>
-              <p className="mb-4">
-                This data is collected under Canada's Personal Information Protection
-                and Electronic Documents Act (PIPEDA). Collection is limited to what
-                is necessary for providing product assistance and facilitating
-                seller-buyer communication.
-              </p>
-              <p className="mb-4">
-                Buyer data collected through your AI Assistant is accessible only to
-                you (the Seller) and FitMatch platform administrators. It will not be
-                sold to third parties or used for purposes beyond product assistance
-                and communication.
-              </p>
-              <p className="mb-4">
-                Buyers may request deletion of their conversation data at any time.
-              </p>
-
-              <h3 className="font-bold mb-2">4. MARKETING CONSENT (CASL)</h3>
-              <p className="mb-4">
-                Canada's Anti-Spam Legislation (CASL) requires explicit opt-in
-                consent before sending commercial electronic messages. The AI
-                Assistant will never send marketing emails to buyers without their
-                express consent.
-              </p>
-
-              <h3 className="font-bold mb-2">5. PROHIBITED USES</h3>
-              <p className="mb-2">You must not use the AI Assistant to:</p>
-              <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>Provide medical, legal, or financial advice</li>
-                <li>Make guarantees or warranties beyond your stated product specifications</li>
-                <li>Collect sensitive personal information</li>
-                <li>Engage in deceptive pricing or bait-and-switch practices</li>
-                <li>Target or discriminate against buyers based on protected characteristics</li>
-              </ul>
-
-              <h3 className="font-bold mb-2">6. LIMITATION OF LIABILITY</h3>
-              <p className="mb-4">
-                FitMatch provides the AI Assistant technology on an "as-is" basis.
-                FitMatch is not liable for incorrect or incomplete AI responses caused
-                by inaccurate Knowledge Base content, lost sales, or buyer claims
-                resulting from AI-generated product information.
-              </p>
-
-              <h3 className="font-bold mb-2">7. SUSPENSION & TERMINATION</h3>
-              <p className="mb-2">
-                FitMatch reserves the right to suspend or disable your AI Assistant if:
-              </p>
-              <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>Your Knowledge Base contains materially inaccurate information</li>
-                <li>Buyer complaints related to AI interactions exceed reasonable thresholds</li>
-                <li>You violate any term of this agreement</li>
-              </ul>
-
-              <h3 className="font-bold mb-2">8. AMENDMENTS</h3>
-              <p className="mb-4">
-                FitMatch may update these terms with 30 days notice via email to{" "}
-                <strong>{email}</strong>. Continued use of the AI Assistant after the
-                notice period constitutes acceptance.
-              </p>
-
-              <p className="text-muted-foreground text-xs">
-                Last updated: {currentDate}
-              </p>
-            </>
-          )}
-        </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Last updated: {currentDate}
+            </p>
+          </div>
+        </ScrollArea>
 
         {/* Footer */}
-        <div className="shrink-0 p-4 border-t-2 border-foreground">
+        <div className="shrink-0 p-4 border-t-2 border-foreground space-y-3">
           {alreadyAccepted ? (
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -249,7 +253,7 @@ export default function SellerAIConsentModal({
               </button>
             </div>
           ) : (
-            <div className="flex items-center justify-between gap-3">
+            <>
               <div className="flex items-start gap-2">
                 <Checkbox
                   id="consent-check"
@@ -257,16 +261,14 @@ export default function SellerAIConsentModal({
                   onCheckedChange={(v) => setAgreed(v === true)}
                   className="mt-0.5"
                 />
-                <label htmlFor="consent-check" className="text-sm cursor-pointer select-none">
-                  {isPersonal
-                    ? `I, ${fullName}, consent to using the Personal Assistant as described above`
-                    : `I, ${fullName}, on behalf of ${businessName}, have read and agree to the AI Assistant Seller Terms of Use`}
+                <label htmlFor="consent-check" className="text-sm cursor-pointer select-none leading-snug">
+                  I, {fullName}, have read and agree to the terms above
                 </label>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center justify-end gap-2">
                 <button
                   onClick={() => onOpenChange(false)}
-                  className="text-sm text-muted-foreground hover:opacity-70 transition-opacity"
+                  className="h-9 px-4 text-sm font-sans text-muted-foreground hover:opacity-70 transition-opacity"
                 >
                   Cancel
                 </button>
@@ -279,7 +281,7 @@ export default function SellerAIConsentModal({
                   {saving ? "Saving…" : "Accept & Enable"}
                 </button>
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>
