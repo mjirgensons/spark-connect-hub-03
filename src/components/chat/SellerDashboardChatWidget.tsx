@@ -75,7 +75,7 @@ export default function SellerDashboardChatWidget({ sellerId }: { sellerId: stri
   // Fetch consent & enabled state
   useEffect(() => {
     if (!sellerId) return;
-    const fetch = async () => {
+    const fetchData = async () => {
       const [profileRes, consentRes] = await Promise.all([
         supabase.from("profiles").select("personal_assistant_enabled, full_name, company_name, email" as any).eq("id", sellerId).single(),
         (supabase as any).from("seller_ai_consents").select("consent_given, consent_at").eq("seller_id", sellerId).eq("consent_type", "personal_assistant").maybeSingle(),
