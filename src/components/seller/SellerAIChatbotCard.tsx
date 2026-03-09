@@ -267,7 +267,7 @@ export default function SellerAIChatbotCard({ sellerId }: Props) {
           <div className="relative z-10 bg-background border-2 border-foreground w-full max-w-lg mx-4 max-h-[70vh] flex flex-col" style={{ boxShadow: "4px 4px 0px hsl(var(--foreground))" }}>
             <div className="flex items-center justify-between p-4 border-b-2 border-foreground shrink-0">
               <h2 className="font-sans font-bold text-base">
-                {readMoreModal === "storefront" ? "AI Storefront Assistant" : "Personal Assistant"}
+                {readMoreModal === "storefront" ? "AI Storefront Assistant" : "Seller AI Assistant"}
               </h2>
               <button onClick={() => setReadMoreModal(null)} className="hover:opacity-70 transition-opacity"><X className="w-4 h-4" /></button>
             </div>
