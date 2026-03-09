@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import SellerDashboardChatWidget from "@/components/chat/SellerDashboardChatWidget";
-import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Search,
