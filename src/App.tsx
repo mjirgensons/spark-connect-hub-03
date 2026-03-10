@@ -138,6 +138,7 @@ const App = () => (
         <AnalyticsTracker />
         <CookieConsent />
         <CompareBar />
+        <GlobalChatWidget />
         <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={isPreview ? <Index /> : <UnderConstruction />} />
