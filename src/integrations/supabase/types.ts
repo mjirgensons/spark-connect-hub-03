@@ -631,6 +631,7 @@ export type Database = {
           buyer_id: string
           buyer_unread_count: number | null
           created_at: string | null
+          escalation_chat_session_id: string | null
           id: string
           last_message_at: string | null
           product_id: string | null
@@ -643,6 +644,7 @@ export type Database = {
           buyer_id: string
           buyer_unread_count?: number | null
           created_at?: string | null
+          escalation_chat_session_id?: string | null
           id?: string
           last_message_at?: string | null
           product_id?: string | null
@@ -655,6 +657,7 @@ export type Database = {
           buyer_id?: string
           buyer_unread_count?: number | null
           created_at?: string | null
+          escalation_chat_session_id?: string | null
           id?: string
           last_message_at?: string | null
           product_id?: string | null
@@ -669,6 +672,13 @@ export type Database = {
             columns: ["buyer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_escalation_chat_session_id_fkey"
+            columns: ["escalation_chat_session_id"]
+            isOneToOne: false
+            referencedRelation: "chat_sessions"
             referencedColumns: ["id"]
           },
           {
