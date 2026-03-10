@@ -81,6 +81,7 @@ export function useChatSession({ sellerId = "", sellerName = "FitMatch", product
           sessionId: sessionIdRef.current,
           chatbot_mode: sellerId ? "buyer_inquiry" : "platform_wide",
           user_role: userRole || (authenticatedUserId ? "registered" : "guest"),
+          buyer_id: authenticatedUserId || null,
           metadata,
         };
         if (sellerId) {

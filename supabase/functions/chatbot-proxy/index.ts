@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
@@ -44,17 +46,37 @@ Deno.serve(async (req) => {
     })
   }
 
+  // Extract authenticated user from JWT (if present)
+  let buyerId: string | null = null;
+  const authHeader = req.headers.get("Authorization");
+  if (authHeader) {
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+      const anonClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: { user } } = await anonClient.auth.getUser();
+      if (user) {
+        buyerId = user.id;
+      }
+    } catch {
+      // Guest user — buyer_id stays null
+    }
+  }
+
   // Debug: log URL construction
   console.log("N8N_WEBHOOK_URL =", n8nBaseUrl)
   console.log("webhookPath =", webhookPath)
 
   // Build the full n8n webhook URL
-  // N8N_WEBHOOK_URL may be "https://x.app.n8n.cloud/webhook/UUID" or just "https://x.app.n8n.cloud"
-  // webhookPath is "/webhook/seller-chatbot", so strip everything from /webhook onward in the base
   const base = n8nBaseUrl.replace(/\/webhook.*$/, '')
   const url = `${base}${webhookPath}`
 
   console.log("chatbot-proxy →", url)
+
+  // Inject buyer_id into the payload forwarded to n8n
+  const forwardPayload = { ...(payload ?? {}), buyer_id: buyerId };
 
   try {
     const n8nRes = await fetch(url, {
@@ -63,7 +85,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
         'x-api-secret': Deno.env.get('N8N_WEBHOOK_SECRET') ?? '',
       },
-      body: JSON.stringify(payload ?? {}),
+      body: JSON.stringify(forwardPayload),
     })
 
     const responseText = await n8nRes.text();
