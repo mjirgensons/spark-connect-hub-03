@@ -12,10 +12,10 @@ import { useVoiceInput } from "./useVoiceInput";
 import VoiceLangSelector, { useVoiceLang } from "./VoiceLangSelector";
 
 interface ChatWidgetProps {
-  sellerId: string;
-  sellerName: string;
-  productId: string;
-  userRole: string;
+  sellerId?: string;
+  sellerName?: string;
+  productId?: string;
+  userRole?: string;
   skipConsent?: boolean;
   chatbotActive?: boolean;
 }
