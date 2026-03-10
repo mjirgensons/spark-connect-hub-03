@@ -9,10 +9,10 @@ export interface ChatMessage {
 }
 
 interface UseChatSessionOptions {
-  sellerId: string;
-  sellerName: string;
-  productId: string;
-  userRole: string;
+  sellerId?: string;
+  sellerName?: string;
+  productId?: string;
+  userRole?: string;
   authenticatedUserId?: string | null;
 }
 
