@@ -1,0 +1,2 @@
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS escalation_chat_session_id uuid REFERENCES public.chat_sessions(id);
+CREATE INDEX IF NOT EXISTS idx_conversations_escalation ON public.conversations(escalation_chat_session_id);
