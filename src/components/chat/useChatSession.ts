@@ -40,15 +40,18 @@ export function useChatSession({ sellerId = "", sellerName = "FitMatch", product
   const showIntro = useCallback(() => {
     if (introShownRef.current) return;
     introShownRef.current = true;
+    const introText = sellerId
+      ? `Hi! I'm the AI Storefront Assistant for ${sellerName}. Ask me anything about this product — dimensions, materials, delivery, or pricing.`
+      : `Hi! I'm the FitMatch AI Assistant. Ask me anything about our products, materials, delivery, or how FitMatch works.`;
     setMessages([
       {
         id: generateId(),
         role: "assistant",
-        content: `Hi! I'm the AI Storefront Assistant for ${sellerName}. Ask me anything about this product — dimensions, materials, delivery, or pricing.`,
+        content: introText,
         timestamp: new Date(),
       },
     ]);
-  }, [sellerName]);
+  }, [sellerName, sellerId]);
 
   const sendMessage = useCallback(
     async (text: string) => {
