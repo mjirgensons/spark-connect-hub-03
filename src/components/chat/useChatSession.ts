@@ -26,8 +26,9 @@ export function useChatSession({ sellerId = "", sellerName = "FitMatch", product
   const [consented, setConsented] = useState(() => sessionStorage.getItem("fitmatch_chat_consent") === "true");
   const sessionIdRef = useRef<string>(generateId());
   const introShownRef = useRef(false);
+  const chatContextKey = sellerId || "platform";
   const [aiResponseCount, setAiResponseCount] = useState<number>(() => {
-    const stored = sessionStorage.getItem(`fitmatch_chat_response_count_${sellerId}`);
+    const stored = sessionStorage.getItem(`fitmatch_chat_response_count_${chatContextKey}`);
     return stored ? parseInt(stored, 10) : 0;
   });
 
