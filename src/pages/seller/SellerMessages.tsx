@@ -92,12 +92,18 @@ const SellerMessages = () => {
     setSending(true);
     try {
       const senderId = adminViewId ? adminViewId : user!.id;
+      const trimmedMessage = messageText.trim();
       const { error: msgErr } = await supabase.from("conversation_messages").insert({
         conversation_id: activeConvId,
         sender_id: senderId,
-        content: messageText.trim(),
+        content: trimmedMessage,
       });
       if (msgErr) throw msgErr;
+
+      // Fire-and-forget notification — don't await, don't block the UI
+      supabase.functions.invoke('notify-conversation-reply', {
+        body: { conversation_id: activeConvId, message_content: trimmedMessage }
+      }).catch(() => {});
 
       await supabase
         .from("conversations")
