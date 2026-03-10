@@ -496,7 +496,7 @@ export default function ChatWidget({ sellerId = "", sellerName = "FitMatch", pro
                     onKeyDown={handleKeyDown}
                     disabled={loading || gateVisible}
                     rows={1}
-                    placeholder="Ask about this product..."
+                    placeholder={sellerId ? "Ask about this product..." : "Ask us anything..."}
                     spellCheck={false}
                     autoCorrect="off"
                     className="flex-1 min-h-[40px] h-[40px] px-3 py-2.5 text-sm leading-5 font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 resize-none overflow-y-auto box-border appearance-none"

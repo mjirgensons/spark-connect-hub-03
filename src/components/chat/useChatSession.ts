@@ -103,7 +103,7 @@ export function useChatSession({ sellerId = "", sellerName = "FitMatch", product
 
         const newCount = aiResponseCount + 1;
         setAiResponseCount(newCount);
-        sessionStorage.setItem(`fitmatch_chat_response_count_${sellerId}`, String(newCount));
+        sessionStorage.setItem(`fitmatch_chat_response_count_${chatContextKey}`, String(newCount));
 
         setMessages((prev) => [
           ...prev,
