@@ -20,7 +20,7 @@ function generateId() {
   return crypto.randomUUID();
 }
 
-export function useChatSession({ sellerId, sellerName, productId, userRole, authenticatedUserId }: UseChatSessionOptions) {
+export function useChatSession({ sellerId = "", sellerName = "FitMatch", productId = "", userRole = "guest", authenticatedUserId }: UseChatSessionOptions) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [consented, setConsented] = useState(() => sessionStorage.getItem("fitmatch_chat_consent") === "true");
