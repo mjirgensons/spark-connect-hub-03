@@ -436,9 +436,9 @@ export default function ChatWidget({ sellerId = "", sellerName = "FitMatch", pro
           {/* Header */}
           <div className="flex items-center justify-between h-12 px-4 bg-foreground text-background shrink-0">
             <div className="flex flex-col min-w-0">
-              <span className="font-bold text-sm font-sans truncate">{sellerName}</span>
+            <span className="font-bold text-sm font-sans truncate">{sellerName || "FitMatch"}</span>
               {chatbotActive ? (
-                <span className="text-xs opacity-60 font-sans">AI Storefront Assistant</span>
+                <span className="text-xs opacity-60 font-sans">{sellerId ? "AI Storefront Assistant" : "AI Assistant"}</span>
               ) : (
                 <span className="text-xs opacity-60 font-sans">AI Storefront Assistant · Offline</span>
               )}
