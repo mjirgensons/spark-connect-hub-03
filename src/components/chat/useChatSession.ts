@@ -76,17 +76,24 @@ export function useChatSession({ sellerId = "", sellerName = "FitMatch", product
           metadata.buyer_id = authenticatedUserId;
         }
 
+        const payload: Record<string, any> = {
+          chatInput: trimmed,
+          sessionId: sessionIdRef.current,
+          chatbot_mode: sellerId ? "buyer_inquiry" : "platform_wide",
+          user_role: userRole || (authenticatedUserId ? "registered" : "guest"),
+          metadata,
+        };
+        if (sellerId) {
+          payload.sellerId = sellerId;
+        }
+        if (productId) {
+          payload.productId = productId;
+        }
+
         const { data, error } = await supabase.functions.invoke("chatbot-proxy", {
           body: {
             webhookPath: "/webhook/seller-chatbot",
-            payload: {
-              chatInput: trimmed,
-              sessionId: sessionIdRef.current,
-              sellerId,
-              productId,
-              user_role: userRole || (authenticatedUserId ? "registered" : "guest"),
-              metadata,
-            },
+            payload,
           },
         });
 
