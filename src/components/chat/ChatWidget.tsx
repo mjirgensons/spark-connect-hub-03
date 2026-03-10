@@ -111,7 +111,7 @@ function InactiveChatBody({ sellerId, productId, productName }: { sellerId: stri
   );
 }
 
-export default function ChatWidget({ sellerId, sellerName, productId, userRole, skipConsent = false, chatbotActive = true }: ChatWidgetProps) {
+export default function ChatWidget({ sellerId = "", sellerName = "FitMatch", productId = "", userRole = "guest", skipConsent = false, chatbotActive = true }: ChatWidgetProps) {
   const [open, setOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
