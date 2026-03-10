@@ -12,10 +12,10 @@ import { useVoiceInput } from "./useVoiceInput";
 import VoiceLangSelector, { useVoiceLang } from "./VoiceLangSelector";
 
 interface ChatWidgetProps {
-  sellerId: string;
-  sellerName: string;
-  productId: string;
-  userRole: string;
+  sellerId?: string;
+  sellerName?: string;
+  productId?: string;
+  userRole?: string;
   skipConsent?: boolean;
   chatbotActive?: boolean;
 }
@@ -111,7 +111,7 @@ function InactiveChatBody({ sellerId, productId, productName }: { sellerId: stri
   );
 }
 
-export default function ChatWidget({ sellerId, sellerName, productId, userRole, skipConsent = false, chatbotActive = true }: ChatWidgetProps) {
+export default function ChatWidget({ sellerId = "", sellerName = "FitMatch", productId = "", userRole = "guest", skipConsent = false, chatbotActive = true }: ChatWidgetProps) {
   const [open, setOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
@@ -436,9 +436,9 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
           {/* Header */}
           <div className="flex items-center justify-between h-12 px-4 bg-foreground text-background shrink-0">
             <div className="flex flex-col min-w-0">
-              <span className="font-bold text-sm font-sans truncate">{sellerName}</span>
+            <span className="font-bold text-sm font-sans truncate">{sellerName || "FitMatch"}</span>
               {chatbotActive ? (
-                <span className="text-xs opacity-60 font-sans">AI Storefront Assistant</span>
+                <span className="text-xs opacity-60 font-sans">{sellerId ? "AI Storefront Assistant" : "AI Assistant"}</span>
               ) : (
                 <span className="text-xs opacity-60 font-sans">AI Storefront Assistant · Offline</span>
               )}
@@ -496,7 +496,7 @@ export default function ChatWidget({ sellerId, sellerName, productId, userRole, 
                     onKeyDown={handleKeyDown}
                     disabled={loading || gateVisible}
                     rows={1}
-                    placeholder="Ask about this product..."
+                    placeholder={sellerId ? "Ask about this product..." : "Ask us anything..."}
                     spellCheck={false}
                     autoCorrect="off"
                     className="flex-1 min-h-[40px] h-[40px] px-3 py-2.5 text-sm leading-5 font-sans bg-background text-foreground border-2 border-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 resize-none overflow-y-auto box-border appearance-none"

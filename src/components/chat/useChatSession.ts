@@ -9,10 +9,10 @@ export interface ChatMessage {
 }
 
 interface UseChatSessionOptions {
-  sellerId: string;
-  sellerName: string;
-  productId: string;
-  userRole: string;
+  sellerId?: string;
+  sellerName?: string;
+  productId?: string;
+  userRole?: string;
   authenticatedUserId?: string | null;
 }
 
@@ -20,14 +20,15 @@ function generateId() {
   return crypto.randomUUID();
 }
 
-export function useChatSession({ sellerId, sellerName, productId, userRole, authenticatedUserId }: UseChatSessionOptions) {
+export function useChatSession({ sellerId = "", sellerName = "FitMatch", productId = "", userRole = "guest", authenticatedUserId }: UseChatSessionOptions) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [consented, setConsented] = useState(() => sessionStorage.getItem("fitmatch_chat_consent") === "true");
   const sessionIdRef = useRef<string>(generateId());
   const introShownRef = useRef(false);
+  const chatContextKey = sellerId || "platform";
   const [aiResponseCount, setAiResponseCount] = useState<number>(() => {
-    const stored = sessionStorage.getItem(`fitmatch_chat_response_count_${sellerId}`);
+    const stored = sessionStorage.getItem(`fitmatch_chat_response_count_${chatContextKey}`);
     return stored ? parseInt(stored, 10) : 0;
   });
 
@@ -39,15 +40,18 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
   const showIntro = useCallback(() => {
     if (introShownRef.current) return;
     introShownRef.current = true;
+    const introText = sellerId
+      ? `Hi! I'm the AI Storefront Assistant for ${sellerName}. Ask me anything about this product — dimensions, materials, delivery, or pricing.`
+      : `Hi! I'm the FitMatch AI Assistant. Ask me anything about our products, materials, delivery, or how FitMatch works.`;
     setMessages([
       {
         id: generateId(),
         role: "assistant",
-        content: `Hi! I'm the AI Storefront Assistant for ${sellerName}. Ask me anything about this product — dimensions, materials, delivery, or pricing.`,
+        content: introText,
         timestamp: new Date(),
       },
     ]);
-  }, [sellerName]);
+  }, [sellerName, sellerId]);
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -72,17 +76,24 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
           metadata.buyer_id = authenticatedUserId;
         }
 
+        const payload: Record<string, any> = {
+          chatInput: trimmed,
+          sessionId: sessionIdRef.current,
+          chatbot_mode: sellerId ? "buyer_inquiry" : "platform_wide",
+          user_role: userRole || (authenticatedUserId ? "registered" : "guest"),
+          metadata,
+        };
+        if (sellerId) {
+          payload.sellerId = sellerId;
+        }
+        if (productId) {
+          payload.productId = productId;
+        }
+
         const { data, error } = await supabase.functions.invoke("chatbot-proxy", {
           body: {
             webhookPath: "/webhook/seller-chatbot",
-            payload: {
-              chatInput: trimmed,
-              sessionId: sessionIdRef.current,
-              sellerId,
-              productId,
-              user_role: userRole || (authenticatedUserId ? "registered" : "guest"),
-              metadata,
-            },
+            payload,
           },
         });
 
@@ -92,7 +103,7 @@ export function useChatSession({ sellerId, sellerName, productId, userRole, auth
 
         const newCount = aiResponseCount + 1;
         setAiResponseCount(newCount);
-        sessionStorage.setItem(`fitmatch_chat_response_count_${sellerId}`, String(newCount));
+        sessionStorage.setItem(`fitmatch_chat_response_count_${chatContextKey}`, String(newCount));
 
         setMessages((prev) => [
           ...prev,

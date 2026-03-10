@@ -14,6 +14,7 @@ import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { CompareProvider } from "./contexts/CompareContext";
 import CompareBar from "./components/CompareBar";
+import GlobalChatWidget from "./components/chat/GlobalChatWidget";
 import Index from "./pages/Index";
 import Product from "./pages/Product";
 import Cart from "./pages/Cart";
@@ -137,6 +138,7 @@ const App = () => (
         <AnalyticsTracker />
         <CookieConsent />
         <CompareBar />
+        <GlobalChatWidget />
         <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={isPreview ? <Index /> : <UnderConstruction />} />
