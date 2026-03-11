@@ -66,6 +66,7 @@ const SellerDashboard = () => {
   const [declinedCount, setDeclinedCount] = useState(0);
   const [dismissedBanner, setDismissedBanner] = useState(false);
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
+  const [msgStats, setMsgStats] = useState<{ total: number; responded: number; avgTime: number | null } | null>(null);
 
   // Stripe Connect state
   const [stripeStatus, setStripeStatus] = useState<{
