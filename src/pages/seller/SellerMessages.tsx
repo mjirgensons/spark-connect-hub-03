@@ -65,7 +65,7 @@ const SellerMessages = () => {
       const { data, error } = await supabase
         .from("conversations")
         .select(
-          "id, subject, last_message_at, seller_unread_count, status, buyer_id, product_id, profiles!conversations_buyer_id_fkey(full_name, email)"
+          "id, subject, last_message_at, seller_unread_count, status, buyer_id, product_id, escalation_chat_session_id, profiles!conversations_buyer_id_fkey(full_name, email)"
         )
         .eq("seller_id", effectiveId!)
         .order("last_message_at", { ascending: false });
