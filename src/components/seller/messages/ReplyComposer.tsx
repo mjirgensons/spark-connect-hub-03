@@ -94,9 +94,11 @@ const ReplyComposer = ({
       const preview = content.length > 150 ? content.slice(0, 150) + "…" : content;
       fetch(WEBHOOK_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-secret": "fitmatch-n8n-secret-2026",
+        },
         body: JSON.stringify({
-          api_secret: "fitmatch-n8n-secret-2026",
           conversation_id: conversationId,
           sender_name: sellerName,
           sender_role: "seller",
