@@ -23,7 +23,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Loader2, Store, MoreVertical, ExternalLink, Package, ShoppingCart, Mail, ShieldCheck, ShieldX, ShieldOff, RotateCcw, Sparkles } from "lucide-react";
+import { Search, Loader2, Store, MoreVertical, ExternalLink, Package, ShoppingCart, Mail, ShieldCheck, ShieldX, ShieldOff, RotateCcw, Sparkles, MessageSquare } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 

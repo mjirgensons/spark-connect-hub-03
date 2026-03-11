@@ -367,6 +367,34 @@ const SellerDashboard = () => {
 
       {sellerId && <SellerHealthCard sellerId={sellerId} />}
 
+      {/* Messaging Stats Card */}
+      {msgStats && msgStats.total > 0 && (
+        <Card className="border-2 border-foreground p-6" style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>
+          <div className="flex items-center gap-2 mb-4">
+            <MessageSquare className="w-5 h-5 text-primary" />
+            <p className="font-sans font-bold text-lg">Messaging Stats</p>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div>
+              <p className="font-mono text-2xl font-bold">{msgStats.total}</p>
+              <p className="text-xs text-muted-foreground">Total Conversations</p>
+            </div>
+            <div>
+              <p className="font-mono text-2xl font-bold">
+                {msgStats.total > 0 ? Math.round((msgStats.responded / msgStats.total) * 100) : 0}%
+              </p>
+              <p className="text-xs text-muted-foreground">Response Rate</p>
+            </div>
+            <div>
+              <p className="font-mono text-2xl font-bold">
+                {msgStats.avgTime != null ? formatDuration(msgStats.avgTime) : "—"}
+              </p>
+              <p className="text-xs text-muted-foreground">Avg Response Time</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <div className="flex flex-wrap gap-3">
         <Button asChild>
           <Link to={addProductUrl}><PlusCircle size={16} className="mr-2" /> Add New Product</Link>
