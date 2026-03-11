@@ -406,6 +406,9 @@ const AdminSellersTab = () => {
                   <span className="text-xs text-muted-foreground">{selectedSeller.auto_approve_products ? "Trusted seller" : "Requires review"}</span>
                 </div>
               </div>
+
+              {/* Messaging Stats */}
+              <SellerMessagingStats sellerId={selectedSeller.id} />
             </>
           )}
         </SheetContent>
