@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DollarSign, CreditCard, ExternalLink, Loader2, CheckCircle2 } from "lucide-react";
+import { DollarSign, CreditCard, ExternalLink, Loader2, CheckCircle2, MessageSquare } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +12,19 @@ import SellerHealthCard from "@/components/seller/SellerHealthCard";
 import SellerAIChatbotCard from "@/components/seller/SellerAIChatbotCard";
 import { toast } from "sonner";
 import Breadcrumbs from "@/components/Breadcrumbs";
+
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
+  if (seconds < 86400) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.round((seconds % 3600) / 60);
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  }
+  const d = Math.floor(seconds / 86400);
+  const h = Math.round((seconds % 86400) / 3600);
+  return h > 0 ? `${d}d ${h}h` : `${d}d`;
+}
 
 interface TopProduct {
   id: string;
@@ -53,6 +66,7 @@ const SellerDashboard = () => {
   const [declinedCount, setDeclinedCount] = useState(0);
   const [dismissedBanner, setDismissedBanner] = useState(false);
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
+  const [msgStats, setMsgStats] = useState<{ total: number; responded: number; avgTime: number | null } | null>(null);
 
   // Stripe Connect state
   const [stripeStatus, setStripeStatus] = useState<{
@@ -210,6 +224,20 @@ const SellerDashboard = () => {
       const { data: cats } = await supabase.from("categories").select("id, name");
       if (cats) setCategories(cats);
 
+      // Messaging stats
+      const { data: convos } = await supabase
+        .from("conversations")
+        .select("id, first_response_at, response_time_seconds")
+        .eq("seller_id", sellerId);
+      if (convos && convos.length > 0) {
+        const responded = convos.filter((c: any) => c.first_response_at != null).length;
+        const times = convos
+          .map((c: any) => c.response_time_seconds)
+          .filter((t: any) => t != null) as number[];
+        const avgTime = times.length > 0 ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : null;
+        setMsgStats({ total: convos.length, responded, avgTime });
+      }
+
       setLoading(false);
     };
     fetchData();
@@ -338,6 +366,34 @@ const SellerDashboard = () => {
       {sellerId && <SellerAIChatbotCard sellerId={sellerId} />}
 
       {sellerId && <SellerHealthCard sellerId={sellerId} />}
+
+      {/* Messaging Stats Card */}
+      {msgStats && msgStats.total > 0 && (
+        <Card className="border-2 border-foreground p-6" style={{ boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>
+          <div className="flex items-center gap-2 mb-4">
+            <MessageSquare className="w-5 h-5 text-primary" />
+            <p className="font-sans font-bold text-lg">Messaging Stats</p>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div>
+              <p className="font-mono text-2xl font-bold">{msgStats.total}</p>
+              <p className="text-xs text-muted-foreground">Total Conversations</p>
+            </div>
+            <div>
+              <p className="font-mono text-2xl font-bold">
+                {msgStats.total > 0 ? Math.round((msgStats.responded / msgStats.total) * 100) : 0}%
+              </p>
+              <p className="text-xs text-muted-foreground">Response Rate</p>
+            </div>
+            <div>
+              <p className="font-mono text-2xl font-bold">
+                {msgStats.avgTime != null ? formatDuration(msgStats.avgTime) : "—"}
+              </p>
+              <p className="text-xs text-muted-foreground">Avg Response Time</p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       <div className="flex flex-wrap gap-3">
         <Button asChild>
