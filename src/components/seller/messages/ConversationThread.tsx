@@ -324,12 +324,15 @@ const ConversationThread = ({
         )}
       </ScrollArea>
 
-      {/* Reply composer placeholder */}
-      <div className="border-t border-border h-20 flex items-center justify-center shrink-0">
-        <p className="text-sm text-muted-foreground">
-          Reply composer coming next
-        </p>
-      </div>
+      <ReplyComposer
+        conversationId={conversationId}
+        sellerId={sellerId}
+        sellerName={sellerName}
+        buyerId={buyerId}
+        buyerName={buyerName}
+        buyerEmail={buyerEmail}
+        conversationStatus={convStatus}
+      />
     </div>
   );
 };
