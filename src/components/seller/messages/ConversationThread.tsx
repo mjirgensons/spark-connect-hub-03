@@ -279,9 +279,9 @@ const ConversationThread = ({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 bg-muted border border-border px-2 py-1 hover:bg-muted/80 transition-colors group"
                   >
-                    {productData.images && Array.isArray(productData.images) && (productData.images as string[])[0] && (
+                    {productData.main_image_url && (
                       <img
-                        src={(productData.images as string[])[0]}
+                        src={productData.main_image_url}
                         alt=""
                         className="w-8 h-8 object-cover border border-border"
                       />
@@ -290,9 +290,9 @@ const ConversationThread = ({
                       <span className="text-[11px] font-medium text-foreground truncate block">
                         {productData.product_name}
                       </span>
-                      {productData.price != null && (
+                      {productData.price_discounted_usd != null && (
                         <span className="text-[10px] text-muted-foreground">
-                          ${Number(productData.price).toLocaleString()}
+                          ${Number(productData.price_discounted_usd).toLocaleString()}
                         </span>
                       )}
                     </div>
