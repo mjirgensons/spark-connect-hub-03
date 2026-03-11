@@ -452,4 +452,52 @@ const DetailRow = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+const SellerMessagingStats = ({ sellerId }: { sellerId: string }) => {
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-seller-msg-stats", sellerId],
+    queryFn: async () => {
+      const { data: convos, error } = await supabase
+        .from("conversations")
+        .select("id, first_response_at, response_time_seconds")
+        .eq("seller_id", sellerId);
+      if (error) throw error;
+      if (!convos || convos.length === 0) return null;
+      const responded = convos.filter((c: any) => c.first_response_at != null).length;
+      const times = convos
+        .map((c: any) => c.response_time_seconds)
+        .filter((t: any) => t != null) as number[];
+      const avgTime = times.length > 0 ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : null;
+      return { total: convos.length, responded, avgTime };
+    },
+  });
+
+  if (isLoading) return <Loader2 className="w-4 h-4 animate-spin text-muted-foreground mx-auto mt-4" />;
+  if (!data) return null;
+
+  const responseRate = data.total > 0 ? Math.round((data.responded / data.total) * 100) : 0;
+
+  return (
+    <div className="mt-6 pt-4 border-t border-border">
+      <div className="flex items-center gap-2 mb-3">
+        <MessageSquare className="w-4 h-4 text-muted-foreground" />
+        <span className="text-sm font-semibold">Messaging Stats</span>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="text-center">
+          <p className="font-mono text-lg font-bold">{data.total}</p>
+          <p className="text-[10px] text-muted-foreground">Conversations</p>
+        </div>
+        <div className="text-center">
+          <p className="font-mono text-lg font-bold">{responseRate}%</p>
+          <p className="text-[10px] text-muted-foreground">Response Rate</p>
+        </div>
+        <div className="text-center">
+          <p className="font-mono text-lg font-bold">{data.avgTime != null ? formatDuration(data.avgTime) : "—"}</p>
+          <p className="text-[10px] text-muted-foreground">Avg Response</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default AdminSellersTab;
