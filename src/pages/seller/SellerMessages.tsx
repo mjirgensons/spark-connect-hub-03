@@ -6,10 +6,21 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { Badge } from "@/components/ui/badge";
 import ConversationList, {
   type ConversationItem,
 } from "@/components/seller/messages/ConversationList";
+import ConversationThread from "@/components/seller/messages/ConversationThread";
+
+interface RawConversation {
+  id: string;
+  subject: string | null;
+  last_message_at: string | null;
+  seller_unread_count: number;
+  status: string | null;
+  buyer_id: string;
+  product_id: string | null;
+  profiles: { full_name: string; email: string } | null;
+}
 
 const SellerMessages = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
@@ -30,7 +41,7 @@ const SellerMessages = () => {
 
   // Fetch conversations with buyer profile and latest message
   const {
-    data: conversations = [],
+    data: rawConversations = { raw: [] as any[], latestMessages: {} as Record<string, string> },
     isLoading: convsLoading,
     isError,
   } = useQuery({
@@ -39,7 +50,7 @@ const SellerMessages = () => {
       const { data, error } = await supabase
         .from("conversations")
         .select(
-          "id, subject, last_message_at, seller_unread_count, status, buyer_id, profiles!conversations_buyer_id_fkey(full_name, email)"
+          "id, subject, last_message_at, seller_unread_count, status, buyer_id, product_id, profiles!conversations_buyer_id_fkey(full_name, email)"
         )
         .eq("seller_id", effectiveId!)
         .order("last_message_at", { ascending: false });
@@ -49,7 +60,6 @@ const SellerMessages = () => {
       const convIds = (data || []).map((c: any) => c.id);
       let latestMessages: Record<string, string> = {};
       if (convIds.length > 0) {
-        // Get latest message per conversation using a single query
         const { data: msgs } = await supabase
           .from("conversation_messages")
           .select("conversation_id, content, created_at")
@@ -57,7 +67,6 @@ const SellerMessages = () => {
           .order("created_at", { ascending: false });
 
         if (msgs) {
-          // Keep only the first (latest) message per conversation
           for (const msg of msgs) {
             if (!latestMessages[msg.conversation_id]) {
               latestMessages[msg.conversation_id] = msg.content;
@@ -66,18 +75,21 @@ const SellerMessages = () => {
         }
       }
 
-      return (data || []).map((conv: any): ConversationItem => ({
-        id: conv.id,
-        buyerName:
-          conv.profiles?.full_name || conv.profiles?.email || "Buyer",
-        subject: conv.subject,
-        lastMessagePreview: latestMessages[conv.id] || null,
-        lastMessageAt: conv.last_message_at,
-        unreadCount: conv.seller_unread_count || 0,
-      }));
+      return { raw: data || [], latestMessages };
     },
     enabled: !!effectiveId,
   });
+
+  const conversations: ConversationItem[] = (rawConversations.raw || []).map(
+    (conv: any): ConversationItem => ({
+      id: conv.id,
+      buyerName: conv.profiles?.full_name || conv.profiles?.email || "Buyer",
+      subject: conv.subject,
+      lastMessagePreview: (rawConversations.latestMessages || {})[conv.id] || null,
+      lastMessageAt: conv.last_message_at,
+      unreadCount: conv.seller_unread_count || 0,
+    })
+  );
 
   // Show error toast
   useEffect(() => {
@@ -129,9 +141,15 @@ const SellerMessages = () => {
   };
 
   const activeConv = conversations.find((c) => c.id === activeConvId);
+  const activeRawConv = rawConversations.raw.find((c: any) => c.id === activeConvId);
   const navBase = adminViewId ? `?adminView=${adminViewId}` : "";
   const showList = !isMobile || !activeConvId;
   const showThread = !isMobile || !!activeConvId;
+
+  const handleBack = () => {
+    setActiveConvId(null);
+    navigate(`/seller/messages${navBase}`, { replace: true });
+  };
 
   return (
     <div className="space-y-4">
@@ -174,22 +192,17 @@ const SellerMessages = () => {
         {/* Right panel — placeholder / selected conversation header */}
         {showThread && (
           <div className="flex-1 flex flex-col bg-background">
-            {activeConvId && activeConv ? (
-              <div className="flex-1 flex flex-col">
-                <div className="px-6 py-4 border-b border-border">
-                  <h3 className="font-sans font-semibold text-sm">
-                    {activeConv.buyerName}
-                  </h3>
-                  {activeConv.subject && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {activeConv.subject}
-                    </p>
-                  )}
-                </div>
-                <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
-                  Thread view coming soon
-                </div>
-              </div>
+            {activeConvId && activeConv && activeRawConv ? (
+              <ConversationThread
+                conversationId={activeConvId}
+                sellerId={effectiveId!}
+                buyerName={activeConv.buyerName}
+                subject={activeConv.subject}
+                productId={activeRawConv.product_id}
+                status={activeRawConv.status}
+                isMobile={isMobile}
+                onBack={handleBack}
+              />
             ) : (
               <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
                 Select a conversation to start chatting
