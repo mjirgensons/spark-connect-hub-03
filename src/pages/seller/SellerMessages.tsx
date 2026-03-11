@@ -6,10 +6,21 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { Badge } from "@/components/ui/badge";
 import ConversationList, {
   type ConversationItem,
 } from "@/components/seller/messages/ConversationList";
+import ConversationThread from "@/components/seller/messages/ConversationThread";
+
+interface RawConversation {
+  id: string;
+  subject: string | null;
+  last_message_at: string | null;
+  seller_unread_count: number;
+  status: string | null;
+  buyer_id: string;
+  product_id: string | null;
+  profiles: { full_name: string; email: string } | null;
+}
 
 const SellerMessages = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
