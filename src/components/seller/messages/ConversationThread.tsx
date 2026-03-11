@@ -83,7 +83,7 @@ const ConversationThread = ({
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("product_name, price, images")
+        .select("product_name, price_discounted_usd, main_image_url")
         .eq("id", productId!)
         .single();
       return data;
