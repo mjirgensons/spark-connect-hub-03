@@ -6,7 +6,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, MessageSquare } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, MessageSquare, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import MessagesSkeleton from "./MessagesSkeleton";
@@ -22,6 +24,7 @@ interface ConversationThreadProps {
   subject: string | null;
   productId: string | null;
   status: string | null;
+  escalationChatSessionId: string | null;
   isMobile: boolean;
   onBack: () => void;
 }
@@ -59,6 +62,7 @@ const ConversationThread = ({
   subject,
   productId,
   status,
+  escalationChatSessionId,
   isMobile,
   onBack,
 }: ConversationThreadProps) => {
@@ -66,25 +70,48 @@ const ConversationThread = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [convStatus, setConvStatus] = useState(status);
   const [togglingStatus, setTogglingStatus] = useState(false);
+  const [escalationOpen, setEscalationOpen] = useState(false);
 
   // Sync status from props
   useEffect(() => {
     setConvStatus(status);
   }, [status]);
 
-  // Fetch product name if product_id exists
-  const { data: productName } = useQuery({
+  // Fetch product details if product_id exists
+  const { data: productData, isLoading: productLoading } = useQuery({
     queryKey: ["conv-product", productId],
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("product_name")
+        .select("product_name, price, images")
         .eq("id", productId!)
         .single();
-      return data?.product_name || null;
+      return data;
     },
     enabled: !!productId,
     staleTime: Infinity,
+  });
+
+  // Fetch escalation chat messages when section is opened
+  const { data: escalationMessages = [], isLoading: escalationLoading } = useQuery({
+    queryKey: ["escalation-chat", escalationChatSessionId],
+    queryFn: async () => {
+      // First get the session to find the session_id string
+      const { data: session } = await supabase
+        .from("chat_sessions")
+        .select("session_id")
+        .eq("id", escalationChatSessionId!)
+        .single();
+      if (!session) return [];
+      const { data, error } = await supabase
+        .from("chat_messages")
+        .select("id, message_type, content, created_at")
+        .eq("session_id", session.session_id)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!escalationChatSessionId && escalationOpen,
   });
 
   // Fetch messages
