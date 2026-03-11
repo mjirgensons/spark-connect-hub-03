@@ -192,22 +192,17 @@ const SellerMessages = () => {
         {/* Right panel — placeholder / selected conversation header */}
         {showThread && (
           <div className="flex-1 flex flex-col bg-background">
-            {activeConvId && activeConv ? (
-              <div className="flex-1 flex flex-col">
-                <div className="px-6 py-4 border-b border-border">
-                  <h3 className="font-sans font-semibold text-sm">
-                    {activeConv.buyerName}
-                  </h3>
-                  {activeConv.subject && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {activeConv.subject}
-                    </p>
-                  )}
-                </div>
-                <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
-                  Thread view coming soon
-                </div>
-              </div>
+            {activeConvId && activeConv && activeRawConv ? (
+              <ConversationThread
+                conversationId={activeConvId}
+                sellerId={effectiveId!}
+                buyerName={activeConv.buyerName}
+                subject={activeConv.subject}
+                productId={activeRawConv.product_id}
+                status={activeRawConv.status}
+                isMobile={isMobile}
+                onBack={handleBack}
+              />
             ) : (
               <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
                 Select a conversation to start chatting
