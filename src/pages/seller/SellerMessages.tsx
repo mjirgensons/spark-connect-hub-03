@@ -41,7 +41,7 @@ const SellerMessages = () => {
 
   // Fetch conversations with buyer profile and latest message
   const {
-    data: rawConversations = [],
+    data: rawConversations = { raw: [] as any[], latestMessages: {} as Record<string, string> },
     isLoading: convsLoading,
     isError,
   } = useQuery({
