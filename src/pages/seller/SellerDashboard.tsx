@@ -224,6 +224,20 @@ const SellerDashboard = () => {
       const { data: cats } = await supabase.from("categories").select("id, name");
       if (cats) setCategories(cats);
 
+      // Messaging stats
+      const { data: convos } = await supabase
+        .from("conversations")
+        .select("id, first_response_at, response_time_seconds")
+        .eq("seller_id", sellerId);
+      if (convos && convos.length > 0) {
+        const responded = convos.filter((c: any) => c.first_response_at != null).length;
+        const times = convos
+          .map((c: any) => c.response_time_seconds)
+          .filter((t: any) => t != null) as number[];
+        const avgTime = times.length > 0 ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : null;
+        setMsgStats({ total: convos.length, responded, avgTime });
+      }
+
       setLoading(false);
     };
     fetchData();

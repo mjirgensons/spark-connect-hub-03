@@ -71,11 +71,19 @@ const ReplyComposer = ({
       // Use RPC-style increment via raw update
       const { data: convData } = await supabase
         .from("conversations")
-        .select("buyer_unread_count")
+        .select("buyer_unread_count, first_response_at, created_at")
         .eq("id", conversationId)
         .single();
 
       updates.buyer_unread_count = ((convData?.buyer_unread_count as number) || 0) + 1;
+
+      // Track first response time
+      if (convData && !(convData as any).first_response_at) {
+        const now = new Date();
+        updates.first_response_at = now.toISOString();
+        const createdAt = new Date(convData.created_at as string);
+        updates.response_time_seconds = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+      }
 
       await supabase
         .from("conversations")
