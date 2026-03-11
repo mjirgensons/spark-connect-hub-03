@@ -218,6 +218,7 @@ const SellerMessages = () => {
                 subject={activeConv.subject}
                 productId={activeRawConv.product_id}
                 status={activeRawConv.status}
+                escalationChatSessionId={activeRawConv.escalation_chat_session_id || null}
                 isMobile={isMobile}
                 onBack={handleBack}
               />
