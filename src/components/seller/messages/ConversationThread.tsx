@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
@@ -10,11 +10,15 @@ import { ArrowLeft, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import MessagesSkeleton from "./MessagesSkeleton";
+import ReplyComposer from "./ReplyComposer";
 
 interface ConversationThreadProps {
   conversationId: string;
   sellerId: string;
+  sellerName: string;
   buyerName: string;
+  buyerId: string;
+  buyerEmail: string;
   subject: string | null;
   productId: string | null;
   status: string | null;
