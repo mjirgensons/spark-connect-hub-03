@@ -35,9 +35,20 @@ const SellerMessages = () => {
     conversationId || null
   );
 
-  useEffect(() => {
-    if (conversationId) setActiveConvId(conversationId);
-  }, [conversationId]);
+  // Fetch seller profile for name
+  const { data: sellerProfile } = useQuery({
+    queryKey: ["seller-profile", effectiveId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", effectiveId!)
+        .single();
+      return data;
+    },
+    enabled: !!effectiveId,
+    staleTime: Infinity,
+  });
 
   // Fetch conversations with buyer profile and latest message
   const {
