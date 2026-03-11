@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DollarSign, CreditCard, ExternalLink, Loader2, CheckCircle2 } from "lucide-react";
+import { DollarSign, CreditCard, ExternalLink, Loader2, CheckCircle2, MessageSquare } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +12,19 @@ import SellerHealthCard from "@/components/seller/SellerHealthCard";
 import SellerAIChatbotCard from "@/components/seller/SellerAIChatbotCard";
 import { toast } from "sonner";
 import Breadcrumbs from "@/components/Breadcrumbs";
+
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
+  if (seconds < 86400) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.round((seconds % 3600) / 60);
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  }
+  const d = Math.floor(seconds / 86400);
+  const h = Math.round((seconds % 86400) / 3600);
+  return h > 0 ? `${d}d ${h}h` : `${d}d`;
+}
 
 interface TopProduct {
   id: string;
