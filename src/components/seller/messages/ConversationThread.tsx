@@ -6,7 +6,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, MessageSquare } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, MessageSquare, ChevronDown, ExternalLink, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import MessagesSkeleton from "./MessagesSkeleton";
@@ -22,6 +24,7 @@ interface ConversationThreadProps {
   subject: string | null;
   productId: string | null;
   status: string | null;
+  escalationChatSessionId: string | null;
   isMobile: boolean;
   onBack: () => void;
 }
@@ -59,6 +62,7 @@ const ConversationThread = ({
   subject,
   productId,
   status,
+  escalationChatSessionId,
   isMobile,
   onBack,
 }: ConversationThreadProps) => {
@@ -66,25 +70,48 @@ const ConversationThread = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [convStatus, setConvStatus] = useState(status);
   const [togglingStatus, setTogglingStatus] = useState(false);
+  const [escalationOpen, setEscalationOpen] = useState(false);
 
   // Sync status from props
   useEffect(() => {
     setConvStatus(status);
   }, [status]);
 
-  // Fetch product name if product_id exists
-  const { data: productName } = useQuery({
+  // Fetch product details if product_id exists
+  const { data: productData, isLoading: productLoading } = useQuery({
     queryKey: ["conv-product", productId],
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("product_name")
+        .select("product_name, price_discounted_usd, main_image_url")
         .eq("id", productId!)
         .single();
-      return data?.product_name || null;
+      return data;
     },
     enabled: !!productId,
     staleTime: Infinity,
+  });
+
+  // Fetch escalation chat messages when section is opened
+  const { data: escalationMessages = [], isLoading: escalationLoading } = useQuery({
+    queryKey: ["escalation-chat", escalationChatSessionId],
+    queryFn: async () => {
+      // First get the session to find the session_id string
+      const { data: session } = await supabase
+        .from("chat_sessions")
+        .select("session_id")
+        .eq("id", escalationChatSessionId!)
+        .single();
+      if (!session) return [];
+      const { data, error } = await supabase
+        .from("chat_messages")
+        .select("id, message_type, content, created_at")
+        .eq("session_id", session.session_id)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!escalationChatSessionId && escalationOpen,
   });
 
   // Fetch messages
@@ -198,56 +225,125 @@ const ConversationThread = ({
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-border flex items-start gap-3 shrink-0">
-        {isMobile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="shrink-0 mt-0.5"
-            onClick={onBack}
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-        )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="font-sans font-semibold text-sm truncate">
-              {buyerName}
-            </h3>
-            <Badge
-              variant={statusVariant}
-              className={cn(
-                "text-[10px] shrink-0",
-                convStatus === "escalated"
-                  ? "border-amber-500 text-amber-600"
-                  : isResolved
-                  ? "border-muted-foreground text-muted-foreground"
-                  : "border-green-500 text-green-600"
-              )}
+      <div className="px-4 py-3 border-b border-border shrink-0">
+        <div className="flex items-start gap-3">
+          {isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0 mt-0.5"
+              onClick={onBack}
             >
-              {statusLabel}
-            </Badge>
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-sans font-semibold text-sm truncate">
+                {buyerName}
+              </h3>
+              <Badge
+                variant={statusVariant}
+                className={cn(
+                  "text-[10px] shrink-0",
+                  convStatus === "escalated"
+                    ? "border-amber-500 text-amber-600"
+                    : isResolved
+                    ? "border-muted-foreground text-muted-foreground"
+                    : "border-green-500 text-green-600"
+                )}
+              >
+                {statusLabel}
+              </Badge>
+            </div>
+            {buyerEmail && (
+              <p className="text-[11px] text-muted-foreground truncate">
+                {buyerEmail}
+              </p>
+            )}
+            {subject && (
+              <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                {subject}
+              </p>
+            )}
+
+            {/* Product context */}
+            {productId && (
+              <div className="mt-1.5">
+                {productLoading ? (
+                  <Skeleton className="h-8 w-48" />
+                ) : productData ? (
+                  <a
+                    href={`/products/${productId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-muted border border-border px-2 py-1 hover:bg-muted/80 transition-colors group"
+                  >
+                    {productData.main_image_url && (
+                      <img
+                        src={productData.main_image_url}
+                        alt=""
+                        className="w-8 h-8 object-cover border border-border"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <span className="text-[11px] font-medium text-foreground truncate block">
+                        {productData.product_name}
+                      </span>
+                      {productData.price_discounted_usd != null && (
+                        <span className="text-[10px] text-muted-foreground">
+                          ${Number(productData.price_discounted_usd).toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                    <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                  </a>
+                ) : null}
+              </div>
+            )}
           </div>
-          {subject && (
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">
-              {subject}
-            </p>
-          )}
-          {productName && (
-            <span className="inline-block mt-1 text-[11px] bg-muted text-muted-foreground px-2 py-0.5 border border-border">
-              {productName}
-            </span>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0 text-xs"
+            disabled={togglingStatus}
+            onClick={handleToggleStatus}
+          >
+            {isResolved ? "Reopen" : "Mark as Resolved"}
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="shrink-0 text-xs"
-          disabled={togglingStatus}
-          onClick={handleToggleStatus}
-        >
-          {isResolved ? "Reopen" : "Mark as Resolved"}
-        </Button>
+
+        {/* Escalation context */}
+        {escalationChatSessionId && (
+          <Collapsible open={escalationOpen} onOpenChange={setEscalationOpen} className="mt-2">
+            <CollapsibleTrigger asChild>
+              <button className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors">
+                <ChevronDown className={cn("w-3 h-3 transition-transform", escalationOpen && "rotate-180")} />
+                View original chatbot conversation
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-2 border border-border bg-muted/50 p-3 max-h-48 overflow-y-auto space-y-2">
+                {escalationLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                  </div>
+                ) : escalationMessages.length === 0 ? (
+                  <p className="text-[11px] text-muted-foreground text-center">No chatbot messages found</p>
+                ) : (
+                  escalationMessages.map((msg: any) => (
+                    <div key={msg.id} className="text-[11px]">
+                      <span className="font-semibold text-foreground">
+                        {msg.message_type === "user" ? "Buyer" : "AI Assistant"}:
+                      </span>{" "}
+                      <span className="text-muted-foreground">{msg.content}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
       </div>
 
       {/* Messages */}
