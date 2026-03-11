@@ -141,9 +141,15 @@ const SellerMessages = () => {
   };
 
   const activeConv = conversations.find((c) => c.id === activeConvId);
+  const activeRawConv = rawConversations.raw.find((c: any) => c.id === activeConvId);
   const navBase = adminViewId ? `?adminView=${adminViewId}` : "";
   const showList = !isMobile || !activeConvId;
   const showThread = !isMobile || !!activeConvId;
+
+  const handleBack = () => {
+    setActiveConvId(null);
+    navigate(`/seller/messages${navBase}`, { replace: true });
+  };
 
   return (
     <div className="space-y-4">
