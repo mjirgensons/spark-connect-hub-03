@@ -41,7 +41,7 @@ const SellerMessages = () => {
 
   // Fetch conversations with buyer profile and latest message
   const {
-    data: conversations = [],
+    data: rawConversations = [],
     isLoading: convsLoading,
     isError,
   } = useQuery({
@@ -50,7 +50,7 @@ const SellerMessages = () => {
       const { data, error } = await supabase
         .from("conversations")
         .select(
-          "id, subject, last_message_at, seller_unread_count, status, buyer_id, profiles!conversations_buyer_id_fkey(full_name, email)"
+          "id, subject, last_message_at, seller_unread_count, status, buyer_id, product_id, profiles!conversations_buyer_id_fkey(full_name, email)"
         )
         .eq("seller_id", effectiveId!)
         .order("last_message_at", { ascending: false });
@@ -60,7 +60,6 @@ const SellerMessages = () => {
       const convIds = (data || []).map((c: any) => c.id);
       let latestMessages: Record<string, string> = {};
       if (convIds.length > 0) {
-        // Get latest message per conversation using a single query
         const { data: msgs } = await supabase
           .from("conversation_messages")
           .select("conversation_id, content, created_at")
@@ -68,7 +67,6 @@ const SellerMessages = () => {
           .order("created_at", { ascending: false });
 
         if (msgs) {
-          // Keep only the first (latest) message per conversation
           for (const msg of msgs) {
             if (!latestMessages[msg.conversation_id]) {
               latestMessages[msg.conversation_id] = msg.content;
@@ -77,18 +75,21 @@ const SellerMessages = () => {
         }
       }
 
-      return (data || []).map((conv: any): ConversationItem => ({
-        id: conv.id,
-        buyerName:
-          conv.profiles?.full_name || conv.profiles?.email || "Buyer",
-        subject: conv.subject,
-        lastMessagePreview: latestMessages[conv.id] || null,
-        lastMessageAt: conv.last_message_at,
-        unreadCount: conv.seller_unread_count || 0,
-      }));
+      return { raw: data || [], latestMessages };
     },
     enabled: !!effectiveId,
   });
+
+  const conversations: ConversationItem[] = (rawConversations.raw || []).map(
+    (conv: any): ConversationItem => ({
+      id: conv.id,
+      buyerName: conv.profiles?.full_name || conv.profiles?.email || "Buyer",
+      subject: conv.subject,
+      lastMessagePreview: (rawConversations.latestMessages || {})[conv.id] || null,
+      lastMessageAt: conv.last_message_at,
+      unreadCount: conv.seller_unread_count || 0,
+    })
+  );
 
   // Show error toast
   useEffect(() => {
