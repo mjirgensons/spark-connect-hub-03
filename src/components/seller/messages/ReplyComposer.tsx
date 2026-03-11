@@ -129,7 +129,7 @@ const ReplyComposer = ({
   };
 
   return (
-    <div className="border-t border-border p-3 bg-background shrink-0">
+    <div className="border-t border-border p-3 pr-[70px] bg-background shrink-0">
       <div className="flex gap-2 items-end">
         <Textarea
           ref={textareaRef}
