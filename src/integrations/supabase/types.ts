@@ -632,9 +632,11 @@ export type Database = {
           buyer_unread_count: number | null
           created_at: string | null
           escalation_chat_session_id: string | null
+          first_response_at: string | null
           id: string
           last_message_at: string | null
           product_id: string | null
+          response_time_seconds: number | null
           seller_id: string
           seller_unread_count: number | null
           status: string | null
@@ -645,9 +647,11 @@ export type Database = {
           buyer_unread_count?: number | null
           created_at?: string | null
           escalation_chat_session_id?: string | null
+          first_response_at?: string | null
           id?: string
           last_message_at?: string | null
           product_id?: string | null
+          response_time_seconds?: number | null
           seller_id: string
           seller_unread_count?: number | null
           status?: string | null
@@ -658,9 +662,11 @@ export type Database = {
           buyer_unread_count?: number | null
           created_at?: string | null
           escalation_chat_session_id?: string | null
+          first_response_at?: string | null
           id?: string
           last_message_at?: string | null
           product_id?: string | null
+          response_time_seconds?: number | null
           seller_id?: string
           seller_unread_count?: number | null
           status?: string | null
