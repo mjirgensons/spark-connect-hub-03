@@ -52,7 +52,10 @@ function formatDateDivider(dateStr: string): string {
 const ConversationThread = ({
   conversationId,
   sellerId,
+  sellerName,
   buyerName,
+  buyerId,
+  buyerEmail,
   subject,
   productId,
   status,
@@ -61,6 +64,13 @@ const ConversationThread = ({
 }: ConversationThreadProps) => {
   const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [convStatus, setConvStatus] = useState(status);
+  const [togglingStatus, setTogglingStatus] = useState(false);
+
+  // Sync status from props
+  useEffect(() => {
+    setConvStatus(status);
+  }, [status]);
 
   // Fetch product name if product_id exists
   const { data: productName } = useQuery({
