@@ -173,8 +173,27 @@ const ConversationThread = ({
     }
   }
 
-  const statusLabel = status === "escalated" ? "Escalated" : "Active";
-  const statusVariant = status === "escalated" ? "outline" : "secondary";
+  const isResolved = convStatus === "resolved";
+  const statusLabel = convStatus === "escalated" ? "Escalated" : isResolved ? "Resolved" : "Active";
+  const statusVariant = convStatus === "escalated" ? "outline" : "secondary";
+
+  const handleToggleStatus = async () => {
+    const newStatus = isResolved ? "active" : "resolved";
+    setTogglingStatus(true);
+    try {
+      const { error } = await supabase
+        .from("conversations")
+        .update({ status: newStatus })
+        .eq("id", conversationId);
+      if (error) throw error;
+      setConvStatus(newStatus);
+      queryClient.invalidateQueries({ queryKey: ["seller-conversations"] });
+    } catch {
+      toast.error("Failed to update conversation status");
+    } finally {
+      setTogglingStatus(false);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full">
