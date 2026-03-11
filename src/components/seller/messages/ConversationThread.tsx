@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
@@ -10,11 +10,15 @@ import { ArrowLeft, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import MessagesSkeleton from "./MessagesSkeleton";
+import ReplyComposer from "./ReplyComposer";
 
 interface ConversationThreadProps {
   conversationId: string;
   sellerId: string;
+  sellerName: string;
   buyerName: string;
+  buyerId: string;
+  buyerEmail: string;
   subject: string | null;
   productId: string | null;
   status: string | null;
@@ -48,7 +52,10 @@ function formatDateDivider(dateStr: string): string {
 const ConversationThread = ({
   conversationId,
   sellerId,
+  sellerName,
   buyerName,
+  buyerId,
+  buyerEmail,
   subject,
   productId,
   status,
@@ -57,6 +64,13 @@ const ConversationThread = ({
 }: ConversationThreadProps) => {
   const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [convStatus, setConvStatus] = useState(status);
+  const [togglingStatus, setTogglingStatus] = useState(false);
+
+  // Sync status from props
+  useEffect(() => {
+    setConvStatus(status);
+  }, [status]);
 
   // Fetch product name if product_id exists
   const { data: productName } = useQuery({
@@ -159,8 +173,27 @@ const ConversationThread = ({
     }
   }
 
-  const statusLabel = status === "escalated" ? "Escalated" : "Active";
-  const statusVariant = status === "escalated" ? "outline" : "secondary";
+  const isResolved = convStatus === "resolved";
+  const statusLabel = convStatus === "escalated" ? "Escalated" : isResolved ? "Resolved" : "Active";
+  const statusVariant = convStatus === "escalated" ? "outline" : "secondary";
+
+  const handleToggleStatus = async () => {
+    const newStatus = isResolved ? "active" : "resolved";
+    setTogglingStatus(true);
+    try {
+      const { error } = await supabase
+        .from("conversations")
+        .update({ status: newStatus })
+        .eq("id", conversationId);
+      if (error) throw error;
+      setConvStatus(newStatus);
+      queryClient.invalidateQueries({ queryKey: ["seller-conversations"] });
+    } catch {
+      toast.error("Failed to update conversation status");
+    } finally {
+      setTogglingStatus(false);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full">
@@ -185,8 +218,10 @@ const ConversationThread = ({
               variant={statusVariant}
               className={cn(
                 "text-[10px] shrink-0",
-                status === "escalated"
+                convStatus === "escalated"
                   ? "border-amber-500 text-amber-600"
+                  : isResolved
+                  ? "border-muted-foreground text-muted-foreground"
                   : "border-green-500 text-green-600"
               )}
             >
@@ -204,6 +239,15 @@ const ConversationThread = ({
             </span>
           )}
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="shrink-0 text-xs"
+          disabled={togglingStatus}
+          onClick={handleToggleStatus}
+        >
+          {isResolved ? "Reopen" : "Mark as Resolved"}
+        </Button>
       </div>
 
       {/* Messages */}
@@ -280,12 +324,15 @@ const ConversationThread = ({
         )}
       </ScrollArea>
 
-      {/* Reply composer placeholder */}
-      <div className="border-t border-border h-20 flex items-center justify-center shrink-0">
-        <p className="text-sm text-muted-foreground">
-          Reply composer coming next
-        </p>
-      </div>
+      <ReplyComposer
+        conversationId={conversationId}
+        sellerId={sellerId}
+        sellerName={sellerName}
+        buyerId={buyerId}
+        buyerName={buyerName}
+        buyerEmail={buyerEmail}
+        conversationStatus={convStatus}
+      />
     </div>
   );
 };

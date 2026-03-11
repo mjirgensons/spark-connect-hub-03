@@ -39,6 +39,21 @@ const SellerMessages = () => {
     if (conversationId) setActiveConvId(conversationId);
   }, [conversationId]);
 
+  // Fetch seller profile for name
+  const { data: sellerProfile } = useQuery({
+    queryKey: ["seller-profile", effectiveId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", effectiveId!)
+        .single();
+      return data;
+    },
+    enabled: !!effectiveId,
+    staleTime: Infinity,
+  });
+
   // Fetch conversations with buyer profile and latest message
   const {
     data: rawConversations = { raw: [] as any[], latestMessages: {} as Record<string, string> },
@@ -196,7 +211,10 @@ const SellerMessages = () => {
               <ConversationThread
                 conversationId={activeConvId}
                 sellerId={effectiveId!}
+                sellerName={sellerProfile?.full_name || "Seller"}
                 buyerName={activeConv.buyerName}
+                buyerId={activeRawConv.buyer_id}
+                buyerEmail={activeRawConv.profiles?.email || ""}
                 subject={activeConv.subject}
                 productId={activeRawConv.product_id}
                 status={activeRawConv.status}
