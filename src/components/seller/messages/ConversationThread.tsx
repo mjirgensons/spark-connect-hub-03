@@ -218,8 +218,10 @@ const ConversationThread = ({
               variant={statusVariant}
               className={cn(
                 "text-[10px] shrink-0",
-                status === "escalated"
+                convStatus === "escalated"
                   ? "border-amber-500 text-amber-600"
+                  : isResolved
+                  ? "border-muted-foreground text-muted-foreground"
                   : "border-green-500 text-green-600"
               )}
             >
@@ -237,6 +239,15 @@ const ConversationThread = ({
             </span>
           )}
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="shrink-0 text-xs"
+          disabled={togglingStatus}
+          onClick={handleToggleStatus}
+        >
+          {isResolved ? "Reopen" : "Mark as Resolved"}
+        </Button>
       </div>
 
       {/* Messages */}
