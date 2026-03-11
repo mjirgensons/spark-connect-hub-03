@@ -35,6 +35,10 @@ const SellerMessages = () => {
     conversationId || null
   );
 
+  useEffect(() => {
+    if (conversationId) setActiveConvId(conversationId);
+  }, [conversationId]);
+
   // Fetch seller profile for name
   const { data: sellerProfile } = useQuery({
     queryKey: ["seller-profile", effectiveId],
