@@ -207,7 +207,10 @@ const SellerMessages = () => {
               <ConversationThread
                 conversationId={activeConvId}
                 sellerId={effectiveId!}
+                sellerName={sellerProfile?.full_name || "Seller"}
                 buyerName={activeConv.buyerName}
+                buyerId={activeRawConv.buyer_id}
+                buyerEmail={activeRawConv.profiles?.email || ""}
                 subject={activeConv.subject}
                 productId={activeRawConv.product_id}
                 status={activeRawConv.status}
