@@ -52,16 +52,21 @@ Deno.serve(async (req) => {
     );
   }
 
-  if (!orders || orders.length === 0) {
+  // Filter out orphan orders (both user_id and seller_id are null)
+  const validOrders = (orders ?? []).filter(
+    (o: any) => o.user_id !== null || o.seller_id !== null
+  );
+
+  if (validOrders.length === 0) {
     return new Response(
       JSON.stringify({ success: true, data: [] }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 
-  const orderIds = orders.map((o: any) => o.id);
-  const buyerIds = [...new Set(orders.map((o: any) => o.user_id).filter(Boolean))];
-  const sellerIds = [...new Set(orders.map((o: any) => o.seller_id).filter(Boolean))];
+  const orderIds = validOrders.map((o: any) => o.id);
+  const buyerIds = [...new Set(validOrders.map((o: any) => o.user_id).filter(Boolean))];
+  const sellerIds = [...new Set(validOrders.map((o: any) => o.seller_id).filter(Boolean))];
 
   // 2-4. Parallel fetches for order_items, buyer profiles, seller profiles
   const [itemsRes, buyersRes, sellersRes] = await Promise.all([
@@ -99,9 +104,11 @@ Deno.serve(async (req) => {
   }
 
   // 5. Assemble result
-  const result = orders.map((o: any) => ({
+  const result = validOrders.map((o: any) => ({
     id: o.id,
     order_number: o.order_number,
+    user_id: o.user_id,
+    seller_id: o.seller_id,
     status: o.status,
     subtotal: o.subtotal,
     shipping_cost: o.shipping_cost,
@@ -122,8 +129,6 @@ Deno.serve(async (req) => {
     shipped_at: o.shipped_at,
     delivered_at: o.delivered_at,
     delivery_confirmed_at: o.delivery_confirmed_at,
-    seller_id: o.seller_id,
-    buyer_id: o.user_id,
     buyer_name: o.user_id ? (buyerMap[o.user_id] ?? null) : null,
     seller_business_name: o.seller_id ? (sellerMap[o.seller_id]?.company_name ?? null) : null,
     seller_business_address: o.seller_id ? (sellerMap[o.seller_id]?.business_address ?? null) : null,
