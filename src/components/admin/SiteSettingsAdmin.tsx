@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Save } from "lucide-react";
+import { Save, Bell } from "lucide-react";
 
 interface SiteSetting {
   id: string;
@@ -122,6 +123,11 @@ const SiteSettingsAdmin = () => {
         </div>
       ))}
 
+      <MessageNotificationSettings
+        settings={settings}
+        onSaved={fetchSettings}
+      />
+
       {ungrouped.length > 0 && (
         <div>
           <h3 className="text-lg font-bold font-sans mb-4">Other Settings</h3>
@@ -186,6 +192,95 @@ const SettingCard = ({
         />
       </CardContent>
     </Card>
+  );
+};
+
+const THROTTLE_FIELDS = [
+  {
+    key: "message_notification_cooldown_minutes",
+    label: "Notification Cooldown (minutes)",
+    helper: "Wait time before sending another notification to the same recipient. 0 = no cooldown.",
+  },
+  {
+    key: "message_notification_daily_limit",
+    label: "Daily Notification Limit",
+    helper: "Max notification emails per recipient per 24 hours. 0 = unlimited.",
+  },
+  {
+    key: "message_send_rate_limit_per_minute",
+    label: "Sender Rate Limit (per minute)",
+    helper: "Max messages from one sender per minute before notifications stop. 0 = unlimited.",
+  },
+];
+
+const MessageNotificationSettings = ({
+  settings,
+  onSaved,
+}: {
+  settings: SiteSetting[];
+  onSaved: () => void;
+}) => {
+  const { toast } = useToast();
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const v: Record<string, string> = {};
+    for (const f of THROTTLE_FIELDS) {
+      const s = settings.find((s) => s.key === f.key);
+      v[f.key] = s?.value ?? "0";
+    }
+    setValues(v);
+  }, [settings]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    for (const f of THROTTLE_FIELDS) {
+      const setting = settings.find((s) => s.key === f.key);
+      if (!setting) continue;
+      if (values[f.key] === setting.value) continue;
+      const { error } = await supabase
+        .from("site_settings")
+        .update({ value: values[f.key] } as any)
+        .eq("id", setting.id);
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+        setSaving(false);
+        return;
+      }
+    }
+    setSaving(false);
+    toast({ title: "Message notification settings saved" });
+    onSaved();
+  };
+
+  return (
+    <div>
+      <h3 className="text-lg font-bold font-sans mb-4 flex items-center gap-2">
+        <Bell className="w-5 h-5" /> Message Notifications
+      </h3>
+      <Card className="border-2">
+        <CardContent className="p-4 space-y-5">
+          {THROTTLE_FIELDS.map((f) => (
+            <div key={f.key} className="space-y-1">
+              <Label className="font-sans text-sm font-medium">{f.label}</Label>
+              <Input
+                type="number"
+                min={0}
+                value={values[f.key] ?? "0"}
+                onChange={(e) => setValues((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                className="max-w-[200px] font-mono"
+              />
+              <p className="text-xs text-muted-foreground">{f.helper}</p>
+            </div>
+          ))}
+          <Button onClick={handleSave} disabled={saving} className="mt-2">
+            <Save className="w-3.5 h-3.5 mr-1" />
+            {saving ? "Saving…" : "Save"}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
