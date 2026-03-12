@@ -407,6 +407,31 @@ const AdminOrdersTab = () => {
                         {o.status}
                       </Badge>
                     </TableCell>
+                    <TableCell className="py-2 px-3 text-center">
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span
+                              className={`inline-block w-2 h-2 rounded-full ${
+                                o.pinecone_synced ? "bg-green-500" : "bg-muted-foreground/40"
+                              }`}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="text-xs">
+                            {o.pinecone_synced ? (
+                              <span>
+                                Synced to AI
+                                {o.pinecone_synced_at && (
+                                  <> · {formatDistanceToNow(new Date(o.pinecone_synced_at), { addSuffix: true })}</>
+                                )}
+                              </span>
+                            ) : (
+                              "Pending AI sync"
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell className="py-2 px-3 text-right">
                       <Button variant="outline" size="sm" className="h-7 text-xs border-2" onClick={() => openDetail(o)}>
                         View
