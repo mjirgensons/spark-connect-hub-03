@@ -176,7 +176,7 @@ const Messages = () => {
                           <span className="bg-destructive text-destructive-foreground text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">{conv.buyer_unread_count}</span>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">{conv.products?.product_name || conv.subject || "General Inquiry"}</p>
+                      <p className="text-xs text-muted-foreground truncate">{conv.subject || "General Inquiry"}</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">{format(new Date(conv.last_message_at), "MMM d, yyyy")}</p>
                     </button>
                   ))
