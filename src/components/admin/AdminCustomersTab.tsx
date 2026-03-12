@@ -31,6 +31,7 @@ const AdminCustomersTab = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [orderTotals, setOrderTotals] = useState<Record<string, { count: number; spent: number }>>({});
+  const { sortKey, sortDirection, handleSort, sortData } = useTableSort<Profile & { _orders: number; _spent: number }>("created_at", "desc");
 
   // Detail sheet
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
