@@ -359,6 +359,7 @@ const AdminOrdersTab = () => {
                   <TableHead className="py-2 px-3 text-right">Total</TableHead>
                   <TableHead className="py-2 px-3 text-center">Payment</TableHead>
                   <TableHead className="py-2 px-3 text-center">Status</TableHead>
+                  <TableHead className="py-2 px-3 text-center">AI</TableHead>
                   <TableHead className="py-2 px-3 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
