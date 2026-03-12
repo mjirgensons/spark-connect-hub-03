@@ -591,6 +591,8 @@ export type Database = {
           created_at: string | null
           id: string
           is_read: boolean | null
+          pinecone_synced: boolean | null
+          pinecone_synced_at: string | null
           sender_id: string
         }
         Insert: {
@@ -599,6 +601,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_read?: boolean | null
+          pinecone_synced?: boolean | null
+          pinecone_synced_at?: string | null
           sender_id: string
         }
         Update: {
@@ -607,6 +611,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_read?: boolean | null
+          pinecone_synced?: boolean | null
+          pinecone_synced_at?: string | null
           sender_id?: string
         }
         Relationships: [

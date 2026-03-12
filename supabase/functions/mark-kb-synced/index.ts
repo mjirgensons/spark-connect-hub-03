@@ -6,7 +6,13 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-api-secret",
 };
 
-const ALLOWED_TABLES = ["products", "seller_knowledge_base", "platform_knowledge_base"] as const;
+const ALLOWED_TABLES = [
+  "products",
+  "seller_knowledge_base",
+  "platform_knowledge_base",
+  "communication_logs",
+  "conversation_messages",
+] as const;
 type AllowedTable = (typeof ALLOWED_TABLES)[number];
 
 Deno.serve(async (req) => {
@@ -62,12 +68,17 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // Products: only pinecone_synced (updated_at has its own trigger)
-  // seller_knowledge_base: pinecone_synced + updated_at
-  const updatePayload: Record<string, unknown> =
-    table === "products"
-      ? { pinecone_synced: true }
-      : { pinecone_synced: true, updated_at: new Date().toISOString() };
+  // Build update payload based on table
+  let updatePayload: Record<string, unknown>;
+  if (table === "products") {
+    // Products: only pinecone_synced (updated_at has its own trigger)
+    updatePayload = { pinecone_synced: true };
+  } else if (table === "communication_logs" || table === "conversation_messages") {
+    updatePayload = { pinecone_synced: true, pinecone_synced_at: new Date().toISOString() };
+  } else {
+    // seller_knowledge_base, platform_knowledge_base
+    updatePayload = { pinecone_synced: true, updated_at: new Date().toISOString() };
+  }
 
   const { data, error } = await supabase
     .from(table)
