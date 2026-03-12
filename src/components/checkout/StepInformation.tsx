@@ -183,7 +183,7 @@ const StepInformation = () => {
         </div>
       )}
 
-      <Button type="submit" size="lg" className="w-full shadow-[4px_4px_0px_0px_hsl(var(--foreground))]">
+      <Button type="submit" size="lg" className="w-full">
         Continue to Review
       </Button>
     </form>

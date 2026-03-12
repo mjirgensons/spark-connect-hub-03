@@ -68,7 +68,7 @@ const ReportIssueDialog = ({ orderId, onReported }: ReportIssueDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="border-2 border-foreground shadow-[2px_2px_0px_0px_hsl(var(--foreground))]">
+        <Button variant="outline" size="sm" className="border-2 border-foreground">
           <AlertTriangle className="h-4 w-4 mr-1" /> Report Issue
         </Button>
       </DialogTrigger>

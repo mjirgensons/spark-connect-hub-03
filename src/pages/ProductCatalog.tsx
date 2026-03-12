@@ -292,7 +292,7 @@ const ProductCatalog = () => {
           {/* Mobile filter trigger */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild className="lg:hidden fixed bottom-4 right-4 z-40">
-              <Button size="lg" className="shadow-lg">
+              <Button size="lg">
                 <SlidersHorizontal size={18} className="mr-2" /> Filters
               </Button>
             </SheetTrigger>

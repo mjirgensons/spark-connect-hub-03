@@ -144,7 +144,7 @@ const AccountAddresses = () => {
       <Breadcrumbs items={[{ label: "My Account", href: "/account" }, { label: "Addresses" }]} />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold font-serif">Saved Addresses</h1>
-        <Button className="gap-2 border-2 shadow-[3px_3px_0px_0px_hsl(var(--foreground))]" onClick={openNew}>
+        <Button className="gap-2 border-2" onClick={openNew}>
           <Plus className="w-4 h-4" /> Add Address
         </Button>
       </div>
@@ -250,7 +250,7 @@ const AccountAddresses = () => {
                 <Input {...register("phone")} className={fieldClass} />
               </div>
             </div>
-            <Button type="submit" className="w-full border-2 shadow-[3px_3px_0px_0px_hsl(var(--foreground))]" disabled={saveMutation.isPending}>
+            <Button type="submit" className="w-full border-2" disabled={saveMutation.isPending}>
               {saveMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {editing ? "Update Address" : "Save Address"}
             </Button>
