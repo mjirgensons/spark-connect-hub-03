@@ -39,10 +39,13 @@ const Messages = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("conversations")
-        .select("*, profiles!conversations_seller_id_fkey(company_name, full_name), products!left(product_name)")
+        .select("*, profiles!conversations_seller_id_fkey(company_name, full_name)")
         .eq("buyer_id", user!.id)
         .order("last_message_at", { ascending: false });
-      if (error) throw error;
+      if (error) {
+        console.error("conversations query error:", error);
+        throw error;
+      }
       return data || [];
     },
     enabled: !!user,
@@ -173,7 +176,7 @@ const Messages = () => {
                           <span className="bg-destructive text-destructive-foreground text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">{conv.buyer_unread_count}</span>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">{conv.products?.product_name || conv.subject || "General Inquiry"}</p>
+                      <p className="text-xs text-muted-foreground truncate">{conv.subject || "General Inquiry"}</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">{format(new Date(conv.last_message_at), "MMM d, yyyy")}</p>
                     </button>
                   ))
