@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Shield, Settings, FlaskConical, CreditCard } from "lucide-react";
@@ -190,6 +191,8 @@ const AdminEmailTemplatesTab = () => {
   const [newVarInput, setNewVarInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
 
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
@@ -455,6 +458,7 @@ const AdminEmailTemplatesTab = () => {
           onDelete={handleDelete}
           onToggleActive={handleToggleActive}
           onNew={() => openEditor("create")}
+          onPreview={(t) => { setPreviewTemplate(t); setPreviewDialogOpen(true); }}
         />
       )}
 
@@ -466,6 +470,27 @@ const AdminEmailTemplatesTab = () => {
 
       {internalTab === "wf8-test" && <EmailWF8TestTab />}
       {internalTab === "wf9-stripe" && <EmailWF9StripeTab />}
+      {/* Quick Preview Dialog */}
+      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] p-0 overflow-hidden">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle className="font-serif">{previewTemplate?.display_name || "Preview"}</DialogTitle>
+            <p className="text-xs text-muted-foreground font-mono">{previewTemplate?.template_key}</p>
+          </DialogHeader>
+          <div className="px-6 pb-6 overflow-auto" style={{ maxHeight: "calc(85vh - 100px)" }}>
+            {previewTemplate && (
+              <iframe
+                srcDoc={replaceVariables(previewTemplate.html_body, generateSampleData(Array.isArray(previewTemplate.variables_schema) ? previewTemplate.variables_schema : []))}
+                className="w-full border-2 border-border"
+                style={{ minHeight: 500 }}
+                title="Email Preview"
+                sandbox="allow-same-origin"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Template Editor Sheet */}
       <Sheet open={editorOpen} onOpenChange={setEditorOpen}>
         <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
@@ -676,11 +701,12 @@ interface TemplatesViewProps {
   onDelete: (id: string) => void;
   onToggleActive: (t: EmailTemplate) => void;
   onNew: () => void;
+  onPreview: (t: EmailTemplate) => void;
 }
 
 const TemplatesView = ({
   templates, loading, filterCategory, setFilterCategory, filterCustomerType, setFilterCustomerType,
-  filterStatus, setFilterStatus, search, setSearch, onEdit, onDuplicate, onDelete, onToggleActive, onNew,
+  filterStatus, setFilterStatus, search, setSearch, onEdit, onDuplicate, onDelete, onToggleActive, onNew, onPreview,
 }: TemplatesViewProps) => (
   <div className="space-y-4">
     {/* Filters */}
@@ -779,6 +805,9 @@ const TemplatesView = ({
                 <TableCell className="text-xs text-muted-foreground">v{t.version}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onPreview(t)} title="Preview">
+                      <Eye className="w-3.5 h-3.5" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(t)} title="Edit">
                       <Pencil className="w-3.5 h-3.5" />
                     </Button>
