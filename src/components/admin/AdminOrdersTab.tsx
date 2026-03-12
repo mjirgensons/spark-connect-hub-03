@@ -154,8 +154,9 @@ const AdminOrdersTab = () => {
     return true;
   });
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const sorted = sortData(filtered);
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
+  const paginated = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   // Count items per order (batch)
   const [itemCounts, setItemCounts] = useState<Record<string, number>>({});
