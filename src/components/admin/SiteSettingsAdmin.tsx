@@ -123,6 +123,11 @@ const SiteSettingsAdmin = () => {
         </div>
       ))}
 
+      <MessageNotificationSettings
+        settings={settings}
+        onSaved={fetchSettings}
+      />
+
       {ungrouped.length > 0 && (
         <div>
           <h3 className="text-lg font-bold font-sans mb-4">Other Settings</h3>
