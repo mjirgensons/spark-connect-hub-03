@@ -12,6 +12,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { RefreshCw, ChevronDown, ChevronRight, ChevronLeft, Search, Play, ClipboardList, Loader2, Send, CheckCircle, AlertTriangle, Radio } from "lucide-react";
+import SortableTableHead, { useTableSort } from "./SortableTableHead";
 import { format, formatDistanceToNow } from "date-fns";
 
 // ─── Neobrutalism card style ───
@@ -84,6 +85,7 @@ const EmailWF8TestTab = () => {
   const [wf10Sending, setWf10Sending] = useState(false);
   const [wf10Status, setWf10Status] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [wf10DebugPayload, setWf10DebugPayload] = useState<any>(null);
+  const wf10Sort = useTableSort<OutboundLog>("created_at", "desc");
 
   // ─── Collapsible state ───
   const [s1Open, setS1Open] = useState(true);
@@ -689,12 +691,12 @@ const EmailWF8TestTab = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-xs w-10"></TableHead>
-                      <TableHead className="text-xs">Date</TableHead>
-                      <TableHead className="text-xs">To</TableHead>
-                      <TableHead className="text-xs">Subject</TableHead>
-                      <TableHead className="text-xs">Status</TableHead>
+                      <SortableTableHead label="Date" sortKey="created_at" currentSort={wf10Sort.sortKey} currentDirection={wf10Sort.sortDirection} onSort={wf10Sort.handleSort} className="text-xs" />
+                      <SortableTableHead label="To" sortKey="to_address" currentSort={wf10Sort.sortKey} currentDirection={wf10Sort.sortDirection} onSort={wf10Sort.handleSort} className="text-xs" />
+                      <SortableTableHead label="Subject" sortKey="subject" currentSort={wf10Sort.sortKey} currentDirection={wf10Sort.sortDirection} onSort={wf10Sort.handleSort} className="text-xs" />
+                      <SortableTableHead label="Status" sortKey="status" currentSort={wf10Sort.sortKey} currentDirection={wf10Sort.sortDirection} onSort={wf10Sort.handleSort} className="text-xs" />
                       <TableHead className="text-xs">Mailgun ID</TableHead>
-                      <TableHead className="text-xs">Entity</TableHead>
+                      <SortableTableHead label="Entity" sortKey="related_entity_type" currentSort={wf10Sort.sortKey} currentDirection={wf10Sort.sortDirection} onSort={wf10Sort.handleSort} className="text-xs" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -706,13 +708,13 @@ const EmailWF8TestTab = () => {
                           ))}
                         </TableRow>
                       ))
-                    ) : wf10OutboundLogs.length === 0 ? (
+                    ) : wf10Sort.sortData(wf10OutboundLogs).length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                           No outbound logs with Mailgun ID found. Send a WF‑8 test email first (Section 3).
                         </TableCell>
                       </TableRow>
-                    ) : wf10OutboundLogs.map((log) => (
+                    ) : wf10Sort.sortData(wf10OutboundLogs).map((log) => (
                       <TableRow
                         key={log.id}
                         className={`cursor-pointer ${wf10SelectedLog?.id === log.id ? "bg-accent" : ""}`}

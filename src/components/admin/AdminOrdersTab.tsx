@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Search, ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { toast } from "sonner";
+import SortableTableHead, { useTableSort } from "./SortableTableHead";
 
 interface Order {
   id: string;
@@ -100,6 +101,7 @@ const AdminOrdersTab = () => {
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
+  const { sortKey, sortDirection, handleSort, sortData } = useTableSort<Order>("created_at", "desc");
 
   // Detail sheet
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -152,8 +154,9 @@ const AdminOrdersTab = () => {
     return true;
   });
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const sorted = sortData(filtered);
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
+  const paginated = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   // Count items per order (batch)
   const [itemCounts, setItemCounts] = useState<Record<string, number>>({});
@@ -352,13 +355,13 @@ const AdminOrdersTab = () => {
             <Table>
               <TableHeader>
                 <TableRow className="text-xs">
-                  <TableHead className="py-2 px-3">Order #</TableHead>
-                  <TableHead className="py-2 px-3">Date</TableHead>
-                  <TableHead className="py-2 px-3">Customer</TableHead>
-                  <TableHead className="py-2 px-3 text-center">Items</TableHead>
-                  <TableHead className="py-2 px-3 text-right">Total</TableHead>
-                  <TableHead className="py-2 px-3 text-center">Payment</TableHead>
-                  <TableHead className="py-2 px-3 text-center">Status</TableHead>
+                  <SortableTableHead label="Order #" sortKey="order_number" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+                  <SortableTableHead label="Date" sortKey="created_at" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+                  <SortableTableHead label="Customer" sortKey="shipping_name" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+                  <SortableTableHead label="Items" sortKey="_items" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-center" />
+                  <SortableTableHead label="Total" sortKey="total" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-right" />
+                  <SortableTableHead label="Payment" sortKey="payment_status" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-center" />
+                  <SortableTableHead label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-center" />
                   <TableHead className="py-2 px-3 text-center">AI</TableHead>
                   <TableHead className="py-2 px-3 text-right">Actions</TableHead>
                 </TableRow>
@@ -456,8 +459,8 @@ const AdminOrdersTab = () => {
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>
-            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of{" "}
-            {filtered.length}
+            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, sorted.length)} of{" "}
+            {sorted.length}
           </span>
           <div className="flex gap-1">
             <Button

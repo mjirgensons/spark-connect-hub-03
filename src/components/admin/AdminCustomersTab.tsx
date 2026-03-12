@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Search, Loader2 } from "lucide-react";
+import SortableTableHead, { useTableSort } from "./SortableTableHead";
 
 interface Profile {
   id: string;
@@ -30,6 +31,7 @@ const AdminCustomersTab = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [orderTotals, setOrderTotals] = useState<Record<string, { count: number; spent: number }>>({});
+  const { sortKey, sortDirection, handleSort, sortData } = useTableSort<Profile & { _orders: number; _spent: number }>("created_at", "desc");
 
   // Detail sheet
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
@@ -68,6 +70,12 @@ const AdminCustomersTab = () => {
     return p.full_name.toLowerCase().includes(s) || p.email.toLowerCase().includes(s);
   });
 
+  const enriched = filtered.map((p) => {
+    const stats = orderTotals[p.id] || { count: 0, spent: 0 };
+    return { ...p, _orders: stats.count, _spent: stats.spent };
+  });
+  const sorted = sortData(enriched);
+
   const openDetail = async (profile: Profile) => {
     setSelectedProfile(profile);
     setSheetOpen(true);
@@ -104,18 +112,16 @@ const AdminCustomersTab = () => {
           <Table>
             <TableHeader>
               <TableRow className="text-xs">
-                <TableHead className="py-2 px-3">Name</TableHead>
-                <TableHead className="py-2 px-3">Email</TableHead>
-                <TableHead className="py-2 px-3 text-center">Role</TableHead>
-                <TableHead className="py-2 px-3 text-center">Orders</TableHead>
-                <TableHead className="py-2 px-3 text-right">Total Spent</TableHead>
-                <TableHead className="py-2 px-3 text-right">Signed Up</TableHead>
+                <SortableTableHead label="Name" sortKey="full_name" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+                <SortableTableHead label="Email" sortKey="email" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+                <SortableTableHead label="Role" sortKey="user_type" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-center" />
+                <SortableTableHead label="Orders" sortKey="_orders" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-center" />
+                <SortableTableHead label="Total Spent" sortKey="_spent" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-right" />
+                <SortableTableHead label="Signed Up" sortKey="created_at" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-right" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((p) => {
-                const stats = orderTotals[p.id] || { count: 0, spent: 0 };
-                return (
+              {sorted.map((p) => (
                   <TableRow
                     key={p.id}
                     className="text-xs cursor-pointer hover:bg-accent"
@@ -130,9 +136,9 @@ const AdminCustomersTab = () => {
                         {p.user_type}
                       </Badge>
                     </TableCell>
-                    <TableCell className="py-2 px-3 text-center">{stats.count}</TableCell>
+                    <TableCell className="py-2 px-3 text-center">{p._orders}</TableCell>
                     <TableCell className="py-2 px-3 text-right font-mono">
-                      ${stats.spent.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      ${p._spent.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </TableCell>
                     <TableCell className="py-2 px-3 text-right text-muted-foreground">
                       {new Date(p.created_at).toLocaleDateString("en-CA", {
@@ -142,9 +148,8 @@ const AdminCustomersTab = () => {
                       })}
                     </TableCell>
                   </TableRow>
-                );
-              })}
-              {filtered.length === 0 && (
+              ))}
+              {sorted.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     No customers found.
