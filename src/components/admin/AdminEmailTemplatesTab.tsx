@@ -772,10 +772,12 @@ const TemplatesView = ({
         const aTime = lastUsedMap[a.template_key] ? new Date(lastUsedMap[a.template_key]).getTime() : 0;
         const bTime = lastUsedMap[b.template_key] ? new Date(lastUsedMap[b.template_key]).getTime() : 0;
         cmp = aTime - bTime;
+      } else if (sortField === "usage_count") {
+        cmp = (usageCountMap[a.template_key] || 0) - (usageCountMap[b.template_key] || 0);
       }
       return sortDir === "desc" ? -cmp : cmp;
     });
-  }, [templates, sortField, sortDir]);
+  }, [templates, sortField, sortDir, lastUsedMap, usageCountMap]);
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
