@@ -445,8 +445,6 @@ const AdminOrdersTab = () => {
                       No orders found.
                     </TableCell>
                   </TableRow>
-                    </TableCell>
-                  </TableRow>
                 )}
               </TableBody>
             </Table>
