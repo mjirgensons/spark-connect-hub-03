@@ -191,6 +191,8 @@ const AdminEmailTemplatesTab = () => {
   const [newVarInput, setNewVarInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
 
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
