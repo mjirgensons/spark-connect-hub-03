@@ -116,7 +116,7 @@ const AdminOrdersTab = () => {
     setLoading(true);
     const { data } = await supabase
       .from("orders")
-      .select("*")
+      .select("*, pinecone_synced, pinecone_synced_at")
       .order("created_at", { ascending: false });
     setOrders((data || []) as unknown as Order[]);
     setLoading(false);
