@@ -752,97 +752,124 @@ const TemplatesView = ({
       </div>
     </div>
 
-    {/* Table */}
-    <div className="border-2 border-border overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-xs">Template</TableHead>
-            <TableHead className="text-xs">Category</TableHead>
-            <TableHead className="text-xs">Type</TableHead>
-            <TableHead className="text-xs">Subject</TableHead>
-            <TableHead className="text-xs">CASL</TableHead>
-            <TableHead className="text-xs">Active</TableHead>
-            <TableHead className="text-xs">Ver</TableHead>
-            <TableHead className="text-xs">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            Array.from({ length: 5 }).map((_, i) => (
-              <TableRow key={i}>
-                {Array.from({ length: 8 }).map((_, j) => (
-                  <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : templates.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={8} className="text-center text-muted-foreground py-8">No templates found.</TableCell>
-            </TableRow>
-          ) : (
-            templates.map((t) => (
-              <TableRow key={t.id}>
-                <TableCell>
-                  <p className="text-sm font-semibold text-foreground">{t.display_name}</p>
-                  <p className="text-xs font-mono text-muted-foreground">{t.template_key}</p>
-                </TableCell>
-                <TableCell>
-                  <Badge className={CATEGORY_COLORS[t.category] || ""}>{t.category}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="border-2 text-xs capitalize">{t.customer_type}</Badge>
-                </TableCell>
-                <TableCell className="max-w-[200px]">
-                  <p className="text-xs truncate" title={t.subject}>{t.subject.length > 50 ? t.subject.slice(0, 50) + "…" : t.subject}</p>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="border-2 text-xs">{CASL_LABELS[t.casl_category] || t.casl_category}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Switch checked={t.is_active} onCheckedChange={() => onToggleActive(t)} />
-                </TableCell>
-                <TableCell className="text-xs text-muted-foreground">v{t.version}</TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onPreview(t)} title="Preview">
-                      <Eye className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(t)} title="Edit">
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onDuplicate(t)} title="Duplicate">
-                      <Copy className="w-3.5 h-3.5" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" title="Delete">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete template?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete &quot;{t.display_name}&quot;. This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => onDelete(t.id)} className="bg-destructive text-destructive-foreground">
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    {/* Table — grouped by category */}
+    {(() => {
+      const categoryOrder = ["transactional", "lifecycle", "marketing", "operational"];
+      const grouped = categoryOrder.reduce<Record<string, EmailTemplate[]>>((acc, cat) => {
+        acc[cat] = templates.filter((t) => t.category === cat);
+        return acc;
+      }, {});
+      // Include any templates with unknown categories
+      const knownCats = new Set(categoryOrder);
+      const otherTemplates = templates.filter((t) => !knownCats.has(t.category));
+      if (otherTemplates.length > 0) grouped["other"] = otherTemplates;
+
+      const formatDate = (dateStr: string) => {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" }) +
+          " " + d.toLocaleTimeString("en-CA", { hour: "2-digit", minute: "2-digit", hour12: false });
+      };
+
+      const CATEGORY_LABELS: Record<string, string> = {
+        transactional: "Transactional",
+        lifecycle: "Lifecycle",
+        marketing: "Marketing",
+        operational: "Operational",
+        other: "Other",
+      };
+
+      return (
+        <div className="space-y-6">
+          {Object.entries(grouped).map(([cat, items]) => {
+            if (items.length === 0) return null;
+            return (
+              <div key={cat} className="space-y-1">
+                <div className="flex items-center gap-2 px-1">
+                  <Badge className={`${CATEGORY_COLORS[cat] || "bg-muted text-muted-foreground"} text-[10px] px-2 py-0`}>
+                    {CATEGORY_LABELS[cat] || cat}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">{items.length} template{items.length !== 1 ? "s" : ""}</span>
+                </div>
+                <div className="border-2 border-border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs text-left">Template</TableHead>
+                        <TableHead className="text-xs text-left">Type</TableHead>
+                        <TableHead className="text-xs text-left">Subject</TableHead>
+                        <TableHead className="text-xs text-left">CASL</TableHead>
+                        <TableHead className="text-xs text-left">Active</TableHead>
+                        <TableHead className="text-xs text-left">Last Updated</TableHead>
+                        <TableHead className="text-xs text-left">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {items.map((t) => (
+                        <TableRow key={t.id}>
+                          <TableCell className="text-left">
+                            <p className="text-sm font-semibold text-foreground leading-tight">{t.display_name}</p>
+                            <p className="text-[11px] font-mono text-muted-foreground leading-tight">{t.template_key}</p>
+                          </TableCell>
+                          <TableCell className="text-left">
+                            <Badge variant="outline" className="border text-[10px] capitalize px-1.5 py-0">{t.customer_type}</Badge>
+                          </TableCell>
+                          <TableCell className="max-w-[200px] text-left">
+                            <p className="text-xs truncate" title={t.subject}>{t.subject.length > 50 ? t.subject.slice(0, 50) + "…" : t.subject}</p>
+                          </TableCell>
+                          <TableCell className="text-left">
+                            <Badge variant="outline" className="border text-[10px] px-1.5 py-0 whitespace-nowrap">{CASL_LABELS[t.casl_category] || t.casl_category}</Badge>
+                          </TableCell>
+                          <TableCell className="text-left">
+                            <Switch checked={t.is_active} onCheckedChange={() => onToggleActive(t)} />
+                          </TableCell>
+                          <TableCell className="text-left">
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(t.updated_at)}</span>
+                          </TableCell>
+                          <TableCell className="text-left">
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onPreview(t)} title="Preview">
+                                <Eye className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(t)} title="Edit">
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onDuplicate(t)} title="Duplicate">
+                                <Copy className="w-3.5 h-3.5" />
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" title="Delete">
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete template?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This will permanently delete &quot;{t.display_name}&quot;. This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => onDelete(t.id)} className="bg-destructive text-destructive-foreground">
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    })()}
   </div>
 );
 
