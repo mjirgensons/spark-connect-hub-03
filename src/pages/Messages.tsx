@@ -192,7 +192,7 @@ const Messages = () => {
                 <>
                   <div className="p-3 border-b border-border flex items-center gap-2">
                     {isMobile && (
-                      <Button variant="ghost" size="icon" onClick={() => { setActiveConvId(null); navigate("/messages", { replace: true }); }}>
+                      <Button variant="ghost" size="icon" onClick={() => { setActiveConvId(null); navigate("/client/messages", { replace: true }); }}>
                         <ArrowLeft className="w-4 h-4" />
                       </Button>
                     )}
