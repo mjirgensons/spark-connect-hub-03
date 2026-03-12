@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { TableHead } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -43,13 +44,17 @@ const SortableTableHead = ({
 };
 
 export function useTableSort<T>(defaultKey: string | null = null, defaultDir: SortDirection = "desc") {
-  const [sortKey, setSortKey] = (await import("react")).useState<string | null>(defaultKey);
-  const [sortDirection, setSortDirection] = (await import("react")).useState<SortDirection>(defaultDir);
+  const [sortKey, setSortKey] = useState<string | null>(defaultKey);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(defaultDir);
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
-      setSortDirection(sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc");
-      if (sortDirection === "desc") setSortKey(null);
+      if (sortDirection === "asc") {
+        setSortDirection("desc");
+      } else if (sortDirection === "desc") {
+        setSortKey(null);
+        setSortDirection(null);
+      }
     } else {
       setSortKey(key);
       setSortDirection("asc");
