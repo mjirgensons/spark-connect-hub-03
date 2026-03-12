@@ -708,7 +708,7 @@ const EmailWF8TestTab = () => {
                           ))}
                         </TableRow>
                       ))
-                    ) : wf10OutboundLogs.length === 0 ? (
+                    ) : wf10Sort.sortData(wf10OutboundLogs).length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                           No outbound logs with Mailgun ID found. Send a WF‑8 test email first (Section 3).
