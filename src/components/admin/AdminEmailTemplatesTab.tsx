@@ -732,7 +732,7 @@ type SortDir = "asc" | "desc";
 
 const TemplatesView = ({
   templates, loading, filterCategory, setFilterCategory, filterCustomerType, setFilterCustomerType,
-  filterStatus, setFilterStatus, search, setSearch, onEdit, onDuplicate, onDelete, onToggleActive, onNew, onPreview,
+  filterStatus, setFilterStatus, search, setSearch, onEdit, onDuplicate, onDelete, onToggleActive, onNew, onPreview, lastUsedMap,
 }: TemplatesViewProps) => {
   const [sortField, setSortField] = useState<SortField>("category");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
