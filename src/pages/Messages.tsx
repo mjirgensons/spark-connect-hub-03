@@ -244,7 +244,7 @@ const Messages = () => {
           )}
         </div>
       </main>
-      <Footer />
+      {!isInDashboard && <Footer />}
     </div>
   );
 };
