@@ -110,44 +110,72 @@ const Admin = () => {
     </div>
   );
 
+  // Sections that benefit from full width (tables, dashboards)
+  const WIDE_SECTIONS: AdminSection[] = [
+    "dashboard", "orders", "quotes", "customers", "sellers",
+    "seller-health", "product-review", "email", "email-test-console",
+    "webhooks", "cookie-manager",
+  ];
+  // Sections with their own layout (no wrapper)
+  const NO_WRAP_SECTIONS: AdminSection[] = ["test-chat", "ai-chatbot"];
+
   const renderSection = () => {
+    let content: React.ReactNode = null;
+
     switch (activeSection) {
       case "dashboard":
-        return <AdminDashboardTab onNavigateToOrders={() => setActiveSection("orders")} />;
+        content = <AdminDashboardTab onNavigateToOrders={() => setActiveSection("orders")} />;
+        break;
       case "orders":
-        return <AdminOrdersTab />;
+        content = <AdminOrdersTab />;
+        break;
       case "quotes":
-        return <AdminQuotesTab />;
+        content = <AdminQuotesTab />;
+        break;
       case "customers":
-        return <AdminCustomersTab />;
+        content = <AdminCustomersTab />;
+        break;
       case "sellers":
-        return <AdminSellersTab />;
+        content = <AdminSellersTab />;
+        break;
       case "seller-health":
-        return <AdminSellerHealthTab />;
+        content = <AdminSellerHealthTab />;
+        break;
       case "product-review":
-        return <AdminProductReviewTab />;
+        content = <AdminProductReviewTab />;
+        break;
       case "qa-overview":
-        return <AdminQATab />;
+        content = <AdminQATab />;
+        break;
       case "reviews":
-        return <AdminReviewsTab />;
+        content = <AdminReviewsTab />;
+        break;
       case "email":
-        return <AdminEmailTemplatesTab />;
+        content = <AdminEmailTemplatesTab />;
+        break;
       case "email-test-console":
-        return <EmailTestConsoleTab />;
+        content = <EmailTestConsoleTab />;
+        break;
       case "integrations":
-        return <AdminIntegrationsTab />;
+        content = <AdminIntegrationsTab />;
+        break;
       case "webhooks":
-        return <AdminWebhooksTab onNavigate={(s) => setActiveSection(s as AdminSection)} />;
+        content = <AdminWebhooksTab onNavigate={(s) => setActiveSection(s as AdminSection)} />;
+        break;
       case "trust-signals":
-        return <AdminTrustSignalsTab />;
+        content = <AdminTrustSignalsTab />;
+        break;
       case "faq":
-        return <AdminFAQTab />;
+        content = <AdminFAQTab />;
+        break;
       case "blog":
-        return <AdminBlogTab />;
+        content = <AdminBlogTab />;
+        break;
       case "newsletter":
-        return <AdminNewsletterTab />;
+        content = <AdminNewsletterTab />;
+        break;
       case "content":
-        return (
+        content = (
           <div className="space-y-8">
             <FooterPagesAdmin />
             <LegalPagesAdmin />
@@ -155,8 +183,9 @@ const Admin = () => {
             <AnalyticsDashboard />
           </div>
         );
+        break;
       case "cookie-manager":
-        return (
+        content = (
           <div className="space-y-8">
             <BannerSettingsAdmin />
             <CookieCategoriesAdmin />
@@ -164,14 +193,18 @@ const Admin = () => {
             <ConsentLogsAdmin />
           </div>
         );
+        break;
       case "test-chat":
-        return <AdminTestChatTab onNavigateToChatbotSettings={() => setActiveSection("ai-chatbot")} />;
+        content = <AdminTestChatTab onNavigateToChatbotSettings={() => setActiveSection("ai-chatbot")} />;
+        break;
       case "ai-chatbot":
-        return <AdminChatbotControlPanel onNavigateToTestChat={() => setActiveSection("test-chat")} />;
+        content = <AdminChatbotControlPanel onNavigateToTestChat={() => setActiveSection("test-chat")} />;
+        break;
       case "platform-kb":
-        return <AdminPlatformKBTab />;
+        content = <AdminPlatformKBTab />;
+        break;
       case "settings":
-        return (
+        content = (
           <div className="space-y-6">
             <Collapsible>
               <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
@@ -185,9 +218,14 @@ const Admin = () => {
             <SiteSettingsAdmin />
           </div>
         );
+        break;
       default:
         return null;
     }
+
+    if (NO_WRAP_SECTIONS.includes(activeSection)) return content;
+    if (WIDE_SECTIONS.includes(activeSection)) return <div className="max-w-[1200px] mx-auto">{content}</div>;
+    return <div className="max-w-[700px] mx-auto">{content}</div>;
   };
 
   return (
