@@ -47,10 +47,10 @@ interface EmailTemplate {
 type InternalTab = "templates" | "comm-log" | "consent" | "settings" | "wf8-test" | "wf9-stripe";
 
 const CATEGORY_COLORS: Record<string, string> = {
-  transactional: "bg-blue-600 text-white hover:bg-blue-700",
-  lifecycle: "bg-yellow-600 text-white hover:bg-yellow-700",
-  marketing: "bg-green-600 text-white hover:bg-green-700",
-  operational: "bg-muted-foreground text-white hover:bg-muted-foreground/80",
+  transactional: "border border-foreground bg-foreground text-background",
+  lifecycle: "border border-border bg-muted text-foreground",
+  marketing: "border border-border bg-secondary text-secondary-foreground",
+  operational: "border border-border bg-accent text-accent-foreground",
 };
 
 const CASL_LABELS: Record<string, string> = {
