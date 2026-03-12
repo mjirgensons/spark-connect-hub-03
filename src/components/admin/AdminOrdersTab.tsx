@@ -11,7 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Search, ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
+import { formatDistanceToNow, format } from "date-fns";
 import { toast } from "sonner";
 
 interface Order {
@@ -39,6 +41,8 @@ interface Order {
   estimated_delivery: string | null;
   notes: string | null;
   stripe_payment_intent_id: string | null;
+  pinecone_synced: boolean;
+  pinecone_synced_at: string | null;
 }
 
 interface OrderItem {
@@ -112,7 +116,7 @@ const AdminOrdersTab = () => {
     setLoading(true);
     const { data } = await supabase
       .from("orders")
-      .select("*")
+      .select("*, pinecone_synced, pinecone_synced_at")
       .order("created_at", { ascending: false });
     setOrders((data || []) as unknown as Order[]);
     setLoading(false);
@@ -355,6 +359,7 @@ const AdminOrdersTab = () => {
                   <TableHead className="py-2 px-3 text-right">Total</TableHead>
                   <TableHead className="py-2 px-3 text-center">Payment</TableHead>
                   <TableHead className="py-2 px-3 text-center">Status</TableHead>
+                  <TableHead className="py-2 px-3 text-center">AI</TableHead>
                   <TableHead className="py-2 px-3 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -402,6 +407,31 @@ const AdminOrdersTab = () => {
                         {o.status}
                       </Badge>
                     </TableCell>
+                    <TableCell className="py-2 px-3 text-center">
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span
+                              className={`inline-block w-2 h-2 rounded-full ${
+                                o.pinecone_synced ? "bg-green-500" : "bg-muted-foreground/40"
+                              }`}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="text-xs">
+                            {o.pinecone_synced ? (
+                              <span>
+                                Synced to AI
+                                {o.pinecone_synced_at && (
+                                  <> · {formatDistanceToNow(new Date(o.pinecone_synced_at), { addSuffix: true })}</>
+                                )}
+                              </span>
+                            ) : (
+                              "Pending AI sync"
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell className="py-2 px-3 text-right">
                       <Button variant="outline" size="sm" className="h-7 text-xs border-2" onClick={() => openDetail(o)}>
                         View
@@ -411,7 +441,7 @@ const AdminOrdersTab = () => {
                 ))}
                 {paginated.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                       No orders found.
                     </TableCell>
                   </TableRow>
