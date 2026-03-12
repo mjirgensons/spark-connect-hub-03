@@ -691,12 +691,12 @@ const EmailWF8TestTab = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-xs w-10"></TableHead>
-                      <TableHead className="text-xs">Date</TableHead>
-                      <TableHead className="text-xs">To</TableHead>
-                      <TableHead className="text-xs">Subject</TableHead>
-                      <TableHead className="text-xs">Status</TableHead>
+                      <SortableTableHead label="Date" sortKey="created_at" currentSort={wf10Sort.sortKey} currentDirection={wf10Sort.sortDirection} onSort={wf10Sort.handleSort} className="text-xs" />
+                      <SortableTableHead label="To" sortKey="to_address" currentSort={wf10Sort.sortKey} currentDirection={wf10Sort.sortDirection} onSort={wf10Sort.handleSort} className="text-xs" />
+                      <SortableTableHead label="Subject" sortKey="subject" currentSort={wf10Sort.sortKey} currentDirection={wf10Sort.sortDirection} onSort={wf10Sort.handleSort} className="text-xs" />
+                      <SortableTableHead label="Status" sortKey="status" currentSort={wf10Sort.sortKey} currentDirection={wf10Sort.sortDirection} onSort={wf10Sort.handleSort} className="text-xs" />
                       <TableHead className="text-xs">Mailgun ID</TableHead>
-                      <TableHead className="text-xs">Entity</TableHead>
+                      <SortableTableHead label="Entity" sortKey="related_entity_type" currentSort={wf10Sort.sortKey} currentDirection={wf10Sort.sortDirection} onSort={wf10Sort.handleSort} className="text-xs" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
