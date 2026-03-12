@@ -12,6 +12,8 @@ const ALLOWED_TABLES = [
   "platform_knowledge_base",
   "communication_logs",
   "conversation_messages",
+  "orders",
+  "conversations",
 ] as const;
 type AllowedTable = (typeof ALLOWED_TABLES)[number];
 
@@ -73,7 +75,7 @@ Deno.serve(async (req) => {
   if (table === "products") {
     // Products: only pinecone_synced (updated_at has its own trigger)
     updatePayload = { pinecone_synced: true };
-  } else if (table === "communication_logs" || table === "conversation_messages") {
+  } else if (table === "communication_logs" || table === "conversation_messages" || table === "orders" || table === "conversations") {
     updatePayload = { pinecone_synced: true, pinecone_synced_at: new Date().toISOString() };
   } else {
     // seller_knowledge_base, platform_knowledge_base
