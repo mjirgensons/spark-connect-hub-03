@@ -845,6 +845,9 @@ const TemplatesView = ({
               <TableHead className="text-xs text-left">Subject</TableHead>
               <TableHead className="text-xs text-left">CASL</TableHead>
               <TableHead className="text-xs text-left">Active</TableHead>
+              <TableHead className="text-xs text-left cursor-pointer select-none" onClick={() => toggleSort("usage_count")}>
+                <span className="inline-flex items-center">Sent <SortIcon field="usage_count" /></span>
+              </TableHead>
               <TableHead className="text-xs text-left cursor-pointer select-none" onClick={() => toggleSort("last_used")}>
                 <span className="inline-flex items-center">Last Used <SortIcon field="last_used" /></span>
               </TableHead>
