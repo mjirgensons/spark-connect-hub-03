@@ -641,6 +641,8 @@ export type Database = {
           first_response_at: string | null
           id: string
           last_message_at: string | null
+          pinecone_synced: boolean | null
+          pinecone_synced_at: string | null
           product_id: string | null
           response_time_seconds: number | null
           seller_id: string
@@ -656,6 +658,8 @@ export type Database = {
           first_response_at?: string | null
           id?: string
           last_message_at?: string | null
+          pinecone_synced?: boolean | null
+          pinecone_synced_at?: string | null
           product_id?: string | null
           response_time_seconds?: number | null
           seller_id: string
@@ -671,6 +675,8 @@ export type Database = {
           first_response_at?: string | null
           id?: string
           last_message_at?: string | null
+          pinecone_synced?: boolean | null
+          pinecone_synced_at?: string | null
           product_id?: string | null
           response_time_seconds?: number | null
           seller_id?: string
@@ -1334,6 +1340,8 @@ export type Database = {
           order_number: string
           paid_at: string | null
           payment_status: string
+          pinecone_synced: boolean | null
+          pinecone_synced_at: string | null
           platform_fee_cents: number | null
           preparing_at: string | null
           seller_id: string | null
@@ -1385,6 +1393,8 @@ export type Database = {
           order_number: string
           paid_at?: string | null
           payment_status?: string
+          pinecone_synced?: boolean | null
+          pinecone_synced_at?: string | null
           platform_fee_cents?: number | null
           preparing_at?: string | null
           seller_id?: string | null
@@ -1436,6 +1446,8 @@ export type Database = {
           order_number?: string
           paid_at?: string | null
           payment_status?: string
+          pinecone_synced?: boolean | null
+          pinecone_synced_at?: string | null
           platform_fee_cents?: number | null
           preparing_at?: string | null
           seller_id?: string | null
