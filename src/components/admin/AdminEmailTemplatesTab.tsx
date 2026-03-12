@@ -195,6 +195,7 @@ const AdminEmailTemplatesTab = () => {
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
 
   const [lastUsedMap, setLastUsedMap] = useState<Record<string, string>>({});
+  const [usageCountMap, setUsageCountMap] = useState<Record<string, number>>({});
 
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
@@ -220,12 +221,17 @@ const AdminEmailTemplatesTab = () => {
       .order("created_at", { ascending: false });
     if (data) {
       const map: Record<string, string> = {};
+      const counts: Record<string, number> = {};
       data.forEach((row: any) => {
-        if (row.template_key && !map[row.template_key]) {
-          map[row.template_key] = row.created_at;
+        if (row.template_key) {
+          if (!map[row.template_key]) {
+            map[row.template_key] = row.created_at;
+          }
+          counts[row.template_key] = (counts[row.template_key] || 0) + 1;
         }
       });
       setLastUsedMap(map);
+      setUsageCountMap(counts);
     }
   }, []);
 
@@ -481,6 +487,7 @@ const AdminEmailTemplatesTab = () => {
           onNew={() => openEditor("create")}
           onPreview={(t) => { setPreviewTemplate(t); setPreviewDialogOpen(true); }}
           lastUsedMap={lastUsedMap}
+          usageCountMap={usageCountMap}
         />
       )}
 
@@ -725,14 +732,15 @@ interface TemplatesViewProps {
   onNew: () => void;
   onPreview: (t: EmailTemplate) => void;
   lastUsedMap: Record<string, string>;
+  usageCountMap: Record<string, number>;
 }
 
-type SortField = "category" | "display_name" | "last_used" | null;
+type SortField = "category" | "display_name" | "last_used" | "usage_count" | null;
 type SortDir = "asc" | "desc";
 
 const TemplatesView = ({
   templates, loading, filterCategory, setFilterCategory, filterCustomerType, setFilterCustomerType,
-  filterStatus, setFilterStatus, search, setSearch, onEdit, onDuplicate, onDelete, onToggleActive, onNew, onPreview, lastUsedMap,
+  filterStatus, setFilterStatus, search, setSearch, onEdit, onDuplicate, onDelete, onToggleActive, onNew, onPreview, lastUsedMap, usageCountMap,
 }: TemplatesViewProps) => {
   const [sortField, setSortField] = useState<SortField>("category");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -764,10 +772,12 @@ const TemplatesView = ({
         const aTime = lastUsedMap[a.template_key] ? new Date(lastUsedMap[a.template_key]).getTime() : 0;
         const bTime = lastUsedMap[b.template_key] ? new Date(lastUsedMap[b.template_key]).getTime() : 0;
         cmp = aTime - bTime;
+      } else if (sortField === "usage_count") {
+        cmp = (usageCountMap[a.template_key] || 0) - (usageCountMap[b.template_key] || 0);
       }
       return sortDir === "desc" ? -cmp : cmp;
     });
-  }, [templates, sortField, sortDir]);
+  }, [templates, sortField, sortDir, lastUsedMap, usageCountMap]);
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -835,6 +845,9 @@ const TemplatesView = ({
               <TableHead className="text-xs text-left">Subject</TableHead>
               <TableHead className="text-xs text-left">CASL</TableHead>
               <TableHead className="text-xs text-left">Active</TableHead>
+              <TableHead className="text-xs text-left cursor-pointer select-none" onClick={() => toggleSort("usage_count")}>
+                <span className="inline-flex items-center">Sent <SortIcon field="usage_count" /></span>
+              </TableHead>
               <TableHead className="text-xs text-left cursor-pointer select-none" onClick={() => toggleSort("last_used")}>
                 <span className="inline-flex items-center">Last Used <SortIcon field="last_used" /></span>
               </TableHead>
@@ -845,14 +858,14 @@ const TemplatesView = ({
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  {Array.from({ length: 8 }).map((_, j) => (
+                  {Array.from({ length: 9 }).map((_, j) => (
                     <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                   ))}
                 </TableRow>
               ))
             ) : sorted.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">No templates found.</TableCell>
+                <TableCell colSpan={9} className="text-center text-muted-foreground py-8">No templates found.</TableCell>
               </TableRow>
             ) : (
               sorted.map((t) => (
@@ -875,6 +888,9 @@ const TemplatesView = ({
                   </TableCell>
                   <TableCell className="text-left">
                     <Switch checked={t.is_active} onCheckedChange={() => onToggleActive(t)} />
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <span className="text-xs font-mono text-foreground">{usageCountMap[t.template_key] || 0}</span>
                   </TableCell>
                   <TableCell className="text-left">
                     {lastUsedMap[t.template_key] ? (
