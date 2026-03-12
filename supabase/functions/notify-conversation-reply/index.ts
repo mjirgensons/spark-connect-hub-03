@@ -79,7 +79,83 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fire to n8n
+    // ── Throttle checks ──
+
+    // Step 1: Fetch settings
+    const { data: settingsRows } = await adminClient
+      .from("site_settings")
+      .select("key, value")
+      .in("key", [
+        "message_notification_cooldown_minutes",
+        "message_notification_daily_limit",
+        "message_send_rate_limit_per_minute",
+      ]);
+
+    const settingsMap: Record<string, number> = {};
+    for (const row of settingsRows ?? []) {
+      settingsMap[row.key] = parseInt(row.value, 10) || 0;
+    }
+    const cooldownMinutes = settingsMap["message_notification_cooldown_minutes"] ?? 0;
+    const dailyLimit = settingsMap["message_notification_daily_limit"] ?? 0;
+    const senderRateLimit = settingsMap["message_send_rate_limit_per_minute"] ?? 0;
+
+    const escalationTemplates = ["chatbot_escalation_buyer", "chatbot_escalation_seller"];
+    const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
+
+    // Step 2: Cooldown check
+    if (cooldownMinutes > 0) {
+      const cutoff = new Date(Date.now() - cooldownMinutes * 60 * 1000).toISOString();
+      const { count } = await adminClient
+        .from("communication_logs")
+        .select("id", { count: "exact", head: true })
+        .in("template_key", escalationTemplates)
+        .eq("to_address", recipientProfile.email)
+        .gte("created_at", cutoff);
+
+      if ((count ?? 0) > 0) {
+        return new Response(
+          JSON.stringify({ success: true, throttled: true, reason: "cooldown" }),
+          { headers: jsonHeaders }
+        );
+      }
+    }
+
+    // Step 3: Daily cap check
+    if (dailyLimit > 0) {
+      const cutoff24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { count } = await adminClient
+        .from("communication_logs")
+        .select("id", { count: "exact", head: true })
+        .in("template_key", escalationTemplates)
+        .eq("to_address", recipientProfile.email)
+        .gte("created_at", cutoff24h);
+
+      if ((count ?? 0) >= dailyLimit) {
+        return new Response(
+          JSON.stringify({ success: true, throttled: true, reason: "daily_limit" }),
+          { headers: jsonHeaders }
+        );
+      }
+    }
+
+    // Step 4: Sender rate check
+    if (senderRateLimit > 0) {
+      const cutoff1m = new Date(Date.now() - 60 * 1000).toISOString();
+      const { count } = await adminClient
+        .from("conversation_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("sender_id", senderId)
+        .gte("created_at", cutoff1m);
+
+      if ((count ?? 0) >= senderRateLimit) {
+        return new Response(
+          JSON.stringify({ success: true, throttled: true, reason: "sender_rate" }),
+          { headers: jsonHeaders }
+        );
+      }
+    }
+
+    // ── All checks passed — fire to n8n ──
     await fetch("https://sundeco.app.n8n.cloud/webhook/conversation-reply-notify", {
       method: "POST",
       headers: {
