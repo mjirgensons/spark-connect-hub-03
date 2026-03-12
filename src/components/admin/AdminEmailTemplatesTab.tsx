@@ -487,6 +487,7 @@ const AdminEmailTemplatesTab = () => {
           onNew={() => openEditor("create")}
           onPreview={(t) => { setPreviewTemplate(t); setPreviewDialogOpen(true); }}
           lastUsedMap={lastUsedMap}
+          usageCountMap={usageCountMap}
         />
       )}
 
