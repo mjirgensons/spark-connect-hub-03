@@ -100,7 +100,7 @@ const NotFound = () => {
           </div>
 
           {/* CTA */}
-          <Button size="xl" asChild className="border-2 border-foreground font-bold shadow-[6px_6px_0px_0px_hsl(var(--foreground))] hover:shadow-[3px_3px_0px_0px_hsl(var(--foreground))] hover:translate-x-[3px] hover:translate-y-[3px] transition-all">
+          <Button size="xl" asChild className="border-2 border-foreground font-bold">
             <Link to="/">Return to Homepage</Link>
           </Button>
         </section>

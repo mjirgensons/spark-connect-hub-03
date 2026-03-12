@@ -448,7 +448,7 @@ const AdminBlogTab = () => {
 
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" className="border-2" onClick={() => setFormOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={saveMutation.isPending} className="shadow-[2px_2px_0px_0px_hsl(var(--foreground))]">
+              <Button type="submit" disabled={saveMutation.isPending}>
                 {saveMutation.isPending ? "Saving..." : editing ? "Update Post" : "Create Post"}
               </Button>
             </div>

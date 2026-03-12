@@ -144,7 +144,7 @@ const FAQPage = () => {
             <p className="text-muted-foreground mb-6">
               Our team is happy to help — reach out anytime.
             </p>
-            <Button size="lg" asChild className="min-h-[48px] shadow-[2px_2px_0px_0px_hsl(var(--foreground))] sm:shadow-[4px_4px_0px_0px_hsl(var(--foreground))]">
+            <Button size="lg" asChild className="min-h-[48px]">
               <Link to="/about">
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Contact Us

@@ -302,7 +302,7 @@ const OrderConfirmation = () => {
 
         {/* Next Steps */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          <Button asChild size="lg" className="flex-1 shadow-[4px_4px_0px_0px_hsl(var(--foreground))]">
+          <Button asChild size="lg" className="flex-1">
             <Link to="/browse">
               <ShoppingBag className="w-4 h-4 mr-2" />
               Continue Shopping

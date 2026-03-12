@@ -365,7 +365,7 @@ const QuoteRequest = () => {
 
           {/* SECTION 4 — Submit */}
           <div className="flex justify-end">
-            <Button type="submit" size="lg" disabled={submitting} className="shadow-[4px_4px_0px_0px_hsl(var(--foreground))]">
+            <Button type="submit" size="lg" disabled={submitting}>
               {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Submit Quote Request
             </Button>
