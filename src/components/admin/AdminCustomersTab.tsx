@@ -149,7 +149,7 @@ const AdminCustomersTab = () => {
                     </TableCell>
                   </TableRow>
               ))}
-              {filtered.length === 0 && (
+              {sorted.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     No customers found.

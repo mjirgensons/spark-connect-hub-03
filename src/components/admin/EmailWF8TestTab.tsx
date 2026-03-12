@@ -714,7 +714,7 @@ const EmailWF8TestTab = () => {
                           No outbound logs with Mailgun ID found. Send a WF‑8 test email first (Section 3).
                         </TableCell>
                       </TableRow>
-                    ) : wf10OutboundLogs.map((log) => (
+                    ) : wf10Sort.sortData(wf10OutboundLogs).map((log) => (
                       <TableRow
                         key={log.id}
                         className={`cursor-pointer ${wf10SelectedLog?.id === log.id ? "bg-accent" : ""}`}
