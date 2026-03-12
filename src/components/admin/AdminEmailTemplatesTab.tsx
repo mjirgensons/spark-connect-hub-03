@@ -480,6 +480,7 @@ const AdminEmailTemplatesTab = () => {
           onToggleActive={handleToggleActive}
           onNew={() => openEditor("create")}
           onPreview={(t) => { setPreviewTemplate(t); setPreviewDialogOpen(true); }}
+          lastUsedMap={lastUsedMap}
         />
       )}
 
