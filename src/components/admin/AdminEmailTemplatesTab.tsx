@@ -805,6 +805,9 @@ const TemplatesView = ({
                 <TableCell className="text-xs text-muted-foreground">v{t.version}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onPreview(t)} title="Preview">
+                      <Eye className="w-3.5 h-3.5" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(t)} title="Edit">
                       <Pencil className="w-3.5 h-3.5" />
                     </Button>
