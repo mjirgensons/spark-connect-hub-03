@@ -52,14 +52,19 @@ Deno.serve(async (req) => {
     );
   }
 
-  if (!orders || orders.length === 0) {
+  // Filter out orphan orders (both user_id and seller_id are null)
+  const validOrders = (orders ?? []).filter(
+    (o: any) => o.user_id !== null || o.seller_id !== null
+  );
+
+  if (validOrders.length === 0) {
     return new Response(
       JSON.stringify({ success: true, data: [] }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 
-  const orderIds = orders.map((o: any) => o.id);
+  const orderIds = validOrders.map((o: any) => o.id);
   const buyerIds = [...new Set(orders.map((o: any) => o.user_id).filter(Boolean))];
   const sellerIds = [...new Set(orders.map((o: any) => o.seller_id).filter(Boolean))];
 
