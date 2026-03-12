@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Search, Loader2 } from "lucide-react";
+import SortableTableHead, { useTableSort } from "./SortableTableHead";
 
 interface Profile {
   id: string;
