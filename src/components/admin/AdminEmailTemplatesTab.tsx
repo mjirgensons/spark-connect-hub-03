@@ -194,6 +194,8 @@ const AdminEmailTemplatesTab = () => {
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
 
+  const [lastUsedMap, setLastUsedMap] = useState<Record<string, string>>({});
+
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -209,9 +211,28 @@ const AdminEmailTemplatesTab = () => {
     setLoading(false);
   }, [toast]);
 
+  const fetchLastUsed = useCallback(async () => {
+    // Get the most recent communication_log entry per template_key
+    const { data } = await supabase
+      .from("communication_logs")
+      .select("template_key, created_at")
+      .not("template_key", "is", null)
+      .order("created_at", { ascending: false });
+    if (data) {
+      const map: Record<string, string> = {};
+      data.forEach((row: any) => {
+        if (row.template_key && !map[row.template_key]) {
+          map[row.template_key] = row.created_at;
+        }
+      });
+      setLastUsedMap(map);
+    }
+  }, []);
+
   useEffect(() => {
     fetchTemplates();
-  }, [fetchTemplates]);
+    fetchLastUsed();
+  }, [fetchTemplates, fetchLastUsed]);
 
   const filtered = useMemo(() => {
     return templates.filter((t) => {
@@ -459,6 +480,7 @@ const AdminEmailTemplatesTab = () => {
           onToggleActive={handleToggleActive}
           onNew={() => openEditor("create")}
           onPreview={(t) => { setPreviewTemplate(t); setPreviewDialogOpen(true); }}
+          lastUsedMap={lastUsedMap}
         />
       )}
 
@@ -702,14 +724,15 @@ interface TemplatesViewProps {
   onToggleActive: (t: EmailTemplate) => void;
   onNew: () => void;
   onPreview: (t: EmailTemplate) => void;
+  lastUsedMap: Record<string, string>;
 }
 
-type SortField = "category" | "display_name" | "updated_at" | null;
+type SortField = "category" | "display_name" | "last_used" | null;
 type SortDir = "asc" | "desc";
 
 const TemplatesView = ({
   templates, loading, filterCategory, setFilterCategory, filterCustomerType, setFilterCustomerType,
-  filterStatus, setFilterStatus, search, setSearch, onEdit, onDuplicate, onDelete, onToggleActive, onNew, onPreview,
+  filterStatus, setFilterStatus, search, setSearch, onEdit, onDuplicate, onDelete, onToggleActive, onNew, onPreview, lastUsedMap,
 }: TemplatesViewProps) => {
   const [sortField, setSortField] = useState<SortField>("category");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -737,8 +760,10 @@ const TemplatesView = ({
         cmp = (categoryOrder[a.category] ?? 99) - (categoryOrder[b.category] ?? 99);
       } else if (sortField === "display_name") {
         cmp = a.display_name.localeCompare(b.display_name);
-      } else if (sortField === "updated_at") {
-        cmp = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+      } else if (sortField === "last_used") {
+        const aTime = lastUsedMap[a.template_key] ? new Date(lastUsedMap[a.template_key]).getTime() : 0;
+        const bTime = lastUsedMap[b.template_key] ? new Date(lastUsedMap[b.template_key]).getTime() : 0;
+        cmp = aTime - bTime;
       }
       return sortDir === "desc" ? -cmp : cmp;
     });
@@ -810,8 +835,8 @@ const TemplatesView = ({
               <TableHead className="text-xs text-left">Subject</TableHead>
               <TableHead className="text-xs text-left">CASL</TableHead>
               <TableHead className="text-xs text-left">Active</TableHead>
-              <TableHead className="text-xs text-left cursor-pointer select-none" onClick={() => toggleSort("updated_at")}>
-                <span className="inline-flex items-center">Last Updated <SortIcon field="updated_at" /></span>
+              <TableHead className="text-xs text-left cursor-pointer select-none" onClick={() => toggleSort("last_used")}>
+                <span className="inline-flex items-center">Last Used <SortIcon field="last_used" /></span>
               </TableHead>
               <TableHead className="text-xs text-left">Actions</TableHead>
             </TableRow>
@@ -852,7 +877,11 @@ const TemplatesView = ({
                     <Switch checked={t.is_active} onCheckedChange={() => onToggleActive(t)} />
                   </TableCell>
                   <TableCell className="text-left">
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(t.updated_at)}</span>
+                    {lastUsedMap[t.template_key] ? (
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(lastUsedMap[t.template_key])}</span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground/50 italic">Never</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-left">
                     <div className="flex gap-1">
