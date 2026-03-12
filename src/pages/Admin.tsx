@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,8 +71,15 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSection = (searchParams.get("tab") as AdminSection) || "dashboard";
+  const [activeSection, setActiveSectionState] = useState<AdminSection>(initialSection);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
+  const setActiveSection = useCallback((section: AdminSection) => {
+    setActiveSectionState(section);
+    setSearchParams({ tab: section }, { replace: true });
+  }, [setSearchParams]);
 
   useEffect(() => {
     const checkAdmin = async () => {
