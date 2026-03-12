@@ -15,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Shield, Settings, FlaskConical, CreditCard } from "lucide-react";
+import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Shield, Settings, FlaskConical, CreditCard, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import EmailCommLogTab from "./EmailCommLogTab";
 import EmailConsentTab from "./EmailConsentTab";
 import EmailSettingsTab from "./EmailSettingsTab";
@@ -704,173 +704,198 @@ interface TemplatesViewProps {
   onPreview: (t: EmailTemplate) => void;
 }
 
+type SortField = "category" | "display_name" | "updated_at" | null;
+type SortDir = "asc" | "desc";
+
 const TemplatesView = ({
   templates, loading, filterCategory, setFilterCategory, filterCustomerType, setFilterCustomerType,
   filterStatus, setFilterStatus, search, setSearch, onEdit, onDuplicate, onDelete, onToggleActive, onNew, onPreview,
-}: TemplatesViewProps) => (
-  <div className="space-y-4">
-    {/* Filters */}
-    <div className="flex flex-wrap items-center gap-3">
-      <Select value={filterCategory} onValueChange={setFilterCategory}>
-        <SelectTrigger className="w-40 border-2"><SelectValue placeholder="Category" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Categories</SelectItem>
-          <SelectItem value="transactional">Transactional</SelectItem>
-          <SelectItem value="lifecycle">Lifecycle</SelectItem>
-          <SelectItem value="marketing">Marketing</SelectItem>
-          <SelectItem value="operational">Operational</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select value={filterCustomerType} onValueChange={setFilterCustomerType}>
-        <SelectTrigger className="w-36 border-2"><SelectValue placeholder="Customer" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Types</SelectItem>
-          <SelectItem value="client">Client</SelectItem>
-          <SelectItem value="contractor">Contractor</SelectItem>
-          <SelectItem value="seller">Seller</SelectItem>
-          <SelectItem value="builder">Builder</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select value={filterStatus} onValueChange={setFilterStatus}>
-        <SelectTrigger className="w-32 border-2"><SelectValue placeholder="Status" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All</SelectItem>
-          <SelectItem value="active">Active</SelectItem>
-          <SelectItem value="inactive">Inactive</SelectItem>
-        </SelectContent>
-      </Select>
-      <Input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search templates..."
-        className="w-48 border-2"
-      />
-      <div className="ml-auto">
-        <Button onClick={onNew} className="border-2">
-          <Plus className="w-4 h-4 mr-1" /> New Template
-        </Button>
+}: TemplatesViewProps) => {
+  const [sortField, setSortField] = useState<SortField>("category");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir("asc");
+    }
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-40" />;
+    return sortDir === "asc" ? <ArrowUp className="w-3 h-3 ml-1" /> : <ArrowDown className="w-3 h-3 ml-1" />;
+  };
+
+  const sorted = useMemo(() => {
+    if (!sortField) return templates;
+    const categoryOrder: Record<string, number> = { transactional: 0, lifecycle: 1, marketing: 2, operational: 3 };
+    return [...templates].sort((a, b) => {
+      let cmp = 0;
+      if (sortField === "category") {
+        cmp = (categoryOrder[a.category] ?? 99) - (categoryOrder[b.category] ?? 99);
+      } else if (sortField === "display_name") {
+        cmp = a.display_name.localeCompare(b.display_name);
+      } else if (sortField === "updated_at") {
+        cmp = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+      }
+      return sortDir === "desc" ? -cmp : cmp;
+    });
+  }, [templates, sortField, sortDir]);
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" }) +
+      " " + d.toLocaleTimeString("en-CA", { hour: "2-digit", minute: "2-digit", hour12: false });
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger className="w-40 border-2"><SelectValue placeholder="Category" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="transactional">Transactional</SelectItem>
+            <SelectItem value="lifecycle">Lifecycle</SelectItem>
+            <SelectItem value="marketing">Marketing</SelectItem>
+            <SelectItem value="operational">Operational</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterCustomerType} onValueChange={setFilterCustomerType}>
+          <SelectTrigger className="w-36 border-2"><SelectValue placeholder="Customer" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="client">Client</SelectItem>
+            <SelectItem value="contractor">Contractor</SelectItem>
+            <SelectItem value="seller">Seller</SelectItem>
+            <SelectItem value="builder">Builder</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-32 border-2"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search templates..."
+          className="w-48 border-2"
+        />
+        <div className="ml-auto">
+          <Button onClick={onNew} className="border-2">
+            <Plus className="w-4 h-4 mr-1" /> New Template
+          </Button>
+        </div>
+      </div>
+
+      {/* Single table */}
+      <div className="border-2 border-border overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs text-left cursor-pointer select-none" onClick={() => toggleSort("display_name")}>
+                <span className="inline-flex items-center">Template <SortIcon field="display_name" /></span>
+              </TableHead>
+              <TableHead className="text-xs text-left cursor-pointer select-none" onClick={() => toggleSort("category")}>
+                <span className="inline-flex items-center">Category <SortIcon field="category" /></span>
+              </TableHead>
+              <TableHead className="text-xs text-left">Type</TableHead>
+              <TableHead className="text-xs text-left">Subject</TableHead>
+              <TableHead className="text-xs text-left">CASL</TableHead>
+              <TableHead className="text-xs text-left">Active</TableHead>
+              <TableHead className="text-xs text-left cursor-pointer select-none" onClick={() => toggleSort("updated_at")}>
+                <span className="inline-flex items-center">Last Updated <SortIcon field="updated_at" /></span>
+              </TableHead>
+              <TableHead className="text-xs text-left">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  {Array.from({ length: 8 }).map((_, j) => (
+                    <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : sorted.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">No templates found.</TableCell>
+              </TableRow>
+            ) : (
+              sorted.map((t) => (
+                <TableRow key={t.id}>
+                  <TableCell className="text-left">
+                    <p className="text-sm font-semibold text-foreground leading-tight">{t.display_name}</p>
+                    <p className="text-[11px] font-mono text-muted-foreground leading-tight">{t.template_key}</p>
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <Badge className={`${CATEGORY_COLORS[t.category] || ""} text-[10px] px-1.5 py-0`}>{t.category}</Badge>
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <Badge variant="outline" className="border text-[10px] capitalize px-1.5 py-0">{t.customer_type}</Badge>
+                  </TableCell>
+                  <TableCell className="max-w-[200px] text-left">
+                    <p className="text-xs truncate" title={t.subject}>{t.subject.length > 50 ? t.subject.slice(0, 50) + "…" : t.subject}</p>
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <Badge variant="outline" className="border text-[10px] px-1.5 py-0 whitespace-nowrap">{CASL_LABELS[t.casl_category] || t.casl_category}</Badge>
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <Switch checked={t.is_active} onCheckedChange={() => onToggleActive(t)} />
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(t.updated_at)}</span>
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onPreview(t)} title="Preview">
+                        <Eye className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(t)} title="Edit">
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onDuplicate(t)} title="Duplicate">
+                        <Copy className="w-3.5 h-3.5" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" title="Delete">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete template?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete &quot;{t.display_name}&quot;. This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => onDelete(t.id)} className="bg-destructive text-destructive-foreground">
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
-
-    {/* Table — grouped by category */}
-    {(() => {
-      const categoryOrder = ["transactional", "lifecycle", "marketing", "operational"];
-      const grouped = categoryOrder.reduce<Record<string, EmailTemplate[]>>((acc, cat) => {
-        acc[cat] = templates.filter((t) => t.category === cat);
-        return acc;
-      }, {});
-      // Include any templates with unknown categories
-      const knownCats = new Set(categoryOrder);
-      const otherTemplates = templates.filter((t) => !knownCats.has(t.category));
-      if (otherTemplates.length > 0) grouped["other"] = otherTemplates;
-
-      const formatDate = (dateStr: string) => {
-        const d = new Date(dateStr);
-        return d.toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" }) +
-          " " + d.toLocaleTimeString("en-CA", { hour: "2-digit", minute: "2-digit", hour12: false });
-      };
-
-      const CATEGORY_LABELS: Record<string, string> = {
-        transactional: "Transactional",
-        lifecycle: "Lifecycle",
-        marketing: "Marketing",
-        operational: "Operational",
-        other: "Other",
-      };
-
-      return (
-        <div className="space-y-6">
-          {Object.entries(grouped).map(([cat, items]) => {
-            if (items.length === 0) return null;
-            return (
-              <div key={cat} className="space-y-1">
-                <div className="flex items-center gap-2 px-1">
-                  <Badge className={`${CATEGORY_COLORS[cat] || "bg-muted text-muted-foreground"} text-[10px] px-2 py-0`}>
-                    {CATEGORY_LABELS[cat] || cat}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">{items.length} template{items.length !== 1 ? "s" : ""}</span>
-                </div>
-                <div className="border-2 border-border overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-xs text-left">Template</TableHead>
-                        <TableHead className="text-xs text-left">Type</TableHead>
-                        <TableHead className="text-xs text-left">Subject</TableHead>
-                        <TableHead className="text-xs text-left">CASL</TableHead>
-                        <TableHead className="text-xs text-left">Active</TableHead>
-                        <TableHead className="text-xs text-left">Last Updated</TableHead>
-                        <TableHead className="text-xs text-left">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {items.map((t) => (
-                        <TableRow key={t.id}>
-                          <TableCell className="text-left">
-                            <p className="text-sm font-semibold text-foreground leading-tight">{t.display_name}</p>
-                            <p className="text-[11px] font-mono text-muted-foreground leading-tight">{t.template_key}</p>
-                          </TableCell>
-                          <TableCell className="text-left">
-                            <Badge variant="outline" className="border text-[10px] capitalize px-1.5 py-0">{t.customer_type}</Badge>
-                          </TableCell>
-                          <TableCell className="max-w-[200px] text-left">
-                            <p className="text-xs truncate" title={t.subject}>{t.subject.length > 50 ? t.subject.slice(0, 50) + "…" : t.subject}</p>
-                          </TableCell>
-                          <TableCell className="text-left">
-                            <Badge variant="outline" className="border text-[10px] px-1.5 py-0 whitespace-nowrap">{CASL_LABELS[t.casl_category] || t.casl_category}</Badge>
-                          </TableCell>
-                          <TableCell className="text-left">
-                            <Switch checked={t.is_active} onCheckedChange={() => onToggleActive(t)} />
-                          </TableCell>
-                          <TableCell className="text-left">
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(t.updated_at)}</span>
-                          </TableCell>
-                          <TableCell className="text-left">
-                            <div className="flex gap-1">
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onPreview(t)} title="Preview">
-                                <Eye className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(t)} title="Edit">
-                                <Pencil className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onDuplicate(t)} title="Duplicate">
-                                <Copy className="w-3.5 h-3.5" />
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" title="Delete">
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete template?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      This will permanently delete &quot;{t.display_name}&quot;. This action cannot be undone.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => onDelete(t.id)} className="bg-destructive text-destructive-foreground">
-                                      Delete
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      );
-    })()}
-  </div>
-);
+  );
+};
 
 export default AdminEmailTemplatesTab;
