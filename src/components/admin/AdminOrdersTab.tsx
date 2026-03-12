@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Search, ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { toast } from "sonner";
+import SortableTableHead, { useTableSort } from "./SortableTableHead";
 
 interface Order {
   id: string;
