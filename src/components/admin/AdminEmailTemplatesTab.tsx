@@ -732,9 +732,10 @@ interface TemplatesViewProps {
   onNew: () => void;
   onPreview: (t: EmailTemplate) => void;
   lastUsedMap: Record<string, string>;
+  usageCountMap: Record<string, number>;
 }
 
-type SortField = "category" | "display_name" | "last_used" | null;
+type SortField = "category" | "display_name" | "last_used" | "usage_count" | null;
 type SortDir = "asc" | "desc";
 
 const TemplatesView = ({
