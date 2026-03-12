@@ -242,7 +242,7 @@ const AdminBlogTab = () => {
             <CardTitle className="font-serif">Blog Management</CardTitle>
             <CardDescription>Create, edit, and manage blog posts.</CardDescription>
           </div>
-          <Button onClick={openNew} className="shadow-[2px_2px_0px_0px_hsl(var(--foreground))]">
+          <Button onClick={openNew}>
             <Plus className="w-4 h-4 mr-1" /> New Post
           </Button>
         </div>
