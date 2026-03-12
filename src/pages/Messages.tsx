@@ -164,7 +164,7 @@ const Messages = () => {
                       key={conv.id}
                       onClick={() => {
                         setActiveConvId(conv.id);
-                        navigate(`/messages/${conv.id}`, { replace: true });
+                        navigate(`/client/messages/${conv.id}`, { replace: true });
                       }}
                       className={`w-full text-left p-3 border-b border-border hover:bg-muted transition-colors ${conv.id === activeConvId ? "bg-muted" : ""}`}
                     >
