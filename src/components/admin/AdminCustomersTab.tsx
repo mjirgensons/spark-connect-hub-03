@@ -112,12 +112,12 @@ const AdminCustomersTab = () => {
           <Table>
             <TableHeader>
               <TableRow className="text-xs">
-                <TableHead className="py-2 px-3">Name</TableHead>
-                <TableHead className="py-2 px-3">Email</TableHead>
-                <TableHead className="py-2 px-3 text-center">Role</TableHead>
-                <TableHead className="py-2 px-3 text-center">Orders</TableHead>
-                <TableHead className="py-2 px-3 text-right">Total Spent</TableHead>
-                <TableHead className="py-2 px-3 text-right">Signed Up</TableHead>
+                <SortableTableHead label="Name" sortKey="full_name" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+                <SortableTableHead label="Email" sortKey="email" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+                <SortableTableHead label="Role" sortKey="user_type" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-center" />
+                <SortableTableHead label="Orders" sortKey="_orders" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-center" />
+                <SortableTableHead label="Total Spent" sortKey="_spent" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-right" />
+                <SortableTableHead label="Signed Up" sortKey="created_at" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-right" />
               </TableRow>
             </TableHeader>
             <TableBody>
