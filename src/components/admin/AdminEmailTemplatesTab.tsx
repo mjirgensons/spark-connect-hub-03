@@ -890,6 +890,9 @@ const TemplatesView = ({
                     <Switch checked={t.is_active} onCheckedChange={() => onToggleActive(t)} />
                   </TableCell>
                   <TableCell className="text-left">
+                    <span className="text-xs font-mono text-foreground">{usageCountMap[t.template_key] || 0}</span>
+                  </TableCell>
+                  <TableCell className="text-left">
                     {lastUsedMap[t.template_key] ? (
                       <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(lastUsedMap[t.template_key])}</span>
                     ) : (
