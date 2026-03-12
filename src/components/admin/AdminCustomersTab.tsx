@@ -121,9 +121,7 @@ const AdminCustomersTab = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((p) => {
-                const stats = orderTotals[p.id] || { count: 0, spent: 0 };
-                return (
+              {sorted.map((p) => (
                   <TableRow
                     key={p.id}
                     className="text-xs cursor-pointer hover:bg-accent"
@@ -138,9 +136,9 @@ const AdminCustomersTab = () => {
                         {p.user_type}
                       </Badge>
                     </TableCell>
-                    <TableCell className="py-2 px-3 text-center">{stats.count}</TableCell>
+                    <TableCell className="py-2 px-3 text-center">{p._orders}</TableCell>
                     <TableCell className="py-2 px-3 text-right font-mono">
-                      ${stats.spent.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      ${p._spent.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </TableCell>
                     <TableCell className="py-2 px-3 text-right text-muted-foreground">
                       {new Date(p.created_at).toLocaleDateString("en-CA", {
@@ -150,8 +148,7 @@ const AdminCustomersTab = () => {
                       })}
                     </TableCell>
                   </TableRow>
-                );
-              })}
+              ))}
               {filtered.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
