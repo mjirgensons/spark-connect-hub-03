@@ -12,6 +12,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { RefreshCw, ChevronDown, ChevronRight, ChevronLeft, Search, Play, ClipboardList, Loader2, Send, CheckCircle, AlertTriangle, Radio } from "lucide-react";
+import SortableTableHead, { useTableSort } from "./SortableTableHead";
 import { format, formatDistanceToNow } from "date-fns";
 
 // ─── Neobrutalism card style ───
