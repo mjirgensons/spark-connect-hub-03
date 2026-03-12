@@ -104,9 +104,11 @@ Deno.serve(async (req) => {
   }
 
   // 5. Assemble result
-  const result = orders.map((o: any) => ({
+  const result = validOrders.map((o: any) => ({
     id: o.id,
     order_number: o.order_number,
+    user_id: o.user_id,
+    seller_id: o.seller_id,
     status: o.status,
     subtotal: o.subtotal,
     shipping_cost: o.shipping_cost,
@@ -127,8 +129,6 @@ Deno.serve(async (req) => {
     shipped_at: o.shipped_at,
     delivered_at: o.delivered_at,
     delivery_confirmed_at: o.delivery_confirmed_at,
-    seller_id: o.seller_id,
-    buyer_id: o.user_id,
     buyer_name: o.user_id ? (buyerMap[o.user_id] ?? null) : null,
     seller_business_name: o.seller_id ? (sellerMap[o.seller_id]?.company_name ?? null) : null,
     seller_business_address: o.seller_id ? (sellerMap[o.seller_id]?.business_address ?? null) : null,
