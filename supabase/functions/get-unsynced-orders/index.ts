@@ -65,8 +65,8 @@ Deno.serve(async (req) => {
   }
 
   const orderIds = validOrders.map((o: any) => o.id);
-  const buyerIds = [...new Set(orders.map((o: any) => o.user_id).filter(Boolean))];
-  const sellerIds = [...new Set(orders.map((o: any) => o.seller_id).filter(Boolean))];
+  const buyerIds = [...new Set(validOrders.map((o: any) => o.user_id).filter(Boolean))];
+  const sellerIds = [...new Set(validOrders.map((o: any) => o.seller_id).filter(Boolean))];
 
   // 2-4. Parallel fetches for order_items, buyer profiles, seller profiles
   const [itemsRes, buyersRes, sellersRes] = await Promise.all([
