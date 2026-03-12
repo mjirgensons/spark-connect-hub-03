@@ -31,61 +31,75 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  const { data: orders, error } = await supabase
+  // 1. Fetch unsynced orders
+  const { data: orders, error: ordersError } = await supabase
     .from("orders")
     .select(`
-      id,
-      order_number,
-      status,
-      subtotal,
-      shipping_cost,
-      tax_amount,
-      total,
-      currency,
-      shipping_name,
-      shipping_city,
-      shipping_province,
-      shipping_postal_code,
-      shipping_method,
-      tracking_number,
-      tracking_url,
-      estimated_delivery,
-      notes,
-      created_at,
-      paid_at,
-      shipped_at,
-      delivered_at,
-      delivery_confirmed_at,
-      seller_id,
-      user_id,
-      order_items (
-        product_name,
-        quantity,
-        unit_price,
-        total_price
-      ),
-      buyer:profiles!orders_user_id_fkey (
-        full_name
-      ),
-      seller:profiles!orders_seller_id_fkey (
-        full_name,
-        company_name,
-        business_address
-      )
+      id, order_number, status, subtotal, shipping_cost, tax_amount, total,
+      currency, shipping_name, shipping_city, shipping_province,
+      shipping_postal_code, shipping_method, tracking_number, tracking_url,
+      estimated_delivery, notes, created_at, paid_at, shipped_at,
+      delivered_at, delivery_confirmed_at, seller_id, user_id
     `)
     .eq("pinecone_synced", false)
     .order("created_at", { ascending: true })
     .limit(50);
 
-  if (error) {
+  if (ordersError) {
     return new Response(
-      JSON.stringify({ error: error.message, details: error.details }),
+      JSON.stringify({ error: ordersError.message, details: ordersError.details }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 
-  // Flatten joined profile data
-  const result = (orders ?? []).map((o: any) => ({
+  if (!orders || orders.length === 0) {
+    return new Response(
+      JSON.stringify({ success: true, data: [] }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  const orderIds = orders.map((o: any) => o.id);
+  const buyerIds = [...new Set(orders.map((o: any) => o.user_id).filter(Boolean))];
+  const sellerIds = [...new Set(orders.map((o: any) => o.seller_id).filter(Boolean))];
+
+  // 2-4. Parallel fetches for order_items, buyer profiles, seller profiles
+  const [itemsRes, buyersRes, sellersRes] = await Promise.all([
+    supabase
+      .from("order_items")
+      .select("order_id, product_name, quantity, unit_price, total_price")
+      .in("order_id", orderIds),
+    buyerIds.length > 0
+      ? supabase.from("profiles").select("id, full_name").in("id", buyerIds)
+      : Promise.resolve({ data: [], error: null }),
+    sellerIds.length > 0
+      ? supabase.from("profiles").select("id, full_name, company_name, business_address").in("id", sellerIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  // Build lookup maps
+  const itemsByOrder: Record<string, any[]> = {};
+  for (const item of itemsRes.data ?? []) {
+    (itemsByOrder[item.order_id] ??= []).push({
+      product_name: item.product_name,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      total_price: item.total_price,
+    });
+  }
+
+  const buyerMap: Record<string, string> = {};
+  for (const b of buyersRes.data ?? []) {
+    buyerMap[b.id] = b.full_name;
+  }
+
+  const sellerMap: Record<string, any> = {};
+  for (const s of sellersRes.data ?? []) {
+    sellerMap[s.id] = { company_name: s.company_name, business_address: s.business_address };
+  }
+
+  // 5. Assemble result
+  const result = orders.map((o: any) => ({
     id: o.id,
     order_number: o.order_number,
     status: o.status,
@@ -110,10 +124,10 @@ Deno.serve(async (req) => {
     delivery_confirmed_at: o.delivery_confirmed_at,
     seller_id: o.seller_id,
     buyer_id: o.user_id,
-    buyer_name: o.buyer?.full_name ?? null,
-    seller_business_name: o.seller?.company_name ?? null,
-    seller_business_address: o.seller?.business_address ?? null,
-    order_items: o.order_items ?? [],
+    buyer_name: o.user_id ? (buyerMap[o.user_id] ?? null) : null,
+    seller_business_name: o.seller_id ? (sellerMap[o.seller_id]?.company_name ?? null) : null,
+    seller_business_address: o.seller_id ? (sellerMap[o.seller_id]?.business_address ?? null) : null,
+    order_items: itemsByOrder[o.id] ?? [],
   }));
 
   return new Response(
