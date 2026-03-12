@@ -470,6 +470,27 @@ const AdminEmailTemplatesTab = () => {
 
       {internalTab === "wf8-test" && <EmailWF8TestTab />}
       {internalTab === "wf9-stripe" && <EmailWF9StripeTab />}
+      {/* Quick Preview Dialog */}
+      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] p-0 overflow-hidden">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle className="font-serif">{previewTemplate?.display_name || "Preview"}</DialogTitle>
+            <p className="text-xs text-muted-foreground font-mono">{previewTemplate?.template_key}</p>
+          </DialogHeader>
+          <div className="px-6 pb-6 overflow-auto" style={{ maxHeight: "calc(85vh - 100px)" }}>
+            {previewTemplate && (
+              <iframe
+                srcDoc={replaceVariables(previewTemplate.html_body, generateSampleData(Array.isArray(previewTemplate.variables_schema) ? previewTemplate.variables_schema : []))}
+                className="w-full border-2 border-border"
+                style={{ minHeight: 500 }}
+                title="Email Preview"
+                sandbox="allow-same-origin"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Template Editor Sheet */}
       <Sheet open={editorOpen} onOpenChange={setEditorOpen}>
         <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
