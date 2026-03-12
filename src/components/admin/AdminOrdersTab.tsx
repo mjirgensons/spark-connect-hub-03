@@ -101,6 +101,7 @@ const AdminOrdersTab = () => {
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
+  const { sortKey, sortDirection, handleSort, sortData } = useTableSort<Order>("created_at", "desc");
 
   // Detail sheet
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
