@@ -15,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Shield, Settings, FlaskConical, CreditCard } from "lucide-react";
+import { Plus, Pencil, Copy, Trash2, Send, Eye, Code, X, Mail, MessageSquare, Shield, Settings, FlaskConical, CreditCard, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import EmailCommLogTab from "./EmailCommLogTab";
 import EmailConsentTab from "./EmailConsentTab";
 import EmailSettingsTab from "./EmailSettingsTab";
