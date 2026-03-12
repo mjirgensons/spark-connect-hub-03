@@ -221,12 +221,17 @@ const AdminEmailTemplatesTab = () => {
       .order("created_at", { ascending: false });
     if (data) {
       const map: Record<string, string> = {};
+      const counts: Record<string, number> = {};
       data.forEach((row: any) => {
-        if (row.template_key && !map[row.template_key]) {
-          map[row.template_key] = row.created_at;
+        if (row.template_key) {
+          if (!map[row.template_key]) {
+            map[row.template_key] = row.created_at;
+          }
+          counts[row.template_key] = (counts[row.template_key] || 0) + 1;
         }
       });
       setLastUsedMap(map);
+      setUsageCountMap(counts);
     }
   }, []);
 
