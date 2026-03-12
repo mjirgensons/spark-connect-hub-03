@@ -30,7 +30,7 @@ const Messages = () => {
 
   // Redirect if not logged in
   useEffect(() => {
-    if (!authLoading && !user) navigate("/login?redirect=/messages");
+    if (!authLoading && !user) navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
   }, [authLoading, user, navigate]);
 
   // Fetch conversations
