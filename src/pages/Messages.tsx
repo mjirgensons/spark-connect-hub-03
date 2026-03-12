@@ -142,11 +142,11 @@ const Messages = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 pt-24 md:pt-10 pb-10">
+    <div className={isInDashboard ? "space-y-4" : "min-h-screen bg-background flex flex-col"}>
+      {!isInDashboard && <Header />}
+      <main className={isInDashboard ? "" : "flex-1 container mx-auto px-4 pt-24 md:pt-10 pb-10"}>
         <h1 className="font-serif text-2xl font-bold mb-4">Messages</h1>
-        <div className="flex border-2 border-foreground rounded-md overflow-hidden" style={{ height: "calc(100vh - 200px)", boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>
+        <div className="flex border-2 border-foreground rounded-md overflow-hidden" style={{ height: isInDashboard ? "calc(100vh - 250px)" : "calc(100vh - 200px)", boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>
           {/* Conversation list */}
           {showList && (
             <div className={`${isMobile ? "w-full" : "w-80"} border-r border-border flex flex-col`}>
