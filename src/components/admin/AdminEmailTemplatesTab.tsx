@@ -195,6 +195,7 @@ const AdminEmailTemplatesTab = () => {
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
 
   const [lastUsedMap, setLastUsedMap] = useState<Record<string, string>>({});
+  const [usageCountMap, setUsageCountMap] = useState<Record<string, number>>({});
 
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
