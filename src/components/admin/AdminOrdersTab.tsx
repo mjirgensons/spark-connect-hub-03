@@ -355,13 +355,13 @@ const AdminOrdersTab = () => {
             <Table>
               <TableHeader>
                 <TableRow className="text-xs">
-                  <TableHead className="py-2 px-3">Order #</TableHead>
-                  <TableHead className="py-2 px-3">Date</TableHead>
-                  <TableHead className="py-2 px-3">Customer</TableHead>
-                  <TableHead className="py-2 px-3 text-center">Items</TableHead>
-                  <TableHead className="py-2 px-3 text-right">Total</TableHead>
-                  <TableHead className="py-2 px-3 text-center">Payment</TableHead>
-                  <TableHead className="py-2 px-3 text-center">Status</TableHead>
+                  <SortableTableHead label="Order #" sortKey="order_number" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+                  <SortableTableHead label="Date" sortKey="created_at" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+                  <SortableTableHead label="Customer" sortKey="shipping_name" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+                  <SortableTableHead label="Items" sortKey="_items" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-center" />
+                  <SortableTableHead label="Total" sortKey="total" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-right" />
+                  <SortableTableHead label="Payment" sortKey="payment_status" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-center" />
+                  <SortableTableHead label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} className="text-center" />
                   <TableHead className="py-2 px-3 text-center">AI</TableHead>
                   <TableHead className="py-2 px-3 text-right">Actions</TableHead>
                 </TableRow>
