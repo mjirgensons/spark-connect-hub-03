@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,6 +18,8 @@ const Messages = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const isInDashboard = location.pathname.startsWith("/client/");
   const queryClient = useQueryClient();
   const [activeConvId, setActiveConvId] = useState<string | null>(conversationId || null);
   const [messageText, setMessageText] = useState("");
@@ -141,11 +143,11 @@ const Messages = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 pt-24 md:pt-10 pb-10">
+    <div className={isInDashboard ? "space-y-4" : "min-h-screen bg-background flex flex-col"}>
+      {!isInDashboard && <Header />}
+      <main className={isInDashboard ? "" : "flex-1 container mx-auto px-4 pt-24 md:pt-10 pb-10"}>
         <h1 className="font-serif text-2xl font-bold mb-4">Messages</h1>
-        <div className="flex border-2 border-foreground rounded-md overflow-hidden" style={{ height: "calc(100vh - 200px)", boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>
+        <div className="flex border-2 border-foreground rounded-md overflow-hidden" style={{ height: isInDashboard ? "calc(100vh - 250px)" : "calc(100vh - 200px)", boxShadow: "4px 4px 0 0 hsl(var(--foreground))" }}>
           {/* Conversation list */}
           {showList && (
             <div className={`${isMobile ? "w-full" : "w-80"} border-r border-border flex flex-col`}>
@@ -164,7 +166,7 @@ const Messages = () => {
                       key={conv.id}
                       onClick={() => {
                         setActiveConvId(conv.id);
-                        navigate(`/messages/${conv.id}`, { replace: true });
+                        navigate(`/client/messages/${conv.id}`, { replace: true });
                       }}
                       className={`w-full text-left p-3 border-b border-border hover:bg-muted transition-colors ${conv.id === activeConvId ? "bg-muted" : ""}`}
                     >
@@ -192,7 +194,7 @@ const Messages = () => {
                 <>
                   <div className="p-3 border-b border-border flex items-center gap-2">
                     {isMobile && (
-                      <Button variant="ghost" size="icon" onClick={() => { setActiveConvId(null); navigate("/messages", { replace: true }); }}>
+                      <Button variant="ghost" size="icon" onClick={() => { setActiveConvId(null); navigate("/client/messages", { replace: true }); }}>
                         <ArrowLeft className="w-4 h-4" />
                       </Button>
                     )}
@@ -243,7 +245,7 @@ const Messages = () => {
           )}
         </div>
       </main>
-      <Footer />
+      {!isInDashboard && <Footer />}
     </div>
   );
 };
