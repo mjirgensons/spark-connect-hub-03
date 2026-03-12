@@ -760,8 +760,10 @@ const TemplatesView = ({
         cmp = (categoryOrder[a.category] ?? 99) - (categoryOrder[b.category] ?? 99);
       } else if (sortField === "display_name") {
         cmp = a.display_name.localeCompare(b.display_name);
-      } else if (sortField === "updated_at") {
-        cmp = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+      } else if (sortField === "last_used") {
+        const aTime = lastUsedMap[a.template_key] ? new Date(lastUsedMap[a.template_key]).getTime() : 0;
+        const bTime = lastUsedMap[b.template_key] ? new Date(lastUsedMap[b.template_key]).getTime() : 0;
+        cmp = aTime - bTime;
       }
       return sortDir === "desc" ? -cmp : cmp;
     });
