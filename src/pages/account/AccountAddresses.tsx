@@ -144,7 +144,7 @@ const AccountAddresses = () => {
       <Breadcrumbs items={[{ label: "My Account", href: "/account" }, { label: "Addresses" }]} />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold font-serif">Saved Addresses</h1>
-        <Button className="gap-2 border-2 shadow-[3px_3px_0px_0px_hsl(var(--foreground))]" onClick={openNew}>
+        <Button className="gap-2 border-2" onClick={openNew}>
           <Plus className="w-4 h-4" /> Add Address
         </Button>
       </div>
