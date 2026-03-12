@@ -41,6 +41,8 @@ interface Order {
   estimated_delivery: string | null;
   notes: string | null;
   stripe_payment_intent_id: string | null;
+  pinecone_synced: boolean;
+  pinecone_synced_at: string | null;
 }
 
 interface OrderItem {
