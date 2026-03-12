@@ -682,7 +682,7 @@ interface TemplatesViewProps {
 
 const TemplatesView = ({
   templates, loading, filterCategory, setFilterCategory, filterCustomerType, setFilterCustomerType,
-  filterStatus, setFilterStatus, search, setSearch, onEdit, onDuplicate, onDelete, onToggleActive, onNew,
+  filterStatus, setFilterStatus, search, setSearch, onEdit, onDuplicate, onDelete, onToggleActive, onNew, onPreview,
 }: TemplatesViewProps) => (
   <div className="space-y-4">
     {/* Filters */}
