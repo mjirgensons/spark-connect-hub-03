@@ -178,7 +178,8 @@ const App = () => (
             <Route path="match/new" element={<ClientNewMatch />} />
             <Route path="projects" element={<ClientProjects />} />
             <Route path="projects/:projectId" element={<ClientProjectDetail />} />
-            <Route path="messages" element={<ClientMessages />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="messages/:conversationId" element={<Messages />} />
             <Route path="profile" element={<ClientProfile />} />
           </Route>
 
