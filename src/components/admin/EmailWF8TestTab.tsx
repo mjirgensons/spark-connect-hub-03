@@ -85,6 +85,7 @@ const EmailWF8TestTab = () => {
   const [wf10Sending, setWf10Sending] = useState(false);
   const [wf10Status, setWf10Status] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [wf10DebugPayload, setWf10DebugPayload] = useState<any>(null);
+  const wf10Sort = useTableSort<OutboundLog>("created_at", "desc");
 
   // ─── Collapsible state ───
   const [s1Open, setS1Open] = useState(true);
