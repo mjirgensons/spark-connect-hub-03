@@ -877,7 +877,11 @@ const TemplatesView = ({
                     <Switch checked={t.is_active} onCheckedChange={() => onToggleActive(t)} />
                   </TableCell>
                   <TableCell className="text-left">
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(t.updated_at)}</span>
+                    {lastUsedMap[t.template_key] ? (
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(lastUsedMap[t.template_key])}</span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground/50 italic">Never</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-left">
                     <div className="flex gap-1">
