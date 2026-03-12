@@ -458,6 +458,7 @@ const AdminEmailTemplatesTab = () => {
           onDelete={handleDelete}
           onToggleActive={handleToggleActive}
           onNew={() => openEditor("create")}
+          onPreview={(t) => { setPreviewTemplate(t); setPreviewDialogOpen(true); }}
         />
       )}
 
