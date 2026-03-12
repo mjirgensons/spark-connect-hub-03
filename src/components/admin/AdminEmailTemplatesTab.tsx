@@ -194,6 +194,8 @@ const AdminEmailTemplatesTab = () => {
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
 
+  const [lastUsedMap, setLastUsedMap] = useState<Record<string, string>>({});
+
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -209,9 +211,28 @@ const AdminEmailTemplatesTab = () => {
     setLoading(false);
   }, [toast]);
 
+  const fetchLastUsed = useCallback(async () => {
+    // Get the most recent communication_log entry per template_key
+    const { data } = await supabase
+      .from("communication_logs")
+      .select("template_key, created_at")
+      .not("template_key", "is", null)
+      .order("created_at", { ascending: false });
+    if (data) {
+      const map: Record<string, string> = {};
+      data.forEach((row: any) => {
+        if (row.template_key && !map[row.template_key]) {
+          map[row.template_key] = row.created_at;
+        }
+      });
+      setLastUsedMap(map);
+    }
+  }, []);
+
   useEffect(() => {
     fetchTemplates();
-  }, [fetchTemplates]);
+    fetchLastUsed();
+  }, [fetchTemplates, fetchLastUsed]);
 
   const filtered = useMemo(() => {
     return templates.filter((t) => {
