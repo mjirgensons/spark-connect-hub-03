@@ -1869,6 +1869,7 @@ export type Database = {
           pickup_prep_days: number | null
           pickup_province: string | null
           pinecone_synced: boolean | null
+          pinecone_synced_at: string | null
           previous_rejection_reason: string | null
           price_discounted_usd: number
           price_retail_usd: number
@@ -1946,6 +1947,7 @@ export type Database = {
           pickup_prep_days?: number | null
           pickup_province?: string | null
           pinecone_synced?: boolean | null
+          pinecone_synced_at?: string | null
           previous_rejection_reason?: string | null
           price_discounted_usd: number
           price_retail_usd: number
@@ -2023,6 +2025,7 @@ export type Database = {
           pickup_prep_days?: number | null
           pickup_province?: string | null
           pinecone_synced?: boolean | null
+          pinecone_synced_at?: string | null
           previous_rejection_reason?: string | null
           price_discounted_usd?: number
           price_retail_usd?: number
@@ -2449,6 +2452,7 @@ export type Database = {
           kb_scope: string
           kb_type: string
           pinecone_synced: boolean | null
+          pinecone_synced_at: string | null
           seller_id: string
           title: string
           updated_at: string | null
@@ -2460,6 +2464,7 @@ export type Database = {
           kb_scope?: string
           kb_type: string
           pinecone_synced?: boolean | null
+          pinecone_synced_at?: string | null
           seller_id: string
           title: string
           updated_at?: string | null
@@ -2471,6 +2476,7 @@ export type Database = {
           kb_scope?: string
           kb_type?: string
           pinecone_synced?: boolean | null
+          pinecone_synced_at?: string | null
           seller_id?: string
           title?: string
           updated_at?: string | null
