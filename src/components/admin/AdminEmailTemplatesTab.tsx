@@ -677,6 +677,7 @@ interface TemplatesViewProps {
   onDelete: (id: string) => void;
   onToggleActive: (t: EmailTemplate) => void;
   onNew: () => void;
+  onPreview: (t: EmailTemplate) => void;
 }
 
 const TemplatesView = ({
