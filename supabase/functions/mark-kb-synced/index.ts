@@ -12,6 +12,8 @@ const ALLOWED_TABLES = [
   "platform_knowledge_base",
   "communication_logs",
   "conversation_messages",
+  "orders",
+  "conversations",
 ] as const;
 type AllowedTable = (typeof ALLOWED_TABLES)[number];
 
