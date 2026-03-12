@@ -167,7 +167,7 @@ const App = () => (
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/messages" element={<Messages />} />
+          <Route path="/messages" element={<Navigate to="/client/messages" replace />} />
           <Route path="/messages/:conversationId" element={<Messages />} />
 
           {/* Client routes */}
