@@ -70,6 +70,12 @@ const AdminCustomersTab = () => {
     return p.full_name.toLowerCase().includes(s) || p.email.toLowerCase().includes(s);
   });
 
+  const enriched = filtered.map((p) => {
+    const stats = orderTotals[p.id] || { count: 0, spent: 0 };
+    return { ...p, _orders: stats.count, _spent: stats.spent };
+  });
+  const sorted = sortData(enriched);
+
   const openDetail = async (profile: Profile) => {
     setSelectedProfile(profile);
     setSheetOpen(true);
