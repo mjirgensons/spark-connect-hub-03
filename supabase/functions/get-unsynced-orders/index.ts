@@ -65,8 +65,7 @@ Deno.serve(async (req) => {
         total_price
       ),
       buyer:profiles!orders_user_id_fkey (
-        full_name,
-        email
+        full_name
       ),
       seller:profiles!orders_seller_id_fkey (
         full_name,
