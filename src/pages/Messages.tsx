@@ -18,7 +18,8 @@ const Messages = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const queryClient = useQueryClient();
+  const location = useLocation();
+  const isInDashboard = location.pathname.startsWith("/client/");
   const [activeConvId, setActiveConvId] = useState<string | null>(conversationId || null);
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
