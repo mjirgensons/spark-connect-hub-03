@@ -146,7 +146,7 @@ const AdminTrustSignalsTab = () => {
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon"><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                      <Button variant="ghost" size="icon"><Trash2 className="w-4 h-4" /></Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
