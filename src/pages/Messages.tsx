@@ -39,7 +39,7 @@ const Messages = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("conversations")
-        .select("*, profiles!conversations_seller_id_fkey(company_name, full_name), products(product_name)")
+        .select("*, profiles!conversations_seller_id_fkey(company_name, full_name), products!left(product_name)")
         .eq("buyer_id", user!.id)
         .order("last_message_at", { ascending: false });
       if (error) throw error;
