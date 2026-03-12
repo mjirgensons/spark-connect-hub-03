@@ -71,8 +71,15 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSection = (searchParams.get("tab") as AdminSection) || "dashboard";
+  const [activeSection, setActiveSectionState] = useState<AdminSection>(initialSection);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
+  const setActiveSection = useCallback((section: AdminSection) => {
+    setActiveSectionState(section);
+    setSearchParams({ tab: section }, { replace: true });
+  }, [setSearchParams]);
 
   useEffect(() => {
     const checkAdmin = async () => {
